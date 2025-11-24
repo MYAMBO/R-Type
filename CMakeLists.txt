@@ -12,3 +12,5 @@ add_executable(r-type_client
 
 target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system)
 
+add_library(ECS ECS/World.cpp
+        ECS/World.hpp)
