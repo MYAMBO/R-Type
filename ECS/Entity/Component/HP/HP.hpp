@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "Component.hpp"
+#include "../Component.hpp"
 
 class HP : public Component {
     public:
