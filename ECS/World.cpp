@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "World.hpp"
-#include "Entity.hpp"
+#include "Entity/Entity.hpp"
 
 std::shared_ptr<Entity> World::createEntity()
 {

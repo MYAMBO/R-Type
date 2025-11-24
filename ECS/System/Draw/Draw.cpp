@@ -6,7 +6,7 @@
 */
 
 #include "Draw.hpp"
-#include "Sprite.hpp"
+#include "../../Entity/Component/Sprite/Sprite.hpp"
 
 void Draw::update(const float& dt, World &w)
 {

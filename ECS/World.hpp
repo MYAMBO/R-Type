@@ -9,10 +9,9 @@
 
 #include <memory>
 #include <vector>
-#include <type_traits>
 
-#include "Entity.hpp"
-#include "System.hpp"
+#include "Entity/Entity.hpp"
+#include "System/System.hpp"
 
 class World {
     public:

@@ -12,7 +12,7 @@
 #include <utility>
 #include <cstddef>
 
-#include "Component.hpp"
+#include "Component/Component.hpp"
 
 class Entity {
     public:

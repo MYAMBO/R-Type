@@ -9,7 +9,7 @@
 
 #include <SFML/Graphics/RenderWindow.hpp>
 
-#include "World.hpp"
+#include "../../World.hpp"
 
 class Draw : public System{
     public:
