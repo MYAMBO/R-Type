@@ -21,16 +21,29 @@
 #include "../../ECS/Entity/Component/Sprite/Sprite.hpp"
 #include "../../ECS/World.hpp"
 
-
+/**
+ * @brief Constructs a new Game object.
+ *
+ * Initializes the game window with specified dimensions and title.
+ */
 Game::Game() : _window(sf::VideoMode({800, 600}), "R-Type Game")
 {
 }
 
+/**
+ * @brief Destroys the Game object.
+ */
 Game::~Game()
 {
 }
 
 
+/**
+ * @brief Runs the main game loop.
+ *
+ * This function initializes the game world, creates entities,
+ * and handles the main event loop for rendering and user input.
+ */
 void Game::run()
 {
     World world;

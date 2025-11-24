@@ -10,6 +10,12 @@
 
 #include "Sprite.hpp"
 
+/**
+ * @brief Constructs a new Sprite component by loading a texture from the specified file path.
+ *
+ * @param filepath The path to the image file to load as a texture.
+ * @throws std::runtime_error if the texture fails to load.
+ */
 Sprite::Sprite(const std::string& filepath)
 {
     if (!_texture.loadFromFile(filepath))
@@ -18,6 +24,11 @@ Sprite::Sprite(const std::string& filepath)
     _sprite = std::make_shared<sf::Sprite>(_texture);
 }
 
+/**
+ * @brief Gets the sprite associated with this component.
+ *
+ * @return A shared pointer to the SFML sprite.
+ */
 std::shared_ptr<sf::Sprite> Sprite::getSprite() const
 {
     return _sprite;
