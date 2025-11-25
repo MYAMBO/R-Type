@@ -5,6 +5,9 @@
 ** main of the server
 */
 
+#include <iostream>
+
+#include "Server.hpp"
 /**
  * @brief Entry point of the server application.
  *
@@ -18,5 +21,13 @@
  */
 auto main() -> int
 {
+	try
+	{
+		Server server(4243);
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
+	}
 	return 0;
 }
