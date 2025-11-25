@@ -9,6 +9,7 @@
 
 /**
  * @brief Constructs a new Layer with the layer id.
+ * @param id Is the layer number
 */
 Layer::Layer(int id) : _id(id) {}
 
