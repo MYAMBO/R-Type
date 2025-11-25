@@ -6,7 +6,7 @@
 */
 
 #include "Draw.hpp"
-#include "../../Entity/Component/Sprite/Sprite.hpp"
+#include "../../Component/Sprite/Sprite.hpp"
 
 /**
  * @brief Updates the draw system by rendering all entities with a Sprite component.

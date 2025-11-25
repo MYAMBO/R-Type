@@ -10,11 +10,11 @@ add_executable(r-type_server
 add_executable(r-type_client
         Client/Game/Game.cpp
         Client/main.cpp
+        Client/Game/Component/HP/HP.cpp
         ECS/World.cpp
         ECS/Entity/Entity.cpp
-        ECS/Entity/Component/HP/HP.cpp
-        ECS/Entity/Component/Position/Position.cpp
-        ECS/Entity/Component/Sprite/Sprite.cpp
+        ECS/Component/Position/Position.cpp
+        ECS/Component/Sprite/Sprite.cpp
         ECS/Component/Layer/Layer.cpp
         ECS/System/Draw/Draw.cpp
 )

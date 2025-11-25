@@ -8,7 +8,7 @@
 #ifndef HP_HPP_
     #define HP_HPP_
 
-#include "../../../../ECS/Entity/Component/Component.hpp"
+#include "../../../../ECS/Component/Component.hpp"
 
 class HP : public Component {
     public:
