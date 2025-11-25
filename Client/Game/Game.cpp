@@ -18,8 +18,9 @@
 #include "Component/HP/HP.hpp"
 #include "../../ECS/World.hpp"
 #include "../../ECS/Entity/Entity.hpp"
+#include "../../ECS/Component/Layer/Layer.hpp"
 #include "../../ECS/Entity/Component/Sprite/Sprite.hpp"
-
+#include "../../ECS/Entity/Component/Position/Position.hpp"
 
 /**
  * @brief Constructs a new Game object.

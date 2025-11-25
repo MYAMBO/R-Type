@@ -15,6 +15,7 @@ add_executable(r-type_client
         ECS/Entity/Component/HP/HP.cpp
         ECS/Entity/Component/Position/Position.cpp
         ECS/Entity/Component/Sprite/Sprite.cpp
+        ECS/Component/Layer/Layer.cpp
         ECS/System/Draw/Draw.cpp
 )
 
