@@ -5,7 +5,8 @@
 ** World
 */
 
-#pragma once
+#ifndef WORLD_HPP_
+    #define WORLD_HPP_
 
 #include <memory>
 #include <vector>
@@ -73,3 +74,5 @@ std::vector<std::shared_ptr<Entity>> World::getAllEntitiesWithComponents() const
     }
     return entitiesWithComponent;
 }
+
+#endif /* !WORLD_HPP_ */
