@@ -2,13 +2,33 @@ cmake_minimum_required(VERSION 3.19)
 
 project(R-Type)
 
+if (WIN32)
+    message(STATUS "Configuring for Windows...")
+elseif(UNIX)
+    message(STATUS "Configuring for Linux...")
+endif()
+
+include(FetchContent)
+
+FetchContent_Declare(
+        SFML
+        GIT_REPOSITORY https://github.com/SFML/SFML.git
+        GIT_TAG 3.0.x
+)
+
+FetchContent_MakeAvailable(SFML)
+
 include_directories(.)
+include_directories(./Server)
 
 add_executable(r-type_server
-        Server/main.cpp)
+        Server/main.cpp
+        Server/Server.cpp)
 
 add_executable(r-type_client
         Client/main.cpp)
 
 target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system)
+
+target_link_libraries(r-type_server sfml-network)
 
