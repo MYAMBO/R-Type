@@ -21,8 +21,9 @@ class Sprite : public Component {
         Sprite(const std::string& filepath);
         virtual ~Sprite() = default;
 
-        std::shared_ptr<sf::Sprite> getSprite() const;
+        [[nodiscard]] std::shared_ptr<sf::Sprite> getSprite() const;
 
+        void setSprite(const std::shared_ptr<sf::Sprite>& sprite);
     private:
         sf::Texture _texture;
         std::shared_ptr<sf::Sprite> _sprite;

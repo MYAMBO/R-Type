@@ -22,10 +22,10 @@ class World {
         std::shared_ptr<Entity> createEntity(void);
 
         template<typename T>
-        std::vector<std::shared_ptr<Entity>> getAllEntitiesWithComponent() const;
+        [[nodiscard]] std::vector<std::shared_ptr<Entity>> getAllEntitiesWithComponent() const;
 
         template<typename T>
-        std::vector<std::shared_ptr<Entity>> getAllEntitiesWithComponents() const;
+        [[nodiscard]] std::vector<std::shared_ptr<Entity>> getAllEntitiesWithComponents() const;
 
         template<typename T, typename ... Args>
         std::shared_ptr<T> addSystem(Args&&... args);

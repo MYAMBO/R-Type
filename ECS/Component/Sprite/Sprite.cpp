@@ -33,3 +33,13 @@ std::shared_ptr<sf::Sprite> Sprite::getSprite() const
 {
     return _sprite;
 }
+
+/**
+ * @brief Sets the sprite associated with this component.
+ *
+ * @param sprite A shared pointer to the new SFML sprite.
+ */
+void Sprite::setSprite(const std::shared_ptr<sf::Sprite>& sprite)
+{
+    _sprite = sprite;
+}

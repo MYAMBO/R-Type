@@ -15,8 +15,8 @@ class Position : public Component {
         Position(float x, float y);
         virtual ~Position() = default;
 
-        float getX() const;
-        float getY() const;
+        [[nodiscard]] float getX() const;
+        [[nodiscard]] float getY() const;
 
         void setX(float x);
         void setY(float y);
