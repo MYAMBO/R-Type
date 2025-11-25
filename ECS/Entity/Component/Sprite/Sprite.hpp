@@ -5,7 +5,8 @@
 ** Sprite
 */
 
-#pragma once
+#ifndef SPRITE_HPP_
+    #define SPRITE_HPP_
 
 #include <memory>
 #include <string>
@@ -26,3 +27,5 @@ class Sprite : public Component {
         sf::Texture _texture;
         std::shared_ptr<sf::Sprite> _sprite;
 };
+
+#endif /* !SPRITE_HPP_ */

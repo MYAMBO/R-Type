@@ -5,7 +5,8 @@
 ** Draw
 */
 
-#pragma once
+#ifndef DRAW_HPP_
+    #define DRAW_HPP_
 
 #include <SFML/Graphics/RenderWindow.hpp>
 
@@ -21,3 +22,5 @@ class Draw : public System{
     private:
         sf::RenderWindow _window;
 };
+
+#endif /* !DRAW_HPP_ */

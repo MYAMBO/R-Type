@@ -12,7 +12,7 @@
 
 class Game {
     public:
-        Game();
+        Game(unsigned int width = 800, unsigned int height = 600, const std::string& title = "Game");
         ~Game();
 
         void run();

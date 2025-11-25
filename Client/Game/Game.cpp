@@ -15,19 +15,22 @@
 #include <SFML/Window/VideoMode.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 
-#include "../../ECS/Entity/Component/HP/HP.hpp"
-#include "../../ECS/Entity/Entity.hpp"
-#include "../../ECS/Entity/Component/Position/Position.hpp"
-#include "../../ECS/Entity/Component/Sprite/Sprite.hpp"
+#include "Component/HP/HP.hpp"
 #include "../../ECS/World.hpp"
-#include "../../ECS/Entity/Component//Layer/Layer.hpp"
+#include "../../ECS/Entity/Entity.hpp"
+#include "../../ECS/Entity/Component/Sprite/Sprite.hpp"
+
 
 /**
  * @brief Constructs a new Game object.
  *
  * Initializes the game window with specified dimensions and title.
+ * @param width The width of the game window in pixels. Default is 800.
+ * @param height The height of the game window in pixels. Default is 600.
+ * @param title The title of the game window. Default is "Game".
  */
-Game::Game() : _window(sf::VideoMode({800, 600}), "R-Type Game")
+Game::Game(unsigned int width, unsigned int height, const std::string& title)
+    : _window(sf::VideoMode({width, height}), title)
 {
 }
 
@@ -36,8 +39,8 @@ Game::Game() : _window(sf::VideoMode({800, 600}), "R-Type Game")
  */
 Game::~Game()
 {
+    _window.close();
 }
-
 
 /**
  * @brief Runs the main game loop.

@@ -5,9 +5,10 @@
 ** HP
 */
 
-#pragma once
+#ifndef HP_HPP_
+    #define HP_HPP_
 
-#include "../Component.hpp"
+#include "../../../../ECS/Entity/Component/Component.hpp"
 
 class HP : public Component {
     public:
@@ -20,3 +21,5 @@ class HP : public Component {
         unsigned int _hp;
         unsigned int _maxHp;
 };
+
+#endif /* !HP_HPP_ */
