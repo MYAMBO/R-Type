@@ -10,6 +10,11 @@
 
     #include <SFML/Graphics.hpp>
 
+enum LayerType {
+    BACKGROUND = -1,
+    UI = 1000,
+};
+
 class Game {
     public:
         Game(unsigned int width = 800, unsigned int height = 600, const std::string& title = "Game");
