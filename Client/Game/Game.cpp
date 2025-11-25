@@ -20,6 +20,7 @@
 #include "../../ECS/Entity/Component/Position/Position.hpp"
 #include "../../ECS/Entity/Component/Sprite/Sprite.hpp"
 #include "../../ECS/World.hpp"
+#include "../../ECS/Entity/Component//Layer/Layer.hpp"
 
 /**
  * @brief Constructs a new Game object.
