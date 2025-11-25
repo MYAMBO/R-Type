@@ -17,7 +17,7 @@ class Layer : public Component {
         virtual ~Layer() = default;
 
         void setLayerId(const int id);
-        int getLayerId() const;
+        [[nodiscard]] int getLayerId() const;
 
     private:
         int _id;
