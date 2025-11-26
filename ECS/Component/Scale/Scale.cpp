@@ -5,22 +5,13 @@
 ** Scale
 */
 
-#include "ScaleSprite.hpp"
-
-/**
- * @brief Constructs a new Scale component with specified scale factors.
- * @param scale The scale factor for the sprite. Default is 1.0f.
-*/
-ScaleSprite::ScaleSprite(float scale)
-    : _scale(scale)
-{
-}
+#include "Scale.hpp"
 
 /**
  * @brief Gets the scale factor of the sprite.
  * @return The scale factor of the sprite.
 */
-float ScaleSprite::getScale() const
+float Scale::getScale() const
 {
     return _scale;
 }
@@ -30,7 +21,7 @@ float ScaleSprite::getScale() const
  * @brief Sets the scale factor of the sprite.
  * @param scaleX The new scale factor of the sprite.
 */
-void ScaleSprite::setScale(float scale)
+void Scale::setScale(float scale)
 {
     _scale = scale;
 }
