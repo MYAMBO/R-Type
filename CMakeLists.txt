@@ -17,6 +17,7 @@ add_executable(r-type_client
         ECS/Component/Sprite/Sprite.cpp
         ECS/Component/Layer/Layer.cpp
         ECS/System/Draw/Draw.cpp
+        ECS/Component/Scale/Scale.cpp
 )
 
 target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system)
