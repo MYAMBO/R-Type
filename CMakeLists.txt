@@ -18,8 +18,8 @@ add_executable(r-type_client
         ECS/Component/Layer/Layer.cpp
         ECS/Component/BoxCollider/BoxCollider.cpp
         ECS/System/Draw/Draw.cpp
-        ECS/Component/ScaleSprite/ScaleSprite.cpp
-        ECS/Component/ScaleCollider/ScaleCollider.cpp
+        ECS/Component/Scale/Scale.cpp
+        ECS/Component/Rotation/Rotation.cpp
 )
 
 target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system)
