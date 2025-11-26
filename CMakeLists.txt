@@ -16,6 +16,7 @@ add_executable(r-type_client
         ECS/Component/Position/Position.cpp
         ECS/Component/Sprite/Sprite.cpp
         ECS/Component/Layer/Layer.cpp
+        ECS/Component/BoxCollider/BoxCollider.cpp
         ECS/System/Draw/Draw.cpp
         ECS/Component/ScaleSprite/ScaleSprite.cpp
         ECS/Component/ScaleCollider/ScaleCollider.cpp
