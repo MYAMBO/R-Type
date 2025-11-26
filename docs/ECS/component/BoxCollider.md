@@ -1,6 +1,6 @@
 ## BoxCollider
 
-The Layer component hold the display priority of the entity.
+The BoxCollider component hold the display priority of the entity.
 
 | Method                    | Signature                                    | Description                                                 |
 |:--------------------------|:---------------------------------------------|:------------------------------------------------------------|
