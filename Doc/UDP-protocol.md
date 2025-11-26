@@ -23,9 +23,15 @@
 
 ## Client → Server Messages
 
+### Time Sync
 | Command | Code | Fields | Description |
 |---------|------|--------|-------------|
 | Time Sync Request | `0x06` | - | Client requests current server time |
+
+### Position
+| Command             | Code   | Fields                 | Description              |
+|---------------------|--------|------------------------|--------------------------|
+| Send Position | `0x07` | `ID (4)` - `x (4)` - `y (4)` | Client send his position |
 
 ---
 
