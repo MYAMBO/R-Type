@@ -21,6 +21,7 @@
 #include "../../ECS/Component/Layer/Layer.hpp"
 #include "../../ECS/Component/Sprite/Sprite.hpp"
 #include "../../ECS/Component/Position/Position.hpp"
+#include "../../ECS/Component/Velocity/Velocity.hpp"
 #include "../../ECS/Component/BoxCollider/BoxCollider.hpp"
 
 /**
