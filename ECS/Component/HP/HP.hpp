@@ -21,8 +21,11 @@ class HP : public Component {
         HP(int maxHp);
         virtual ~HP() = default;
 
-        unsigned int getHP() const;
+        [[nodiscard]] unsigned int getHP() const;
         void setHP(unsigned int hp);
+
+        [[nodiscard]] unsigned int getMaxHP() const;
+        void setMaxHP(unsigned int maxHp);
     private:
         unsigned int _hp;
         unsigned int _maxHp;

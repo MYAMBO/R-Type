@@ -33,3 +33,21 @@ unsigned int HP::getHP() const
 {
     return _hp;
 }
+
+/**
+ * @brief Gets the maximum HP value.
+ * @return The maximum HP value as an unsigned integer.
+*/
+unsigned int HP::getMaxHP() const
+{
+    return _maxHp;
+}
+
+/**
+ * @brief Sets the maximum HP value.
+ * @param maxHp The new maximum HP value to set.
+*/
+void HP::setMaxHP(unsigned int maxHp)
+{
+    _maxHp = maxHp;
+}

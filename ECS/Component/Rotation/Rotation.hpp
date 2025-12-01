@@ -43,7 +43,6 @@ Rotation::Rotation(float rotation)
 {
     if (std::is_same<T, Sprite>::value)
     rotation = std::fmod(rotation, 360.0f);
-    rotation = rotation % 360;
     _rotation = rotation;
 }
 

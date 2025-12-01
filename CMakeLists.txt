@@ -19,8 +19,6 @@ include_directories(ECS/System/Updater)
 include_directories(ECS/Entity)
 include_directories(Client)
 include_directories(Client/Game)
-include_directories(Client/Game/Component)
-include_directories(Client/Game/Component/HP)
 
 add_executable(r-type_server
         Server/main.cpp)
@@ -28,10 +26,10 @@ add_executable(r-type_server
 add_executable(r-type_client
         Client/main.cpp
         Client/Game/Game.cpp
-        Client/Game/Component/HP/HP.cpp
         ECS/Entity/Entity.cpp
         ECS/System/Draw/Draw.cpp
         ECS/World.cpp
+        ECS/Component/HP/HP.cpp
         ECS/Component/Scale/Scale.cpp
         ECS/Component/Layer/Layer.cpp
         ECS/Component/Sprite/Sprite.cpp
