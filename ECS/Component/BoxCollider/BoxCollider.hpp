@@ -16,7 +16,7 @@
 
 class BoxCollider : public Component {
 public:
-    BoxCollider(sf::Vector2f &size);
+    BoxCollider(const sf::Vector2f &size);
     virtual ~BoxCollider() = default;
 
     [[nodiscard]] bool isVisible() const;
