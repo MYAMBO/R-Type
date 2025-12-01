@@ -10,7 +10,14 @@
 
 #include "Component.hpp"
 #include "Sprite.hpp"
+#include <cmath>
 
+/**
+ * @brief Rotation component to define the rotation of an entity.
+ *
+ * This component holds the rotation angle of an entity in degrees.
+ * It provides methods to retrieve and modify the rotation value.
+*/
 class Rotation : public Component {
     public:
         template<typename T>
@@ -35,9 +42,8 @@ template<typename T>
 Rotation::Rotation(float rotation)
 {
     if (std::is_same<T, Sprite>::value)
-        _type = "Sprite";
-    for (; rotation >= 360.0f; rotation -= 360.0f);
-    for (; rotation < 0.0f; rotation += 360.0f);
+    rotation = std::fmod(rotation, 360.0f);
+    rotation = rotation % 360;
     _rotation = rotation;
 }
 

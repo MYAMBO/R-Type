@@ -11,6 +11,12 @@
 
 #include "Component.hpp"
 
+/**
+ * @brief Velocity component to define the movement speed of an entity.
+ *
+ * This component holds the velocity value of an entity.
+ * It provides methods to retrieve and modify the velocity.
+*/
 class Velocity : public Component {
     public:
         Velocity(float velocity);

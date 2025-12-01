@@ -14,6 +14,11 @@
 
 #include "Component.hpp"
 
+/**
+ * @brief A BoxCollider component for handling collision detection.
+ * This component defines a rectangular collision area for an entity,
+ * allowing it to interact with other entities in the game world.
+ */
 class BoxCollider : public Component {
 public:
     BoxCollider(const sf::Vector2f &size);

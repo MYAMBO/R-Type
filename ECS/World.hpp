@@ -14,6 +14,12 @@
 #include "Entity.hpp"
 #include "System.hpp"
 
+/**
+ * @brief World class that manages entities and systems in the ECS architecture.
+ *
+ * The World class is responsible for creating and storing entities,
+ * as well as managing the systems that operate on those entities.
+*/
 class World {
     public:
         World() = default;

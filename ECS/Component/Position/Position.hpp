@@ -10,6 +10,13 @@
 
 #include "Component.hpp"
 
+/**
+ * @brief Position component to store the coordinates of an entity.
+ *
+ * This component holds the x and y coordinates representing the position
+ * of an entity in a 2D space. It provides methods to retrieve and modify
+ * the position values.
+*/
 class Position : public Component {
     public:
         Position(float x, float y);

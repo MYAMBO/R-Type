@@ -12,6 +12,12 @@
 
 #include "World.hpp"
 
+/**
+ * @brief Draw system responsible for rendering entities with Sprite components.
+ *
+ * This system iterates through all entities in the world that have a Sprite component
+ * and draws them to the render window.
+*/
 class Draw : public System {
     public:
         Draw();

@@ -10,6 +10,12 @@
 
 class World;
 
+/**
+ * @brief Base class for all systems in the ECS architecture.
+ *
+ * Systems are responsible for processing entities that possess specific components.
+ * This base class provides a common interface for all system types.
+ */
 class System {
     public:
         System() = default;

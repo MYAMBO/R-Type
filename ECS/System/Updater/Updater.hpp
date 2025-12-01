@@ -9,6 +9,12 @@
 
 #include "World.hpp"
 
+/**
+ * @brief Updater system responsible for updating various components of entities.
+ *
+ * This system handles the updating of components such as Position, Velocity,
+ * Sprite, and BoxCollider for all entities in the world.
+*/
 class Updater : public System {
     public:
         Updater();

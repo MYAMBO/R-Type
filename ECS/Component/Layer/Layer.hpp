@@ -10,6 +10,13 @@
 
 #include "Component.hpp"
 
+/**
+ * @brief Layer component to define rendering order of entities.
+ *
+ * Each entity with a Layer component can be assigned a layer ID,
+ * which determines its rendering order relative to other entities.
+ * Entities with lower layer IDs are rendered before those with higher IDs.
+*/
 class Layer : public Component {
     public:
 
