@@ -104,7 +104,7 @@ Responsibilities:
 - Apply them to the ```sf::Sprite```
 
 ```cpp
-updater.updateSprites(dt, world);
+updater.update(dt, world);
 ```
 
 This system does **not** handle rendering.
