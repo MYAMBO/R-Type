@@ -11,7 +11,7 @@
  * @brief Constructs a new BoxCollider component with specify size.
  * @param size The box collider size.
 */
-BoxCollider::BoxCollider(sf::Vector2f &size)
+BoxCollider::BoxCollider(const sf::Vector2f &size)
     : _size(size), _offset(-size.x / 2.0f, -size.y / 2.0f)
 {
 }
@@ -77,6 +77,7 @@ void BoxCollider::setVisibility(bool visible)
 void BoxCollider::setSize(const sf::Vector2f &size)
 {
     _size = size;
+    _offset = sf::Vector2f(-size.x / 2.0f, -size.y / 2.0f);
 }
 
 /**
