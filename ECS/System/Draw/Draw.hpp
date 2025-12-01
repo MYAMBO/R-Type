@@ -12,7 +12,7 @@
 
 #include "../../World.hpp"
 
-class Draw : public System{
+class Draw : public System {
     public:
         Draw();
         virtual ~Draw() = default;
@@ -23,4 +23,4 @@ class Draw : public System{
         sf::RenderWindow _window;
 };
 
-#endif /* !DRAW_HPP_ */
+#endif
