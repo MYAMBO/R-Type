@@ -15,6 +15,12 @@
 
 #include "Component.hpp"
 
+/**
+ * @brief Entity class representing an object in the ECS architecture.
+ *
+ * An entity is a container for components that define its data and behavior.
+ * This class provides methods to add and retrieve components associated with the entity.
+*/
 class Entity {
     public:
         Entity();

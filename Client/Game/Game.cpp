@@ -58,7 +58,7 @@ void Game::run()
 
     player.addComponent<HP>(100);
     player.addComponent<Position>(0.0f, 0.0f);
-    player.addComponent<Sprite>(std::string("../sprite/YaeMiko.jpg"));
+    player.addComponent<Sprite>(std::string("../sprite/r-typesheet28.gif"));
 
     auto pos = player.getComponent<Position>();
     if (pos)

@@ -11,6 +11,12 @@
 #include "Component.hpp"
 #include "Sprite.hpp"
 
+/**
+ * @brief Scale component to define the scale of an entity.
+ *
+ * This component holds the scale factor of an entity.
+ * It provides methods to retrieve and modify the scale value.
+*/
 class Scale : public Component {
     public:
         template<typename T>

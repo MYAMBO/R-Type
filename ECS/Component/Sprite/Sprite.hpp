@@ -16,6 +16,12 @@
 
 #include "Component.hpp"
 
+/**
+ * @brief Sprite component to handle graphical representation of an entity.
+ *
+ * This component encapsulates an SFML sprite and its associated texture.
+ * It provides methods to retrieve and modify the sprite.
+*/
 class Sprite : public Component {
     public:
         Sprite(const std::string& filepath);

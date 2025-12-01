@@ -10,6 +10,12 @@
 
 #include "Component.hpp"
 
+/**
+ * @brief HP (Health Points) component to manage entity health.
+ *
+ * This component keeps track of the current and maximum health points
+ * of an entity. It provides methods to retrieve and modify the health values.
+*/
 class HP : public Component {
     public:
         HP(int maxHp);
