@@ -9,7 +9,7 @@
 #ifndef R_TYPE_VELOCITY_HPP
     #define R_TYPE_VELOCITY_HPP
 
-#include "../Component.hpp"
+#include "Component.hpp"
 
 class Velocity : public Component {
     public:

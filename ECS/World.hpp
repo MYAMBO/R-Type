@@ -11,8 +11,8 @@
 #include <memory>
 #include <vector>
 
-#include "Entity/Entity.hpp"
-#include "System/System.hpp"
+#include "Entity.hpp"
+#include "System.hpp"
 
 class World {
     public:

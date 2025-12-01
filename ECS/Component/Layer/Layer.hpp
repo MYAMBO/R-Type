@@ -8,7 +8,7 @@
 #ifndef R_TYPE_LAYER_HPP
     #define R_TYPE_LAYER_HPP
 
-#include "../Component.hpp"
+#include "Component.hpp"
 
 class Layer : public Component {
     public:

@@ -8,7 +8,7 @@
 #ifndef POSITION_HPP_
     #define POSITION_HPP_
 
-#include "../Component.hpp"
+#include "Component.hpp"
 
 class Position : public Component {
     public:

@@ -12,7 +12,7 @@
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
-#include "../Component.hpp"
+#include "Component.hpp"
 
 class BoxCollider : public Component {
 public:
