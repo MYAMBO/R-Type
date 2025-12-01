@@ -8,8 +8,8 @@
 #ifndef ROTATION_HPP_
     #define ROTATION_HPP_
 
-#include "../Component.hpp"
-#include "../Sprite/Sprite.hpp"
+#include "Component.hpp"
+#include "Sprite.hpp"
 
 class Rotation : public Component {
     public:

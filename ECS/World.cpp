@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "World.hpp"
-#include "Entity/Entity.hpp"
+#include "Entity.hpp"
 
 /**
  * @brief Creates a new entity and adds it to the world.

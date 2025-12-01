@@ -14,7 +14,7 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
-#include "../Component.hpp"
+#include "Component.hpp"
 
 class Sprite : public Component {
     public:

@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "../../World.hpp"
+#include "World.hpp"
 
 class Updater : public System {
     public:

@@ -15,14 +15,14 @@
 #include <SFML/Window/VideoMode.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 
-#include "Component/HP/HP.hpp"
-#include "../../ECS/World.hpp"
-#include "../../ECS/Entity/Entity.hpp"
-#include "../../ECS/Component/Layer/Layer.hpp"
-#include "../../ECS/Component/Sprite/Sprite.hpp"
-#include "../../ECS/Component/Position/Position.hpp"
-#include "../../ECS/Component/Velocity/Velocity.hpp"
-#include "../../ECS/Component/BoxCollider/BoxCollider.hpp"
+#include "HP.hpp"
+#include "World.hpp"
+#include "Entity.hpp"
+#include "Layer.hpp"
+#include "Sprite.hpp"
+#include "Position.hpp"
+#include "Velocity.hpp"
+#include "BoxCollider.hpp"
 
 /**
  * @brief Constructs a new Game object.

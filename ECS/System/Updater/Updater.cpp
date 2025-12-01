@@ -7,12 +7,12 @@
 
 #include "Updater.hpp"
 
+#include "Scale.hpp"
+#include "Sprite.hpp"
+#include "Sprite.hpp"
 #include "Updater.hpp"
-#include "../../Component/Scale/Scale.hpp"
-#include "../../Component/Sprite/Sprite.hpp"
-#include "../../Component/Sprite/Sprite.hpp"
-#include "../../Component/Position/Position.hpp"
-#include "../../Component/Rotation/Rotation.hpp"
+#include "Position.hpp"
+#include "Rotation.hpp"
 #include <SFML/System/Angle.hpp>
 
 /**
