@@ -23,6 +23,8 @@
 #include "Position.hpp"
 #include "Velocity.hpp"
 #include "BoxCollider.hpp"
+#include "Animator.hpp"
+#include "Updater.hpp"
 
 /**
  * @brief Constructs a new Game object.
@@ -54,27 +56,30 @@ Game::~Game()
 void Game::run()
 {
     World world;
-    Entity player;
-
-    player.addComponent<HP>(100);
-    player.addComponent<Position>(0.0f, 0.0f);
-    player.addComponent<Sprite>(std::string("../sprite/r-typesheet28.gif"));
-
-    auto pos = player.getComponent<Position>();
+    auto player = world.createEntity();
+    player->addComponent<HP>(100);
+    player->addComponent<Position>(0.0f, 0.0f);
+    player->addComponent<Sprite>(std::string("../sprites/r-typesheet11.gif"));
+    player->addComponent<Animator>(3, 0.2f, 0, 0, 33, 33, 33, 0);
+    auto pos = player->getComponent<Position>();
     if (pos)
         std::cout << "Player position: (" << pos->getX() << ", " << pos->getY() << ")\n";
-
     sf::VideoMode videoMode(sf::Vector2u(1920, 1080));
     sf::RenderWindow window(videoMode, "My Window");
-
+    Updater updater;
+    sf::Clock clock;
     while (window.isOpen()) {
+
+        float dt = clock.restart().asSeconds();
+        updater.update(dt, world);
+
         window.clear(sf::Color::Black);
-        auto sprite = player.getComponent<Sprite>();
+        auto sprite = player->getComponent<Sprite>();
         while (const std::optional event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>())
                 window.close();
             else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
-                auto pos = player.getComponent<Position>();
+                auto pos = player->getComponent<Position>();
                 if (pos) {
                     switch (keyPressed->scancode) {
                         case sf::Keyboard::Scancode::Up:
