@@ -3,12 +3,41 @@ cmake_minimum_required(VERSION 3.19)
 project(R-Type)
 
 include_directories(.)
+include_directories(ECS)
+include_directories(ECS/Component)
+include_directories(ECS/Component/HP)
+include_directories(ECS/Component/Layer)
+include_directories(ECS/Component/Scale)
+include_directories(ECS/Component/Sprite)
+include_directories(ECS/Component/Position)
+include_directories(ECS/Component/Velocity)
+include_directories(ECS/Component/Rotation)
+include_directories(ECS/Component/BoxCollider)
+include_directories(ECS/System)
+include_directories(ECS/System/Draw)
+include_directories(ECS/System/Updater)
+include_directories(ECS/Entity)
+include_directories(Client)
+include_directories(Client/Game)
 
 add_executable(r-type_server
         Server/main.cpp)
 
 add_executable(r-type_client
-        Client/main.cpp)
+        Client/main.cpp
+        Client/Game/Game.cpp
+        ECS/Entity/Entity.cpp
+        ECS/System/Draw/Draw.cpp
+        ECS/World.cpp
+        ECS/Component/HP/HP.cpp
+        ECS/Component/Scale/Scale.cpp
+        ECS/Component/Layer/Layer.cpp
+        ECS/Component/Sprite/Sprite.cpp
+        ECS/Component/Position/Position.cpp
+        ECS/Component/Velocity/Velocity.cpp
+        ECS/Component/Rotation/Rotation.cpp
+        ECS/Component/BoxCollider/BoxCollider.cpp
+)
 
 target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system)
 
