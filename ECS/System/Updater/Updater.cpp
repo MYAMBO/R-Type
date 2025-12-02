@@ -13,6 +13,7 @@
 #include "Updater.hpp"
 #include "Position.hpp"
 #include "Rotation.hpp"
+#include "Animator.hpp"
 #include <SFML/System/Angle.hpp>
 
 /**
@@ -30,6 +31,7 @@ Updater::Updater()
 void Updater::update(const float& dt, World &w)
 {
     updateSprites(dt, w);
+    updateAnimations(dt, w);
 }
 
 /**
@@ -57,5 +59,22 @@ void Updater::updateSprites(const float& dt, World &w)
             sprite->setPosition({posComp->getX(), posComp->getY()});
         if (rotComp)
             sprite->setRotation(sf::degrees(rotComp->getRotation()));
+    }
+}
+
+void Updater::updateAnimations(const float &dt, World &w)
+{
+    for (auto &entity : w.getAllEntitiesWithComponent<Animator>()) {
+        auto anim = entity->getComponent<Animator>();
+        auto spriteComp = entity->getComponent<Sprite>();
+        if (!anim || !spriteComp)
+            continue;
+        auto sprite = spriteComp->getSprite();
+        anim->setCurrentTime(anim->getCurrentTime() + dt);
+        if (anim->getCurrentTime() >= anim->getFrameRate()) {
+            anim->setCurrentTime(0.f);
+            anim->setCurrentFrame(anim->getCurrentFrame() + 1);
+        }
+        sprite->setTextureRect(anim->getFrameRect());
     }
 }
