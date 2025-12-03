@@ -6,13 +6,13 @@ include_directories(.)
 
 add_executable(r-type_server
         Server/main.cpp
-        packet/packet.cpp
-        packet/packet.hpp)
+        PacketBuilder/PacketBuilder.cpp
+        PacketBuilder/PacketBuilder.hpp)
 
 add_executable(r-type_client
         Client/main.cpp
-        packet/packet.cpp
-        packet/packet.hpp)
+        PacketBuilder/PacketBuilder.cpp
+        PacketBuilder/PacketBuilder.hpp)
 
 target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system)
 
