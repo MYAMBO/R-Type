@@ -20,13 +20,11 @@
 */
 class Draw : public System {
     public:
-        Draw();
+        Draw() = default;
         virtual ~Draw() = default;
 
-        virtual void update(const float& dt, World &w);
-
+        void update(const float& dt, World &w);
     private:
-        sf::RenderWindow _window;
 };
 
 #endif
