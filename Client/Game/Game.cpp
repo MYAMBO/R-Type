@@ -28,6 +28,7 @@
 #include "Updater.hpp"
 #include "Inputs.hpp"
 #include "Draw.hpp"
+#include "Scale.hpp"
 
 /**
  * @brief Constructs a new Game object.
@@ -63,7 +64,8 @@ void Game::run()
     player->addComponent<HP>(100);
     player->addComponent<Position>(0.0f, 0.0f);
     player->addComponent<Sprite>(std::string("../sprites/r-typesheet11.gif"));
-    player->addComponent<Animator>(3, 0.2f, 0, 0, 33, 33, 33, 0);
+    player->addComponent<Animator>(3, 0.5f, 0, 0, 33, 33, 33, 0);
+    player->addComponent<Scale>(10.f);
     auto pos = player->getComponent<Position>();
     if (pos)
         std::cout << "Player position: (" << pos->getX() << ", " << pos->getY() << ")\n";
@@ -77,10 +79,8 @@ void Game::run()
     window.setFramerateLimit(30); 
     world.setWindow(window);
     while (window.isOpen()) {
-
-        float dt = clock.restart().asSeconds();
-        updater.update(dt, world);
-
+       float dt = clock.restart().asSeconds();
+       world.setDeltaTime(dt);
         window.clear(sf::Color::Black);
         while (const std::optional eventOpt = window.pollEvent()) {
             world.setEvent(*eventOpt);
