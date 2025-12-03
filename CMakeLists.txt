@@ -9,6 +9,7 @@ include_directories(ECS/Component/HP)
 include_directories(ECS/Component/Layer)
 include_directories(ECS/Component/Scale)
 include_directories(ECS/Component/Sprite)
+include_directories(ECS/Component/Animator)
 include_directories(ECS/Component/Position)
 include_directories(ECS/Component/Velocity)
 include_directories(ECS/Component/Rotation)
@@ -39,6 +40,7 @@ add_executable(r-type_client
         ECS/Component/Position/Position.cpp
         ECS/Component/Velocity/Velocity.cpp
         ECS/Component/Rotation/Rotation.cpp
+        ECS/Component/Animator/Animator.cpp
         ECS/Component/BoxCollider/BoxCollider.cpp
 )
 
