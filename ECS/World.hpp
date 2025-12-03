@@ -10,6 +10,8 @@
 
 #include <memory>
 #include <vector>
+#include <SFML/Window/Event.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
 
 #include "Entity.hpp"
 #include "System.hpp"
@@ -22,7 +24,7 @@
 */
 class World {
     public:
-        World() = default;
+        World();
         ~World() = default;
 
         std::shared_ptr<Entity> createEntity(void);
@@ -36,7 +38,21 @@ class World {
         template<typename T, typename ... Args>
         std::shared_ptr<T> addSystem(Args&&... args);
 
+        void manageSystems(void);
+
+        sf::Event& getEvent(void);
+        void setEvent(const sf::Event& event);
+        float getDeltaTime(void) const;
+        void setDeltaTime(const float& dt);
+        sf::RenderWindow* getWindow(void);
+        void setWindow(sf::RenderWindow& window);
+
+        template<typename T>
+        std::shared_ptr<T> getSystem() const;
     private:
+        float _deltaTime;
+        sf::Event _event;
+        sf::RenderWindow *_window = nullptr;
         std::vector<std::shared_ptr<Entity>> _entities;
         std::vector<std::shared_ptr<System>> _systems;
 };
@@ -79,6 +95,41 @@ std::vector<std::shared_ptr<Entity>> World::getAllEntitiesWithComponents() const
             entitiesWithComponent.push_back(entity);
     }
     return entitiesWithComponent;
+}
+
+/**
+ * @brief Retrieves a system of a specific type from the world.
+ *
+ * @tparam T The type of the system to retrieve. Must be derived from System.
+ * @return A shared pointer to the system if found, nullptr otherwise.
+ */
+template<typename T>
+std::shared_ptr<T> World::getSystem() const
+{
+    static_assert(std::is_base_of<System, T>::value, "T must be derived from System");
+    for (const auto& system : _systems) {
+        std::shared_ptr<T> sysType = std::dynamic_pointer_cast<T>(system);
+        if (sysType)
+            return sysType;
+    }
+    return nullptr;
+}
+
+/**
+ * @brief Adds a new system to the world.
+ *
+ * @tparam T The type of the system to add. Must be derived from System.
+ * @tparam Args The types of the arguments to pass to the system's constructor.
+ * @param args The arguments to pass to the system's constructor.
+ * @return A shared pointer to the newly added system.
+ */
+template<typename T, typename ... Args>
+std::shared_ptr<T> World::addSystem(Args&&... args)
+{
+    static_assert(std::is_base_of<System, T>::value, "T must be derived from System");
+    auto comp = std::make_shared<T>(std::forward<Args>(args) ...);
+    _systems.push_back(comp);
+    return comp;
 }
 
 #endif /* !WORLD_HPP_ */
