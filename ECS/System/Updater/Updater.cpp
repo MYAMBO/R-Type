@@ -62,6 +62,11 @@ void Updater::updateSprites(const float& dt, World &w)
     }
 }
 
+/**
+* @brief Update the animations of sprite of all entities if they have it in the world
+* @param dt Delta time since last update
+* @param w Reference to the world containing entities and components
+*/
 void Updater::updateAnimations(const float &dt, World &w)
 {
     for (auto &entity : w.getAllEntitiesWithComponent<Animator>()) {

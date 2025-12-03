@@ -14,6 +14,13 @@
 #include "Component.hpp"
 
 
+/**
+ * @brief Animator component to animate the sprite of entities.
+ *
+ * The Animator component handles frame-based animations by selecting
+ * sub-rectangles from a texture atlas (sprite sheet).
+ * It manages timing, frame switching, and texture offsets.
+*/
 class Animator : public Component {
 public:
 
