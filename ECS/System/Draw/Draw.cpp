@@ -17,9 +17,9 @@
 void Draw::update(const float& dt, World &w)
 {
     (void) dt;
-    auto entities = w.getAllEntitiesWithComponents<Sprite>();
+    auto entities = w.getAllEntitiesWithComponent<Sprite>();
     for (auto& entity : entities) {
         auto objectComponent = entity->getComponent<Sprite>();
-        _window.draw(*objectComponent->getSprite());
+        w.getWindow()->draw(*objectComponent->getSprite());
     }
 }

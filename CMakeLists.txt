@@ -16,6 +16,7 @@ include_directories(ECS/Component/BoxCollider)
 include_directories(ECS/System)
 include_directories(ECS/System/Draw)
 include_directories(ECS/System/Updater)
+include_directories(ECS/System/Inputs)
 include_directories(ECS/Entity)
 include_directories(Client)
 include_directories(Client/Game)
@@ -28,6 +29,8 @@ add_executable(r-type_client
         Client/Game/Game.cpp
         ECS/Entity/Entity.cpp
         ECS/System/Draw/Draw.cpp
+        ECS/System/Inputs/Inputs.cpp
+        ECS/System/Updater/Updater.cpp
         ECS/World.cpp
         ECS/Component/HP/HP.cpp
         ECS/Component/Scale/Scale.cpp

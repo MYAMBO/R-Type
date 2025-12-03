@@ -11,6 +11,7 @@
 #include "Sprite.hpp"
 #include "Sprite.hpp"
 #include "Updater.hpp"
+#include "Velocity.hpp"
 #include "Position.hpp"
 #include "Rotation.hpp"
 #include <SFML/System/Angle.hpp>
@@ -49,6 +50,8 @@ void Updater::updateSprites(const float& dt, World &w)
         auto scaleComp = entity->getComponent<Scale>();
         auto posComp   = entity->getComponent<Position>();
         auto rotComp   = entity->getComponent<Rotation>();
+        auto velComp   = entity->getComponent<Velocity>();
+
         if (scaleComp) {
             float s = scaleComp->getScale();
             sprite->setScale({s, s});
@@ -57,5 +60,9 @@ void Updater::updateSprites(const float& dt, World &w)
             sprite->setPosition({posComp->getX(), posComp->getY()});
         if (rotComp)
             sprite->setRotation(sf::degrees(rotComp->getRotation()));
+        if (velComp) {
+            posComp->setX(posComp->getX() + velComp->getVelocity() * dt);
+            posComp->setY(posComp->getY() + velComp->getVelocity() * dt);
+        }
     }
 }
