@@ -1,6 +1,6 @@
 ## Draw
 
-The Draw system is one of the fundamental data structures in our ECS. It display the sprite of 
+The Draw system display the sprite of each entity who have one.
 
 
 | Method | Signature | Description |
@@ -10,8 +10,7 @@ The Draw system is one of the fundamental data structures in our ECS. It display
 
 ```mermaid
 classDiagram
-  class Position {
-    _x: float
-    _y: float
+  class Draw {
+    there is no private variables
   }
 ```

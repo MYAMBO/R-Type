@@ -21,10 +21,13 @@
 #include "Layer.hpp"
 #include "Sprite.hpp"
 #include "Position.hpp"
+#include "Updater.hpp"
 #include "Velocity.hpp"
 #include "BoxCollider.hpp"
 #include "Animator.hpp"
 #include "Updater.hpp"
+#include "Inputs.hpp"
+#include "Draw.hpp"
 
 /**
  * @brief Constructs a new Game object.
@@ -66,44 +69,40 @@ void Game::run()
         std::cout << "Player position: (" << pos->getX() << ", " << pos->getY() << ")\n";
     sf::VideoMode videoMode(sf::Vector2u(1920, 1080));
     sf::RenderWindow window(videoMode, "My Window");
-    Updater updater;
     sf::Clock clock;
+    world.addSystem<Draw>();
+    world.addSystem<Inputs>();
+    world.addSystem<Updater>();
+    auto inputSystem = world.getSystem<Inputs>();
+    window.setFramerateLimit(30); 
+    world.setWindow(window);
     while (window.isOpen()) {
 
         float dt = clock.restart().asSeconds();
         updater.update(dt, world);
 
         window.clear(sf::Color::Black);
-        auto sprite = player->getComponent<Sprite>();
-        while (const std::optional event = window.pollEvent()) {
-            if (event->is<sf::Event::Closed>())
+        while (const std::optional eventOpt = window.pollEvent()) {
+            world.setEvent(*eventOpt);
+            if (inputSystem->isKeyPressed(KeyboardKey::Key_Escape))
                 window.close();
-            else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
-                auto pos = player->getComponent<Position>();
-                if (pos) {
-                    switch (keyPressed->scancode) {
-                        case sf::Keyboard::Scancode::Up:
-                            pos->setY(pos->getY() - 10.0f);
-                            break;
-                        case sf::Keyboard::Scancode::Down:
-                            pos->setY(pos->getY() + 10.0f);
-                            break;
-                        case sf::Keyboard::Scancode::Left:
-                            pos->setX(pos->getX() - 10.0f);
-                            break;
-                        case sf::Keyboard::Scancode::Right:
-                            pos->setX(pos->getX() + 10.0f);
-                            break;
-                        default:
-                            break;
-                    }
-                    sprite->getSprite()->setPosition(sf::Vector2f(pos->getX(), pos->getY()));
+            if (inputSystem->isKeyPressed(KeyboardKey::Key_Right))
+                pos->setX(pos->getX() + 1.0f);
+            if (inputSystem->isKeyPressed(KeyboardKey::Key_Left))
+                pos->setX(pos->getX() - 1.0f);
+            if (inputSystem->isKeyPressed(KeyboardKey::Key_Up))
+                pos->setY(pos->getY() - 1.0f);
+            if (inputSystem->isKeyPressed(KeyboardKey::Key_Down))
+                pos->setY(pos->getY() + 1.0f);
+            if (const auto* keyEvent = eventOpt->getIf<sf::Event::KeyPressed>()) {
+                if (keyEvent->code == sf::Keyboard::Key::P) {
+                    window.close();
                 }
             }
+            if (eventOpt->is<sf::Event::Closed>())
+                window.close();
         }
-        if (sprite) {
-            window.draw(*sprite->getSprite());
-        }
+        world.manageSystems();
         window.display();
     }
 }
