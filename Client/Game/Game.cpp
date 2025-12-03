@@ -28,6 +28,7 @@
 #include "Updater.hpp"
 #include "Inputs.hpp"
 #include "Draw.hpp"
+#include "Scale.hpp"
 
 /**
  * @brief Constructs a new Game object.
@@ -64,6 +65,7 @@ void Game::run()
     player->addComponent<Position>(0.0f, 0.0f);
     player->addComponent<Sprite>(std::string("../sprites/r-typesheet11.gif"));
     player->addComponent<Animator>(3, 0.5f, 0, 0, 33, 33, 33, 0);
+    player->addComponent<Scale>(10.f);
     auto pos = player->getComponent<Position>();
     if (pos)
         std::cout << "Player position: (" << pos->getX() << ", " << pos->getY() << ")\n";
