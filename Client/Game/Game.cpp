@@ -48,7 +48,6 @@ Game::Game(unsigned int width, unsigned int height, const std::string& title)
  */
 Game::~Game()
 {
-    printf("Game destructor called, closing window if open.\n");
     _window.close();
 }
 
@@ -112,7 +111,6 @@ void Game::run()
                 window.close();
             }
         }
-        printf("Player position: (%.2f, %.2f)\n", pos->getX(), pos->getY());
         world.manageSystems();
         window.display();
     }
