@@ -17,6 +17,8 @@
 | **get system** | `template<typename T> / std::shared_ptr<T> getSystem() const` | return the system in the world who have the system class in parameters" |
 | **set scene** | `void setScene(int Scene)` | set the current scene of the world. |
 | **get scene** | `int getScene()` | get the current scene of the world. |
+| **kill entity** | ` void killEntity(std::size_t id)` | destory the entity with the id given. |
+
 
 ```mermaid
 classDiagram

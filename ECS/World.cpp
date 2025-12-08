@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <vector>
+#include <algorithm>
 
 #include "World.hpp"
 #include "Entity.hpp"
@@ -20,6 +21,15 @@ World::World()
 {
     sf::Clock clock;
     _deltaTime = clock.restart().asSeconds();
+}
+
+/**
+ * @brief destroys the World object.
+ */
+World::~World()
+{
+    _entities.clear();
+    _systems.clear();
 }
 
 /**
@@ -122,4 +132,19 @@ void World::setCurrentScene(int scene)
 int World::getCurrentScene() const
 {
     return _currentScene;
+}
+
+/**
+ * @brief kill an entity by its ID.
+* @param id The ID of the entity to kill.
+*/
+void World::killEntity(size_t id)
+{
+    auto it = std::remove_if(_entities.begin(), _entities.end(),
+        [id](const std::shared_ptr<Entity>& entity) {
+            return entity->getId() == id;
+        });
+    if (it != _entities.end()) {
+        _entities.erase(it, _entities.end());
+    }
 }
