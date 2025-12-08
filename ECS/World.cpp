@@ -103,3 +103,23 @@ void World::setWindow(sf::RenderWindow& window)
 {
     _window = &window;
 }
+
+/**
+ * @brief Sets the current scene.
+ *
+ * @param scene The scene to set.
+ */
+void World::setCurrentScene(int scene)
+{
+    _currentScene = scene;
+}
+
+/**
+ * @brief Retrieves the current scene.
+ *
+ * @return The current scene.
+ */
+int World::getCurrentScene() const
+{
+    return _currentScene;
+}
