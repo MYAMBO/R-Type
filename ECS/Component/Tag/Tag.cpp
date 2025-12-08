@@ -13,7 +13,7 @@
  *
  * @param tag The name of the tag of the entity.
  */
-Tag::Tag(std::string &tag) : _tag(tag)
+Tag::Tag(const std::string &tag) : _tag(tag)
 {
 }
 
