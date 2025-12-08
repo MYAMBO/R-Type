@@ -16,19 +16,20 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 
 #include "HP.hpp"
+#include "Draw.hpp"
 #include "World.hpp"
-#include "Entity.hpp"
 #include "Layer.hpp"
+#include "Scale.hpp"
+#include "Scene.hpp"
 #include "Sprite.hpp"
-#include "Position.hpp"
+#include "Entity.hpp"
+#include "Inputs.hpp"
+#include "Updater.hpp"
 #include "Updater.hpp"
 #include "Velocity.hpp"
-#include "BoxCollider.hpp"
+#include "Position.hpp"
 #include "Animator.hpp"
-#include "Updater.hpp"
-#include "Inputs.hpp"
-#include "Draw.hpp"
-#include "Scale.hpp"
+#include "BoxCollider.hpp"
 
 /**
  * @brief Constructs a new Game object.
@@ -66,6 +67,7 @@ void Game::run()
     player->addComponent<Sprite>(std::string("../sprites/r-typesheet11.gif"));
     player->addComponent<Animator>(3, 0.5f, 0, 0, 33, 33, 33, 0);
     player->addComponent<Scale>(10.f);
+    player->addComponent<Scene>(1);
     auto pos = player->getComponent<Position>();
     sf::VideoMode videoMode(sf::Vector2u(1920, 1080));
     sf::RenderWindow window(videoMode, "My Window");
@@ -76,6 +78,7 @@ void Game::run()
     auto inputSystem = world.getSystem<Inputs>();
     window.setFramerateLimit(30); 
     world.setWindow(window);
+    world.setCurrentScene(1);
     while (window.isOpen()) {
        float dt = clock.restart().asSeconds();
        world.setDeltaTime(dt);

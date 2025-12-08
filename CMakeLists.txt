@@ -6,6 +6,7 @@ include_directories(.)
 include_directories(ECS)
 include_directories(ECS/Component)
 include_directories(ECS/Component/HP)
+include_directories(ECS/Component/Scene)
 include_directories(ECS/Component/Layer)
 include_directories(ECS/Component/Scale)
 include_directories(ECS/Component/Sprite)
@@ -36,6 +37,7 @@ add_executable(r-type_client
         ECS/Component/HP/HP.cpp
         ECS/Component/Scale/Scale.cpp
         ECS/Component/Layer/Layer.cpp
+        ECS/Component/Scene/Scene.cpp
         ECS/Component/Sprite/Sprite.cpp
         ECS/Component/Position/Position.cpp
         ECS/Component/Velocity/Velocity.cpp
