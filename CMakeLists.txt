@@ -6,6 +6,7 @@ include_directories(.)
 include_directories(ECS)
 include_directories(ECS/Component)
 include_directories(ECS/Component/HP)
+include_directories(ECS/Component/Tag)
 include_directories(ECS/Component/Scene)
 include_directories(ECS/Component/Layer)
 include_directories(ECS/Component/Scale)
@@ -35,6 +36,7 @@ add_executable(r-type_client
         ECS/System/Updater/Updater.cpp
         ECS/World.cpp
         ECS/Component/HP/HP.cpp
+        ECS/Component/Tag/Tag.cpp
         ECS/Component/Scale/Scale.cpp
         ECS/Component/Layer/Layer.cpp
         ECS/Component/Scene/Scene.cpp

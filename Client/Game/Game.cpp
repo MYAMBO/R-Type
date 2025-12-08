@@ -27,6 +27,11 @@
 #include "Velocity.hpp"
 #include "Position.hpp"
 #include "Animator.hpp"
+#include "Updater.hpp"
+#include "Inputs.hpp"
+#include "Draw.hpp"
+#include "Scale.hpp"
+#include "Tag.hpp"
 #include "BoxCollider.hpp"
 
 /**
