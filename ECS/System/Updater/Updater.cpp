@@ -11,8 +11,10 @@
 #include "Sprite.hpp"
 #include "Sprite.hpp"
 #include "Updater.hpp"
+#include "Velocity.hpp"
 #include "Position.hpp"
 #include "Rotation.hpp"
+#include "Animator.hpp"
 #include <SFML/System/Angle.hpp>
 
 /**
@@ -30,6 +32,7 @@ Updater::Updater()
 void Updater::update(const float& dt, World &w)
 {
     updateSprites(dt, w);
+    updateAnimations(dt, w);
 }
 
 /**
@@ -49,6 +52,8 @@ void Updater::updateSprites(const float& dt, World &w)
         auto scaleComp = entity->getComponent<Scale>();
         auto posComp   = entity->getComponent<Position>();
         auto rotComp   = entity->getComponent<Rotation>();
+        auto velComp   = entity->getComponent<Velocity>();
+
         if (scaleComp) {
             float s = scaleComp->getScale();
             sprite->setScale({s, s});
@@ -57,5 +62,31 @@ void Updater::updateSprites(const float& dt, World &w)
             sprite->setPosition({posComp->getX(), posComp->getY()});
         if (rotComp)
             sprite->setRotation(sf::degrees(rotComp->getRotation()));
+        if (velComp) {
+            posComp->setX(posComp->getX() + velComp->getVelocity() * dt);
+            posComp->setY(posComp->getY() + velComp->getVelocity() * dt);
+        }
+    }
+}
+
+/**
+* @brief Update the animations of sprite of all entities if they have it in the world
+* @param dt Delta time since last update
+* @param w Reference to the world containing entities and components
+*/
+void Updater::updateAnimations(const float &dt, World &w)
+{
+    for (auto &entity : w.getAllEntitiesWithComponent<Animator>()) {
+        auto anim = entity->getComponent<Animator>();
+        auto spriteComp = entity->getComponent<Sprite>();
+        if (!anim || !spriteComp)
+            continue;
+        auto sprite = spriteComp->getSprite();
+        anim->setCurrentTime(anim->getCurrentTime() + dt);
+        if (anim->getCurrentTime() >= anim->getFrameRate()) {
+            anim->setCurrentTime(0.f);
+            anim->setCurrentFrame(anim->getCurrentFrame() + 1);
+        }
+        sprite->setTextureRect(anim->getFrameRect());
     }
 }

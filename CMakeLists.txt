@@ -9,6 +9,7 @@ include_directories(ECS/Component/HP)
 include_directories(ECS/Component/Layer)
 include_directories(ECS/Component/Scale)
 include_directories(ECS/Component/Sprite)
+include_directories(ECS/Component/Animator)
 include_directories(ECS/Component/Position)
 include_directories(ECS/Component/Velocity)
 include_directories(ECS/Component/Rotation)
@@ -16,6 +17,7 @@ include_directories(ECS/Component/BoxCollider)
 include_directories(ECS/System)
 include_directories(ECS/System/Draw)
 include_directories(ECS/System/Updater)
+include_directories(ECS/System/Inputs)
 include_directories(ECS/Entity)
 include_directories(Client)
 include_directories(Client/Game)
@@ -28,6 +30,8 @@ add_executable(r-type_client
         Client/Game/Game.cpp
         ECS/Entity/Entity.cpp
         ECS/System/Draw/Draw.cpp
+        ECS/System/Inputs/Inputs.cpp
+        ECS/System/Updater/Updater.cpp
         ECS/World.cpp
         ECS/Component/HP/HP.cpp
         ECS/Component/Scale/Scale.cpp
@@ -36,6 +40,7 @@ add_executable(r-type_client
         ECS/Component/Position/Position.cpp
         ECS/Component/Velocity/Velocity.cpp
         ECS/Component/Rotation/Rotation.cpp
+        ECS/Component/Animator/Animator.cpp
         ECS/Component/BoxCollider/BoxCollider.cpp
 )
 

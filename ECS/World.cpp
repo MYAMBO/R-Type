@@ -11,6 +11,17 @@
 #include "World.hpp"
 #include "Entity.hpp"
 
+
+/**
+ * @brief Constructs a new World object.
+ */
+World::World()
+    : _event(sf::Event::FocusLost{}) 
+{
+    sf::Clock clock;
+    _deltaTime = clock.restart().asSeconds();
+}
+
 /**
  * @brief Creates a new entity and adds it to the world.
  *
@@ -24,18 +35,71 @@ std::shared_ptr<Entity> World::createEntity()
 }
 
 /**
- * @brief Adds a new system to the world.
- *
- * @tparam T The type of the system to add. Must be derived from System.
- * @tparam Args The types of the arguments to pass to the system's constructor.
- * @param args The arguments to pass to the system's constructor.
- * @return A shared pointer to the newly added system.
+ * @brief Manages all systems in the world by calling their update methods.
  */
-template<typename T, typename ... Args>
-std::shared_ptr<T> World::addSystem(Args&&... args)
+void World::manageSystems(void)
 {
-    static_assert(std::is_base_of<System, T>::value, "T must be derived from System");
-    auto comp = std::make_shared<T>(std::forward<Args>(args) ...);
-    _systems.push_back(comp);
-    return comp;
+    for (const auto& system : _systems) {
+        system->update(this->getDeltaTime(), *this);
+    }
+}
+
+/**
+ * @brief Retrieves the current SFML event.
+ *
+ * @return A reference to the current SFML event.
+ */
+sf::Event& World::getEvent(void)
+{
+    return _event;
+}
+
+/**
+ * @brief Sets the current SFML event.
+ *
+ * @param event The SFML event to set.
+ */
+void World::setEvent(const sf::Event& event)
+{
+    _event = event;
+}
+
+/**
+ * @brief Retrieves the current delta time.
+ *
+ * @return The current delta time.
+ */
+float World::getDeltaTime(void) const
+{
+    return _deltaTime;
+}
+
+/**
+ * @brief Sets the current delta time.
+ *
+ * @param dt The delta time to set.
+ */
+void World::setDeltaTime(const float& dt)
+{
+    _deltaTime = dt;
+}
+
+/**
+ * @brief Retrieves the render window.
+ *
+ * @return A reference to the render window.
+ */
+sf::RenderWindow* World::getWindow(void) const
+{
+    return _window;
+}
+
+/**
+ * @brief Sets the render window.
+ *
+ * @param window The render window to set.
+ */
+void World::setWindow(sf::RenderWindow& window)
+{
+    _window = &window;
 }

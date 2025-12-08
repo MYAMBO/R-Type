@@ -8,6 +8,15 @@
 #include "Scale.hpp"
 
 /**
+ * @brief Constructs a Scale component with the specified scale factor.
+ * @param scale The scale factor of the sprite.
+*/
+Scale::Scale(float scale)
+        : _scale(scale), _type("Scale")
+{
+}
+
+/**
  * @brief Gets the scale factor of the sprite.
  * @return The scale factor of the sprite.
 */
