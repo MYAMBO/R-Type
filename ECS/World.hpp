@@ -44,7 +44,7 @@ class World {
         void setEvent(const sf::Event& event);
         float getDeltaTime(void) const;
         void setDeltaTime(const float& dt);
-        sf::RenderWindow* getWindow(void);
+        sf::RenderWindow* getWindow(void) const;
         void setWindow(sf::RenderWindow& window);
 
         template<typename T>

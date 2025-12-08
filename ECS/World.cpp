@@ -89,7 +89,7 @@ void World::setDeltaTime(const float& dt)
  *
  * @return A reference to the render window.
  */
-sf::RenderWindow* World::getWindow(void)
+sf::RenderWindow* World::getWindow(void) const
 {
     return _window;
 }
