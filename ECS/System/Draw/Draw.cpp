@@ -6,6 +6,7 @@
 */
 
 #include "Draw.hpp"
+#include "Scene.hpp"
 #include "Sprite.hpp"
 
 /**
@@ -20,6 +21,11 @@ void Draw::update(const float& dt, World &w)
     auto entities = w.getAllEntitiesWithComponent<Sprite>();
     for (auto& entity : entities) {
         auto objectComponent = entity->getComponent<Sprite>();
+        auto sceneComponent = entity->getComponent<Scene>();
+        if (!objectComponent || !sceneComponent)
+            continue;
+        if (sceneComponent->getScene() != w.getCurrentScene())
+            continue;
         w.getWindow()->draw(*objectComponent->getSprite());
     }
 }
