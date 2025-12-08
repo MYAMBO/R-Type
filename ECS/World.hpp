@@ -40,18 +40,24 @@ class World {
 
         void manageSystems(void);
 
-        sf::Event& getEvent(void);
         void setEvent(const sf::Event& event);
-        float getDeltaTime(void) const;
-        void setDeltaTime(const float& dt);
-        sf::RenderWindow* getWindow(void) const;
-        void setWindow(sf::RenderWindow& window);
+        [[nodiscard]] sf::Event& getEvent(void);
 
+        void setDeltaTime(const float& dt);
+        [[nodiscard]] float getDeltaTime(void) const;
+
+        void setCurrentScene(int scene);
+        [[nodiscard]] int getCurrentScene() const;
+
+        void setWindow(sf::RenderWindow& window);
+        [[nodiscard]] sf::RenderWindow* getWindow(void) const;
+        
         template<typename T>
         std::shared_ptr<T> getSystem() const;
     private:
         float _deltaTime;
         sf::Event _event;
+        int _currentScene = 1;
         sf::RenderWindow *_window = nullptr;
         std::vector<std::shared_ptr<Entity>> _entities;
         std::vector<std::shared_ptr<System>> _systems;
@@ -76,7 +82,6 @@ std::vector<std::shared_ptr<Entity>> World::getAllEntitiesWithComponent() const
     }
     return entitiesWithComponent;
 }
-
 
 /**
  * @brief Retrieves all entities that have a specific component type.
