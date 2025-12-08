@@ -8,6 +8,7 @@ The Input system is one of the fundamental data structures in our ECS. It catch 
 | **Update** | `void update(sf::Event &event, class World &w);` | Update the Key with the event  |
 | **Is Key Pressed** | ` bool isKeyPressed(KeyboardKey key) const;` | Return true is pressed or false otherwise.  |
 | **Clear Inputs** | `void clearInputs();` | clear all the data stored in keyboard. |
+| **Get key pressed** | `KeyboardKey getKeysPressed() const` | get the enum of the key pressed |
 
 
 ```mermaid

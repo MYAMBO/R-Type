@@ -48,6 +48,7 @@ Game::Game(unsigned int width, unsigned int height, const std::string& title)
  */
 Game::~Game()
 {
+    printf("Game destructor called, closing window if open.\n");
     _window.close();
 }
 
@@ -67,8 +68,6 @@ void Game::run()
     player->addComponent<Animator>(3, 0.5f, 0, 0, 33, 33, 33, 0);
     player->addComponent<Scale>(10.f);
     auto pos = player->getComponent<Position>();
-    if (pos)
-        std::cout << "Player position: (" << pos->getX() << ", " << pos->getY() << ")\n";
     sf::VideoMode videoMode(sf::Vector2u(1920, 1080));
     sf::RenderWindow window(videoMode, "My Window");
     sf::Clock clock;
@@ -84,24 +83,36 @@ void Game::run()
         window.clear(sf::Color::Black);
         while (const std::optional eventOpt = window.pollEvent()) {
             world.setEvent(*eventOpt);
-            if (inputSystem->isKeyPressed(KeyboardKey::Key_Escape))
+            if (inputSystem->isKeyPressed(KeyboardKey::Key_Escape, *eventOpt)) {
+                printf("Escape key pressed, closing window.\n");
                 window.close();
-            if (inputSystem->isKeyPressed(KeyboardKey::Key_Right))
+            }
+            if (inputSystem->isKeyPressed(KeyboardKey::Key_Right, *eventOpt)) {
+                printf("Right key pressed.\n");
                 pos->setX(pos->getX() + 1.0f);
-            if (inputSystem->isKeyPressed(KeyboardKey::Key_Left))
+            }
+            if (inputSystem->isKeyPressed(KeyboardKey::Key_Left, *eventOpt)) {
+                printf("Left key pressed.\n");
                 pos->setX(pos->getX() - 1.0f);
-            if (inputSystem->isKeyPressed(KeyboardKey::Key_Up))
+            }
+            if (inputSystem->isKeyPressed(KeyboardKey::Key_Up, *eventOpt)) {
+                printf("Up key pressed.\n");
                 pos->setY(pos->getY() - 1.0f);
-            if (inputSystem->isKeyPressed(KeyboardKey::Key_Down))
+            }
+            if (inputSystem->isKeyPressed(KeyboardKey::Key_Down, *eventOpt)) {
+                printf("Down key pressed.\n");
                 pos->setY(pos->getY() + 1.0f);
+            }
             if (const auto* keyEvent = eventOpt->getIf<sf::Event::KeyPressed>()) {
                 if (keyEvent->code == sf::Keyboard::Key::P) {
                     window.close();
                 }
             }
-            if (eventOpt->is<sf::Event::Closed>())
+            if (eventOpt->is<sf::Event::Closed>()) {
                 window.close();
+            }
         }
+        printf("Player position: (%.2f, %.2f)\n", pos->getX(), pos->getY());
         world.manageSystems();
         window.display();
     }
