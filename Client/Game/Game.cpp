@@ -29,6 +29,7 @@
 #include "Inputs.hpp"
 #include "Draw.hpp"
 #include "Scale.hpp"
+#include "Tag.hpp"
 
 /**
  * @brief Constructs a new Game object.
