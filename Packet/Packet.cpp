@@ -6,6 +6,7 @@
 */
 
 #include "Packet.hpp"
+#include "CustomError.hpp"
 
 #include <cstring>
 
@@ -21,7 +22,7 @@ sf::Packet Packet::getPacket() const
         setDataSize(_dataSize);
         return _packet;
     }
-    throw new std::exception(); //  Refactor send public error
+    throw MissingPacketParameterError();
 }
 
 
@@ -64,7 +65,7 @@ void Packet::timeSync(const int time)
     constexpr int size = sizeof(uint8_t) + sizeof(int);
 
     if (_dataSize + size > MAX_DATA_SIZE)
-        throw new std::exception(); // to refacto, pimped message
+        throw PacketFullError();
 
     _packet << uint8_t{0x06} << time;
     _dataSize += size;
@@ -75,7 +76,7 @@ void Packet::playerPosition(const int id, const float x, const float y)
     constexpr int size = sizeof(uint8_t) + sizeof(int) + (sizeof(float) * 2);
 
     if (_dataSize + size > MAX_DATA_SIZE)
-        throw new std::exception(); // to refacto, pimped message
+        throw PacketFullError();
 
     _packet << uint8_t{0x07} << id << x << y;
     _dataSize += size;
@@ -86,7 +87,7 @@ void Packet::positionSpawn(const int id, const uint16_t type, const float x, con
     constexpr int size = sizeof(uint8_t) + sizeof(int) + sizeof(uint16_t) + (sizeof(float) * 2);
 
     if (_dataSize + size > MAX_DATA_SIZE)
-        throw new std::exception(); // to refacto, pimped message
+        throw PacketFullError();
 
     _packet << uint8_t{0x07} << id << type << x << y;
     _dataSize += size;
@@ -97,7 +98,7 @@ void Packet::hit(const int id, const int value)
     constexpr int size = sizeof(uint8_t) + (sizeof(int) * 2);
 
     if (_dataSize + size > MAX_DATA_SIZE)
-        throw new std::exception(); // to refacto, pimped message
+        throw PacketFullError();
 
     _packet << uint8_t{0x08} << id << value;
     _dataSize += size;
@@ -108,7 +109,7 @@ void Packet::dead(const int id)
     constexpr int size = sizeof(uint8_t) + sizeof(int);
 
     if (_dataSize + size > MAX_DATA_SIZE)
-        throw new std::exception(); // to refacto, pimped message
+        throw PacketFullError();
 
     _packet << uint8_t{0x09} << id;
     _dataSize += size;
@@ -119,7 +120,7 @@ void Packet::endGame(const uint8_t status)
     constexpr int size = (sizeof(uint8_t) * 2);
 
     if (_dataSize + size > MAX_DATA_SIZE)
-        throw new std::exception(); // to refacto, pimped message
+        throw PacketFullError();
 
     _packet << uint8_t{0x0A} << status;
     _dataSize += size;
