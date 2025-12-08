@@ -33,7 +33,12 @@ class Game {
         void run();
     private:
         void gameInput(std::shared_ptr<Inputs> inputSystem);
-        void playerInput(std::shared_ptr<Inputs> inputSystem, sf::Event eventOpt);
+        void playerInput(std::shared_ptr<Inputs> inputSystem);
+
+        void createPlayer();
+        void createLaser(int entityId);
+
+        void laserMovement();
 
         World _world;
         sf::RenderWindow _window;
