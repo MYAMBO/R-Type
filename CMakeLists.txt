@@ -10,7 +10,9 @@ add_executable(r-type_server
         Packet/Packet.hpp
         Packet/CustomError.hpp
         Packet/Packetreader.cpp
-        Packet/Packetreader.hpp)
+        Packet/Packetreader.hpp
+        Packet/MyString.cpp
+        Packet/MyString.hpp)
 
 add_executable(r-type_client
         Client/main.cpp
@@ -18,7 +20,9 @@ add_executable(r-type_client
         Packet/Packet.hpp
         Packet/CustomError.hpp
         Packet/Packetreader.cpp
-        Packet/Packetreader.hpp)
+        Packet/Packetreader.hpp
+        Packet/MyString.cpp
+        Packet/MyString.hpp)
 
 target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system)
 

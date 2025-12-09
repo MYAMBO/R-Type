@@ -6,21 +6,23 @@
 */
 
 #ifndef R_TYPE_PACKETREADER_HPP
-#define R_TYPE_PACKETREADER_HPP
+    #define R_TYPE_PACKETREADER_HPP
+
 #include <string>
+#include "MyString.hpp"
 
 class Packetreader
 {
     public:
-        Packetreader(std::string data, bool isClient = false);
+        explicit Packetreader(std::string data, bool isClient = false);
         ~Packetreader() = default;
 
         void interpretPacket();
     private:
         bool _isClient;
-        std::string _data;
+        MyString _data;
 
-        void timestamp() const;
+        void timestamp();
         void updateEntity();
         void hit();
         void dead();
