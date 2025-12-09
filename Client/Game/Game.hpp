@@ -10,6 +10,9 @@
 
     #include <SFML/Graphics.hpp>
 
+    #include "World.hpp"
+    #include "Inputs.hpp"
+
 /**
  * @brief Enumeration for different rendering layers in the game.
  * Each layer is assigned an integer value to determine its rendering order.
@@ -29,6 +32,15 @@ class Game {
 
         void run();
     private:
+        void gameInput(std::shared_ptr<Inputs> inputSystem);
+        void playerInput(std::shared_ptr<Inputs> inputSystem);
+
+        void createPlayer();
+        void createLaser(int entityId);
+
+        void laserMovement();
+
+        World _world;
         sf::RenderWindow _window;
 };
 

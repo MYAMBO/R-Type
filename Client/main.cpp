@@ -20,7 +20,7 @@
  */
 auto main() -> int
 {
-	Game game;
+	Game game(1920, 1080, "R-Type");
 	game.run();
 	return 0;
 }

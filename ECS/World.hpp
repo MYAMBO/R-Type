@@ -25,7 +25,7 @@
 class World {
     public:
         World();
-        ~World() = default;
+        ~World();
 
         std::shared_ptr<Entity> createEntity(void);
 
@@ -54,6 +54,8 @@ class World {
         
         template<typename T>
         std::shared_ptr<T> getSystem() const;
+
+        void killEntity(std::size_t id);
     private:
         float _deltaTime;
         sf::Event _event;

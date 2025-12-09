@@ -11,8 +11,8 @@
  * @brief Constructs a Scene component with the specified Scene value.
  * @param Scene The Scene value of the entity.
 */
-Scene::Scene(int Scene)
-        : _Scene(Scene)
+Scene::Scene(int scene)
+        : _scene(scene)
 {
 }
 
@@ -20,16 +20,16 @@ Scene::Scene(int Scene)
  * @brief Gets the Scene value of the entity.
  * @return The Scene value of the entity.
 */
-float Scene::getScene() const
+float Scene::getScene()
 {
-    return _Scene;
+    return _scene;
 }
 
 /**
  * @brief Sets the Scene value of the entity.
  * @param Scene The new Scene value of the entity.
 */
-void Scene::setScene(float Scene)
+void Scene::setScene(float scene)
 {
-    _Scene = Scene;
+    _scene = scene;
 }

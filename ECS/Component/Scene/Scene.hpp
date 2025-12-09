@@ -21,12 +21,12 @@ class Scene : public Component {
         Scene(int Scene = 1);
         ~Scene() = default;
 
-        [[nodiscard]] float getScene() const;
+        [[nodiscard]] float getScene();
 
         void setScene(float Scene);
 
     private:
-        int _Scene;
+        int _scene;
 };
 
 #endif /* !Scene_HPP_ */

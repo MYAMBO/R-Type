@@ -56,14 +56,14 @@ class Inputs : public System {
         ~Inputs() = default;
         void update(const float& dt, World &w);
 
-        bool isKeyPressed(KeyboardKey key, sf::Event event) const;
+        bool isKeyPressed(KeyboardKey key) const; 
 
         void clearInputs();
 
         KeyboardKey getKeysPressed() const;
 
     private:
-        void processKeyPress(KeyboardKey key, sf::Event event);
+        void processKeyPress(KeyboardKey key);
         void processKeyRelease(KeyboardKey key);
 
         KeyboardKey convertSfKey(sf::Keyboard::Key key);
