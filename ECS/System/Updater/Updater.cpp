@@ -46,8 +46,6 @@ void Updater::updateSprites(const float& dt, const World &w)
             continue; 
         }
         const auto sprite = spriteComp->getSprite();
-
-        auto sprite = spriteComp->getSprite();
         auto scaleComp = entity->getComponent<Scale>();
         auto posComp   = entity->getComponent<Position>();
         auto rotComp   = entity->getComponent<Rotation>();
