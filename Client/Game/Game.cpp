@@ -15,20 +15,25 @@
 #include <SFML/Window/VideoMode.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 
+
 #include "HP.hpp"
-#include "World.hpp"
-#include "Entity.hpp"
+#include "Draw.hpp"
 #include "Layer.hpp"
+#include "Scale.hpp"
+#include "Scene.hpp"
 #include "Sprite.hpp"
-#include "Position.hpp"
+#include "Entity.hpp"
+#include "Camera.hpp"
 #include "Updater.hpp"
 #include "Velocity.hpp"
-#include "BoxCollider.hpp"
+#include "Position.hpp"
 #include "Animator.hpp"
 #include "Updater.hpp"
 #include "Inputs.hpp"
 #include "Draw.hpp"
 #include "Scale.hpp"
+#include "Tag.hpp"
+#include "BoxCollider.hpp"
 
 /**
  * @brief Constructs a new Game object.
@@ -41,6 +46,11 @@
 Game::Game(unsigned int width, unsigned int height, const std::string& title)
     : _window(sf::VideoMode({width, height}), title)
 {
+    createPlayer();
+    _world.addSystem<Updater>();
+    _world.addSystem<Draw>();
+    _world.addSystem<Inputs>();
+    _window.setFramerateLimit(30); 
 }
 
 /**
@@ -59,59 +69,140 @@ Game::~Game()
  */
 void Game::run()
 {
-    World world;
-    auto player = world.createEntity();
-    player->addComponent<HP>(100);
-    player->addComponent<Position>(0.0f, 0.0f);
-    player->addComponent<Sprite>(std::string("../sprites/r-typesheet11.gif"));
-    player->addComponent<Animator>(3, 0.5f, 0, 0, 33, 33, 33, 0);
-    player->addComponent<Scale>(10.f);
-    auto pos = player->getComponent<Position>();
-    sf::VideoMode videoMode(sf::Vector2u(1920, 1080));
-    sf::RenderWindow window(videoMode, "My Window");
     sf::Clock clock;
-    world.addSystem<Draw>();
-    world.addSystem<Inputs>();
-    world.addSystem<Updater>();
-    auto inputSystem = world.getSystem<Inputs>();
-    window.setFramerateLimit(30); 
-    world.setWindow(window);
-    while (window.isOpen()) {
-       float dt = clock.restart().asSeconds();
-       world.setDeltaTime(dt);
-        window.clear(sf::Color::Black);
-        while (const std::optional eventOpt = window.pollEvent()) {
-            world.setEvent(*eventOpt);
-            if (inputSystem->isKeyPressed(KeyboardKey::Key_Escape, *eventOpt)) {
-                printf("Escape key pressed, closing window.\n");
-                window.close();
-            }
-            if (inputSystem->isKeyPressed(KeyboardKey::Key_Right, *eventOpt)) {
-                printf("Right key pressed.\n");
-                pos->setX(pos->getX() + 1.0f);
-            }
-            if (inputSystem->isKeyPressed(KeyboardKey::Key_Left, *eventOpt)) {
-                printf("Left key pressed.\n");
-                pos->setX(pos->getX() - 1.0f);
-            }
-            if (inputSystem->isKeyPressed(KeyboardKey::Key_Up, *eventOpt)) {
-                printf("Up key pressed.\n");
-                pos->setY(pos->getY() - 1.0f);
-            }
-            if (inputSystem->isKeyPressed(KeyboardKey::Key_Down, *eventOpt)) {
-                printf("Down key pressed.\n");
-                pos->setY(pos->getY() + 1.0f);
-            }
-            if (const auto* keyEvent = eventOpt->getIf<sf::Event::KeyPressed>()) {
-                if (keyEvent->code == sf::Keyboard::Key::P) {
-                    window.close();
+    auto inputSystem = _world.getSystem<Inputs>();
+    _world.setWindow(_window);
+    _world.setCurrentScene(1);
+    while (_window.isOpen()) {
+        _window.clear(sf::Color::Black);
+        float dt = clock.restart().asSeconds();
+        _world.setDeltaTime(dt);
+        gameInput(inputSystem);
+        laserMovement();
+        _world.manageSystems();
+        _window.display();
+    }
+}
+
+/**
+ * @brief Handles game input.
+ *
+ * This function processes user input events and updates the game state accordingly.
+ * @param inputSystem The input system to check for player actions.
+ */
+void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
+{
+    while (const std::optional eventOpt = _window.pollEvent()) {
+        _world.setEvent(*eventOpt);
+        if (const auto* keyEvent = eventOpt->getIf<sf::Event::KeyPressed>()) {
+            if (keyEvent->code == sf::Keyboard::Key::P)
+                _window.close();
+        }
+        if (eventOpt->is<sf::Event::Closed>()) {
+            _window.close();
+        }
+        inputSystem->update(0.0f, _world);
+    }
+    playerInput(inputSystem);
+}
+
+/**
+ * @brief Handles player input.
+ *
+ * This function processes user input events and updates the game state accordingly.
+ * @param inputSystem The input system to check for player actions.
+ */
+void Game::playerInput(std::shared_ptr<Inputs> inputSystem)
+{
+    for (auto& player : _world.getAllEntitiesWithComponent<Tag>()) {
+        auto tagComp = player->getComponent<Tag>();
+        if (tagComp && tagComp->getTag() == "player") {
+            auto pos = player->getComponent<Position>();
+            if (inputSystem->isKeyPressed(KeyboardKey::Key_Escape))
+                _window.close();
+            if (inputSystem->isKeyPressed(KeyboardKey::Key_Right))
+                pos->setX(pos->getX() + 7.0f);
+            if (inputSystem->isKeyPressed(KeyboardKey::Key_Left))
+                pos->setX(pos->getX() - 7.0f);
+            if (inputSystem->isKeyPressed(KeyboardKey::Key_Up))
+                pos->setY(pos->getY() - 7.0f);
+            if (inputSystem->isKeyPressed(KeyboardKey::Key_Down))
+                pos->setY(pos->getY() + 7.0f);
+            if (inputSystem->isKeyPressed(KeyboardKey::Key_E))
+                createLaser(player->getId());
+            for (auto& fire : _world.getAllEntitiesWithComponent<Tag>()) {
+                auto tagCompFire = fire->getComponent<Tag>();
+                if (tagCompFire && tagCompFire->getTag() == "fire") {
+                    auto posPlayer = player->getComponent<Position>();
+                    auto posFire = fire->getComponent<Position>();
+                    if (posPlayer && posFire) {
+                        posFire->setX(posPlayer->getX() - 25.f);
+                        posFire->setY(posPlayer->getY() + 10.f);
+                    }
                 }
             }
-            if (eventOpt->is<sf::Event::Closed>()) {
-                window.close();
+        }
+    }
+}
+
+/**
+ * @brief Creates the player entity.
+ * 
+ * This function initializes the player entity with necessary components.
+ */
+void Game::createPlayer()
+{
+    auto player = _world.createEntity();
+    player->addComponent<HP>(100);
+    player->addComponent<Position>(75.0f, 75.0f);
+    player->addComponent<Sprite>(std::string("../sprites/r-typesheet42.gif"));
+    player->addComponent<Animator>(2, 0.1f, 0, 0, 33, 19, 33, 0);
+    player->addComponent<Scale>(2.f);
+    player->addComponent<Scene>(1);
+    player->addComponent<Camera>(sf::Vector2f(1920.f, 1080.f), sf::Vector2f(player->getComponent<Position>()->getX(), player->getComponent<Position>()->getY()));
+    player->addComponent<Tag>("player");
+    auto fire = _world.createEntity();
+    fire->addComponent<Position>(0.f, 85.f);
+    fire->addComponent<Sprite>(std::string("../sprites/r-typesheet1.gif"));
+    fire->addComponent<Animator>(2, 0.1f, 285, 85, 15, 15, 20, 0);
+    fire->addComponent<Scale>(2.f);
+    fire->addComponent<Scene>(1);
+    fire->addComponent<Tag>("fire");
+}
+
+/**
+ * @brief Creates a laser entity.
+ *
+ * This function initializes a laser entity with necessary components.
+ * @param entityId The ID of the entity that fired the laser.
+ */
+void Game::createLaser(int entityId)
+{
+    auto laser = _world.createEntity();
+    auto shooter = _world.getAllEntitiesWithComponent<Tag>()[entityId];
+    auto shooterPos = shooter->getComponent<Position>();
+    laser->addComponent<Position>(shooterPos->getX() + 60.f, shooterPos->getY() + 15.f);
+    laser->addComponent<Sprite>(std::string("../sprites/r-typesheet1.gif"));
+    laser->addComponent<Animator>(2, 0.05f, 200, 120, 32, 15, 32, 0);
+    laser->addComponent<Scale>(2.f);
+    laser->addComponent<Scene>(1);
+    laser->addComponent<Tag>("laser");
+}
+
+/**
+ * @brief handles laser movement.
+ * This function updates the position of all laser entities.
+ */
+void Game::laserMovement()
+{
+    for (auto& laser : _world.getAllEntitiesWithComponent<Tag>()) {
+        auto tagComp = laser->getComponent<Tag>();
+        if (tagComp && tagComp->getTag() == "laser") {
+            auto pos = laser->getComponent<Position>();
+            pos->setX(pos->getX() + 10.0f);
+            if (pos->getX() > 1920.f) {
+                _world.killEntity(laser->getId());
             }
         }
-        world.manageSystems();
-        window.display();
     }
 }

@@ -15,3 +15,11 @@ Entity::Entity()
     static int id = 0;
     _id = id++;
 }
+
+/**
+ * @brief Return the id of the entity
+ */
+std::size_t Entity::getId(void) const
+{
+    return _id;
+}

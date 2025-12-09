@@ -11,7 +11,7 @@
  * @brief Constructs a new HP component with specified maximum HP.
  * @param maxHp The maximum HP value for the component.
 */
-HP::HP(int maxHp)
+HP::HP(const int maxHp)
     : _hp(maxHp), _maxHp(maxHp)
 {
 }
@@ -20,7 +20,7 @@ HP::HP(int maxHp)
  * @brief Sets the current HP value.
  * @param hp The new HP value to set.
 */
-void HP::setHP(unsigned int hp)
+void HP::setHP(const unsigned int hp)
 {
     _hp = hp;
 }
@@ -47,7 +47,7 @@ unsigned int HP::getMaxHP() const
  * @brief Sets the maximum HP value.
  * @param maxHp The new maximum HP value to set.
 */
-void HP::setMaxHP(unsigned int maxHp)
+void HP::setMaxHP(const unsigned int maxHp)
 {
     _maxHp = maxHp;
 }

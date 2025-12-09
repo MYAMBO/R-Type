@@ -17,7 +17,7 @@
 #include "System.hpp"
 
 /**
- * @brief World class that manages entities and systems in the ECS architecture.
+ * @brief World-class that manages entities and systems in the ECS architecture.
  *
  * The World class is responsible for creating and storing entities,
  * as well as managing the systems that operate on those entities.
@@ -25,9 +25,9 @@
 class World {
     public:
         World();
-        ~World() = default;
+        ~World();
 
-        std::shared_ptr<Entity> createEntity(void);
+        std::shared_ptr<Entity> createEntity();
 
         template<typename T>
         [[nodiscard]] std::vector<std::shared_ptr<Entity>> getAllEntitiesWithComponent() const;
@@ -38,20 +38,28 @@ class World {
         template<typename T, typename ... Args>
         std::shared_ptr<T> addSystem(Args&&... args);
 
-        void manageSystems(void);
+        void manageSystems();
 
-        sf::Event& getEvent(void);
         void setEvent(const sf::Event& event);
-        float getDeltaTime(void) const;
-        void setDeltaTime(const float& dt);
-        sf::RenderWindow* getWindow(void) const;
-        void setWindow(sf::RenderWindow& window);
+        [[nodiscard]] sf::Event& getEvent();
 
+        void setDeltaTime(const float& dt);
+        [[nodiscard]] float getDeltaTime() const;
+
+        void setCurrentScene(int scene);
+        [[nodiscard]] int getCurrentScene() const;
+
+        void setWindow(sf::RenderWindow& window);
+        [[nodiscard]] sf::RenderWindow* getWindow() const;
+        
         template<typename T>
         std::shared_ptr<T> getSystem() const;
+
+        void killEntity(std::size_t id);
     private:
         float _deltaTime;
         sf::Event _event;
+        int _currentScene = 1;
         sf::RenderWindow *_window = nullptr;
         std::vector<std::shared_ptr<Entity>> _entities;
         std::vector<std::shared_ptr<System>> _systems;
@@ -66,17 +74,14 @@ class World {
 template<typename T>
 std::vector<std::shared_ptr<Entity>> World::getAllEntitiesWithComponent() const
 {
-    static_assert(std::is_base_of<Component, T>::value, "T must be derived from Component");
+    static_assert(std::is_base_of_v<Component, T>, "T must be derived from Component");
     std::vector<std::shared_ptr<Entity>> entitiesWithComponent;
 
-    for (const auto& entity : _entities) {
-        auto component = entity->getComponent<T>();
-        if (component)
+    for (const auto& entity : _entities)
+        if (auto component = entity->getComponent<T>())
             entitiesWithComponent.push_back(entity);
-    }
     return entitiesWithComponent;
 }
-
 
 /**
  * @brief Retrieves all entities that have a specific component type.
@@ -87,13 +92,11 @@ std::vector<std::shared_ptr<Entity>> World::getAllEntitiesWithComponent() const
 template<typename T>
 std::vector<std::shared_ptr<Entity>> World::getAllEntitiesWithComponents() const
 {
-    static_assert(std::is_base_of<Component, T>::value, "T must be derived from Component");
+    static_assert(std::is_base_of_v<Component, T>, "T must be derived from Component");
     std::vector<std::shared_ptr<Entity>> entitiesWithComponent;
-    for (const auto& entity : _entities) {
-        auto component = entity->getComponent<T>();
-        if (component)
+    for (const auto& entity : _entities)
+        if (auto component = entity->getComponent<T>())
             entitiesWithComponent.push_back(entity);
-    }
     return entitiesWithComponent;
 }
 
@@ -106,12 +109,10 @@ std::vector<std::shared_ptr<Entity>> World::getAllEntitiesWithComponents() const
 template<typename T>
 std::shared_ptr<T> World::getSystem() const
 {
-    static_assert(std::is_base_of<System, T>::value, "T must be derived from System");
-    for (const auto& system : _systems) {
-        std::shared_ptr<T> sysType = std::dynamic_pointer_cast<T>(system);
-        if (sysType)
+    static_assert(std::is_base_of_v<System, T>, "T must be derived from System");
+    for (const auto& system : _systems)
+        if (std::shared_ptr<T> sysType = std::dynamic_pointer_cast<T>(system))
             return sysType;
-    }
     return nullptr;
 }
 
@@ -126,7 +127,7 @@ std::shared_ptr<T> World::getSystem() const
 template<typename T, typename ... Args>
 std::shared_ptr<T> World::addSystem(Args&&... args)
 {
-    static_assert(std::is_base_of<System, T>::value, "T must be derived from System");
+    static_assert(std::is_base_of_v<System, T>, "T must be derived from System");
     auto comp = std::make_shared<T>(std::forward<Args>(args) ...);
     _systems.push_back(comp);
     return comp;

@@ -8,8 +8,6 @@
 #ifndef DRAW_HPP_
     #define DRAW_HPP_
 
-#include <SFML/Graphics/RenderWindow.hpp>
-
 #include "World.hpp"
 
 /**
@@ -21,9 +19,9 @@
 class Draw : public System {
     public:
         Draw() = default;
-        virtual ~Draw() = default;
+        ~Draw() override = default;
 
-        void update(const float& dt, World &w);
+        void update(const float& dt, World &w) override;
     private:
 };
 

@@ -10,6 +10,7 @@
 #include "Scale.hpp"
 #include "Sprite.hpp"
 #include "Sprite.hpp"
+#include "Camera.hpp"
 #include "Updater.hpp"
 #include "Velocity.hpp"
 #include "Position.hpp"
@@ -20,9 +21,7 @@
 /**
 * @brief Construct a new Updater:: Updater object
 */
-Updater::Updater()
-{
-}
+Updater::Updater() = default;
 
 /**
 * @brief Update the world by updating all entities' components
@@ -31,8 +30,9 @@ Updater::Updater()
 */
 void Updater::update(const float& dt, World &w)
 {
-    updateSprites(dt, w);
+    updateCameras(dt, w);
     updateAnimations(dt, w);
+    updateSprites(dt, w);
 }
 
 /**
@@ -40,15 +40,14 @@ void Updater::update(const float& dt, World &w)
 * @param dt Delta time since last update
 * @param w Reference to the world containing entities and components
 */
-void Updater::updateSprites(const float& dt, World &w)
+void Updater::updateSprites(const float& dt, const World &w)
 {
-    for (auto &entity : w.getAllEntitiesWithComponent<Sprite>()) {
-        auto spriteComp = entity->getComponent<Sprite>();
+    for (const auto &entity : w.getAllEntitiesWithComponent<Sprite>()) {
+        const auto spriteComp = entity->getComponent<Sprite>();
         if (!spriteComp) {
             continue; 
         }
-        auto sprite = spriteComp->getSprite();
-
+        const auto sprite = spriteComp->getSprite();
         auto scaleComp = entity->getComponent<Scale>();
         auto posComp   = entity->getComponent<Position>();
         auto rotComp   = entity->getComponent<Rotation>();
@@ -74,11 +73,11 @@ void Updater::updateSprites(const float& dt, World &w)
 * @param dt Delta time since last update
 * @param w Reference to the world containing entities and components
 */
-void Updater::updateAnimations(const float &dt, World &w)
+void Updater::updateAnimations(const float &dt, const World &w)
 {
-    for (auto &entity : w.getAllEntitiesWithComponent<Animator>()) {
-        auto anim = entity->getComponent<Animator>();
-        auto spriteComp = entity->getComponent<Sprite>();
+    for (const auto &entity : w.getAllEntitiesWithComponent<Animator>()) {
+        const auto anim = entity->getComponent<Animator>();
+        const auto spriteComp = entity->getComponent<Sprite>();
         if (!anim || !spriteComp)
             continue;
         auto sprite = spriteComp->getSprite();
@@ -88,5 +87,23 @@ void Updater::updateAnimations(const float &dt, World &w)
             anim->setCurrentFrame(anim->getCurrentFrame() + 1);
         }
         sprite->setTextureRect(anim->getFrameRect());
+    }
+}
+
+/**
+* @brief Update the camera of all entities if they have it in the world
+* @param dt Delta time since last update
+* @param w Reference to the world containing entities and components
+*/
+void Updater::updateCameras(const float &dt, const World &w)
+{
+    for (auto &entity : w.getAllEntitiesWithComponent<Camera>()) {
+        auto cameraComp = entity->getComponent<Camera>();
+        if (!cameraComp)
+            continue; 
+        auto posComp = entity->getComponent<Position>();
+        if (posComp)
+            cameraComp->setPosition({posComp->getX(), posComp->getY()});
+        w.getWindow()->setView(cameraComp->getView());
     }
 }

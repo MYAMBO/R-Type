@@ -15,12 +15,17 @@
 | **get window** | `sf::RenderWindow* getWindow(void)` | get the reference of the window. |
 | **set window** | `void setWindow(sf::RenderWindow& window)` | set the reference of the window to the world. |
 | **get system** | `template<typename T> / std::shared_ptr<T> getSystem() const` | return the system in the world who have the system class in parameters" |
+| **set scene** | `void setScene(int Scene)` | set the current scene of the world. |
+| **get scene** | `int getScene()` | get the current scene of the world. |
+| **kill entity** | ` void killEntity(std::size_t id)` | destory the entity with the id given. |
+
 
 ```mermaid
 classDiagram
   class World {
     _deltaTime: float
     _event: sf::Event
+    _currentScene: int
     _window: sf::RenderWindow *
     _entities: std::vector< std::shared_ptr< Entity>>
     _systems: std::vector< std::shared_ptr< System>>

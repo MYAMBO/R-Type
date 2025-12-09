@@ -30,10 +30,10 @@ float Position::getY() const { return _y; }
  * @brief Sets the X coordinate.
  * @param x The new X coordinate.
 */
-void Position::setX(float x) { _x = x; }
+void Position::setX(const float x) { _x = x; }
 
 /**
  * @brief Sets the Y coordinate.
  * @param y The new Y coordinate.
 */
-void Position::setY(float y) { _y = y; }
+void Position::setY(const float y) { _y = y; }

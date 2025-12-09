@@ -30,7 +30,9 @@ class Entity {
         void addComponent(Args&& ... args);
 
         template<typename T>
-        [[nodiscard]] std::shared_ptr<T> getComponent(void) const;
+        [[nodiscard]] std::shared_ptr<T> getComponent() const;
+
+        [[nodiscard]] std::size_t getId(void) const;
     private:
         std::size_t _id;
         std::vector<std::shared_ptr<Component>> _components;
@@ -57,14 +59,12 @@ void Entity::addComponent(Args&& ... args)
  * @return A shared pointer to the component if found, nullptr otherwise.
  */
 template<typename T>
-std::shared_ptr<T> Entity::getComponent(void) const
+std::shared_ptr<T> Entity::getComponent() const
 {
-    static_assert(std::is_base_of<Component, T>::value, "T must be a Component");
-    for (const auto& comp : _components) {
-        std::shared_ptr<T> comType = std::dynamic_pointer_cast<T>(comp);
-        if (comType)
+    static_assert(std::is_base_of_v<Component, T>, "T must be a Component");
+    for (const auto& comp : _components)
+        if (std::shared_ptr<T> comType = std::dynamic_pointer_cast<T>(comp))
             return comType;
-    }
     return nullptr;
 }
 
