@@ -41,7 +41,7 @@ class Rotation : public Component {
 template<typename T>
 Rotation::Rotation(float rotation)
 {
-    if (std::is_same<T, Sprite>::value)
+    if (std::is_same_v<T, Sprite>)
     rotation = std::fmod(rotation, 360.0f);
     _rotation = rotation;
 }

@@ -72,7 +72,7 @@ class World {
 template<typename T>
 std::vector<std::shared_ptr<Entity>> World::getAllEntitiesWithComponent() const
 {
-    static_assert(std::is_base_of<Component, T>::value, "T must be derived from Component");
+    static_assert(std::is_base_of_v<Component, T>, "T must be derived from Component");
     std::vector<std::shared_ptr<Entity>> entitiesWithComponent;
 
     for (const auto& entity : _entities) {
@@ -92,7 +92,7 @@ std::vector<std::shared_ptr<Entity>> World::getAllEntitiesWithComponent() const
 template<typename T>
 std::vector<std::shared_ptr<Entity>> World::getAllEntitiesWithComponents() const
 {
-    static_assert(std::is_base_of<Component, T>::value, "T must be derived from Component");
+    static_assert(std::is_base_of_v<Component, T>, "T must be derived from Component");
     std::vector<std::shared_ptr<Entity>> entitiesWithComponent;
     for (const auto& entity : _entities) {
         auto component = entity->getComponent<T>();
@@ -111,7 +111,7 @@ std::vector<std::shared_ptr<Entity>> World::getAllEntitiesWithComponents() const
 template<typename T>
 std::shared_ptr<T> World::getSystem() const
 {
-    static_assert(std::is_base_of<System, T>::value, "T must be derived from System");
+    static_assert(std::is_base_of_v<System, T>, "T must be derived from System");
     for (const auto& system : _systems) {
         std::shared_ptr<T> sysType = std::dynamic_pointer_cast<T>(system);
         if (sysType)
@@ -131,7 +131,7 @@ std::shared_ptr<T> World::getSystem() const
 template<typename T, typename ... Args>
 std::shared_ptr<T> World::addSystem(Args&&... args)
 {
-    static_assert(std::is_base_of<System, T>::value, "T must be derived from System");
+    static_assert(std::is_base_of_v<System, T>, "T must be derived from System");
     auto comp = std::make_shared<T>(std::forward<Args>(args) ...);
     _systems.push_back(comp);
     return comp;
