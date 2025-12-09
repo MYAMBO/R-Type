@@ -29,27 +29,23 @@ void Inputs::update(const float& dt, World &w)
 {
     (void)dt;
     const sf::Event &event = w.getEvent();
-    if (const auto* keyEvent = event.getIf<sf::Event::KeyPressed>())
-        processKeyPress(convertSfKey(keyEvent->code), *keyEvent);
-    else if (const auto* keyEvent = event.getIf<sf::Event::KeyReleased>())
+    if (const auto* keyEvent = event.getIf<sf::Event::KeyPressed>()) {
+        processKeyPress(convertSfKey(keyEvent->code));
+    }
+    else if (const auto* keyEvent = event.getIf<sf::Event::KeyReleased>()) {
         processKeyRelease(convertSfKey(keyEvent->code));
+    }
 }
 
 /**
  * @brief Checks if a specific key is currently pressed.
  *
  * @param key The key to check.
- * @param event SFML event
  * @return true if the key is pressed, false otherwise.
  */
-bool Inputs::isKeyPressed(const KeyboardKey key, const sf::Event& event) const
+bool Inputs::isKeyPressed(const KeyboardKey key) const
 {
-    if (const auto* keyEvent = event.getIf<sf::Event::KeyPressed>()) {
-        return std::find(_pressedKeys.begin(), _pressedKeys.end(), key) != _pressedKeys.end();
-    } else if (const auto* keyEvent = event.getIf<sf::Event::KeyReleased>()) {
-        return std::find(_pressedKeys.begin(), _pressedKeys.end(), key) != _pressedKeys.end();
-    }
-    return false;
+    return std::find(_pressedKeys.begin(), _pressedKeys.end(), key) != _pressedKeys.end();
 }
 
 /**
@@ -58,14 +54,11 @@ bool Inputs::isKeyPressed(const KeyboardKey key, const sf::Event& event) const
  * @param key The key that was pressed.
  * @param event The SFML event associated with the key press.
  */
-void Inputs::processKeyPress(const KeyboardKey key, const sf::Event& event)
+void Inputs::processKeyPress(const KeyboardKey key)
 {
-    if (key == KeyboardKey::Key_Unknown) {
-        printf("Unknown key pressed, ignoring.\n");
+    if (key == KeyboardKey::Key_Unknown)
         return;
-    }
-    if (!isKeyPressed(key, event)) {
-        printf("Key pressed, adding to pressed keys.\n");
+    if (!isKeyPressed(key)) {
         _pressedKeys.push_back(key);
     }
 }
@@ -77,13 +70,10 @@ void Inputs::processKeyPress(const KeyboardKey key, const sf::Event& event)
  */
 void Inputs::processKeyRelease(const KeyboardKey key)
 {
-    if (key == KeyboardKey::Key_Unknown) {
-        printf("Unknown key released, ignoring.\n");
+    if (key == KeyboardKey::Key_Unknown)
         return;
-    }
     auto it = std::remove(_pressedKeys.begin(), _pressedKeys.end(), key);
     if (it != _pressedKeys.end()) {
-        printf("Key released, removing from pressed keys.\n");
         _pressedKeys.erase(it, _pressedKeys.end());
     }
 }
@@ -95,7 +85,6 @@ void Inputs::clearInputs()
 {
     _pressedKeys.clear();
 }
-
 /**
  * @brief Converts an SFML keyboard key to a custom KeyboardKey enum.
  *

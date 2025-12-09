@@ -31,6 +31,8 @@ class Entity {
 
         template<typename T>
         [[nodiscard]] std::shared_ptr<T> getComponent() const;
+
+        [[nodiscard]] std::size_t getId(void) const;
     private:
         std::size_t _id;
         std::vector<std::shared_ptr<Component>> _components;
