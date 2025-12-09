@@ -10,6 +10,7 @@
 #include "Scale.hpp"
 #include "Sprite.hpp"
 #include "Sprite.hpp"
+#include "Camera.hpp"
 #include "Updater.hpp"
 #include "Velocity.hpp"
 #include "Position.hpp"
@@ -31,6 +32,7 @@ Updater::Updater()
 */
 void Updater::update(const float& dt, World &w)
 {
+    updateCameras(dt, w);
     updateAnimations(dt, w);
     updateSprites(dt, w);
 }
@@ -87,5 +89,23 @@ void Updater::updateAnimations(const float &dt, World &w)
             anim->setCurrentFrame(anim->getCurrentFrame() + 1);
         }
         sprite->setTextureRect(anim->getFrameRect());
+    }
+}
+
+/**
+* @brief Update the camera of all entities if they have it in the world
+* @param dt Delta time since last update
+* @param w Reference to the world containing entities and components
+*/
+void Updater::updateCameras(const float &dt, World &w)
+{
+    for (auto &entity : w.getAllEntitiesWithComponent<Camera>()) {
+        auto cameraComp = entity->getComponent<Camera>();
+        if (!cameraComp)
+            continue; 
+        auto posComp = entity->getComponent<Position>();
+        if (posComp)
+            cameraComp->setPosition({posComp->getX(), posComp->getY()});
+        w.getWindow()->setView(cameraComp->getView());
     }
 }
