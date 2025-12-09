@@ -8,11 +8,12 @@
 #ifndef INPUTS_HPP_
     #define INPUTS_HPP_
 
-#include <vector>
-#include <algorithm>
-#include <SFML/Window/Keyboard.hpp>
-#include <SFML/Window/Event.hpp>
-#include "System.hpp"
+    #include <vector>
+    #include <algorithm>
+    #include <SFML/Window/Event.hpp>
+    #include <SFML/Window/Keyboard.hpp>
+
+    #include "System.hpp"
 
 /**
  * @brief Enum of keyboard keys.
@@ -29,8 +30,8 @@ enum class KeyboardKey {
     // Controls
     Key_Escape, Key_LControl, Key_LShift, Key_LAlt, Key_LSystem,
     Key_RControl, Key_RShift, Key_RAlt, Key_RSystem, Key_Menu,
-    Key_LBracket, Key_RBracket, Key_SemiColon, Key_Comma, Key_Period,
-    Key_Slash, Key_BackSlash, Key_Equal, Key_Dash,
+    Key_LBracket, Key_RBracket, Key_Semicolon, Key_Comma, Key_Period,
+    Key_Quote, Key_Slash, Key_BackSlash, Key_Tilde, Key_Equal, Key_Hyphen,
     Key_Space, Key_Enter, Key_Backspace, Key_Tab,
     Key_PageUp, Key_PageDown, Key_End, Key_Home, Key_Insert, Key_Delete,
     Key_Add, Key_Subtract, Key_Multiply, Key_Divide,
