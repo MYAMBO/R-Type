@@ -4,9 +4,10 @@ The Updater system is one of the fundamental data structures in our ECS. It upda
 
 
 | Method | Signature | Description |
-| :--- | :--- | :--- |
-| **Update** | `void update(const float& dt, World &w)` | Update the collider and the sprite `w` |
-
+|:---|:---|:---|
+| **Constructor** | `Updater()` | Constructs the Updater system. |
+| **Destructor** | `~Updater()` | Destroys the Updater system. |
+| **Update** | `void update(const float& dt, World &w)` | The main update loop. It synchronizes Sprites, Cameras, Animations, and BoxColliders with the world state and delta time. |
 
 ```mermaid
 classDiagram
