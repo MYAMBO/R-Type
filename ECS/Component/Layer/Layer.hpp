@@ -20,7 +20,7 @@
 class Layer : public Component {
     public:
 
-        Layer(int id);
+        explicit Layer(int id);
         ~Layer() override = default;
 
         void setLayerId(int id);

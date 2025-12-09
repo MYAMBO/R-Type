@@ -17,7 +17,7 @@
 #include "System.hpp"
 
 /**
- * @brief World class that manages entities and systems in the ECS architecture.
+ * @brief World-class that manages entities and systems in the ECS architecture.
  *
  * The World class is responsible for creating and storing entities,
  * as well as managing the systems that operate on those entities.
@@ -27,7 +27,7 @@ class World {
         World();
         ~World() = default;
 
-        std::shared_ptr<Entity> createEntity(void);
+        std::shared_ptr<Entity> createEntity();
 
         template<typename T>
         [[nodiscard]] std::vector<std::shared_ptr<Entity>> getAllEntitiesWithComponent() const;
@@ -38,19 +38,19 @@ class World {
         template<typename T, typename ... Args>
         std::shared_ptr<T> addSystem(Args&&... args);
 
-        void manageSystems(void);
+        void manageSystems();
 
         void setEvent(const sf::Event& event);
-        [[nodiscard]] sf::Event& getEvent(void);
+        [[nodiscard]] sf::Event& getEvent();
 
         void setDeltaTime(const float& dt);
-        [[nodiscard]] float getDeltaTime(void) const;
+        [[nodiscard]] float getDeltaTime() const;
 
         void setCurrentScene(int scene);
         [[nodiscard]] int getCurrentScene() const;
 
         void setWindow(sf::RenderWindow& window);
-        [[nodiscard]] sf::RenderWindow* getWindow(void) const;
+        [[nodiscard]] sf::RenderWindow* getWindow() const;
         
         template<typename T>
         std::shared_ptr<T> getSystem() const;

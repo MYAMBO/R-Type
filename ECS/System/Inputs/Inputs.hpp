@@ -53,7 +53,7 @@ class Inputs : public System {
     public:
         Inputs();
         ~Inputs() override = default;
-        void update(const float& dt, World &w);
+        void update(const float& dt, World &w) override;
 
         bool isKeyPressed(KeyboardKey key, const sf::Event& event) const;
 

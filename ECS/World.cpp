@@ -37,7 +37,7 @@ std::shared_ptr<Entity> World::createEntity()
 /**
  * @brief Manages all systems in the world by calling their update methods.
  */
-void World::manageSystems(void)
+void World::manageSystems()
 {
     for (const auto& system : _systems) {
         system->update(this->getDeltaTime(), *this);
@@ -49,7 +49,7 @@ void World::manageSystems(void)
  *
  * @return A reference to the current SFML event.
  */
-sf::Event& World::getEvent(void)
+sf::Event& World::getEvent()
 {
     return _event;
 }
@@ -69,7 +69,7 @@ void World::setEvent(const sf::Event& event)
  *
  * @return The current delta time.
  */
-float World::getDeltaTime(void) const
+float World::getDeltaTime() const
 {
     return _deltaTime;
 }
@@ -89,7 +89,7 @@ void World::setDeltaTime(const float& dt)
  *
  * @return A reference to the render window.
  */
-sf::RenderWindow* World::getWindow(void) const
+sf::RenderWindow* World::getWindow() const
 {
     return _window;
 }

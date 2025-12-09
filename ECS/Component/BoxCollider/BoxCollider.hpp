@@ -20,7 +20,7 @@
  */
 class BoxCollider : public Component {
 public:
-    BoxCollider(const sf::Vector2f &size);
+    explicit BoxCollider(const sf::Vector2f &size);
     ~BoxCollider() override = default;
 
     [[nodiscard]] bool isVisible() const;

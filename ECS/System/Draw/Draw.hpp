@@ -21,7 +21,7 @@ class Draw : public System {
         Draw() = default;
         ~Draw() override = default;
 
-        void update(const float& dt, World &w);
+        void update(const float& dt, World &w) override;
     private:
 };
 

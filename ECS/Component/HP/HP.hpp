@@ -18,7 +18,7 @@
 */
 class HP : public Component {
     public:
-        HP(int maxHp);
+        explicit HP(int maxHp);
         ~HP() override = default;
 
         [[nodiscard]] unsigned int getHP() const;

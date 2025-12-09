@@ -19,7 +19,7 @@
 */
 class Velocity : public Component {
     public:
-        Velocity(float velocity);
+        explicit Velocity(float velocity);
         ~Velocity() override = default;
 
     [[nodiscard]] float getVelocity() const;

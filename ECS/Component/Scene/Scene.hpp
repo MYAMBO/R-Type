@@ -18,7 +18,7 @@
 */
 class Scene : public Component {
     public:
-        Scene(int Scene = 1);
+        explicit Scene(int Scene = 1);
         ~Scene() override = default;
 
         [[nodiscard]] float getScene() const;

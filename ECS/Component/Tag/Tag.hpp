@@ -22,7 +22,7 @@
 class Tag : public Component {
 
     public:
-        Tag(const std::string &tag);
+        explicit Tag(const std::string &tag);
         ~Tag() override = default;
 
     [[nodiscard]] std::string getTag() const;

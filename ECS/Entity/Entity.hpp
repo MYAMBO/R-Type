@@ -30,7 +30,7 @@ class Entity {
         void addComponent(Args&& ... args);
 
         template<typename T>
-        [[nodiscard]] std::shared_ptr<T> getComponent(void) const;
+        [[nodiscard]] std::shared_ptr<T> getComponent() const;
     private:
         std::size_t _id;
         std::vector<std::shared_ptr<Component>> _components;
