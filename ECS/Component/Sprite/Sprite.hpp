@@ -14,7 +14,7 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
-#include "../Component.hpp"
+#include "Component.hpp"
 
 /**
  * @brief Sprite component to handle graphical representation of an entity.

@@ -8,8 +8,6 @@
 #ifndef DRAW_HPP_
     #define DRAW_HPP_
 
-#include <SFML/Graphics/RenderWindow.hpp>
-
 #include "World.hpp"
 
 /**

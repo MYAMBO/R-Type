@@ -5,8 +5,6 @@
 ** Animator
 */
 
-#include <stdexcept>
-
 #include "Animator.hpp"
 
 

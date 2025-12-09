@@ -10,7 +10,6 @@
     #define R_TYPE_BOXCOLLIDER_HPP
 
 #include <SFML/Graphics/Text.hpp>
-#include <SFML/Graphics/Texture.hpp>
 
 #include "Component.hpp"
 

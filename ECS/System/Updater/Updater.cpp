@@ -9,8 +9,6 @@
 
 #include "Scale.hpp"
 #include "Sprite.hpp"
-#include "Sprite.hpp"
-#include "Updater.hpp"
 #include "Velocity.hpp"
 #include "Position.hpp"
 #include "Rotation.hpp"

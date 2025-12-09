@@ -8,7 +8,6 @@
 #ifndef R_TYPE_ANIMATOR_HPP
     #define R_TYPE_ANIMATOR_HPP
 
-#include <memory>
 #include <SFML/Graphics/Rect.hpp>
 
 #include "Component.hpp"
