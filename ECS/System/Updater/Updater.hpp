@@ -22,7 +22,7 @@ class Updater : public System {
 
         void update(const float& dt, World &w) override;
     private:
-        void updateSprites(const float& dt, const World &w);
+        static void updateSprites(const float& dt, const World &w);
         void updateBoxColliders(const float& dt, World &w);
-        void updateAnimations(const float& dt, const World &w);
+        static void updateAnimations(const float& dt, const World &w);
 };

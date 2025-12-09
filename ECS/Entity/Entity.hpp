@@ -60,11 +60,9 @@ template<typename T>
 std::shared_ptr<T> Entity::getComponent() const
 {
     static_assert(std::is_base_of_v<Component, T>, "T must be a Component");
-    for (const auto& comp : _components) {
-        std::shared_ptr<T> comType = std::dynamic_pointer_cast<T>(comp);
-        if (comType)
+    for (const auto& comp : _components)
+        if (std::shared_ptr<T> comType = std::dynamic_pointer_cast<T>(comp))
             return comType;
-    }
     return nullptr;
 }
 

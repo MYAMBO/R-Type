@@ -40,12 +40,12 @@ void Updater::update(const float& dt, World &w)
 */
 void Updater::updateSprites(const float& dt, const World &w)
 {
-    for (auto &entity : w.getAllEntitiesWithComponent<Sprite>()) {
-        auto spriteComp = entity->getComponent<Sprite>();
+    for (const auto &entity : w.getAllEntitiesWithComponent<Sprite>()) {
+        const auto spriteComp = entity->getComponent<Sprite>();
         if (!spriteComp) {
             continue; 
         }
-        auto sprite = spriteComp->getSprite();
+        const auto sprite = spriteComp->getSprite();
 
         auto scaleComp = entity->getComponent<Scale>();
         auto posComp   = entity->getComponent<Position>();
@@ -74,9 +74,9 @@ void Updater::updateSprites(const float& dt, const World &w)
 */
 void Updater::updateAnimations(const float &dt, const World &w)
 {
-    for (auto &entity : w.getAllEntitiesWithComponent<Animator>()) {
-        auto anim = entity->getComponent<Animator>();
-        auto spriteComp = entity->getComponent<Sprite>();
+    for (const auto &entity : w.getAllEntitiesWithComponent<Animator>()) {
+        const auto anim = entity->getComponent<Animator>();
+        const auto spriteComp = entity->getComponent<Sprite>();
         if (!anim || !spriteComp)
             continue;
         auto sprite = spriteComp->getSprite();
