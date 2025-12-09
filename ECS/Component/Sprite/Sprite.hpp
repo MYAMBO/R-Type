@@ -25,7 +25,7 @@
 class Sprite : public Component {
     public:
         Sprite(const std::string& filepath);
-        virtual ~Sprite() = default;
+        ~Sprite() override = default;
 
         [[nodiscard]] std::shared_ptr<sf::Sprite> getSprite() const;
 

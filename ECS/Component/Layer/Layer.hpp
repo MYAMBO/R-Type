@@ -21,7 +21,7 @@ class Layer : public Component {
     public:
 
         Layer(int id);
-        virtual ~Layer() = default;
+        ~Layer() override = default;
 
         void setLayerId(const int id);
         [[nodiscard]] int getLayerId() const;

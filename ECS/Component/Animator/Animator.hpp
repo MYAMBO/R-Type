@@ -26,7 +26,7 @@ public:
     Animator(int nbFrame, float frameRate,
              int startX, int startY, int frameWidth, int frameHeight,
              int offsetX = 0, int offsetY = 0);
-    virtual ~Animator() = default;
+    ~Animator() override = default;
 
     [[nodiscard]] int getCurrentFrame() const;
     [[nodiscard]] float getFrameRate() const;

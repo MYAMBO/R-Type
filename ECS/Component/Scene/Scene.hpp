@@ -19,7 +19,7 @@
 class Scene : public Component {
     public:
         Scene(int Scene = 1);
-        ~Scene() = default;
+        ~Scene() override = default;
 
         [[nodiscard]] float getScene() const;
 

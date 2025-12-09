@@ -22,7 +22,7 @@ class Rotation : public Component {
     public:
         template<typename T>
         Rotation(float rotation = 0.0f);
-        ~Rotation() = default;
+        ~Rotation() override = default;
 
         [[nodiscard]] float getRotation() const;
 

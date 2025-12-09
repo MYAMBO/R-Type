@@ -52,7 +52,7 @@ enum class KeyboardKey {
 class Inputs : public System {
     public:
         Inputs();
-        ~Inputs() = default;
+        ~Inputs() override = default;
         void update(const float& dt, World &w);
 
         bool isKeyPressed(KeyboardKey key, sf::Event event) const;

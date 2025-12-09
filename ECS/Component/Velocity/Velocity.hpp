@@ -20,7 +20,7 @@
 class Velocity : public Component {
     public:
         Velocity(float velocity);
-        virtual ~Velocity() = default;
+        ~Velocity() override = default;
 
     [[nodiscard]] float getVelocity() const;
 

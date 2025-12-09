@@ -20,7 +20,7 @@
 class Scale : public Component {
     public:
         Scale(float scale = 1.0f);
-        ~Scale() = default;
+        ~Scale() override = default;
 
         [[nodiscard]] float getScale() const;
 

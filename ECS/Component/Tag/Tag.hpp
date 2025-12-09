@@ -23,7 +23,7 @@ class Tag : public Component {
 
     public:
         Tag(const std::string &tag);
-        virtual ~Tag() = default;
+        ~Tag() override = default;
 
     [[nodiscard]] std::string getTag() const;
 

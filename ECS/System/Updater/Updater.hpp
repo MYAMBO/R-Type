@@ -18,7 +18,7 @@
 class Updater : public System {
     public:
         Updater();
-        ~Updater() = default;
+        ~Updater() override = default;
 
         void update(const float& dt, World &w) override;
     private:

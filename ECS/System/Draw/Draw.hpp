@@ -19,7 +19,7 @@
 class Draw : public System {
     public:
         Draw() = default;
-        virtual ~Draw() = default;
+        ~Draw() override = default;
 
         void update(const float& dt, World &w);
     private:
