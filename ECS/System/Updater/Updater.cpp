@@ -38,7 +38,7 @@ void Updater::update(const float& dt, World &w)
 * @param dt Delta time since last update
 * @param w Reference to the world containing entities and components
 */
-void Updater::updateSprites(const float& dt, World &w)
+void Updater::updateSprites(const float& dt, const World &w)
 {
     for (auto &entity : w.getAllEntitiesWithComponent<Sprite>()) {
         auto spriteComp = entity->getComponent<Sprite>();
@@ -72,7 +72,7 @@ void Updater::updateSprites(const float& dt, World &w)
 * @param dt Delta time since last update
 * @param w Reference to the world containing entities and components
 */
-void Updater::updateAnimations(const float &dt, World &w)
+void Updater::updateAnimations(const float &dt, const World &w)
 {
     for (auto &entity : w.getAllEntitiesWithComponent<Animator>()) {
         auto anim = entity->getComponent<Animator>();

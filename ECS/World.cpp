@@ -109,7 +109,7 @@ void World::setWindow(sf::RenderWindow& window)
  *
  * @param scene The scene to set.
  */
-void World::setCurrentScene(int scene)
+void World::setCurrentScene(const int scene)
 {
     _currentScene = scene;
 }

@@ -33,9 +33,9 @@ public:
     [[nodiscard]] float getCurrentTime() const;
     [[nodiscard]] sf::IntRect getFrameRect() const;
 
-    void setFrameRate(const float frameRate);
-    void setCurrentFrame(const int currentFrame);
-    void setCurrentTime(const float currentTime);
+    void setFrameRate(float frameRate);
+    void setCurrentFrame(int frame);
+    void setCurrentTime(float currentTime);
 
 private:
     int _startX;

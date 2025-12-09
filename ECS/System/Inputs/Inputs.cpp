@@ -5,6 +5,8 @@
 ** Inputs.cpp
 */
 
+#include <algorithm>
+
 #include "World.hpp"
 #include "Inputs.hpp"
 
@@ -37,9 +39,10 @@ void Inputs::update(const float& dt, World &w)
  * @brief Checks if a specific key is currently pressed.
  *
  * @param key The key to check.
+ * @param event SFML event
  * @return true if the key is pressed, false otherwise.
  */
-bool Inputs::isKeyPressed(KeyboardKey key, sf::Event event) const
+bool Inputs::isKeyPressed(const KeyboardKey key, const sf::Event& event) const
 {
     if (const auto* keyEvent = event.getIf<sf::Event::KeyPressed>()) {
         return std::find(_pressedKeys.begin(), _pressedKeys.end(), key) != _pressedKeys.end();
@@ -55,7 +58,7 @@ bool Inputs::isKeyPressed(KeyboardKey key, sf::Event event) const
  * @param key The key that was pressed.
  * @param event The SFML event associated with the key press.
  */
-void Inputs::processKeyPress(KeyboardKey key, sf::Event event)
+void Inputs::processKeyPress(const KeyboardKey key, const sf::Event& event)
 {
     if (key == KeyboardKey::Key_Unknown) {
         printf("Unknown key pressed, ignoring.\n");
@@ -72,7 +75,7 @@ void Inputs::processKeyPress(KeyboardKey key, sf::Event event)
  *
  * @param key The key that was released.
  */
-void Inputs::processKeyRelease(KeyboardKey key)
+void Inputs::processKeyRelease(const KeyboardKey key)
 {
     if (key == KeyboardKey::Key_Unknown) {
         printf("Unknown key released, ignoring.\n");
@@ -99,7 +102,7 @@ void Inputs::clearInputs()
  * @param key The SFML keyboard key to convert.
  * @return The corresponding KeyboardKey enum value.
  */
-KeyboardKey Inputs::convertSfKey(sf::Keyboard::Key key)
+KeyboardKey Inputs::convertSfKey(const sf::Keyboard::Key key)
 {
     switch (key) {
         case sf::Keyboard::Key::A : return KeyboardKey::Key_A;

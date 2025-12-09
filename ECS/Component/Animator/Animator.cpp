@@ -83,7 +83,7 @@ float Animator::getCurrentTime() const
  *
  * @param frame Frame index to set.
 */
-void Animator::setCurrentFrame(int frame)
+void Animator::setCurrentFrame(const int frame)
 {
     _currentFrame = frame % _nbFrame;
 }
@@ -93,7 +93,7 @@ void Animator::setCurrentFrame(int frame)
    *
    * @param frameRate New frame rate in seconds.
 */
-void Animator::setFrameRate(float frameRate)
+void Animator::setFrameRate(const float frameRate)
 {
     _frameRate = frameRate;
 }

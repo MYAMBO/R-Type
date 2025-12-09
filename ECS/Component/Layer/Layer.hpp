@@ -23,7 +23,7 @@ class Layer : public Component {
         Layer(int id);
         ~Layer() override = default;
 
-        void setLayerId(const int id);
+        void setLayerId(int id);
         [[nodiscard]] int getLayerId() const;
 
     private:

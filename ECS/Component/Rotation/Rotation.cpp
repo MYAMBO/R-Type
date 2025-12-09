@@ -21,7 +21,7 @@ float Rotation::getRotation() const
  * @brief Sets the Rotation factor of the collider.
  * @param rotation The new Rotation factor of the collider.
 */
-void Rotation::setRotation(float rotation)
+void Rotation::setRotation(const float rotation)
 {
     _rotation = rotation;
 }
