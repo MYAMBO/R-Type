@@ -18,9 +18,7 @@
 /**
 * @brief Construct a new Updater:: Updater object
 */
-Updater::Updater()
-{
-}
+Updater::Updater() = default;
 
 /**
 * @brief Update the world by updating all entities' components

@@ -55,17 +55,17 @@ class Inputs : public System {
         ~Inputs() override = default;
         void update(const float& dt, World &w) override;
 
-        bool isKeyPressed(KeyboardKey key) const;
+        [[nodiscard]] bool isKeyPressed(KeyboardKey key) const;
 
         void clearInputs();
 
-        KeyboardKey getKeysPressed() const;
+        [[nodiscard]] KeyboardKey getKeysPressed() const;
 
     private:
         void processKeyPress(KeyboardKey key);
         void processKeyRelease(KeyboardKey key);
 
-        KeyboardKey convertSfKey(sf::Keyboard::Key key);
+        static KeyboardKey convertSfKey(sf::Keyboard::Key key);
 
         std::vector<KeyboardKey> _pressedKeys;
 };

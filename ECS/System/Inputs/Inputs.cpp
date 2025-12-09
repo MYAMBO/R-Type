@@ -29,11 +29,11 @@ void Inputs::update(const float& dt, World &w)
 {
     (void)dt;
     const sf::Event &event = w.getEvent();
-    if (const auto* keyEvent = event.getIf<sf::Event::KeyPressed>()) {
-        processKeyPress(convertSfKey(keyEvent->code));
+    if (const auto* key_pressed = event.getIf<sf::Event::KeyPressed>()) {
+        processKeyPress(convertSfKey(key_pressed->code));
     }
-    else if (const auto* keyEvent = event.getIf<sf::Event::KeyReleased>()) {
-        processKeyRelease(convertSfKey(keyEvent->code));
+    else if (const auto* key_released = event.getIf<sf::Event::KeyReleased>()) {
+        processKeyRelease(convertSfKey(key_released->code));
     }
 }
 
@@ -52,7 +52,6 @@ bool Inputs::isKeyPressed(const KeyboardKey key) const
  * @brief Processes a key press event.
  *
  * @param key The key that was pressed.
- * @param event The SFML event associated with the key press.
  */
 void Inputs::processKeyPress(const KeyboardKey key)
 {
