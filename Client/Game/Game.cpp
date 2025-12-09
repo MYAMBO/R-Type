@@ -88,6 +88,7 @@ void Game::run()
  * @brief Handles game input.
  *
  * This function processes user input events and updates the game state accordingly.
+ * @param inputSystem The input system to check for player actions.
  */
 void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
 {
@@ -109,6 +110,7 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
  * @brief Handles player input.
  *
  * This function processes user input events and updates the game state accordingly.
+ * @param inputSystem The input system to check for player actions.
  */
 void Game::playerInput(std::shared_ptr<Inputs> inputSystem)
 {
@@ -128,11 +130,11 @@ void Game::playerInput(std::shared_ptr<Inputs> inputSystem)
                 pos->setY(pos->getY() + 7.0f);
             if (inputSystem->isKeyPressed(KeyboardKey::Key_E))
                 createLaser(player->getId());
-            for (auto& fireInTheAss : _world.getAllEntitiesWithComponent<Tag>()) {
-                auto tagCompFire = fireInTheAss->getComponent<Tag>();
-                if (tagCompFire && tagCompFire->getTag() == "fireInTheAss") {
+            for (auto& fire : _world.getAllEntitiesWithComponent<Tag>()) {
+                auto tagCompFire = fire->getComponent<Tag>();
+                if (tagCompFire && tagCompFire->getTag() == "fire") {
                     auto posPlayer = player->getComponent<Position>();
-                    auto posFire = fireInTheAss->getComponent<Position>();
+                    auto posFire = fire->getComponent<Position>();
                     if (posPlayer && posFire) {
                         posFire->setX(posPlayer->getX() - 25.f);
                         posFire->setY(posPlayer->getY() + 10.f);
@@ -145,7 +147,7 @@ void Game::playerInput(std::shared_ptr<Inputs> inputSystem)
 
 /**
  * @brief Creates the player entity.
- *
+ * 
  * This function initializes the player entity with necessary components.
  */
 void Game::createPlayer()
@@ -159,13 +161,13 @@ void Game::createPlayer()
     player->addComponent<Scene>(1);
     player->addComponent<Camera>(sf::Vector2f(1920.f, 1080.f), sf::Vector2f(player->getComponent<Position>()->getX(), player->getComponent<Position>()->getY()));
     player->addComponent<Tag>("player");
-    auto fireInTheAss = _world.createEntity();
-    fireInTheAss->addComponent<Position>(0.f, 85.f);
-    fireInTheAss->addComponent<Sprite>(std::string("../sprites/r-typesheet1.gif"));
-    fireInTheAss->addComponent<Animator>(2, 0.1f, 285, 85, 15, 15, 20, 0);
-    fireInTheAss->addComponent<Scale>(2.f);
-    fireInTheAss->addComponent<Scene>(1);
-    fireInTheAss->addComponent<Tag>("fireInTheAss");
+    auto fire = _world.createEntity();
+    fire->addComponent<Position>(0.f, 85.f);
+    fire->addComponent<Sprite>(std::string("../sprites/r-typesheet1.gif"));
+    fire->addComponent<Animator>(2, 0.1f, 285, 85, 15, 15, 20, 0);
+    fire->addComponent<Scale>(2.f);
+    fire->addComponent<Scene>(1);
+    fire->addComponent<Tag>("fire");
 }
 
 /**
