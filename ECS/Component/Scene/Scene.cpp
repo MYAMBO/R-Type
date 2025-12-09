@@ -12,7 +12,7 @@
  * @param Scene The Scene value of the entity.
 */
 Scene::Scene(const int Scene)
-        : _Scene(Scene)
+        : _scene(Scene)
 {
 }
 
@@ -20,16 +20,16 @@ Scene::Scene(const int Scene)
  * @brief Gets the Scene value of the entity.
  * @return The Scene value of the entity.
 */
-float Scene::getScene() const
+int Scene::getScene() const
 {
-    return _Scene;
+    return _scene;
 }
 
 /**
  * @brief Sets the Scene value of the entity.
  * @param Scene The new Scene value of the entity.
 */
-void Scene::setScene(const float Scene)
+void Scene::setScene(const int Scene)
 {
-    _Scene = Scene;
+    _scene = Scene;
 }
