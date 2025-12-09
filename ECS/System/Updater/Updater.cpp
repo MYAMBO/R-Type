@@ -95,7 +95,7 @@ void Updater::updateAnimations(const float &dt, const World &w)
 * @param dt Delta time since last update
 * @param w Reference to the world containing entities and components
 */
-void Updater::updateCameras(const float &dt, World &w)
+void Updater::updateCameras(const float &dt, const World &w)
 {
     for (auto &entity : w.getAllEntitiesWithComponent<Camera>()) {
         auto cameraComp = entity->getComponent<Camera>();
