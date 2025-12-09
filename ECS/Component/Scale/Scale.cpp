@@ -11,7 +11,7 @@
  * @brief Constructs a Scale component with the specified scale factor.
  * @param scale The scale factor of the sprite.
 */
-Scale::Scale(float scale)
+Scale::Scale(const float scale)
         : _scale(scale), _type("Scale")
 {
 }
@@ -28,9 +28,9 @@ float Scale::getScale() const
 
 /**
  * @brief Sets the scale factor of the sprite.
- * @param scaleX The new scale factor of the sprite.
+ * @param scale The new scale factor of the sprite.
 */
-void Scale::setScale(float scale)
+void Scale::setScale(const float scale)
 {
     _scale = scale;
 }

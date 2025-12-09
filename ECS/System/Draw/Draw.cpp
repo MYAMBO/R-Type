@@ -18,10 +18,10 @@
 void Draw::update(const float& dt, World &w)
 {
     (void) dt;
-    auto entities = w.getAllEntitiesWithComponent<Sprite>();
+    const auto entities = w.getAllEntitiesWithComponent<Sprite>();
     for (auto& entity : entities) {
-        auto objectComponent = entity->getComponent<Sprite>();
-        auto sceneComponent = entity->getComponent<Scene>();
+        const auto objectComponent = entity->getComponent<Sprite>();
+        const auto sceneComponent = entity->getComponent<Scene>();
         if (!objectComponent || !sceneComponent)
             continue;
         if (sceneComponent->getScene() != w.getCurrentScene())

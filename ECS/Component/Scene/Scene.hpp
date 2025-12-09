@@ -18,12 +18,12 @@
 */
 class Scene : public Component {
     public:
-        Scene(int Scene = 1);
-        ~Scene() = default;
+        explicit Scene(int Scene = 1);
+        ~Scene() override = default;
 
-        [[nodiscard]] float getScene();
+        [[nodiscard]] int getScene() const;
 
-        void setScene(float Scene);
+        void setScene(int Scene);
 
     private:
         int _scene;

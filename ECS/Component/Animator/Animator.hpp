@@ -8,7 +8,6 @@
 #ifndef R_TYPE_ANIMATOR_HPP
     #define R_TYPE_ANIMATOR_HPP
 
-#include <memory>
 #include <SFML/Graphics/Rect.hpp>
 
 #include "Component.hpp"
@@ -27,16 +26,16 @@ public:
     Animator(int nbFrame, float frameRate,
              int startX, int startY, int frameWidth, int frameHeight,
              int offsetX = 0, int offsetY = 0);
-    virtual ~Animator() = default;
+    ~Animator() override = default;
 
     [[nodiscard]] int getCurrentFrame() const;
     [[nodiscard]] float getFrameRate() const;
     [[nodiscard]] float getCurrentTime() const;
     [[nodiscard]] sf::IntRect getFrameRect() const;
 
-    void setFrameRate(const float frameRate);
-    void setCurrentFrame(const int currentFrame);
-    void setCurrentTime(const float currentTime);
+    void setFrameRate(float frameRate);
+    void setCurrentFrame(int frame);
+    void setCurrentTime(float currentTime);
 
 private:
     int _startX;

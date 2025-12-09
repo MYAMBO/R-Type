@@ -21,8 +21,8 @@
 class Rotation : public Component {
     public:
         template<typename T>
-        Rotation(float rotation = 0.0f);
-        ~Rotation() = default;
+        explicit Rotation(float rotation = 0.0f);
+        ~Rotation() override = default;
 
         [[nodiscard]] float getRotation() const;
 
@@ -41,8 +41,8 @@ class Rotation : public Component {
 template<typename T>
 Rotation::Rotation(float rotation)
 {
-    if (std::is_same<T, Sprite>::value)
-    rotation = std::fmod(rotation, 360.0f);
+    if (std::is_same_v<T, Sprite>)
+        rotation = std::fmod(rotation, 360.0f);
     _rotation = rotation;
 }
 

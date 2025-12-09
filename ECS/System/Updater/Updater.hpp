@@ -18,11 +18,11 @@
 class Updater : public System {
     public:
         Updater();
-        ~Updater() = default;
+        ~Updater() override = default;
 
         void update(const float& dt, World &w) override;
     private:
-        void updateSprites(const float& dt, World &w);
+        static void updateSprites(const float& dt, const World &w);
         void updateBoxColliders(const float& dt, World &w);
-        void updateAnimations(const float& dt, World &w);
+        static void updateAnimations(const float& dt, const World &w);
 };

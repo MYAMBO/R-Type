@@ -10,7 +10,6 @@
     #define R_TYPE_BOXCOLLIDER_HPP
 
 #include <SFML/Graphics/Text.hpp>
-#include <SFML/Graphics/Texture.hpp>
 
 #include "Component.hpp"
 
@@ -21,8 +20,8 @@
  */
 class BoxCollider : public Component {
 public:
-    BoxCollider(const sf::Vector2f &size);
-    virtual ~BoxCollider() = default;
+    explicit BoxCollider(const sf::Vector2f &size);
+    ~BoxCollider() override = default;
 
     [[nodiscard]] bool isVisible() const;
     [[nodiscard]] bool isTrigger() const;
