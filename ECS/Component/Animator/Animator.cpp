@@ -81,7 +81,7 @@ float Animator::getCurrentTime() const
 /**
  * @brief Set the current animation frame.
  *
- * @param currentFrame Frame index to set.
+ * @param frame Frame index to set.
 */
 void Animator::setCurrentFrame(int frame)
 {

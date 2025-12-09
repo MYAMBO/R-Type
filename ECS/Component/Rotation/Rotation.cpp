@@ -19,7 +19,7 @@ float Rotation::getRotation() const
 
 /**
  * @brief Sets the Rotation factor of the collider.
- * @param RotationX The new Rotation factor of the collider.
+ * @param rotation The new Rotation factor of the collider.
 */
 void Rotation::setRotation(float rotation)
 {

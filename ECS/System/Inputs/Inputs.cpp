@@ -20,7 +20,7 @@ Inputs::Inputs()
 /**
  * @brief Updates the input states based on SFML events.
  *
- * @param event The SFML event to process.
+ * @param dt Delta time since last update
  * @param w The world context.
  */
 void Inputs::update(const float& dt, World &w)

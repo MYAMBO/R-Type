@@ -28,7 +28,7 @@ float Scale::getScale() const
 
 /**
  * @brief Sets the scale factor of the sprite.
- * @param scaleX The new scale factor of the sprite.
+ * @param scale The new scale factor of the sprite.
 */
 void Scale::setScale(float scale)
 {
