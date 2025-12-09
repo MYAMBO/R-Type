@@ -23,7 +23,7 @@
 #include "Scene.hpp"
 #include "Sprite.hpp"
 #include "Entity.hpp"
-#include "Updater.hpp"
+#include "Camera.hpp"
 #include "Updater.hpp"
 #include "Velocity.hpp"
 #include "Position.hpp"
@@ -157,6 +157,7 @@ void Game::createPlayer()
     player->addComponent<Animator>(2, 0.1f, 0, 0, 33, 19, 33, 0);
     player->addComponent<Scale>(2.f);
     player->addComponent<Scene>(1);
+    player->addComponent<Camera>(sf::Vector2f(1920.f, 1080.f), sf::Vector2f(player->getComponent<Position>()->getX(), player->getComponent<Position>()->getY()));
     player->addComponent<Tag>("player");
     auto fireInTheAss = _world.createEntity();
     fireInTheAss->addComponent<Position>(0.f, 85.f);

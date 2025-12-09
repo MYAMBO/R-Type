@@ -10,7 +10,9 @@ include_directories(ECS/Component/Tag)
 include_directories(ECS/Component/Scene)
 include_directories(ECS/Component/Layer)
 include_directories(ECS/Component/Scale)
+include_directories(ECS/Component/Camera)
 include_directories(ECS/Component/Sprite)
+include_directories(ECS/Component/Camera)
 include_directories(ECS/Component/Animator)
 include_directories(ECS/Component/Position)
 include_directories(ECS/Component/Velocity)
@@ -40,6 +42,7 @@ add_executable(r-type_client
         ECS/Component/Scale/Scale.cpp
         ECS/Component/Layer/Layer.cpp
         ECS/Component/Scene/Scene.cpp
+        ECS/Component/Camera/Camera.cpp
         ECS/Component/Sprite/Sprite.cpp
         ECS/Component/Position/Position.cpp
         ECS/Component/Velocity/Velocity.cpp
