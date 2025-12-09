@@ -11,7 +11,7 @@
  * @brief Constructs a new Velocity component with specified velocity.
  * @param velocity The velocity value.
 */
-Velocity::Velocity(float velocity) : _velocity(velocity)
+Velocity::Velocity(const float velocity) : _velocity(velocity)
 {
 }
 
@@ -30,7 +30,7 @@ float Velocity::getVelocity() const
  *
  * @param velocity value used to change the velocity of the entity.
  */
-void Velocity::setVelocity(float velocity)
+void Velocity::setVelocity(const float velocity)
 {
     _velocity = velocity;
 }

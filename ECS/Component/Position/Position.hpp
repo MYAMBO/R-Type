@@ -20,7 +20,7 @@
 class Position : public Component {
     public:
         Position(float x, float y);
-        virtual ~Position() = default;
+        ~Position() override = default;
 
         [[nodiscard]] float getX() const;
         [[nodiscard]] float getY() const;

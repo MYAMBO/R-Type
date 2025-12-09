@@ -5,6 +5,8 @@
 ** Inputs.cpp
 */
 
+#include <algorithm>
+
 #include "World.hpp"
 #include "Inputs.hpp"
 
@@ -20,19 +22,18 @@ Inputs::Inputs()
 /**
  * @brief Updates the input states based on SFML events.
  *
- * @param event The SFML event to process.
+ * @param dt Delta time since last update
  * @param w The world context.
  */
-
 void Inputs::update(const float& dt, World &w)
 {
     (void)dt;
     const sf::Event &event = w.getEvent();
-    if (const auto* keyEvent = event.getIf<sf::Event::KeyPressed>()) {
-        processKeyPress(convertSfKey(keyEvent->code));
+    if (const auto* key_pressed = event.getIf<sf::Event::KeyPressed>()) {
+        processKeyPress(convertSfKey(key_pressed->code));
     }
-    else if (const auto* keyEvent = event.getIf<sf::Event::KeyReleased>()) {
-        processKeyRelease(convertSfKey(keyEvent->code));
+    else if (const auto* key_released = event.getIf<sf::Event::KeyReleased>()) {
+        processKeyRelease(convertSfKey(key_released->code));
     }
 }
 
@@ -42,7 +43,7 @@ void Inputs::update(const float& dt, World &w)
  * @param key The key to check.
  * @return true if the key is pressed, false otherwise.
  */
-bool Inputs::isKeyPressed(KeyboardKey key) const
+bool Inputs::isKeyPressed(const KeyboardKey key) const
 {
     return std::find(_pressedKeys.begin(), _pressedKeys.end(), key) != _pressedKeys.end();
 }
@@ -51,9 +52,8 @@ bool Inputs::isKeyPressed(KeyboardKey key) const
  * @brief Processes a key press event.
  *
  * @param key The key that was pressed.
- * @param event The SFML event associated with the key press.
  */
-void Inputs::processKeyPress(KeyboardKey key)
+void Inputs::processKeyPress(const KeyboardKey key)
 {
     if (key == KeyboardKey::Key_Unknown)
         return;
@@ -67,7 +67,7 @@ void Inputs::processKeyPress(KeyboardKey key)
  *
  * @param key The key that was released.
  */
-void Inputs::processKeyRelease(KeyboardKey key)
+void Inputs::processKeyRelease(const KeyboardKey key)
 {
     if (key == KeyboardKey::Key_Unknown)
         return;
@@ -84,17 +84,14 @@ void Inputs::clearInputs()
 {
     _pressedKeys.clear();
 }
+
 /**
  * @brief Converts an SFML keyboard key to a custom KeyboardKey enum.
  *
  * @param key The SFML keyboard key to convert.
  * @return The corresponding KeyboardKey enum value.
  */
-/*
-** Inputs.cpp
-*/
-
-KeyboardKey Inputs::convertSfKey(sf::Keyboard::Key key)
+KeyboardKey Inputs::convertSfKey(const sf::Keyboard::Key key)
 {
     return static_cast<KeyboardKey>(static_cast<int>(key));
 }

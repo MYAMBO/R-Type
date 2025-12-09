@@ -18,8 +18,8 @@
 */
 class HP : public Component {
     public:
-        HP(int maxHp);
-        virtual ~HP() = default;
+        explicit HP(int maxHp);
+        ~HP() override = default;
 
         [[nodiscard]] unsigned int getHP() const;
         void setHP(unsigned int hp);

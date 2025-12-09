@@ -20,10 +20,10 @@
 class Layer : public Component {
     public:
 
-        Layer(int id);
-        virtual ~Layer() = default;
+        explicit Layer(int id);
+        ~Layer() override = default;
 
-        void setLayerId(const int id);
+        void setLayerId(int id);
         [[nodiscard]] int getLayerId() const;
 
     private:

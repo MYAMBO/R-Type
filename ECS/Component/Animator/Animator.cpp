@@ -5,8 +5,6 @@
 ** Animator
 */
 
-#include <stdexcept>
-
 #include "Animator.hpp"
 
 
@@ -22,12 +20,12 @@
      * @param offsetX    Horizontal spacing between frames (default: 0).
      * @param offsetY    Vertical spacing between frames (default: 0).
 */
-Animator::Animator(int nbFrame, float frameRate,
-    int startX, int startY, int frameWidth, int frameHeight,
-    int offsetX, int offsetY)
-    :   _nbFrame(nbFrame), _frameRate(frameRate),
-        _startX(startX), _startY(startY), _frameWidth(frameWidth),
-        _frameHeight(frameHeight), _offsetX(offsetX), _offsetY(offsetY),
+Animator::Animator(const int nbFrame, const float frameRate,
+    const int startX, const int startY, const int frameWidth,
+    const int frameHeight, const int offsetX, const int offsetY)
+    :   _startX(startX), _startY(startY),
+        _offsetX(offsetX), _offsetY(offsetY), _frameWidth(frameWidth),
+        _frameHeight(frameHeight), _nbFrame(nbFrame), _frameRate(frameRate),
         _currentFrame(0), _currentTime(0.f)
 {
 }
@@ -35,18 +33,18 @@ Animator::Animator(int nbFrame, float frameRate,
 /**
      * @brief Get the texture rectangle corresponding to the current frame.
      *
-     * This rectangle can be assigned directly to an sf::Sprite.
+     * This rectangle can be assigned directly to a sf::Sprite.
      *
      * @return sf::IntRect representing the current animation frame.
 */
 sf::IntRect Animator::getFrameRect() const
 {
-    return sf::IntRect(
+    return {
             sf::Vector2i(
                     _startX + _currentFrame * _offsetX,
                     _startY + _currentFrame * _offsetY),
             sf::Vector2i(_frameWidth, _frameHeight)
-    );
+    };
 }
 
 /**
@@ -83,9 +81,9 @@ float Animator::getCurrentTime() const
 /**
  * @brief Set the current animation frame.
  *
- * @param currentFrame Frame index to set.
+ * @param frame Frame index to set.
 */
-void Animator::setCurrentFrame(int frame)
+void Animator::setCurrentFrame(const int frame)
 {
     _currentFrame = frame % _nbFrame;
 }
@@ -95,7 +93,7 @@ void Animator::setCurrentFrame(int frame)
    *
    * @param frameRate New frame rate in seconds.
 */
-void Animator::setFrameRate(float frameRate)
+void Animator::setFrameRate(const float frameRate)
 {
     _frameRate = frameRate;
 }

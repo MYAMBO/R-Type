@@ -14,7 +14,7 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
-#include "../Component.hpp"
+#include "Component.hpp"
 
 /**
  * @brief Sprite component to handle graphical representation of an entity.
@@ -24,8 +24,8 @@
 */
 class Sprite : public Component {
     public:
-        Sprite(const std::string& filepath);
-        virtual ~Sprite() = default;
+        explicit Sprite(const std::string& filepath);
+        ~Sprite() override = default;
 
         [[nodiscard]] std::shared_ptr<sf::Sprite> getSprite() const;
 

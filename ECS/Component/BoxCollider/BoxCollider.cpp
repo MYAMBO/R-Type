@@ -56,7 +56,7 @@ sf::Vector2f BoxCollider::getOffset() const
  * @brief Sets the trigger value of the box collider.
  * @param trigger The new trigger value of the box collider.
 */
-void BoxCollider::setTrigger(bool trigger)
+void BoxCollider::setTrigger(const bool trigger)
 {
     _trigger = trigger;
 }
