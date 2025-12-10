@@ -57,9 +57,9 @@ class World {
 
         void killEntity(std::size_t id);
     private:
-        float _deltaTime;
         sf::Event _event;
         int _currentScene = 1;
+        float _deltaTime = 1.0f;
         sf::RenderWindow *_window = nullptr;
         std::vector<std::shared_ptr<Entity>> _entities;
         std::vector<std::shared_ptr<System>> _systems;

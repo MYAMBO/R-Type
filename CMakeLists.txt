@@ -25,6 +25,7 @@ include_directories(ECS/System/Inputs)
 include_directories(ECS/Entity)
 include_directories(Client)
 include_directories(Client/Game)
+include_directories(Client/GameHelper)
 
 add_executable(r-type_server
         Server/main.cpp)
@@ -32,6 +33,7 @@ add_executable(r-type_server
 add_executable(r-type_client
         Client/main.cpp
         Client/Game/Game.cpp
+        Client/GameHelper/GameHelper.cpp
         ECS/Entity/Entity.cpp
         ECS/System/Draw/Draw.cpp
         ECS/System/Inputs/Inputs.cpp
