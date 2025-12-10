@@ -9,7 +9,7 @@
 
 #include "Scale.hpp"
 #include "Sprite.hpp"
-#include "Sprite.hpp"
+#include "Script.hpp"
 #include "Camera.hpp"
 #include "Updater.hpp"
 #include "Velocity.hpp"
@@ -31,6 +31,7 @@ Updater::Updater() = default;
 void Updater::update(const float& dt, World &w)
 {
     updateCameras(dt, w);
+    updateScripts(dt, w);
     updateAnimations(dt, w);
     updateSprites(dt, w);
 }
@@ -105,5 +106,21 @@ void Updater::updateCameras(const float &dt, const World &w)
         if (posComp)
             cameraComp->setPosition({posComp->getX(), posComp->getY()});
         w.getWindow()->setView(cameraComp->getView());
+    }
+}
+
+/**
+* @brief Update the scripts of all entities if they have it in the world
+* @param dt Delta time since last update
+* @param w Reference to the world containing entities and components
+*/
+void Updater::updateScripts(const float &dt, World &w)
+{
+    (void)dt;
+    for (auto &entity : w.getAllEntitiesWithComponent<Script>()) {
+        auto scriptComp = entity->getComponent<Script>();
+        if (!scriptComp || !scriptComp->getScript())
+            continue; 
+        scriptComp->getScript()(entity->getId(), w);
     }
 }
