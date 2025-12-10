@@ -50,8 +50,6 @@ include_directories(ECS/System/Inputs)
 include_directories(ECS/Entity)
 include_directories(Client)
 include_directories(Client/Game)
-include_directories(Client/GameHelper)
-include_directories(./Server)
 
 add_executable(r-type_server
         Server/main.cpp
