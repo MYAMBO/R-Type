@@ -7,6 +7,13 @@
 
 #pragma once
 
+#include <thread>
+#include <utility>
+#include <iostream>
+#include <mutex>
+#include <unistd.h>
+
+#include "User.hpp"
 #include "SFML/Network.hpp"
 
 class Server
@@ -23,9 +30,27 @@ public:
 
     class InitServerException : public std::exception
     {
-        const char* what() const noexcept override
+    public:
+        explicit InitServerException(std::string message = "")
         {
-            return "Unable to initialize server";
+            _message = std::move(message);
+        };
+        [[nodiscard]] const char* what() const noexcept override
+        {
+            return _message.c_str();
         }
+    private:
+        std::string _message;
     };
+
+private:
+    sf::UdpSocket _udpSocket;
+    sf::TcpListener _tcpListener;
+    sf::TcpSocket _tcpClient;
+    std::thread _udpThread;
+    long _tcpPort;
+    long _udpPort;
+    bool _debugMode;
+    std::vector<User> _users;
+    std::mutex _mutex;
 };

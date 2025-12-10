@@ -129,4 +129,25 @@ void Server::tcpThread()
     }
 }
 
+
+void Server::start()
+{
+    _tcpClient = sf::TcpSocket();
+    std::thread tcpThread(&Server::tcpThread, this);
+    std::thread udpThread(&Server::udpThread, this);
+    while (true)
+    {
+        if (_tcpListener.accept(_tcpClient) != sf::Socket::Status::Done)
+            throw InitServerException();
+        unsigned short port = _tcpClient.getRemotePort();
+        std::string ip = _tcpClient.getRemoteAddress().value().toString();
+        log("Connected with port " + std::to_string(port) +
+            " at address " +
+            (_tcpClient.getRemoteAddress().has_value() ?
+                ip : ""));
+        _tcpClient.setBlocking(false);
+        _mutex.lock();
+        _users.emplace_back(port, ip, std::make_shared<sf::TcpSocket>(std::move(_tcpClient)));
+        _mutex.unlock();
+    }
 }
