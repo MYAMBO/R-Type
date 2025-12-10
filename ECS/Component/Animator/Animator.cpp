@@ -53,8 +53,8 @@ sf::IntRect Animator::getFrameRect() const
     int column = _currentFrame % _framePerRow;
     int row = _currentFrame / _framePerRow;
 
-    int x = _startX + column * (_frameWidth + _offsetX);
-    int y = _startY + row * (_frameHeight + _offsetY);
+    int x = _startX + row * (_frameWidth + _offsetX);
+    int y = _startY + column * (_frameHeight + _offsetY);
     return {
             sf::Vector2i(x, y),
             sf::Vector2i(_frameWidth, _frameHeight)
