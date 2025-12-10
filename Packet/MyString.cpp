@@ -11,11 +11,14 @@
 
 /**
  * @brief Construct a new MyString
+ * @param s The string contained by the class
 */
 MyString::MyString(std::string s) : _data(std::move(s)){};
 
 /**
  * @brief A SubStr who consume the char
+ * @param pos where start the substr and erase
+ * @param n how much char affected by substr and erase
 */
 std::string MyString::mySubStr(const size_t pos, const size_t n)
 {
@@ -26,6 +29,8 @@ std::string MyString::mySubStr(const size_t pos, const size_t n)
 
 /**
  * @brief A wrapped SubStr from std::string
+ * @param pos where start the substr
+ * @param n how much char affected by substr
  */
 std::string MyString::substr(const size_t pos, const size_t n) const
 {

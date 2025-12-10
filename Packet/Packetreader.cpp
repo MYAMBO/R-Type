@@ -11,6 +11,8 @@
 
 /**
  * @brief Construct a packetReader
+ * @param data The string to be parsed
+ * @param isClient If it's client side or not
  */
 Packetreader::Packetreader(std::string data, const bool isClient) : _isClient(isClient), _data(MyString(std::move(data))){}
 
