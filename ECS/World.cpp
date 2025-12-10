@@ -19,8 +19,6 @@
 World::World()
     : _event(sf::Event::FocusLost{}) 
 {
-    sf::Clock clock;
-    _deltaTime = clock.restart().asSeconds();
 }
 
 /**
