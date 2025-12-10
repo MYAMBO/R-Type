@@ -23,7 +23,7 @@
 class Animator : public Component {
 public:
 
-    Animator(int nbFrame, float frameRate,
+    Animator(int nbFrame, int framePerRow, float frameRate,
              int startX, int startY, int frameWidth, int frameHeight,
              int offsetX = 0, int offsetY = 0);
     ~Animator() override = default;
@@ -48,6 +48,7 @@ private:
     float _frameRate;
     int _currentFrame;
     float _currentTime;
+    int _framePerRow;
 };
 
 #endif //R_TYPE_ANIMATOR_HPP

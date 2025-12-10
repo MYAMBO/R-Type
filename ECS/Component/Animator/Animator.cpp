@@ -7,11 +7,14 @@
 
 #include "Animator.hpp"
 
+#include <iostream>
+
 
 /**
      * @brief Construct a new Animator component.
      *
      * @param nbFrame     Number of frames in the animation.
+     * @param framePerRow  Total frames on a Row.
      * @param frameRate   Time (in seconds) between two frames.
      * @param startX      X position of the first frame in the sprite sheet.
      * @param startY      Y position of the first frame in the sprite sheet.
@@ -20,14 +23,22 @@
      * @param offsetX    Horizontal spacing between frames (default: 0).
      * @param offsetY    Vertical spacing between frames (default: 0).
 */
-Animator::Animator(const int nbFrame, const float frameRate,
+Animator::Animator(const int nbFrame, const int framePerRow, const float frameRate,
     const int startX, const int startY, const int frameWidth,
     const int frameHeight, const int offsetX, const int offsetY)
     :   _startX(startX), _startY(startY),
-        _offsetX(offsetX), _offsetY(offsetY), _frameWidth(frameWidth),
+        _offsetX(offsetX), _offsetY(offsetY), _frameWidth(frameWidth), _framePerRow(framePerRow),
         _frameHeight(frameHeight), _nbFrame(nbFrame), _frameRate(frameRate),
         _currentFrame(0), _currentTime(0.f)
 {
+    if (nbFrame <= 0) {
+        _nbFrame = 1;
+        std::cerr << "Warning: nbFrame value is <= 0, set it at 1 by default" << std::endl;
+    }
+    if (framePerRow <= 0) {
+        _framePerRow = 1;
+        std::cerr << "Warning: framePerRow value is <= 0, set it at 1 by default" << std::endl;
+    }
 }
 
 /**
@@ -39,10 +50,13 @@ Animator::Animator(const int nbFrame, const float frameRate,
 */
 sf::IntRect Animator::getFrameRect() const
 {
+    int column = _currentFrame % _framePerRow;
+    int row = _currentFrame / _framePerRow;
+
+    int x = _startX + column * (_frameWidth + _offsetX);
+    int y = _startY + row * (_frameHeight + _offsetY);
     return {
-            sf::Vector2i(
-                    _startX + _currentFrame * _offsetX,
-                    _startY + _currentFrame * _offsetY),
+            sf::Vector2i(x, y),
             sf::Vector2i(_frameWidth, _frameHeight)
     };
 }
