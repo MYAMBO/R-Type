@@ -33,6 +33,7 @@ sf::Packet Packet::getPacket() const
 
 /**
  * @brief Setter for packet id
+ * @param id The id of the packet
  */
 void Packet::setId(const int id)
 {
@@ -42,6 +43,7 @@ void Packet::setId(const int id)
 
 /**
  * @brief Setter for packet ack
+ * @param ack The ack of the packet
  */
 void Packet::setAck(const int ack)
 {
@@ -52,6 +54,7 @@ void Packet::setAck(const int ack)
 
 /**
  * @brief Setter for Packet packetNbr
+ * @param packetNbr The packetNbr of the packet
  */
 void Packet::setPacketNbr(const uint8_t packetNbr)
 {
@@ -62,6 +65,7 @@ void Packet::setPacketNbr(const uint8_t packetNbr)
 
 /**
  * @brief Setter for Packet totalPacketNbr
+ * @param totalPacketNbr The totalPacketNbr of the packet
  */
 void Packet::setTotalPacketNbr(const uint8_t totalPacketNbr)
 {
@@ -72,6 +76,7 @@ void Packet::setTotalPacketNbr(const uint8_t totalPacketNbr)
 
 /**
  * @brief Setter for Packet dataSize
+ * @param dataSize The dataSize of the packet
  */
 void Packet::setDataSize(const uint16_t dataSize) const
 {
@@ -81,6 +86,7 @@ void Packet::setDataSize(const uint16_t dataSize) const
 
 /**
  * @brief Write timeSync action in packet
+ * @param time The time from serv
  */
 void Packet::timeSync(const int time)
 {
@@ -95,6 +101,9 @@ void Packet::timeSync(const int time)
 
 /**
  * @brief Write playerPosition action in packet
+ * @param id The id of the entity
+ * @param x The x coordinate
+ * @param y The y coordinate
  */
 void Packet::playerPosition(const int id, const float x, const float y)
 {
@@ -109,6 +118,10 @@ void Packet::playerPosition(const int id, const float x, const float y)
 
 /**
  * @brief Write positionSpawn action in packet
+ * @param id The id of the entity
+ * @param type The type of entity
+ * @param x The x coordinate
+ * @param y The y coordinate
  */
 void Packet::positionSpawn(const int id, const uint16_t type, const float x, const float y)
 {
@@ -123,6 +136,8 @@ void Packet::positionSpawn(const int id, const uint16_t type, const float x, con
 
 /**
  * @brief Write hit action in packet
+ * @param id The of the entity
+ * @param value The value of damage
  */
 void Packet::hit(const int id, const int value)
 {
@@ -137,6 +152,7 @@ void Packet::hit(const int id, const int value)
 
 /**
  * @brief Write dead action in packet
+ * @param id The id of the entity
  */
 void Packet::dead(const int id)
 {
@@ -151,6 +167,7 @@ void Packet::dead(const int id)
 
 /**
  * @brief Write endGame action in packet
+ * @param status Alive or dead (0/1)
  */
 void Packet::endGame(const uint8_t status)
 {
@@ -165,6 +182,7 @@ void Packet::endGame(const uint8_t status)
 
 /**
  * @brief Write shoot action in packet
+ * @param id The id of the shooter
  */
 void Packet::shoot(const int id)
 {
