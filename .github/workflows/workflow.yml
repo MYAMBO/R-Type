@@ -48,8 +48,8 @@ jobs:
           echo "Checking executables: $EXECUTABLES"
           IFS=',' read -ra filenames <<< "$EXECUTABLES"
           for filename in "${filenames[@]}"; do
-            if [ ! -f "$filename" ]; then
-              echo "Error: $filename not found!" 1>&2
+            if [ ! -f "build/$filename" ]; then
+              echo "Error: build/$filename not found!" 1>&2
               exit 1
             fi
           done
