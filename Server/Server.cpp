@@ -7,7 +7,14 @@
 
 #include "Server.hpp"
 
-Server::Server(int port)
+Server::Server()
+{
+    _tcpPort = -1;
+    _udpPort = -1;
+    _debugMode = false;
+}
+
+auto Server::parse(int ac, char **av) -> void
 {
     sf::TcpListener listener;
     if (listener.listen(port) != sf::Socket::Status::Done)

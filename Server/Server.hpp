@@ -2,7 +2,7 @@
 ** EPITECH PROJECT, 2025
 ** R-Type
 ** File description:
-** server class
+** Server.hpp
 */
 
 #pragma once
@@ -11,11 +11,15 @@
 
 class Server
 {
-    public:
-        Server(int port);
-        ~Server() = default;
-        //void start();
-    private:
+public:
+    Server();
+    ~Server() = default;
+    void initServer();
+    void start();
+    void parse(int ac, char **av);
+    void log(const std::string& message) const;
+    void udpThread();
+    void tcpThread();
 
     class InitServerException : public std::exception
     {
