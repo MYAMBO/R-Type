@@ -13,6 +13,7 @@ include_directories(ECS/Component/Scale)
 include_directories(ECS/Component/Camera)
 include_directories(ECS/Component/Sprite)
 include_directories(ECS/Component/Camera)
+include_directories(ECS/Component/Script)
 include_directories(ECS/Component/Animator)
 include_directories(ECS/Component/Position)
 include_directories(ECS/Component/Velocity)
@@ -25,6 +26,7 @@ include_directories(ECS/System/Inputs)
 include_directories(ECS/Entity)
 include_directories(Client)
 include_directories(Client/Game)
+include_directories(Client/GameHelper)
 include_directories(Server)
 include_directories(Server/Game)
 
@@ -49,6 +51,7 @@ add_executable(r-type_server
 add_executable(r-type_client
         Client/main.cpp
         Client/Game/Game.cpp
+        Client/GameHelper/GameHelper.cpp
         ECS/Entity/Entity.cpp
         ECS/System/Draw/Draw.cpp
         ECS/System/Inputs/Inputs.cpp
@@ -59,6 +62,7 @@ add_executable(r-type_client
         ECS/Component/Scale/Scale.cpp
         ECS/Component/Layer/Layer.cpp
         ECS/Component/Scene/Scene.cpp
+        ECS/Component/Script/Script.cpp
         ECS/Component/Sprite/Sprite.cpp
         ECS/Component/Camera/Camera.cpp
         ECS/Component/Position/Position.cpp

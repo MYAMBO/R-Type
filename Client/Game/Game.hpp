@@ -35,13 +35,17 @@ class Game {
         void gameInput(std::shared_ptr<Inputs> inputSystem);
         void playerInput(std::shared_ptr<Inputs> inputSystem);
 
+        void createCamera();
         void createPlayer();
-        void createLaser(int entityId);
+        void createBullet(int entityId);
+        void createEnemy(float x, float y, int type);
 
-        void laserMovement();
+        void bulletMovement();
+        void bulletShooting();
 
         World _world;
         sf::RenderWindow _window;
+        bool _isShootKeyPressed = false;
 };
 
 #endif
