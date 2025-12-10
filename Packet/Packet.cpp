@@ -10,12 +10,18 @@
 
 #include <cstring>
 
+/**
+ * @brief Constructor for Packet
+ */
 Packet::Packet() : _dataSize(0), _idSetted(false), _ackSetted(false), _packetNumberSetted(false), _totalPacketNumberSetted(false)
 {
     constexpr char zeros[12] = {};
     _packet.append(zeros, 12);
 }
 
+/**
+ * @brief Get the packet
+ */
 sf::Packet Packet::getPacket() const
 {
     if (_idSetted && _ackSetted && _packetNumberSetted && _totalPacketNumberSetted) {
@@ -25,13 +31,18 @@ sf::Packet Packet::getPacket() const
     throw MissingPacketParameterError();
 }
 
-
+/**
+ * @brief Setter for packet id
+ */
 void Packet::setId(const int id)
 {
     std::memcpy(static_cast<char*>(const_cast<void*>(_packet.getData())), &id, sizeof(int));
     _idSetted = true;
 }
 
+/**
+ * @brief Setter for packet ack
+ */
 void Packet::setAck(const int ack)
 {
     constexpr int offset = 4;
@@ -39,6 +50,9 @@ void Packet::setAck(const int ack)
     _ackSetted = true;
 }
 
+/**
+ * @brief Setter for Packet packetNbr
+ */
 void Packet::setPacketNbr(const uint8_t packetNbr)
 {
     constexpr int offset = 8;
@@ -46,6 +60,9 @@ void Packet::setPacketNbr(const uint8_t packetNbr)
     _packetNumberSetted = true;
 }
 
+/**
+ * @brief Setter for Packet totalPacketNbr
+ */
 void Packet::setTotalPacketNbr(const uint8_t totalPacketNbr)
 {
     constexpr int offset = 9;
@@ -53,13 +70,18 @@ void Packet::setTotalPacketNbr(const uint8_t totalPacketNbr)
     _totalPacketNumberSetted = true;
 }
 
+/**
+ * @brief Setter for Packet dataSize
+ */
 void Packet::setDataSize(const uint16_t dataSize) const
 {
     constexpr int offset = 10;
     std::memcpy(static_cast<char*>(const_cast<void*>(_packet.getData())) + offset, &dataSize, sizeof(uint16_t));
 }
 
-
+/**
+ * @brief Write timeSync action in packet
+ */
 void Packet::timeSync(const int time)
 {
     constexpr int size = sizeof(uint8_t) + sizeof(int);
@@ -71,6 +93,9 @@ void Packet::timeSync(const int time)
     _dataSize += size;
 }
 
+/**
+ * @brief Write playerPosition action in packet
+ */
 void Packet::playerPosition(const int id, const float x, const float y)
 {
     constexpr int size = sizeof(uint8_t) + sizeof(int) + (sizeof(float) * 2);
@@ -82,6 +107,9 @@ void Packet::playerPosition(const int id, const float x, const float y)
     _dataSize += size;
 }
 
+/**
+ * @brief Write positionSpawn action in packet
+ */
 void Packet::positionSpawn(const int id, const uint16_t type, const float x, const float y)
 {
     constexpr int size = sizeof(uint8_t) + sizeof(int) + sizeof(uint16_t) + (sizeof(float) * 2);
@@ -93,6 +121,9 @@ void Packet::positionSpawn(const int id, const uint16_t type, const float x, con
     _dataSize += size;
 }
 
+/**
+ * @brief Write hit action in packet
+ */
 void Packet::hit(const int id, const int value)
 {
     constexpr int size = sizeof(uint8_t) + (sizeof(int) * 2);
@@ -104,6 +135,9 @@ void Packet::hit(const int id, const int value)
     _dataSize += size;
 }
 
+/**
+ * @brief Write dead action in packet
+ */
 void Packet::dead(const int id)
 {
     constexpr int size = sizeof(uint8_t) + sizeof(int);
@@ -115,6 +149,9 @@ void Packet::dead(const int id)
     _dataSize += size;
 }
 
+/**
+ * @brief Write endGame action in packet
+ */
 void Packet::endGame(const uint8_t status)
 {
     constexpr int size = (sizeof(uint8_t) * 2);
@@ -126,6 +163,9 @@ void Packet::endGame(const uint8_t status)
     _dataSize += size;
 }
 
+/**
+ * @brief Write shoot action in packet
+ */
 void Packet::shoot(const int id)
 {
     constexpr int size = (sizeof(uint8_t) * 2);

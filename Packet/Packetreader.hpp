@@ -11,6 +11,9 @@
 #include <string>
 #include "MyString.hpp"
 
+/**
+ * @brief PacketReader class to read and interpret received data
+ */
 class Packetreader
 {
     public:

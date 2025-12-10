@@ -8,6 +8,10 @@
 #ifndef R_TYPE_CUSTOMERROR_HPP
     #define R_TYPE_CUSTOMERROR_HPP
 
+
+/**
+ * @brief A custom error, for full packet
+ */
 class PacketFullError : public std::exception
 {
     public:
@@ -19,6 +23,9 @@ class PacketFullError : public std::exception
 };
 
 
+/**
+ * @brief A custom error, for missing parameter
+ */
 class MissingPacketParameterError : public std::exception
 {
     public:

@@ -10,6 +10,9 @@
 
 #include <string>
 
+/**
+ * @brief MyString class wrapping the std::string
+ */
 class MyString {
     private:
         std::string _data;

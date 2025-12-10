@@ -12,6 +12,9 @@
 inline int MAX_DATA_SIZE = 116;
 inline int HEADER_SIZE = 12;
 
+/**
+ * @brief Packet class, is a wrapper for sf::packet with useful function
+ */
 class Packet
 {
     public:
