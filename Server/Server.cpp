@@ -107,4 +107,26 @@ void Server::udpThread()
     }
 }
 
+void Server::tcpThread()
+{
+    while (true)
+    {
+        _mutex.lock();
+        auto tmp_list = _users;
+        _mutex.unlock();
+        for (const auto& tmp : tmp_list)
+        {
+            std::array<char, 100> data {};
+            std::size_t received;
+
+            data.fill(0);
+            if (tmp.getSocket()->receive(data.data(), data.size(), received) != sf::Socket::Status::Done)
+                continue;
+            data[received - 1] = '\0';
+            std::string message;
+            log("TCP | Received " + std::to_string(received) + " bytes with value " + data.data() + " from client " + std::to_string(tmp.getId()) + " with port " + std::to_string(tmp.getPort()) + " with ip " + tmp.getIp());
+        }
+    }
+}
+
 }
