@@ -5,8 +5,6 @@
 ** main of the server
 */
 
-#include <iostream>
-
 #include "Server.hpp"
 /**
  * @brief Entry point of the server application.
@@ -19,15 +17,21 @@
  * @retval 0 Successful execution.
  * @retval 1 Execution error.
  */
-auto main() -> int
+auto main(int ac, char **av) -> int
 {
+
 	try
 	{
-		Server server(4243);
+		Server server;
+		server.parse(ac, av);
+		server.initServer();
+		server.start();
 	}
-	catch (const std::exception& e)
+	catch (const Server::InitServerException& e)
 	{
-		std::cerr << e.what() << std::endl;
+		if (std::string(e.what()).empty() == false)
+			std::cerr << e.what() << std::endl;
+		return 84;
 	}
 	return 0;
 }

@@ -8,6 +8,14 @@ elseif(UNIX)
     message(STATUS "Configuring for Linux...")
 endif()
 
+option(DEV_COMPILE "Enable strict compile warnings" OFF)
+
+if (DEV_COMPILE)
+    add_compile_options(-Werror)
+endif ()
+
+add_compile_options(-Wall -Wextra)
+
 include(FetchContent)
 
 FetchContent_Declare(
@@ -23,7 +31,8 @@ include_directories(./Server)
 
 add_executable(r-type_server
         Server/main.cpp
-        Server/Server.cpp)
+        Server/Server.cpp
+        Server/User.cpp)
 
 add_executable(r-type_client
         Client/main.cpp)
