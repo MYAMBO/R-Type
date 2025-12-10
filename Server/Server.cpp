@@ -73,4 +73,17 @@ auto Server::initServer() -> void
 
 }
 
+void Server::log(const std::string& message) const
+{
+    if (_debugMode)
+    {
+        auto time = std::chrono::system_clock::now();
+        std::time_t end_time = std::chrono::system_clock::to_time_t(time);
+        std::string time_string = std::ctime(&end_time);
+        time_string.erase(time_string.end() - 1, time_string.end());
+        std::cout << "[" << time_string << "] " << message << std::endl;
+
+    }
+}
+
 }
