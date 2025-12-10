@@ -7,6 +7,7 @@
 
 #include "HP.hpp"
 #include "Tag.hpp"
+#include "Script.hpp"
 #include "Updater.hpp"
 #include "Position.hpp"
 #include "ServerGame.hpp"
@@ -58,6 +59,15 @@ void ServerGame::createPlayer()
     player->addComponent<Tag>("player");
 }
 
+static void EnemyMovement(int entityId, World &world)
+{
+    const auto entity = world.getAllEntitiesWithComponent<Tag>()[entityId];
+    const auto pos = entity->getComponent<Position>();
+
+    pos->setX(pos->getX() + 10);
+    pos->setY(pos->getY() + 10);
+}
+
 /**
  * @brief Creates the player entity.
  *
@@ -70,5 +80,5 @@ void ServerGame::createEnemy()
     enemy->addComponent<Position>(150.0f, 150.0f);
     enemy->addComponent<BoxCollider>((sf::Vector2f){10.f, 10.f});
     enemy->addComponent<Tag>("enemy");
-    enemy->addComponent<EnemyBehaviour>(enemy, _world);
+    enemy->addComponent<Script>(EnemyMovement);
 }
