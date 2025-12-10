@@ -5,6 +5,8 @@
 ** main of the server
 */
 
+#include "Game/ServerGame.hpp"
+
 /**
  * @brief Entry point of the server application.
  *
@@ -18,5 +20,6 @@
  */
 auto main() -> int
 {
+	ServerGame game;
 	return 0;
 }

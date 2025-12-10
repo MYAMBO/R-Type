@@ -25,9 +25,26 @@ include_directories(ECS/System/Inputs)
 include_directories(ECS/Entity)
 include_directories(Client)
 include_directories(Client/Game)
+include_directories(Server)
+include_directories(Server/Game)
 
 add_executable(r-type_server
-        Server/main.cpp)
+        Server/main.cpp
+        Server/Game/ServerGame.cpp
+        ECS/Entity/Entity.cpp
+        ECS/System/Updater/Updater.cpp
+        ECS/World.cpp
+        ECS/Component/HP/HP.cpp
+        ECS/Component/Tag/Tag.cpp
+        ECS/Component/Scale/Scale.cpp
+        ECS/Component/Scene/Scene.cpp
+        ECS/Component/Position/Position.cpp
+        ECS/Component/Velocity/Velocity.cpp
+        ECS/Component/Rotation/Rotation.cpp
+        ECS/Component/BoxCollider/BoxCollider.cpp
+        Server/Game/Enemy/EnemyBehaviour.cpp
+        Server/Game/Enemy/EnemyBehaviour.hpp
+)
 
 add_executable(r-type_client
         Client/main.cpp
@@ -42,8 +59,8 @@ add_executable(r-type_client
         ECS/Component/Scale/Scale.cpp
         ECS/Component/Layer/Layer.cpp
         ECS/Component/Scene/Scene.cpp
-        ECS/Component/Camera/Camera.cpp
         ECS/Component/Sprite/Sprite.cpp
+        ECS/Component/Camera/Camera.cpp
         ECS/Component/Position/Position.cpp
         ECS/Component/Velocity/Velocity.cpp
         ECS/Component/Rotation/Rotation.cpp
@@ -51,5 +68,15 @@ add_executable(r-type_client
         ECS/Component/BoxCollider/BoxCollider.cpp
 )
 
-target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system)
+include(FetchContent)
 
+FetchContent_Declare(
+        SFML
+        GIT_REPOSITORY https://github.com/SFML/SFML.git
+        GIT_TAG 3.0.x
+)
+
+FetchContent_MakeAvailable(SFML)
+
+target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system)
+target_link_libraries(r-type_server sfml-graphics sfml-window sfml-system)
