@@ -86,4 +86,25 @@ void Server::log(const std::string& message) const
     }
 }
 
+void Server::udpThread()
+{
+    std::array<char, 100> data = {0};
+    std::size_t received;
+
+    std::optional<sf::IpAddress> sender;
+    unsigned short rport;
+    while (true)
+    {
+        data.fill(0);
+        if (_udpSocket.receive(data.data(), data.size(), received, sender, rport) != sf::Socket::Status::Done)
+        {
+            // error...
+        }
+        if (received == 0)
+            continue;
+        data[received - 1] = '\0';
+        log("UDP | Received " + std::to_string(received) + " bytes from " + sender.value().toString() + " on port " + std::to_string(rport) + " with value " + data.data());
+    }
+}
+
 }
