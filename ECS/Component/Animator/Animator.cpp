@@ -35,6 +35,10 @@ Animator::Animator(const int nbFrame, const int framePerRow, const float frameRa
         _nbFrame = 1;
         std::cerr << "Warning: nbFrame value is <= 0, set it at 1 by default" << std::endl;
     }
+    if (framePerRow <= 0) {
+        _framePerRow = 1;
+        std::cerr << "Warning: framePerRow value is <= 0, set it at 1 by default" << std::endl;
+    }
 }
 
 /**
