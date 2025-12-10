@@ -3,15 +3,15 @@ cmake_minimum_required(VERSION 3.19)
 project(R-Type)
 
 if (WIN32)
-    message(STATUS "Configuring for Windows...")
+        message(STATUS "Configuring for Windows...")
 elseif(UNIX)
-    message(STATUS "Configuring for Linux...")
+        message(STATUS "Configuring for Linux...")
 endif()
 
 option(DEV_COMPILE "Enable strict compile warnings" OFF)
 
 if (DEV_COMPILE)
-    add_compile_options(-Werror)
+        add_compile_options(-Werror)
 endif ()
 
 add_compile_options(-Wall -Wextra)
@@ -94,4 +94,3 @@ add_executable(r-type_client
 target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system)
 
 target_link_libraries(r-type_server sfml-network)
-

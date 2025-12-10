@@ -23,52 +23,52 @@
 
 ## Client → Server Messages
 
-### Time Sync
-| Command | Code | Fields | Description |
-|---------|------|--------|-------------|
-| Time Sync Request | `0x06` | - | Client requests current server time |
-
 ### Position
 | Command             | Code   | Fields                 | Description              |
 |---------------------|--------|------------------------|--------------------------|
 | Send Position | `0x07` | `ID (4)` - `x (4)` - `y (4)` | Client send his position |
 
+### Shoot
+| Command      | Code   | Fields  | Description           |
+|--------------|--------|---------|-----------------------|
+| Shoot action | `0x0B` | `ID (4)` | Client send shooter id |
+
 ---
 
 ## Server → Client Messages
 
-### Time Response
-| Command | Code | Fields | Description |
-|---------|------|--------|-------------|
-| Time Response | `0x06` | `Time (4 bytes)` | Server sends current timestamp |
+### Time Sync
+| Command   | Code | Fields | Description |
+|-----------|------|--------|-------------|
+| Time sync | `0x06` | `Time (4 bytes)` | Server sends current timestamp |
 
----
 
 ### Entity/Position Update
 | Command | Code | Fields | Description |
 |---------|------|--------|-------------|
 | Send Position/Spawn | `0x07` | `ID (4)` - `Type (2)` - `x (4)` - `y (4)` | Spawns or updates entity/player position |
 
----
-
 ### Hit Notification
 | Command | Code | Fields | Description |
 |---------|------|--------|-------------|
 | Hit | `0x08` | `ID (4)` - `Value (4)` | Indicates an entity has taken damage or scored |
-
----
 
 ### Entity Death
 | Command | Code | Fields | Description |
 |---------|------|--------|-------------|
 | Dead | `0x09` | `ID (4)` | Entity is dead |
 
----
-
 ### Game End
 | Command | Code | Fields | Description |
 |---------|------|--------|-------------|
 | EndGame | `0x0A` | `Result (1)` | `0 = lose`, `1 = win` |
+
+
+
+### Shoot
+| Command      | Code   | Fields  | Description            |
+|--------------|--------|---------|------------------------|
+| Shoot action | `0x0B` | `ID (4)` | Server send shooter id |
 
 ---
 
