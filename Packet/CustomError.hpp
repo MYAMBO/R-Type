@@ -15,7 +15,7 @@
 class PacketFullError : public std::exception
 {
     public:
-        PacketFullError();
+        PacketFullError() = default;
     private:
         [[nodiscard]] const char* what() const noexcept override {
             return "Packet data is full";
@@ -29,7 +29,7 @@ class PacketFullError : public std::exception
 class MissingPacketParameterError : public std::exception
 {
     public:
-        MissingPacketParameterError();
+        MissingPacketParameterError() = default;
     private:
         [[nodiscard]] const char* what() const noexcept override {
             return "Packet: missing required parameter";
