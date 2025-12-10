@@ -26,6 +26,30 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(SFML)
 
+if (WIN32)
+        message(STATUS "Configuring for Windows...")
+elseif(UNIX)
+        message(STATUS "Configuring for Linux...")
+endif()
+
+option(DEV_COMPILE "Enable strict compile warnings" OFF)
+
+if (DEV_COMPILE)
+        add_compile_options(-Werror)
+endif ()
+
+add_compile_options(-Wall -Wextra)
+
+include(FetchContent)
+
+FetchContent_Declare(
+        SFML
+        GIT_REPOSITORY https://github.com/SFML/SFML.git
+        GIT_TAG 3.0.x
+)
+
+FetchContent_MakeAvailable(SFML)
+
 include_directories(.)
 include_directories(ECS)
 include_directories(ECS/Component)
@@ -50,8 +74,20 @@ include_directories(ECS/System/Inputs)
 include_directories(ECS/Entity)
 include_directories(Client)
 include_directories(Client/Game)
+include_directories(./Server)
+include_directories(Client/GameHelper)
 
 add_executable(r-type_server
+        Server/main.cpp
+        Server/Server.cpp
+        Server/User.cpp
+        Packet/Packet.cpp
+        Packet/Packet.hpp
+        Packet/CustomError.hpp
+        Packet/Packetreader.cpp
+        Packet/Packetreader.hpp
+        Packet/MyString.cpp
+        Packet/MyString.hpp)
         Server/main.cpp
         Server/Server.cpp
         Server/User.cpp
@@ -85,6 +121,13 @@ add_executable(r-type_client
         ECS/Component/Rotation/Rotation.cpp
         ECS/Component/Animator/Animator.cpp
         ECS/Component/BoxCollider/BoxCollider.cpp
+        Packet/Packet.cpp
+        Packet/Packet.hpp
+        Packet/CustomError.hpp
+        Packet/Packetreader.cpp
+        Packet/Packetreader.hpp
+        Packet/MyString.cpp
+        Packet/MyString.hpp)
         Packet/Packet.cpp
         Packet/Packet.hpp
         Packet/CustomError.hpp
