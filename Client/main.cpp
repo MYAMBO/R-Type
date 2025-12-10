@@ -5,6 +5,8 @@
 ** main of the client
 */
 
+#include "Game/Game.hpp"
+
 /**
  * @brief Entry point of the client application.
  *
@@ -18,5 +20,7 @@
  */
 auto main() -> int
 {
+	Game game(1920, 1080, "R-Type");
+	game.run();
 	return 0;
 }
