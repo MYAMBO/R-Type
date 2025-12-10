@@ -125,3 +125,14 @@ void Packet::endGame(const uint8_t status)
     _packet << uint8_t{0x0A} << status;
     _dataSize += size;
 }
+
+void Packet::shoot(const int id)
+{
+    constexpr int size = (sizeof(uint8_t) * 2);
+
+    if (_dataSize + size > MAX_DATA_SIZE)
+        throw PacketFullError();
+
+    _packet << uint8_t{0x0B} << id;
+    _dataSize += size;
+}

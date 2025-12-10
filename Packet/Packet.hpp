@@ -30,6 +30,7 @@ class Packet
         void hit(int id, int value);
         void dead(int id);
         void endGame(uint8_t status);
+        void shoot(int id);
 
         sf::Packet getPacket() const;
     private:

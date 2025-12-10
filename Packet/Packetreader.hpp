@@ -27,6 +27,7 @@ class Packetreader
         void hit();
         void dead();
         void endGame();
+        void shoot();
 };
 
 

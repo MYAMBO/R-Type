@@ -19,6 +19,7 @@ void Packetreader::interpretPacket()
         case 0x08: hit(); break;
         case 0x09: dead(); break;
         case 0x0A: endGame(); break;
+        case 0x0B: shoot(); break;
         default:
             break;
     }
@@ -57,6 +58,13 @@ void Packetreader::dead()
 }
 
 void Packetreader::endGame()
+{
+    int id = std::stoi(_data.mySubStr(0, 4), nullptr, 16);
+
+    // call function and give parameter
+}
+
+void Packetreader::shoot()
 {
     int id = std::stoi(_data.mySubStr(0, 4), nullptr, 16);
 
