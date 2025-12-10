@@ -5,14 +5,15 @@
 ** GameHelper
 */
 
+#include "HP.hpp"
 #include "Tag.hpp"
-#include "Camera.hpp"
-#include "GameHelper.hpp"
-#include "Position.hpp"
-#include "Sprite.hpp"
-#include "Animator.hpp"
 #include "Scale.hpp"
 #include "Scene.hpp"
+#include "Camera.hpp"
+#include "Sprite.hpp"
+#include "Position.hpp"
+#include "Animator.hpp"
+#include "GameHelper.hpp"
 
 /**
  * @brief Retrieves the main camera from the world.
