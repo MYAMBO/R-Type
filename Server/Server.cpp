@@ -66,8 +66,11 @@ auto Server::initServer() -> void
 
     if (_tcpListener.listen(_tcpPort) != sf::Socket::Status::Done)
         throw InitServerException();
-
-    sf::TcpSocket client;
-    if (listener.accept(client) != sf::Socket::Status::Done)
+    log("TCP server listening on port " + std::to_string(_tcpPort));
+    if (_udpSocket.bind(_udpPort) != sf::Socket::Status::Done)
         throw InitServerException();
+    log("UDP server listening on port " + std::to_string(_udpPort));
+
+}
+
 }
