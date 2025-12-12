@@ -62,6 +62,7 @@ include_directories(ECS/Component/Camera)
 include_directories(ECS/Component/Sprite)
 include_directories(ECS/Component/Camera)
 include_directories(ECS/Component/Script)
+include_directories(ECS/Component/Damage)
 include_directories(ECS/Component/Animator)
 include_directories(ECS/Component/Position)
 include_directories(ECS/Component/Velocity)
@@ -107,6 +108,7 @@ add_executable(r-type_client
         ECS/Component/Script/Script.cpp
         ECS/Component/Camera/Camera.cpp
         ECS/Component/Sprite/Sprite.cpp
+        ECS/Component/Damage/Damage.cpp
         ECS/Component/Position/Position.cpp
         ECS/Component/Velocity/Velocity.cpp
         ECS/Component/Rotation/Rotation.cpp
