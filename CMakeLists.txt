@@ -16,39 +16,21 @@ endif ()
 
 add_compile_options(-Wall -Wextra)
 
-include(FetchContent)
+if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake")
+    file(DOWNLOAD
+        https://raw.githubusercontent.com/cpm-cmake/CPM.cmake/master/cmake/CPM.cmake
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake"
 
-FetchContent_Declare(
-        SFML
-        GIT_REPOSITORY https://github.com/SFML/SFML.git
-        GIT_TAG 3.0.x
-)
-
-FetchContent_MakeAvailable(SFML)
-
-if (WIN32)
-        message(STATUS "Configuring for Windows...")
-elseif(UNIX)
-        message(STATUS "Configuring for Linux...")
+    )
 endif()
+include("${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake")
 
-option(DEV_COMPILE "Enable strict compile warnings" OFF)
-
-if (DEV_COMPILE)
-        add_compile_options(-Werror)
-endif ()
-
-add_compile_options(-Wall -Wextra)
-
-include(FetchContent)
-
-FetchContent_Declare(
-        SFML
-        GIT_REPOSITORY https://github.com/SFML/SFML.git
-        GIT_TAG 3.0.x
+CPMAddPackage(
+    NAME SFML
+    GITHUB_REPOSITORY SFML/SFML
+    GIT_TAG 3.0.x
+    EXCLUDE_FROM_ALL YES
 )
-
-FetchContent_MakeAvailable(SFML)
 
 include_directories(.)
 include_directories(ECS)
