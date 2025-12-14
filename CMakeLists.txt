@@ -16,11 +16,12 @@ endif ()
 
 add_compile_options(-Wall -Wextra)
 
-if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake")
-    file(DOWNLOAD
-        https://raw.githubusercontent.com/cpm-cmake/CPM.cmake/master/cmake/CPM.cmake
-        "${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake"
+set(CPM_DOWNLOAD_VERSION 0.40.2)
 
+if(NOT EXISTS "${CMAKE_BINARY_DIR}/cmake/CPM.cmake")
+    file(DOWNLOAD
+            https://github.com/cpm-cmake/CPM.cmake/releases/download/v${CPM_DOWNLOAD_VERSION}/CPM.cmake
+            "${CMAKE_BINARY_DIR}/cmake/CPM.cmake"
     )
 endif()
 include("${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake")
