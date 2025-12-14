@@ -14,6 +14,7 @@
 #include <mutex>
 #include <unistd.h>
 
+#include "Packet.hpp"
 #include "User.hpp"
 #include "SFML/Network.hpp"
 
@@ -28,6 +29,12 @@ class Server
         void log(const std::string& message) const;
         void udpThread();
         void tcpThread();
+        void accepterThread();
+        void sendPacket(Packet packet, sf::IpAddress ip, unsigned short port);
+        void sendPacket(Packet packet, unsigned int playerId);
+        void sendMessage(std::string message, sf::IpAddress ip, unsigned short port);
+        void sendMessage(std::string message, unsigned int playerId);
+        static void sendAll(sf::TcpSocket& socket, const void* data, std::size_t size);
 
         class InitServerException : public std::exception
         {
