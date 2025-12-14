@@ -104,7 +104,7 @@ void Packetreader::endGame()
  */
 void Packetreader::shoot()
 {
-    int id = std::stoi(_data.mySubStr(0, 4), nullptr, 16);
+    const int id = std::stoi(_data.mySubStr(0, 4), nullptr, 16);
 
-    // call function and give parameter
+    _serverGame.handleShoot(id);
 }

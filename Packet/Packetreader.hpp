@@ -10,6 +10,7 @@
 
 #include <string>
 #include "MyString.hpp"
+#include "ServerGame.hpp"
 
 /**
  * @brief PacketReader class to read and interpret received data
@@ -24,6 +25,7 @@ class Packetreader
     private:
         bool _isClient;
         MyString _data;
+        ServerGame _serverGame;
 
         void timestamp();
         void updateEntity();
