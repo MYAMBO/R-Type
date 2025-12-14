@@ -5,8 +5,7 @@
 ** main of the server
 */
 
-#include "Game/ServerGame.hpp"
-
+#include "Server.hpp"
 /**
  * @brief Entry point of the server application.
  *
@@ -18,8 +17,21 @@
  * @retval 0 Successful execution.
  * @retval 1 Execution error.
  */
-auto main() -> int
+auto main(int ac, char **av) -> int
 {
-	ServerGame game;
+
+	try
+	{
+		Server server;
+		server.parse(ac, av);
+		server.initServer();
+		server.start();
+	}
+	catch (const Server::InitServerException& e)
+	{
+		if (std::string(e.what()).empty() == false)
+			std::cerr << e.what() << std::endl;
+		return 84;
+	}
 	return 0;
 }

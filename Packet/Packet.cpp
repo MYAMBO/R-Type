@@ -1,0 +1,196 @@
+/*
+** EPITECH PROJECT, 2025
+** R-Type
+** File description:
+** PacketBuilder.cpp
+*/
+
+#include "Packet.hpp"
+#include "CustomError.hpp"
+
+#include <cstring>
+
+/**
+ * @brief Constructor for Packet
+ */
+Packet::Packet() : _dataSize(0), _idSetted(false), _ackSetted(false), _packetNumberSetted(false), _totalPacketNumberSetted(false)
+{
+    constexpr char zeros[12] = {};
+    _packet.append(zeros, 12);
+}
+
+/**
+ * @brief Get the packet
+ */
+sf::Packet Packet::getPacket() const
+{
+    if (_idSetted && _ackSetted && _packetNumberSetted && _totalPacketNumberSetted) {
+        setDataSize(_dataSize);
+        return _packet;
+    }
+    throw MissingPacketParameterError();
+}
+
+/**
+ * @brief Setter for packet id
+ * @param id The id of the packet
+ */
+void Packet::setId(const int id)
+{
+    std::memcpy(static_cast<char*>(const_cast<void*>(_packet.getData())), &id, sizeof(int));
+    _idSetted = true;
+}
+
+/**
+ * @brief Setter for packet ack
+ * @param ack The ack of the packet
+ */
+void Packet::setAck(const int ack)
+{
+    constexpr int offset = 4;
+    std::memcpy(static_cast<char*>(const_cast<void*>(_packet.getData())) + offset, &ack, sizeof(int));
+    _ackSetted = true;
+}
+
+/**
+ * @brief Setter for Packet packetNbr
+ * @param packetNbr The packetNbr of the packet
+ */
+void Packet::setPacketNbr(const uint8_t packetNbr)
+{
+    constexpr int offset = 8;
+    std::memcpy(static_cast<char*>(const_cast<void*>(_packet.getData())) + offset, &packetNbr, sizeof(uint8_t));
+    _packetNumberSetted = true;
+}
+
+/**
+ * @brief Setter for Packet totalPacketNbr
+ * @param totalPacketNbr The totalPacketNbr of the packet
+ */
+void Packet::setTotalPacketNbr(const uint8_t totalPacketNbr)
+{
+    constexpr int offset = 9;
+    std::memcpy(static_cast<char*>(const_cast<void*>(_packet.getData())) + offset, &totalPacketNbr, sizeof(uint8_t));
+    _totalPacketNumberSetted = true;
+}
+
+/**
+ * @brief Setter for Packet dataSize
+ * @param dataSize The dataSize of the packet
+ */
+void Packet::setDataSize(const uint16_t dataSize) const
+{
+    constexpr int offset = 10;
+    std::memcpy(static_cast<char*>(const_cast<void*>(_packet.getData())) + offset, &dataSize, sizeof(uint16_t));
+}
+
+/**
+ * @brief Write timeSync action in packet
+ * @param time The time from serv
+ */
+void Packet::timeSync(const int time)
+{
+    constexpr int size = sizeof(uint8_t) + sizeof(int);
+
+    if (_dataSize + size > MAX_DATA_SIZE)
+        throw PacketFullError();
+
+    _packet << uint8_t{0x06} << time;
+    _dataSize += size;
+}
+
+/**
+ * @brief Write playerPosition action in packet
+ * @param id The id of the entity
+ * @param x The x coordinate
+ * @param y The y coordinate
+ */
+void Packet::playerPosition(const int id, const float x, const float y)
+{
+    constexpr int size = sizeof(uint8_t) + sizeof(int) + (sizeof(float) * 2);
+
+    if (_dataSize + size > MAX_DATA_SIZE)
+        throw PacketFullError();
+
+    _packet << uint8_t{0x07} << id << x << y;
+    _dataSize += size;
+}
+
+/**
+ * @brief Write positionSpawn action in packet
+ * @param id The id of the entity
+ * @param type The type of entity
+ * @param x The x coordinate
+ * @param y The y coordinate
+ */
+void Packet::positionSpawn(const int id, const uint16_t type, const float x, const float y)
+{
+    constexpr int size = sizeof(uint8_t) + sizeof(int) + sizeof(uint16_t) + (sizeof(float) * 2);
+
+    if (_dataSize + size > MAX_DATA_SIZE)
+        throw PacketFullError();
+
+    _packet << uint8_t{0x07} << id << type << x << y;
+    _dataSize += size;
+}
+
+/**
+ * @brief Write hit action in packet
+ * @param id The of the entity
+ * @param value The value of damage
+ */
+void Packet::hit(const int id, const int value)
+{
+    constexpr int size = sizeof(uint8_t) + (sizeof(int) * 2);
+
+    if (_dataSize + size > MAX_DATA_SIZE)
+        throw PacketFullError();
+
+    _packet << uint8_t{0x08} << id << value;
+    _dataSize += size;
+}
+
+/**
+ * @brief Write dead action in packet
+ * @param id The id of the entity
+ */
+void Packet::dead(const int id)
+{
+    constexpr int size = sizeof(uint8_t) + sizeof(int);
+
+    if (_dataSize + size > MAX_DATA_SIZE)
+        throw PacketFullError();
+
+    _packet << uint8_t{0x09} << id;
+    _dataSize += size;
+}
+
+/**
+ * @brief Write endGame action in packet
+ * @param status Alive or dead (0/1)
+ */
+void Packet::endGame(const uint8_t status)
+{
+    constexpr int size = (sizeof(uint8_t) * 2);
+
+    if (_dataSize + size > MAX_DATA_SIZE)
+        throw PacketFullError();
+
+    _packet << uint8_t{0x0A} << status;
+    _dataSize += size;
+}
+
+/**
+ * @brief Write shoot action in packet
+ * @param id The id of the shooter
+ */
+void Packet::shoot(const int id)
+{
+    constexpr int size = (sizeof(uint8_t) * 2);
+
+    if (_dataSize + size > MAX_DATA_SIZE)
+        throw PacketFullError();
+
+    _packet << uint8_t{0x0B} << id;
+    _dataSize += size;
+}

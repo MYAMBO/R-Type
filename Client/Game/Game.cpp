@@ -169,14 +169,14 @@ void Game::createPlayer()
     player->addComponent<HP>(100);
     player->addComponent<Position>(75.0f, 75.0f);
     player->addComponent<Sprite>(std::string("../sprites/r-typesheet42.gif"));
-    player->addComponent<Animator>(2, 3.f, 0, 0, 33, 19, 33, 0);
+    player->addComponent<Animator>(2, 1, 3.f, 0, 0, 33, 19, 0, 0);
     player->addComponent<Scale>(2.f);
     player->addComponent<Scene>(1);
     player->addComponent<Tag>("player");
     auto fire = _world.createEntity();
     fire->addComponent<Position>(0.f, 85.f);
     fire->addComponent<Sprite>(std::string("../sprites/r-typesheet1.gif"));
-    fire->addComponent<Animator>(2, 3.f, 285, 85, 15, 15, 20, 0);
+    fire->addComponent<Animator>(2, 1, 3.f, 285, 85, 15, 15, 0, 0);
     fire->addComponent<Scale>(2.f);
     fire->addComponent<Scene>(1);
     fire->addComponent<Tag>("fire");
@@ -195,7 +195,7 @@ void Game::createBullet(int entityId)
     auto shooterPos = shooter->getComponent<Position>();
     bullet->addComponent<Position>(shooterPos->getX() + 60.f, shooterPos->getY() + 15.f);
     bullet->addComponent<Sprite>(std::string("../sprites/r-typesheet1.gif"));
-    bullet->addComponent<Animator>(2, 1.5f, 200, 120, 32, 15, 32, 0);
+    bullet->addComponent<Animator>(2, 1, 1.5f, 200, 120, 32, 15, 32, 0);
     bullet->addComponent<Scale>(2.f);
     bullet->addComponent<Scene>(1);
     bullet->addComponent<Tag>("bullet");

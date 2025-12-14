@@ -2,6 +2,54 @@ cmake_minimum_required(VERSION 3.19)
 
 project(R-Type)
 
+if (WIN32)
+        message(STATUS "Configuring for Windows...")
+elseif(UNIX)
+        message(STATUS "Configuring for Linux...")
+endif()
+
+option(DEV_COMPILE "Enable strict compile warnings" OFF)
+
+if (DEV_COMPILE)
+        add_compile_options(-Werror)
+endif ()
+
+add_compile_options(-Wall -Wextra)
+
+include(FetchContent)
+
+FetchContent_Declare(
+        SFML
+        GIT_REPOSITORY https://github.com/SFML/SFML.git
+        GIT_TAG 3.0.x
+)
+
+FetchContent_MakeAvailable(SFML)
+
+if (WIN32)
+        message(STATUS "Configuring for Windows...")
+elseif(UNIX)
+        message(STATUS "Configuring for Linux...")
+endif()
+
+option(DEV_COMPILE "Enable strict compile warnings" OFF)
+
+if (DEV_COMPILE)
+        add_compile_options(-Werror)
+endif ()
+
+add_compile_options(-Wall -Wextra)
+
+include(FetchContent)
+
+FetchContent_Declare(
+        SFML
+        GIT_REPOSITORY https://github.com/SFML/SFML.git
+        GIT_TAG 3.0.x
+)
+
+FetchContent_MakeAvailable(SFML)
+
 include_directories(.)
 include_directories(ECS)
 include_directories(ECS/Component)
@@ -27,26 +75,21 @@ include_directories(ECS/Entity)
 include_directories(Client)
 include_directories(Client/Game)
 include_directories(Client/GameHelper)
-include_directories(Server)
+include_directories(./Server)
+include_directories(./Packet)
 include_directories(Server/Game)
 
 add_executable(r-type_server
         Server/main.cpp
-        Server/Game/ServerGame.cpp
-        ECS/Entity/Entity.cpp
-        ECS/System/Updater/Updater.cpp
-        ECS/World.cpp
-        ECS/Component/HP/HP.cpp
-        ECS/Component/Tag/Tag.cpp
-        ECS/Component/Scale/Scale.cpp
-        ECS/Component/Scene/Scene.cpp
-        ECS/Component/Position/Position.cpp
-        ECS/Component/Velocity/Velocity.cpp
-        ECS/Component/Rotation/Rotation.cpp
-        ECS/Component/BoxCollider/BoxCollider.cpp
-        Server/Game/Enemy/EnemyBehaviour.cpp
-        Server/Game/Enemy/EnemyBehaviour.hpp
-)
+        Server/Server.cpp
+        Server/User.cpp
+        Packet/Packet.cpp
+        Packet/Packet.hpp
+        Packet/CustomError.hpp
+        Packet/Packetreader.cpp
+        Packet/Packetreader.hpp
+        Packet/MyString.cpp
+        Packet/MyString.hpp)
 
 add_executable(r-type_client
         Client/main.cpp
@@ -70,17 +113,14 @@ add_executable(r-type_client
         ECS/Component/Rotation/Rotation.cpp
         ECS/Component/Animator/Animator.cpp
         ECS/Component/BoxCollider/BoxCollider.cpp
-)
+        Packet/Packet.cpp
+        Packet/Packet.hpp
+        Packet/CustomError.hpp
+        Packet/Packetreader.cpp
+        Packet/Packetreader.hpp
+        Packet/MyString.cpp
+        Packet/MyString.hpp)
 
-include(FetchContent)
+target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network)
 
-FetchContent_Declare(
-        SFML
-        GIT_REPOSITORY https://github.com/SFML/SFML.git
-        GIT_TAG 3.0.x
-)
-
-FetchContent_MakeAvailable(SFML)
-
-target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system)
-target_link_libraries(r-type_server sfml-graphics sfml-window sfml-system)
+target_link_libraries(r-type_server sfml-network)
