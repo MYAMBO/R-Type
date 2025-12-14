@@ -5,7 +5,7 @@
 ** Server.hpp
 */
 
-#ifndef SEVER
+#ifndef SERVER
 #define SERVER
 
 #include <thread>
