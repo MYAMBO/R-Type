@@ -58,6 +58,7 @@ include_directories(Client)
 include_directories(Client/Game)
 include_directories(Client/GameHelper)
 include_directories(./Server)
+include_directories(./Server/Core)
 include_directories(./Packet)
 
 add_executable(r-type_server
