@@ -62,8 +62,8 @@ include_directories(./Packet)
 
 add_executable(r-type_server
         Server/main.cpp
-        Server/Server.cpp
-        Server/User.cpp
+        Server/Core/Server.cpp
+        Server/Core/User.cpp
         Packet/Packet.cpp
         Packet/Packet.hpp
         Packet/CustomError.hpp

@@ -7,8 +7,6 @@
 
 #include "User.hpp"
 
-#include <utility>
-
 static auto getUserId() -> unsigned int
 {
     static unsigned int id = 0;
