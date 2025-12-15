@@ -28,6 +28,7 @@ class ServerGame {
         void run();
         void handleNewPlayerPosition(int id, float x, float y) const;
         void handleShoot(int id);
+        void handleNewPlayer();
 
     private:
         void createPlayer(float x, float y);

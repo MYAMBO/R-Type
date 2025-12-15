@@ -33,8 +33,6 @@ ServerGame::ServerGame()
  */
 void ServerGame::run()
 {
-    for (int i = 0; i < NB_PLAYER; i++)
-        createPlayer(300, 300 + i * 100);
     createWave();
 
     while (true) {
@@ -150,6 +148,15 @@ void ServerGame::createBullet(const float x, const float y)
 }
 
 /**
+ * @brief Create a new player when a client connect.
+ */
+void ServerGame::handleNewPlayer()
+{
+    createPlayer(300, 300);
+}
+
+/**
+ * @brief check if the new position send by the client is valid and change it in server side.
  *
  * @param id The id of the player who is moving.
  * @param x The new x position of the player.
