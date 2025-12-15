@@ -30,6 +30,7 @@ Updater::Updater() = default;
 */
 void Updater::update(const float& dt, World &w)
 {
+    _collision.update(dt, w);
     updateCameras(dt, w);
     updateScripts(dt, w);
     updateAnimations(dt, w);
