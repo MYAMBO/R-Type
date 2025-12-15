@@ -110,5 +110,13 @@ void Packetreader::shoot()
 {
     const int id = std::stoi(_data.mySubStr(0, 4), nullptr, 16);
 
-    _serverGame.handleShoot(id);
+    _game->handleShoot(id);
+}
+
+/**
+ * @brief interpret shoot action
+ */
+void Packetreader::addData(const std::string& data)
+{
+    _data.append(data.c_str());
 }
