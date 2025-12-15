@@ -1,4 +1,4 @@
-#Rotation 
+## Rotation 
 
 The Rotation component defines the rotation angle of an entity in degrees. It is used by systems to orient visual elements (Sprites) or physical elements (BoxColliders) associated with the entity.
 
