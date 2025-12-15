@@ -50,6 +50,24 @@ std::shared_ptr<Entity> GameHelper::getEntityByTag(World &world, const std::stri
 }
 
 /**
+ * @brief Retrieves an entity by its ID from the world.
+ *
+ * @param world The world containing entities and components.
+ * @param id The ID of the entity to retrieve.
+ * @return A shared pointer to the Entity component, or nullptr if not found.
+ */
+std::shared_ptr<Entity> GameHelper::getEntityById(World &world, int id)
+{
+    for (const auto& entity : world.getAllEntitiesWithComponent<Tag>()) {
+        if (entity->getId() == id) {
+            return entity;
+        }
+    }
+    return nullptr;
+}
+
+
+/**
  * @brief Creates a basic enemy entity in the world at the specified position.
  *
  * @param world The world to create the enemy in.
