@@ -75,6 +75,7 @@ include_directories(ECS/Entity)
 include_directories(Client)
 include_directories(Client/Game)
 include_directories(Client/GameHelper)
+include_directories(Client/ScriptsHandler)
 include_directories(./Server)
 include_directories(./Packet)
 
@@ -94,6 +95,7 @@ add_executable(r-type_client
         Client/main.cpp
         Client/Game/Game.cpp
         Client/GameHelper/GameHelper.cpp
+        Client/ScriptsHandler/ScriptsHandler.cpp
         ECS/Entity/Entity.cpp
         ECS/System/Draw/Draw.cpp
         ECS/System/Inputs/Inputs.cpp
