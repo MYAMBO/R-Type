@@ -12,6 +12,9 @@
     #include "World.hpp"
     #include "Camera.hpp"
 
+/**
+ * @brief GameHelper class providing utility functions for game entities.
+*/
 class GameHelper {
     public:
         GameHelper() = delete; 
