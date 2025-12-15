@@ -13,8 +13,12 @@
  * @brief Construct a packetReader
  * @param data The string to be parsed
  * @param isClient If it's client side or not
+ * @param game Pointer to the Server-side game
  */
-Packetreader::Packetreader(std::string data, const bool isClient) : _isClient(isClient), _data(MyString(std::move(data))){}
+Packetreader::Packetreader(std::string data, const bool isClient, std::shared_ptr<ServerGame> game) : _isClient(isClient), _data(MyString(std::move(data)))
+{
+    _game = std::move(game);
+}
 
 /**
  * @brief parse the Packet and interpret it
