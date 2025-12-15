@@ -66,13 +66,32 @@ add_executable(r-type_server
         Server/main.cpp
         Server/Core/Server.cpp
         Server/Core/User.cpp
+        Server/Game/ServerGame.cpp
         Packet/Packet.cpp
         Packet/Packet.hpp
         Packet/CustomError.hpp
         Packet/Packetreader.cpp
         Packet/Packetreader.hpp
         Packet/MyString.cpp
-        Packet/MyString.hpp)
+        Packet/MyString.hpp
+        ECS/Entity/Entity.cpp
+        ECS/System/Draw/Draw.cpp
+        ECS/System/Inputs/Inputs.cpp
+        ECS/System/Updater/Updater.cpp
+        ECS/World.cpp
+        ECS/Component/HP/HP.cpp
+        ECS/Component/Tag/Tag.cpp
+        ECS/Component/Scale/Scale.cpp
+        ECS/Component/Layer/Layer.cpp
+        ECS/Component/Scene/Scene.cpp
+        ECS/Component/Script/Script.cpp
+        ECS/Component/Sprite/Sprite.cpp
+        ECS/Component/Camera/Camera.cpp
+        ECS/Component/Position/Position.cpp
+        ECS/Component/Velocity/Velocity.cpp
+        ECS/Component/Rotation/Rotation.cpp
+        ECS/Component/Animator/Animator.cpp
+        ECS/Component/BoxCollider/BoxCollider.cpp)
 
 add_executable(r-type_client
         Client/main.cpp
@@ -106,4 +125,4 @@ add_executable(r-type_client
 
 target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network)
 
-target_link_libraries(r-type_server sfml-network)
+target_link_libraries(r-type_server  sfml-graphics sfml-system sfml-network)
