@@ -89,18 +89,6 @@ void playerInput(int entityId, World &world)
     } else {
         isShootKeyPressed = false;
     }
-
-    for (auto& fire : world.getAllEntitiesWithComponent<Tag>()) {
-        auto tagCompFire = fire->getComponent<Tag>();
-        if (tagCompFire && tagCompFire->getTag() == "fire") {
-            auto posPlayer = compPlayer->getComponent<Position>();
-            auto posFire = fire->getComponent<Position>();
-            if (posPlayer && posFire) {
-                posFire->setX(posPlayer->getX() - 25.f);
-                posFire->setY(posPlayer->getY() + 10.f);
-            }
-        }
-    }
 }
 
 /**
@@ -123,4 +111,28 @@ void backgroundScrollScript(int entityId, World &world)
     float width = bounds.size.x; 
     if (posComp->getX() <= -width)
         posComp->setX(width);
+}
+
+/**
+ * @brief Updates the position of the player's fire entity.
+ *
+ * This function aligns the fire entity's position with the player's position.
+ * @param entityId The ID of the fire entity.
+ * @param world The game world containing entities and components.
+ */
+void playerfire(int entityId, World &world)
+{
+    auto player = GameHelper::getEntityById(world, entityId - 1);
+    if (!player)
+        return;
+    auto posPlayer = player->getComponent<Position>();
+
+    auto fire = GameHelper::getEntityById(world, entityId);
+    if (!fire)
+        return;
+    auto posFire = fire->getComponent<Position>();
+    if (!posFire || !posPlayer)
+        return;
+    posFire->setX(posPlayer->getX() - 25.f);
+    posFire->setY(posPlayer->getY() + 10.f);
 }

@@ -7,6 +7,13 @@ Defines the rendering order for entities:
 *   `BACKGROUND` (-1)
 *   `UI` (1000)
 
+### PlayerColor
+Define the color of the players:
+*   `BLUE`  (0)
+    `PURPLE`
+    `RED`
+    `GREEN`
+
 ### Class Reference
 
 | Method | Signature | Description |

@@ -7,6 +7,7 @@ The **GameHelper** class is a static utility class designed to assist the main g
 | **Get Main Camera** | `static std::shared_ptr<Camera> getMainCamera(World &world)` | Retrieves the primary camera component from the world by searching for the "main_camera" tag. |
 | **Get Entity By Tag** | `static std::shared_ptr<Entity> getEntityByTag(World &world, const std::string &tag)` | specific entity by its tag string. Returns `nullptr` if not found. |
 | **Create Basic Enemy**| `static void createBasicEnemy(World &world, float x, float y)` | Spawns a standard enemy entity at the specified `(x, y)` coordinates with default components. |
+| **Get Entity By Id** | `static std::shared_ptr<Entity> getEntityById(World &world, int id)` | specific entity by its id, Returns `nullptr` if not found. |
 
 ```mermaid
 classDiagram
@@ -15,5 +16,6 @@ classDiagram
     +getMainCamera(world: World) shared_ptr~Camera~
     +getEntityByTag(world: World, tag: string) shared_ptr~Entity~
     +createBasicEnemy(world: World, x: float, y: float) void
+    +getEntityById(world: World, id: int) shared_ptr~Entity~ 
   }
 ```
