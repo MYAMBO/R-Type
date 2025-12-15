@@ -92,7 +92,7 @@ void ServerGame::createEnemy(const float x, const float y)
     enemy->addComponent<BoxCollider>((sf::Vector2f){10.f, 10.f});
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<Script>(EnemyMovement);
-
+// call function to send packet
     Packet packet;
     packet.positionSpawn(enemy->getId(), Enemy, x, y);
     // call function to send packet
@@ -117,14 +117,18 @@ static void BulletMovement(const int entityId, World &world)
 {
     const auto entity = world.getAllEntitiesWithComponent<Tag>()[entityId];
     const auto pos = entity->getComponent<Position>();
+    Packet packet;
 
+    if (entity->getComponent<BoxCollider>()->isTrigger()) {
+        // check collisions with enemies
+    }
     if (pos->getX() > 3000) {
         world.killEntity(entity->getId());
-        return;
+        packet.dead(entity->getId());
+    } else {
+        pos->setX(pos->getX() + 10 * world.getDeltaTime());
+        packet.positionSpawn(entity->getId(), None, pos->getX(), pos->getY());
     }
-    Packet packet;
-    pos->setX(pos->getX() + 10 * world.getDeltaTime());
-    packet.positionSpawn(entity->getId(), None, pos->getX(), pos->getY());
     // call function to send packet
 }
 
@@ -174,6 +178,10 @@ void ServerGame::handleNewPlayerPosition(const int id, const float x, const floa
         pos->setX(x);
         pos->setY(y);
     }
+
+    Packet packet;
+    packet.positionSpawn(id, None, x, y);
+    // call function to send packet
 }
 
 /**
