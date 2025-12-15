@@ -49,6 +49,7 @@ Game::Game(unsigned int width, unsigned int height, const std::string& title)
 {
     createPlayer();
     createCamera();
+    createBackground();
     createEnemy(600.f, 100.f, 1);
     _world.addSystem<Updater>();
     _world.addSystem<Draw>();
@@ -63,6 +64,41 @@ Game::Game(unsigned int width, unsigned int height, const std::string& title)
 Game::~Game()
 {
     _window.close();
+}
+
+/**
+ * @brief Create Background
+ * This function initializes the background entities with necessary components.
+*/
+void Game::createBackground()
+{
+    auto backgroundFirst = _world.createEntity();
+    backgroundFirst->addComponent<Sprite>(std::string("../sprites/image.png"));
+    
+    auto windowSize = _window.getSize();
+    auto spriteComp = backgroundFirst->getComponent<Sprite>();
+    auto boundsSize = spriteComp->getSprite()->getGlobalBounds(); 
+    float scaleX = static_cast<float>(windowSize.x) / boundsSize.size.x;
+    float scaleY = static_cast<float>(windowSize.y) / boundsSize.size.y;
+    float finalScale = std::max(scaleX, scaleY);
+    if (finalScale < 1.0f)
+        finalScale = 1.0f;
+    backgroundFirst->addComponent<Scale>(finalScale);
+
+    backgroundFirst->addComponent<Scene>(_world.getCurrentScene());
+    backgroundFirst->addComponent<Position>(0.f, 0.f);
+    backgroundFirst->addComponent<Script>(backgroundScrollScript);
+    backgroundFirst->addComponent<Layer>(LayerType::BACKGROUND);
+    backgroundFirst->addComponent<Tag>("background_first");
+    auto backgroundSecond = _world.createEntity();
+    backgroundSecond->addComponent<Sprite>(std::string("../sprites/image.png"));
+    backgroundSecond->addComponent<Scale>(1.f);
+    backgroundSecond->addComponent<Scene>(_world.getCurrentScene());
+    auto bounds = backgroundFirst->getComponent<Sprite>()->getSprite()->getGlobalBounds();
+    backgroundSecond->addComponent<Position>(bounds.size.x - 10.f, 0.f);
+    backgroundSecond->addComponent<Script>(backgroundScrollScript);
+    backgroundSecond->addComponent<Layer>(LayerType::BACKGROUND);
+    backgroundSecond->addComponent<Tag>("background_second");
 }
 
 /**
@@ -94,9 +130,8 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
 {
     while (const std::optional eventOpt = _window.pollEvent()) {
         _world.setEvent(*eventOpt);
-        if (const auto* keyEvent = eventOpt->getIf<sf::Event::KeyPressed>())
-            if (inputSystem->isKeyPressed(KeyboardKey::Key_Escape))
-                _window.close();
+        if (inputSystem->isKeyPressed(KeyboardKey::Key_Escape))
+            _window.close();
         if (eventOpt->is<sf::Event::Closed>())
             _window.close();
         if (eventOpt->is<sf::Event::Resized>()) {
@@ -127,6 +162,7 @@ void Game::createPlayer()
     player->addComponent<Animator>(2, 1, 3.f, 0, 0, 33, 19, 0, 0);
     player->addComponent<Scale>(2.f);
     player->addComponent<Scene>(1);
+    player->addComponent<Layer>(10);
     player->addComponent<Script>(playerInput);
     player->addComponent<Tag>("player");
     auto fire = _world.createEntity();
@@ -135,6 +171,7 @@ void Game::createPlayer()
     fire->addComponent<Animator>(2, 1, 3.f, 285, 85, 15, 15, 0, 0);
     fire->addComponent<Scale>(2.f);
     fire->addComponent<Scene>(1);
+    fire->addComponent<Layer>(10);
     fire->addComponent<Tag>("fire");
 }
 
