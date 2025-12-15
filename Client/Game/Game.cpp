@@ -49,6 +49,7 @@ Game::Game(unsigned int width, unsigned int height, const std::string& title)
 {
     createPlayer();
     createCamera();
+    createPlayer();
     createBackground();
     createEnemy(600.f, 100.f, 1);
     _world.addSystem<Updater>();
@@ -157,22 +158,33 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
  */
 void Game::createPlayer()
 {
+    static int playerCount = 0;
+    if (playerCount >= 4)
+        return;
     auto player = _world.createEntity();
     player->addComponent<HP>(100);
     player->addComponent<Position>(75.0f, 75.0f);
     player->addComponent<Sprite>(std::string("../sprites/r-typesheet42.gif"));
-    player->addComponent<Animator>(2, 1, 3.f, 0, 0, 33, 19, 0, 0);
     player->addComponent<Scale>(2.f);
     player->addComponent<Scene>(1);
     player->addComponent<Layer>(10);
-    player->addComponent<Script>(playerInput);
-    player->addComponent<Tag>("player");
+    if (GameHelper::getEntityByTag(_world, "player")) {
+        player->addComponent<Tag>("player_mate");
+        player->addComponent<Animator>(2, 1, 3.f, 0, (playerCount * 17), 33, 19, 0, 0);
+        playerCount++;
+    } else {
+        player->addComponent<Animator>(2, 1, 3.f, 0, 0, 33, 19, 0, 0);
+        player->addComponent<Script>(playerInput);
+        player->addComponent<Tag>("player");
+        playerCount++;
+    }
     auto fire = _world.createEntity();
     fire->addComponent<Position>(0.f, 85.f);
     fire->addComponent<Sprite>(std::string("../sprites/r-typesheet1.gif"));
     fire->addComponent<Animator>(2, 1, 3.f, 285, 85, 15, 15, 0, 0);
     fire->addComponent<Scale>(2.f);
     fire->addComponent<Scene>(1);
+    fire->addComponent<Script>(playerfire);
     fire->addComponent<Layer>(10);
     fire->addComponent<Tag>("fire");
 }

@@ -22,6 +22,13 @@ enum LayerType {
     UI = 1000,
 };
 
+enum PlayerColor {
+    BLUE = 0,
+    PURPLE,
+    RED,
+    GREEN
+};
+
 
 /**
  * @brief Main Game class to handle the game window and loop.
