@@ -30,7 +30,6 @@ class Updater : public System {
         void updateCameras(const float& dt, const World &w);
         void updateAnimations(const float& dt, const World &w);
         void updateCollisions(const float& dt, const World &w);
-        Collision _collision;
 };
 
 #endif /* !UPDATER_HPP_ */

@@ -36,6 +36,7 @@
 #include "Tag.hpp"
 #include "GameHelper.hpp"
 #include "BoxCollider.hpp"
+#include "Collision.hpp"
 
 /**
  * @brief Constructs a new Game object.
@@ -51,6 +52,7 @@ Game::Game(unsigned int width, unsigned int height, const std::string& title)
     createPlayer();
     createCamera();
     createEnemy(600.f, 100.f, 1);
+    _world.addSystem<Collision>();
     _world.addSystem<Updater>();
     _world.addSystem<Draw>();
     _world.addSystem<Inputs>();
