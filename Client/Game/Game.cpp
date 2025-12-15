@@ -173,6 +173,7 @@ void Game::createPlayer()
     player->addComponent<Scale>(2.f);
     player->addComponent<Scene>(1);
     player->addComponent<Tag>("player");
+    player->addComponent<BoxCollider>(33.0f, 19.0f);
     auto fire = _world.createEntity();
     fire->addComponent<Position>(0.f, 85.f);
     fire->addComponent<Sprite>(std::string("../sprites/r-typesheet1.gif"));
