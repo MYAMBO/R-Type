@@ -73,7 +73,7 @@ Game::~Game()
 void Game::createBackground()
 {
     auto backgroundFirst = _world.createEntity();
-    backgroundFirst->addComponent<Sprite>(std::string("../sprites/image.png"));
+    backgroundFirst->addComponent<Sprite>(std::string("../sprites/background.png"));
     
     auto windowSize = _window.getSize();
     auto spriteComp = backgroundFirst->getComponent<Sprite>();
@@ -89,13 +89,15 @@ void Game::createBackground()
     backgroundFirst->addComponent<Position>(0.f, 0.f);
     backgroundFirst->addComponent<Script>(backgroundScrollScript);
     backgroundFirst->addComponent<Layer>(LayerType::BACKGROUND);
+    backgroundFirst->addComponent<Velocity>(-4.f, 0.f);
     backgroundFirst->addComponent<Tag>("background_first");
     auto backgroundSecond = _world.createEntity();
-    backgroundSecond->addComponent<Sprite>(std::string("../sprites/image.png"));
+    backgroundSecond->addComponent<Sprite>(std::string("../sprites/background.png"));
     backgroundSecond->addComponent<Scale>(1.f);
     backgroundSecond->addComponent<Scene>(_world.getCurrentScene());
     auto bounds = backgroundFirst->getComponent<Sprite>()->getSprite()->getGlobalBounds();
     backgroundSecond->addComponent<Position>(bounds.size.x - 10.f, 0.f);
+    backgroundSecond->addComponent<Velocity>(-4.f, 0.f);
     backgroundSecond->addComponent<Script>(backgroundScrollScript);
     backgroundSecond->addComponent<Layer>(LayerType::BACKGROUND);
     backgroundSecond->addComponent<Tag>("background_second");

@@ -118,10 +118,9 @@ void backgroundScrollScript(int entityId, World &world)
     auto spriteComp = entity->getComponent<Sprite>();
     if (!posComp || !spriteComp)
         return;
-    if (entity->getComponent<Tag>()->getTag() == "background_first" || entity->getComponent<Tag>()->getTag() == "background_second")
-        posComp->setX(posComp->getX() - 4.f);
+
     auto bounds = spriteComp->getSprite()->getGlobalBounds();
     float width = bounds.size.x; 
     if (posComp->getX() <= -width)
-        posComp->setX(width - 4.f);
+        posComp->setX(width);
 }
