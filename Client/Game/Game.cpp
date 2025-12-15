@@ -17,25 +17,24 @@
 
 
 #include "HP.hpp"
+#include "Tag.hpp" 
 #include "Draw.hpp"
 #include "Layer.hpp"
 #include "Scale.hpp"
 #include "Scene.hpp"
+#include "Inputs.hpp"
 #include "Sprite.hpp"
 #include "Entity.hpp"
+#include "Script.hpp"
 #include "Camera.hpp"
 #include "Updater.hpp"
 #include "Velocity.hpp"
 #include "Position.hpp"
 #include "Animator.hpp"
-#include "Updater.hpp"
-#include "Script.hpp"
-#include "Inputs.hpp"
-#include "Draw.hpp"
-#include "Scale.hpp"
-#include "Tag.hpp"
+#include "Rotation.hpp"
 #include "GameHelper.hpp"
 #include "BoxCollider.hpp"
+#include "ScriptsHandler.hpp"
 
 /**
  * @brief Constructs a new Game object.
@@ -80,7 +79,6 @@ void Game::run()
     while (_window.isOpen()) {
         _window.clear(sf::Color::Black);
         gameInput(inputSystem);
-        bulletMovement();
         _world.manageSystems();
         _window.display();
     }
@@ -101,60 +99,17 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
                 _window.close();
         if (eventOpt->is<sf::Event::Closed>())
             _window.close();
-        inputSystem->update(0.0f, _world);
-    }
-    playerInput(inputSystem);
-}
-
-/**
- * @brief Handles player input.
- *
- * This function processes user input events and updates the game state accordingly.
- * @param inputSystem The input system to check for player actions.
- */
-void Game::playerInput(std::shared_ptr<Inputs> inputSystem)
-{
-    std::shared_ptr<Camera> compCam = GameHelper::getMainCamera(_world);
-    if (!compCam)
-        return;
-
-    std::shared_ptr<Entity> compPlayer = GameHelper::getEntityByTag(_world, "player");
-    if (!compPlayer)
-        return;
-
-    auto pos = compPlayer->getComponent<Position>();
-
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_D))
-        if (compCam->getPosition().x + compCam->getSize().x > pos->getX() + 7.0f)
-            pos->setX(pos->getX() + 7.0f);
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_Q))
-        if (compCam->getPosition().x < pos->getX() - 7.0f)
-            pos->setX(pos->getX() - 7.0f);
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_Z))
-        if (compCam->getPosition().y < pos->getY() - 7.0f)
-            pos->setY(pos->getY() - 7.0f);
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_S))
-        if (compCam->getPosition().y + compCam->getSize().y > pos->getY() + 7.0f)
-            pos->setY(pos->getY() + 7.0f);
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_Space)) {
-        if (!_isShootKeyPressed) {
-            createBullet(compPlayer->getId());
-            _isShootKeyPressed = true;
+        if (eventOpt->is<sf::Event::Resized>()) {
+            sf::FloatRect visibleArea({0, 0}, {static_cast<float>(_window.getSize().x), static_cast<float>( _window.getSize().y)});
+            _window.setView(sf::View(visibleArea));
         }
-    } else {
-        _isShootKeyPressed = false;
-    }
-
-    for (auto& fire : _world.getAllEntitiesWithComponent<Tag>()) {
-        auto tagCompFire = fire->getComponent<Tag>();
-        if (tagCompFire && tagCompFire->getTag() == "fire") {
-            auto posPlayer = compPlayer->getComponent<Position>();
-            auto posFire = fire->getComponent<Position>();
-            if (posPlayer && posFire) {
-                posFire->setX(posPlayer->getX() - 25.f);
-                posFire->setY(posPlayer->getY() + 10.f);
+        if (inputSystem->isKeyPressed(KeyboardKey::Key_M)) {
+            auto enemy = GameHelper::getEntityByTag(_world, "enemy");
+            if (enemy) {
+                createBullet(enemy->getId(), _world);
             }
         }
+        inputSystem->update(0.0f, _world);
     }
 }
 
@@ -172,6 +127,7 @@ void Game::createPlayer()
     player->addComponent<Animator>(2, 1, 3.f, 0, 0, 33, 19, 0, 0);
     player->addComponent<Scale>(2.f);
     player->addComponent<Scene>(1);
+    player->addComponent<Script>(playerInput);
     player->addComponent<Tag>("player");
     auto fire = _world.createEntity();
     fire->addComponent<Position>(0.f, 85.f);
@@ -180,45 +136,6 @@ void Game::createPlayer()
     fire->addComponent<Scale>(2.f);
     fire->addComponent<Scene>(1);
     fire->addComponent<Tag>("fire");
-}
-
-/**
- * @brief Creates a bullet entity.
- *
- * This function initializes a bullet entity with necessary components.
- * @param entityId The ID of the entity that fired the bullet.
- */
-void Game::createBullet(int entityId)
-{
-    auto bullet = _world.createEntity();
-    auto shooter = _world.getAllEntitiesWithComponent<Tag>()[entityId];
-    auto shooterPos = shooter->getComponent<Position>();
-    bullet->addComponent<Position>(shooterPos->getX() + 60.f, shooterPos->getY() + 15.f);
-    bullet->addComponent<Sprite>(std::string("../sprites/r-typesheet1.gif"));
-    bullet->addComponent<Animator>(2, 1, 1.5f, 200, 120, 32, 15, 32, 0);
-    bullet->addComponent<Scale>(2.f);
-    bullet->addComponent<Scene>(1);
-    bullet->addComponent<Tag>("bullet");
-}
-
-/**
- * @brief handles bullet movement.
- * This function updates the position of all bullet entities.
- */
-void Game::bulletMovement()
-{
-    std::shared_ptr<Camera> compCam = GameHelper::getMainCamera(_world);
-    if (!compCam)
-        return;
-    for (auto& bullet : _world.getAllEntitiesWithComponent<Tag>()) {
-        auto tagComp = bullet->getComponent<Tag>();
-        if (tagComp && tagComp->getTag() == "bullet") {
-            auto pos = bullet->getComponent<Position>();
-            pos->setX(pos->getX() + 10.0f);
-            if (pos->getX() > compCam->getPosition().x + compCam->getSize().x)
-                _world.killEntity(bullet->getId());
-        }
-    }
 }
 
 /**

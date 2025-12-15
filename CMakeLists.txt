@@ -74,20 +74,12 @@ include_directories(ECS/System/Inputs)
 include_directories(ECS/Entity)
 include_directories(Client)
 include_directories(Client/Game)
-include_directories(./Server)
 include_directories(Client/GameHelper)
+include_directories(Client/ScriptsHandler)
+include_directories(./Server)
+include_directories(./Packet)
 
 add_executable(r-type_server
-        Server/main.cpp
-        Server/Server.cpp
-        Server/User.cpp
-        Packet/Packet.cpp
-        Packet/Packet.hpp
-        Packet/CustomError.hpp
-        Packet/Packetreader.cpp
-        Packet/Packetreader.hpp
-        Packet/MyString.cpp
-        Packet/MyString.hpp)
         Server/main.cpp
         Server/Server.cpp
         Server/User.cpp
@@ -103,6 +95,7 @@ add_executable(r-type_client
         Client/main.cpp
         Client/Game/Game.cpp
         Client/GameHelper/GameHelper.cpp
+        Client/ScriptsHandler/ScriptsHandler.cpp
         ECS/Entity/Entity.cpp
         ECS/System/Draw/Draw.cpp
         ECS/System/Inputs/Inputs.cpp
@@ -128,14 +121,7 @@ add_executable(r-type_client
         Packet/Packetreader.hpp
         Packet/MyString.cpp
         Packet/MyString.hpp)
-        Packet/Packet.cpp
-        Packet/Packet.hpp
-        Packet/CustomError.hpp
-        Packet/Packetreader.cpp
-        Packet/Packetreader.hpp
-        Packet/MyString.cpp
-        Packet/MyString.hpp)
 
-target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system)
+target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network)
 
 target_link_libraries(r-type_server sfml-network)

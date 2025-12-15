@@ -63,8 +63,8 @@ void Updater::updateSprites(const float& dt, const World &w)
         if (rotComp)
             sprite->setRotation(sf::degrees(rotComp->getRotation()));
         if (velComp) {
-            posComp->setX(posComp->getX() + velComp->getVelocity() * dt);
-            posComp->setY(posComp->getY() + velComp->getVelocity() * dt);
+            posComp->setX(posComp->getX() + velComp->getVelocityX() * dt);
+            posComp->setY(posComp->getY() + velComp->getVelocityY() * dt);
         }
     }
 }
