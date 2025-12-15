@@ -16,6 +16,8 @@
 #include <unistd.h>
 
 #include "Packet.hpp"
+#include "Packetreader.hpp"
+#include "ServerGame.hpp"
 #include "User.hpp"
 #include "SFML/Network.hpp"
 
@@ -63,5 +65,7 @@ class Server
         bool _debugMode;
         std::vector<User> _users;
         std::mutex _mutex;
+        std::shared_ptr<ServerGame> _game;
+        Packetreader _packetReader;
 };
 #endif // SERVER

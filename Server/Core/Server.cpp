@@ -7,11 +7,15 @@
 
 #include "Server.hpp"
 
+#include "Game.hpp"
+
 Server::Server()
 {
     _tcpPort = -1;
     _udpPort = -1;
     _debugMode = false;
+    _game = std::make_shared<ServerGame>();
+    _packetReader = Packetreader("", false, _game);
 }
 
 auto Server::parse(int ac, char **av) -> void
@@ -99,6 +103,10 @@ void Server::udpThread()
         {
             // error...
         }
+        std::string data;
+        p >> data;
+        _packetReader.addData(data);
+        _packetReader.interpretPacket();
         log("UDP | Received " + std::to_string(p.getDataSize()) + " bytes from " + sender.value().toString() + " on port " + std::to_string(rport));
     }
 }
@@ -202,7 +210,7 @@ void Server::start()
     std::thread tcpThread(&Server::tcpThread, this);
     std::thread udpThread(&Server::udpThread, this);
     std::thread accepterThread(&Server::accepterThread, this);
-    while (true){}
+    _game->run();
     tcpThread.join();
     udpThread.join();
     accepterThread.join();
