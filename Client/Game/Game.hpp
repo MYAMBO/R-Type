@@ -22,6 +22,7 @@ enum LayerType {
     UI = 1000,
 };
 
+
 /**
  * @brief Main Game class to handle the game window and loop.
  */
@@ -33,19 +34,18 @@ class Game {
         void run();
     private:
         void gameInput(std::shared_ptr<Inputs> inputSystem);
-        void playerInput(std::shared_ptr<Inputs> inputSystem);
 
         void createCamera();
         void createPlayer();
-        void createBullet(int entityId);
+        void createBackground();
         void createEnemy(float x, float y, int type);
 
-        void bulletMovement();
         void bulletShooting();
 
         World _world;
         sf::RenderWindow _window;
-        bool _isShootKeyPressed = false;
 };
+    
+
 
 #endif

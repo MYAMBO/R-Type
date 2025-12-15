@@ -59,7 +59,6 @@ std::shared_ptr<Entity> GameHelper::getEntityByTag(World &world, const std::stri
 */
 void GameHelper::createBasicEnemy(World &world, float x, float y)
 {
-    printf("Creating basic enemy at (%f, %f)\n", x, y);
     auto enemy = world.createEntity();
     enemy->addComponent<HP>(50);
     enemy->addComponent<Position>(x, y);
