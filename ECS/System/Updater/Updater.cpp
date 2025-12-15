@@ -98,6 +98,7 @@ void Updater::updateAnimations(const float &dt, const World &w)
 */
 void Updater::updateCameras(const float &dt, const World &w)
 {
+    (void)dt;
     for (auto &entity : w.getAllEntitiesWithComponent<Camera>()) {
         auto cameraComp = entity->getComponent<Camera>();
         if (!cameraComp)

@@ -103,3 +103,24 @@ void playerInput(int entityId, World &world)
     }
 }
 
+/**
+ * @brief Script to scroll the background.
+ *
+ * This function moves the background entities to create a scrolling effect.
+ * @param entityId The ID of the background entity.
+ */
+void backgroundScrollScript(int entityId, World &world)
+{
+    auto entity = world.getAllEntitiesWithComponent<Tag>()[entityId];
+    if (!entity)
+        return;
+    auto posComp = entity->getComponent<Position>();
+    auto spriteComp = entity->getComponent<Sprite>();
+    if (!posComp || !spriteComp)
+        return;
+
+    auto bounds = spriteComp->getSprite()->getGlobalBounds();
+    float width = bounds.size.x; 
+    if (posComp->getX() <= -width)
+        posComp->setX(width);
+}

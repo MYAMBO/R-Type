@@ -37,6 +37,7 @@ class Game {
 
         void createCamera();
         void createPlayer();
+        void createBackground();
         void createEnemy(float x, float y, int type);
 
         void bulletShooting();
