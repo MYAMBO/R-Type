@@ -9,6 +9,8 @@
     #define UPDATER_HPP_
 
     #include "World.hpp"
+    #include "BoxCollider.hpp"
+    #include "Collision.hpp"
 
 /**
  * @brief Updater system responsible for updating various components of entities.
@@ -27,7 +29,7 @@ class Updater : public System {
         void updateSprites(const float& dt, const World &w);
         void updateCameras(const float& dt, const World &w);
         void updateAnimations(const float& dt, const World &w);
-        void updateBoxColliders(const float& dt, const World &w);
+        void updateCollisions(const float& dt, const World &w);
 };
 
 #endif /* !UPDATER_HPP_ */

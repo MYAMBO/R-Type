@@ -10,15 +10,14 @@ The BoxCollider component hold the display priority of the entity.
 | **Get the offset**        | `sf::Vector2f getOffset() const`             | Returns the offset of the box collider.                     |
 | **set the trigger value** | `void setTrigger(bool trigger)`              | Updates the trigger value.                                  |
 | **set the visible value** | `void setVisibility(bool visible)`           | Updates the visible value.                                  |
-| **set the size vector**   | `void setSize(const sf::Vector2f &size)`     | Updates the size vector.                                    |
-| **set the offset vector** | `void setOffset(const sf::Vector2f &offset)` | Updates the offset vector.                                  |
+| **set the size vector**   | `void setSize(const float width, const float height)`     | Updates the size vector.                                    |
 
 
 ```mermaid
 classDiagram
   class BoxCollider {
-    _size: sf::Vector2f
-    _offset: sf::Vector2f
+    _x: float;
+    _y: float;
     _visible: bool;
     _trigger: bool;
   }
