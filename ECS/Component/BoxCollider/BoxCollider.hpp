@@ -20,7 +20,7 @@
  */
 class BoxCollider : public Component {
 public:
-    explicit BoxCollider(const sf::Vector2f &size);
+    explicit BoxCollider(float width, float height);
     ~BoxCollider() override = default;
 
     [[nodiscard]] bool isVisible() const;
@@ -30,12 +30,11 @@ public:
 
     void setTrigger(bool trigger);
     void setVisibility(bool visible);
-    void setSize(const sf::Vector2f &size);
-    void setOffset(const sf::Vector2f &offset);
+    void setSize(float width, float height);
 
 private:
-    sf::Vector2f _size;
-    sf::Vector2f _offset;
+    float _x;
+    float _y;
     bool _visible = false;
     bool _trigger = false;
 };

@@ -34,7 +34,9 @@
 #include "Rotation.hpp"
 #include "GameHelper.hpp"
 #include "BoxCollider.hpp"
+#include "Collision.hpp"
 #include "ScriptsHandler.hpp"
+
 
 /**
  * @brief Constructs a new Game object.
@@ -51,6 +53,7 @@ Game::Game(unsigned int width, unsigned int height, const std::string& title)
     createCamera();
     createBackground();
     createEnemy(600.f, 100.f, 1);
+    _world.addSystem<Collision>();
     _world.addSystem<Updater>();
     _world.addSystem<Draw>();
     _world.addSystem<Inputs>();
@@ -167,6 +170,7 @@ void Game::createPlayer()
     player->addComponent<Layer>(10);
     player->addComponent<Script>(playerInput);
     player->addComponent<Tag>("player");
+    player->addComponent<BoxCollider>(33.0f, 19.0f);
     auto fire = _world.createEntity();
     fire->addComponent<Position>(0.f, 85.f);
     fire->addComponent<Sprite>(std::string("../sprites/r-typesheet1.gif"));
