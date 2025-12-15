@@ -1,17 +1,20 @@
-## Rotation
+#Rotation 
 
-The Rotation component that can contain the rotation value of the sprite or the box collider component created with the component linked to it and by default the value 0.0f.
+The Rotation component defines the rotation angle of an entity in degrees. It is used by systems to orient visual elements (Sprites) or physical elements (BoxColliders) associated with the entity.
 
 | Method | Signature | Description |
-| :--- | :--- | :--- |
-| **Rotation**     | `Rotation(float rotation = 0.0f, template<typename T>)` | create the rotation component with the value 0.0 by default and the component linked to it (Sprite / Box collider). 
-| **Get Rotation** | `float getRotation() const` | Returns the value of the rotation. |
-| **Set Rotation** | `void setRotation(float rotation)` | Update the current rotation.
+|:---|:---|:---|
+| **Constructor** | `Rotation(float rotation = 0.0f)` | Initializes the component with a specific angle in degrees (default is 0.0f). |
+| **Get Rotation** | `float getRotation() const` | Returns the current rotation value in degrees. |
+| **Set Rotation** | `void setRotation(float rotation)` | Updates the rotation angle. |
 
 ```mermaid
 classDiagram
   class Rotation {
-    _rotation: float
-    _type: std::string
+    -_rotation: float
+    -_type: std::string
+    +Rotation(rotation: float)
+    +getRotation() float
+    +setRotation(rotation: float) void
   }
 ```
