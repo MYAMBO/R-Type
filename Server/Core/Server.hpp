@@ -12,6 +12,7 @@
 #include <utility>
 #include <iostream>
 #include <mutex>
+#include <cstring>
 #include <unistd.h>
 
 #include "Packet.hpp"

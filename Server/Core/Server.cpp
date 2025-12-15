@@ -144,19 +144,23 @@ void Server::accepterThread()
         _tcpClient.setBlocking(false);
         _mutex.lock();
         _users.emplace_back(port, ip, std::make_shared<sf::TcpSocket>(std::move(_tcpClient)));
-        sendMessage("Connected", _users.back().getId());
+        std::array<char, 1024> data {};
+        data.at(0) = 1;
+        data.at(1) = static_cast<char>(_users.back().getId());
+        std::memcpy(&data[2], &_udpPort, sizeof(_udpPort));
+        sendMessage(data.data(), _users.back().getId());
         _mutex.unlock();
     }
 }
 
-void Server::sendAll(sf::TcpSocket& socket, const void* data, std::size_t size)
+void Server::sendAll(sf::TcpSocket& socket, const void* data, const std::size_t size)
 {
     std::size_t sent = 0;
 
     while (sent < size)
     {
         std::size_t justSent = 0;
-        auto status = socket.send(
+        const auto status = socket.send(
             static_cast<const char*>(data) + sent,
             size - sent,
             justSent

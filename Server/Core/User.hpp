@@ -17,11 +17,11 @@ class User
         User(unsigned int port, std::string ip,
              std::shared_ptr<sf::TcpSocket> socket);
         ~User() = default;
-        std::shared_ptr<sf::TcpSocket> getSocket() const;
-        unsigned int getId() const;
-        unsigned int getPort() const;
-        std::string getName() const;
-        std::string getIp() const;
+        [[nodiscard]] std::shared_ptr<sf::TcpSocket> getSocket() const;
+        [[nodiscard]] unsigned int getId() const;
+        [[nodiscard]] unsigned int getPort() const;
+        [[nodiscard]] std::string getName() const;
+        [[nodiscard]] std::string getIp() const;
 
     private:
         std::shared_ptr<sf::TcpSocket> _socket;
