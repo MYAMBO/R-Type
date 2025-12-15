@@ -61,4 +61,10 @@ MyString::operator std::string() const
     { return _data; }
 }
 
-
+/**
+ * @brief A wrapped operator from std::string
+ */
+void MyString::append(const char* string)
+{
+    _data.append(string);
+}
