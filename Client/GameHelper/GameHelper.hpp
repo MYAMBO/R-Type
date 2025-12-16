@@ -21,6 +21,7 @@ class GameHelper {
         ~GameHelper() = delete;
 
         static std::shared_ptr<Camera> getMainCamera(World &world);
+        static std::shared_ptr<Entity> getEntityById(World &world, int id);
         static std::shared_ptr<Entity> getEntityByTag(World &world, const std::string &tag);
 
         static void createBasicEnemy(World &world, float x, float y);
