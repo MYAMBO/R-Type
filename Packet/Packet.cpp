@@ -105,7 +105,7 @@ void Packet::timeSync(const int time)
  * @param x The x coordinate
  * @param y The y coordinate
  */
-void Packet::playerPosition(const int id, const float x, const float y)
+void Packet::playerPosition(const size_t id, const float x, const float y)
 {
     constexpr int size = sizeof(uint8_t) + sizeof(int) + (sizeof(float) * 2);
 
@@ -123,7 +123,7 @@ void Packet::playerPosition(const int id, const float x, const float y)
  * @param x The x coordinate
  * @param y The y coordinate
  */
-void Packet::positionSpawn(const int id, const uint16_t type, const float x, const float y)
+void Packet::positionSpawn(const size_t id, const uint16_t type, const float x, const float y)
 {
     constexpr int size = sizeof(uint8_t) + sizeof(int) + sizeof(uint16_t) + (sizeof(float) * 2);
 
@@ -139,7 +139,7 @@ void Packet::positionSpawn(const int id, const uint16_t type, const float x, con
  * @param id The of the entity
  * @param value The value of damage
  */
-void Packet::hit(const int id, const int value)
+void Packet::hit(const size_t id, const int value)
 {
     constexpr int size = sizeof(uint8_t) + (sizeof(int) * 2);
 
@@ -154,7 +154,7 @@ void Packet::hit(const int id, const int value)
  * @brief Write dead action in packet
  * @param id The id of the entity
  */
-void Packet::dead(const int id)
+void Packet::dead(const size_t id)
 {
     constexpr int size = sizeof(uint8_t) + sizeof(int);
 
@@ -184,7 +184,7 @@ void Packet::endGame(const uint8_t status)
  * @brief Write shoot action in packet
  * @param id The id of the shooter
  */
-void Packet::shoot(const int id)
+void Packet::shoot(const size_t id)
 {
     constexpr int size = (sizeof(uint8_t) * 2);
 
