@@ -40,12 +40,13 @@
  * @brief Constructs a new Game object.
  *
  * Initializes the game window with specified dimensions and title.
+ * @param network The class containing methods to send packet
  * @param width The width of the game window in pixels. Default is 800.
  * @param height The height of the game window in pixels. Default is 600.
  * @param title The title of the game window. Default is "Game".
  */
-Game::Game(unsigned int width, unsigned int height, const std::string& title)
-    : _window(sf::VideoMode({width, height}), title)
+Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const std::string& title)
+    : _window(sf::VideoMode({width, height}), title), _network(network)
 {
     createPlayer();
     createCamera();

@@ -194,11 +194,11 @@ void Server::sendPacket(const Packet& packet)
     {
         std::string tmp = fst.substr(0, fst.find('.'));
         const std::uint8_t byte0 = stoi(tmp);
-        tmp = tmp.substr(0, fst.find('.'));
+        tmp = tmp.substr(0, tmp.find('.'));
         const std::uint8_t byte1 = stoi(tmp);
-        tmp = tmp.substr(0, fst.find('.'));
+        tmp = tmp.substr(0, tmp.find('.'));
         const std::uint8_t byte2 = stoi(tmp);
-        tmp = tmp.substr(0, fst.find('.'));
+        tmp = tmp.substr(0, tmp.find('.'));
         const std::uint8_t byte3 = stoi(tmp);
 
         if (_udpSocket.send(p.getData(), p.getDataSize(), sf::IpAddress(byte0, byte1, byte2, byte3), snd) != sf::Socket::Status::Done) {

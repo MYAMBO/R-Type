@@ -12,6 +12,7 @@
 
     #include "World.hpp"
     #include "Inputs.hpp"
+    #include "IGameNetwork.hpp"
 
 /**
  * @brief Enumeration for different rendering layers in the game.
@@ -27,7 +28,7 @@ enum LayerType {
  */
 class Game {
     public:
-        Game(unsigned int width = 800, unsigned int height = 600, const std::string& title = "Game");
+        Game(IGameNetwork& network, unsigned int width = 800, unsigned int height = 600, const std::string& title = "Game");
         ~Game();
 
         void run();
@@ -45,6 +46,7 @@ class Game {
 
         World _world;
         sf::RenderWindow _window;
+        IGameNetwork& _network;
         bool _isShootKeyPressed = false;
 };
 

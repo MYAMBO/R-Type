@@ -61,6 +61,7 @@ include_directories(./Server)
 include_directories(./Server/Core)
 include_directories(./Packet)
 include_directories(Server/Game)
+include_directories(Client/Core)
 
 add_executable(r-type_server
         Server/main.cpp
@@ -122,7 +123,10 @@ add_executable(r-type_client
         Packet/Packetreader.cpp
         Packet/Packetreader.hpp
         Packet/MyString.cpp
-        Packet/MyString.hpp)
+        Packet/MyString.hpp
+        Client/Core/Network.cpp
+        Client/Core/Network.hpp
+        Client/Core/ClientPacketreader.hpp)
 
 target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network)
 

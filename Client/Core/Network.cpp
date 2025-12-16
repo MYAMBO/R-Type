@@ -1,0 +1,193 @@
+/*
+** EPITECH PROJECT, 2025
+** R-Type
+** File description:
+** Network
+*/
+
+#include <cstring>
+#include <iostream>
+#include <netinet/in.h>
+#include <bits/getopt_core.h>
+
+#include "Game.hpp"
+#include "Network.hpp"
+#include "ClientPacketreader.hpp"
+
+Network::Network()
+    : _ip(sf::IpAddress(0))
+{
+    _tcpPort = -1;
+    _udpPort = -1;
+    _debugMode = false;
+    _game = std::make_shared<Game>(*this);
+    _packetReader = ClientPacketreader("", false, _game);
+}
+
+auto Network::parse(const int ac, char **av) -> void
+{
+    char *endPtr;
+
+    for (int opt = getopt(ac, av, "p:u:hd"); opt != -1; opt = getopt(ac, av, "p:u:hd"))
+        switch(opt) {
+            case 'p':
+                _tcpPort = strtol(optarg, &endPtr, 10);
+                if (endPtr == optarg)
+                    _tcpPort = -1;
+                break;
+
+            case 'u':
+                std::string option(optarg);
+                std::string tmp = option.substr(0, option.find('.'));
+                const std::uint8_t byte0 = stoi(tmp);
+                tmp = tmp.substr(0, tmp.find('.'));
+                const std::uint8_t byte1 = stoi(tmp);
+                tmp = tmp.substr(0, tmp.find('.'));
+                const std::uint8_t byte2 = stoi(tmp);
+                tmp = tmp.substr(0, tmp.find('.'));
+                const std::uint8_t byte3 = stoi(tmp);
+                _ip = sf::IpAddress(byte0, byte1, byte2, byte3);
+                break;
+
+            case 'd':
+                _debugMode = true;
+                break;
+
+            case 'h':
+                std::cout << "R-TYPE Server - USAGE" << std::endl;
+                std::cout << "\t./r-type_server [-d] [-p TcpPort] [-u UdpPort]" << std::endl;
+                std::cout << std::endl << "\td : debug mode" << std::endl;
+                std::cout <<  "\tp : specify the TCP port (mandatory)" << std::endl;
+                std::cout <<  "\tu : specify the UDP port (mandatory)" << std::endl;
+                break;
+
+            default:
+                std::cerr << "R-TYPE Server - USAGE" << std::endl;
+                std::cerr << "\t./r-type_server [-d] [-p TcpPort] [-u UdpPort]" << std::endl;
+                std::cerr << std::endl << "\td : debug mode" << std::endl;
+                std::cerr <<  "\tp : specify the TCP port (mandatory)" << std::endl;
+                std::cerr <<  "\tu : specify the UDP port (mandatory)" << std::endl;
+                throw InitServerException("");
+        }
+    if (_tcpPort == -1)
+        throw InitServerException("TCP port must be specified. Check the helper with the -h option.");
+    if (_udpPort == -1)
+        throw InitServerException("UDP port must be specified. Check the helper with the -h option.");
+}
+
+auto Network::initClient() -> void
+{
+    _tcpListener = sf::TcpListener();
+    _udpSocket = sf::UdpSocket();
+
+    if (_tcpListener.listen(_tcpPort) != sf::Socket::Status::Done)
+        throw InitServerException();
+    log("TCP server listening on port " + std::to_string(_tcpPort));
+    if (_udpSocket.bind(_udpPort) != sf::Socket::Status::Done)
+        throw InitServerException();
+    log("UDP server listening on port " + std::to_string(_udpPort));
+}
+
+void Network::udpThread()
+{
+    sf::Packet p;
+
+    std::optional<sf::IpAddress> sender;
+    unsigned short rport;
+    while (true)
+    {
+        p.clear();
+        if (_udpSocket.receive(p, sender, rport) != sf::Socket::Status::Done)
+        {
+            // error...
+        }
+        const void* raw = p.getData();
+        const std::size_t size = p.getDataSize();
+
+        std::string data(static_cast<const char*>(raw), size);
+        _packetReader.addData(data);
+        try
+        {
+            _packetReader.interpretPacket();
+        }
+        catch (std::exception& e)
+        {
+            _packetReader.clear();
+            log("UDP | Failed to interpret packet : " + std::string(e.what()));
+        }
+        log("UDP | Received " + std::to_string(p.getDataSize()) + " bytes from " + sender.value().toString() + " on port " + std::to_string(rport));
+    }
+}
+
+void Network::tcpThread()
+{
+    while (true)
+    {
+        std::array<char, 1024> data {};
+        std::size_t received;
+
+        data.fill(0);
+        if (_tcpClient.receive(data.data(), data.size(), received) != sf::Socket::Status::Done)
+            continue;
+        data[received - 1] = '\0';
+        std::string message;
+    }
+}
+
+void Network::log(const std::string& message) const
+{
+    if (_debugMode)
+    {
+        const auto time = std::chrono::system_clock::now();
+        const std::time_t end_time = std::chrono::system_clock::to_time_t(time);
+        std::string time_string = std::ctime(&end_time);
+        time_string.erase(time_string.end() - 1, time_string.end());
+        std::cout << "[" << time_string << "] " << message << std::endl;
+
+    }
+}
+
+void Network::sendPacket(const Packet& packet)
+{
+    const sf::Packet p = packet.getPacket();
+
+    if (_udpSocket.send(p.getData(), p.getDataSize(), _ip, _udpPort) != sf::Socket::Status::Done) {
+        log("UDP | Failed to send packet to server");
+    }
+}
+
+void Network::sendAll(sf::TcpSocket& socket, const void* data, const std::size_t size)
+{
+    std::size_t sent = 0;
+
+    while (sent < size)
+    {
+        std::size_t justSent = 0;
+        const auto status = socket.send(
+            static_cast<const char*>(data) + sent,
+            size - sent,
+            justSent
+        );
+
+        if (status != sf::Socket::Status::Done)
+            throw std::runtime_error("TCP send failed");
+
+        sent += justSent;
+    }
+}
+
+void Network::sendMessage(const std::string &message)
+{
+    sendAll(_tcpClient, message.data(), message.size());
+}
+
+void Network::start()
+{
+    _tcpClient = sf::TcpSocket();
+
+    std::thread tcpThread(&Network::tcpThread, this);
+    std::thread udpThread(&Network::udpThread, this);
+    _game->run();
+    tcpThread.join();
+    udpThread.join();
+}
