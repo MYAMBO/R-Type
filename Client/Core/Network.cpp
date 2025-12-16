@@ -24,6 +24,19 @@ Network::Network()
     _packetReader = ClientPacketreader("", false, _game);
 }
 
+void Network::getIpAdress(std::string option)
+{
+    std::string tmp = option.substr(0, option.find('.'));
+    const std::uint8_t byte0 = stoi(tmp);
+    tmp = tmp.substr(0, tmp.find('.'));
+    const std::uint8_t byte1 = stoi(tmp);
+    tmp = tmp.substr(0, tmp.find('.'));
+    const std::uint8_t byte2 = stoi(tmp);
+    tmp = tmp.substr(0, tmp.find('.'));
+    const std::uint8_t byte3 = stoi(tmp);
+    _ip = sf::IpAddress(byte0, byte1, byte2, byte3);
+}
+
 auto Network::parse(const int ac, char **av) -> void
 {
     char *endPtr;
@@ -36,17 +49,8 @@ auto Network::parse(const int ac, char **av) -> void
                     _tcpPort = -1;
                 break;
 
-            case 'u':
-                std::string option(optarg);
-                std::string tmp = option.substr(0, option.find('.'));
-                const std::uint8_t byte0 = stoi(tmp);
-                tmp = tmp.substr(0, tmp.find('.'));
-                const std::uint8_t byte1 = stoi(tmp);
-                tmp = tmp.substr(0, tmp.find('.'));
-                const std::uint8_t byte2 = stoi(tmp);
-                tmp = tmp.substr(0, tmp.find('.'));
-                const std::uint8_t byte3 = stoi(tmp);
-                _ip = sf::IpAddress(byte0, byte1, byte2, byte3);
+        case 'u':
+                getIpAdress(std::string(optarg));
                 break;
 
             case 'd':

@@ -49,6 +49,7 @@ class Network : public IGameNetwork {
         };
 
     private:
+        void getIpAdress(std::string option);
         sf::UdpSocket _udpSocket;
         sf::TcpListener _tcpListener;
         sf::TcpSocket _tcpClient;

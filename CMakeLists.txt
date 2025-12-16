@@ -118,15 +118,9 @@ add_executable(r-type_client
         ECS/Component/Animator/Animator.cpp
         ECS/Component/BoxCollider/BoxCollider.cpp
         Packet/Packet.cpp
-        Packet/Packet.hpp
-        Packet/CustomError.hpp
-        Packet/Packetreader.cpp
-        Packet/Packetreader.hpp
         Packet/MyString.cpp
-        Packet/MyString.hpp
         Client/Core/Network.cpp
-        Client/Core/Network.hpp
-        Client/Core/ClientPacketreader.hpp)
+        Client/Core/ClientPacketreader.cpp)
 
 target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network)
 

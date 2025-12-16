@@ -5,6 +5,7 @@
 ** main of the client
 */
 
+#include "Network.hpp"
 #include "Game/Game.hpp"
 
 /**
@@ -20,7 +21,8 @@
  */
 auto main() -> int
 {
-	Game game(1920, 1080, "R-Type");
+	Network network;
+	Game game(network, 1920, 1080, "R-Type");
 	game.run();
 	return 0;
 }
