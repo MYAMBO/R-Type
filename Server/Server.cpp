@@ -14,49 +14,76 @@ Server::Server()
     _debugMode = false;
 }
 
-auto Server::parse(int ac, char **av) -> void
+auto Server::parse(int ac, char** av) -> void
 {
-    char *endPtr;
+    char* endPtr;
+    bool help_requested = false;
 
-    for (int opt = getopt(ac, av, "p:u:hd"); opt != -1; opt = getopt(ac, av, "p:u:hd"))
-        switch(opt) {
-            case 'p':
-                _tcpPort = strtol(optarg, &endPtr, 10);
-                if (endPtr == optarg)
+    for (int i = 1; i < ac; ++i) {
+        std::string arg = av[i];
+
+        if (arg == "-p") {
+            if (i + 1 < ac) {
+                _tcpPort = strtol(av[i + 1], &endPtr, 10);
+                if (endPtr == av[i + 1]) {
                     _tcpPort = -1;
-                continue;
-
-            case 'u':
-                _udpPort = strtol(optarg, &endPtr, 10);
-                if (endPtr == optarg)
-                    _udpPort = -1;
-                continue;
-
-            case 'd':
-                _debugMode = true;
+                }
+                i++;
+            }
+            else {
+                std::cerr << "Error: -p requires a port number." << std::endl;
+                help_requested = true;
                 break;
-
-            case 'h':
-                std::cout << "R-TYPE Server - USAGE" << std::endl;
-                std::cout << "\t./r-type_server [-d] [-p TcpPort] [-u UdpPort]" << std::endl;
-                std::cout << std::endl << "\td : debug mode" << std::endl;
-                std::cout <<  "\tp : specify the TCP port (mandatory)" << std::endl;
-                std::cout <<  "\tu : specify the UDP port (mandatory)" << std::endl;
-                break;
-
-            default :
-                std::cerr << "R-TYPE Server - USAGE" << std::endl;
-                std::cerr << "\t./r-type_server [-d] [-p TcpPort] [-u UdpPort]" << std::endl;
-                std::cerr << std::endl << "\td : debug mode" << std::endl;
-                std::cerr <<  "\tp : specify the TCP port (mandatory)" << std::endl;
-                std::cerr <<  "\tu : specify the UDP port (mandatory)" << std::endl;
-                throw InitServerException("");
+            }
         }
-    if (_tcpPort == -1)
-        throw InitServerException("TCP port must be specified. Check the helper with the -h option.");
-    if (_udpPort == -1)
-        throw InitServerException("UDP port must be specified. Check the helper with the -h option.");
+        else if (arg == "-u") {
+            if (i + 1 < ac) {
+                _udpPort = strtol(av[i + 1], &endPtr, 10);
+                if (endPtr == av[i + 1]) {
+                    _udpPort = -1;
+                }
+                i++;
+            }
+            else {
+                std::cerr << "Error: -u requires a port number." << std::endl;
+                help_requested = true;
+                break;
+            }
+        }
+        else if (arg == "-d") {
+            _debugMode = true;
+        }
+        else if (arg == "-h") {
+            help_requested = true;
+            break;
+        }
+        else {
+            std::cerr << "Error: Unknown argument '" << arg << "'" << std::endl;
+            help_requested = true;
+            break;
+        }
+    }
+
+    if (help_requested || _tcpPort == -1 || _udpPort == -1) {
+        std::cout << "R-TYPE Server - USAGE" << std::endl;
+        std::cout << "\t./r-type_server [-d] [-p TcpPort] [-u UdpPort]" << std::endl;
+        std::cout << std::endl << "\td : debug mode" << std::endl;
+        std::cout << "\tp : specify the TCP port (mandatory)" << std::endl;
+        std::cout << "\tu : specify the UDP port (mandatory)" << std::endl;
+
+        if (_tcpPort == -1) {
+            throw InitServerException("TCP port must be specified. Check the helper with the -h option.");
+        }
+        if (_udpPort == -1) {
+            throw InitServerException("UDP port must be specified. Check the helper with the -h option.");
+        }
+        if (help_requested) {
+            return;
+        }
+        throw InitServerException("Invalid arguments provided. Check the helper with the -h option.");
+    }
 }
+
 
 
 auto Server::initServer() -> void
