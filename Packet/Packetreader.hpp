@@ -23,6 +23,7 @@ class Packetreader
 
         void interpretPacket();
         void addData(const std::string& data);
+        void clear();
     private:
         bool _isClient;
         MyString _data;

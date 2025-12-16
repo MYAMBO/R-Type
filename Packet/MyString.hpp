@@ -24,6 +24,8 @@ class MyString {
 
         void append(const char *string);
 
+        void clear();
+
         [[nodiscard]] std::string substr(size_t pos, size_t n) const;
 
         [[nodiscard]] size_t size() const;

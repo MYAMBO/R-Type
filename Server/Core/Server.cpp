@@ -110,7 +110,15 @@ void Server::udpThread()
 
         std::string data(static_cast<const char*>(raw), size);
         _packetReader.addData(data);
-        _packetReader.interpretPacket();
+        try
+        {
+            _packetReader.interpretPacket();
+        }
+        catch (std::exception& e)
+        {
+            _packetReader.clear();
+            log("UDP | Failed to interpret packet : " + std::string(e.what()));
+        }
         log("UDP | Received " + std::to_string(p.getDataSize()) + " bytes from " + sender.value().toString() + " on port " + std::to_string(rport));
     }
 }

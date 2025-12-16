@@ -72,6 +72,11 @@ void Packetreader::updateEntity()
     }
 }
 
+void Packetreader::clear()
+{
+    _data.clear();
+}
+
 /**
  * @brief interpret hit action
  */

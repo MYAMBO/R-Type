@@ -68,3 +68,12 @@ void MyString::append(const char* string)
 {
     _data.append(string);
 }
+
+/**
+ * @brief A wrapped operator from std::string
+ */
+void MyString::clear()
+{
+    _data.clear();
+}
+
