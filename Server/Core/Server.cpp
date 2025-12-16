@@ -173,18 +173,23 @@ void Server::accepterThread()
 
 void Server::sendPacket(const Packet& packet)
 {
-    log("Coucou Yanis");
-    // sf::Packet p = packet.getPacket();
-    //
-    // for (auto &user : _users)
-    // {
-    //     sf::IpAddress address = sf::IpAddress::parse(user.getIp());
-    //
-    //     if (_udpSocket.send(p.getData(), p.getDataSize(), , user.getPort()) != sf::Socket::Status::Done)
-    //     {
-    //         log("TCP | Failed to send packet to client " + std::to_string(user.getId()));
-    //     }
-    // }
+    const sf::Packet p = packet.getPacket();
+
+    for (auto &user : _users)
+    {
+        std::string tmp = user.getIp().substr(0, user.getIp().find('.'));
+        const std::uint8_t byte0 = stoi(tmp);
+        tmp = tmp.substr(0, user.getIp().find('.'));
+        const std::uint8_t byte1 = stoi(tmp);
+        tmp = tmp.substr(0, user.getIp().find('.'));
+        const std::uint8_t byte2 = stoi(tmp);
+        tmp = tmp.substr(0, user.getIp().find('.'));
+        const std::uint8_t byte3 = stoi(tmp);
+
+        if (_udpSocket.send(p.getData(), p.getDataSize(), sf::IpAddress(byte0, byte1, byte2, byte3), user.getPort()) != sf::Socket::Status::Done) {
+            log("UDP | Failed to send packet to client " + std::to_string(user.getId()));
+        }
+    }
 }
 
 void Server::sendAll(sf::TcpSocket& socket, const void* data, const std::size_t size)
