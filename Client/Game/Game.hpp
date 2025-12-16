@@ -23,6 +23,14 @@ enum LayerType {
     UI = 1000,
 };
 
+enum PlayerColor {
+    BLUE = 0,
+    PURPLE,
+    RED,
+    GREEN
+};
+
+
 /**
  * @brief Main Game class to handle the game window and loop.
  */
@@ -34,14 +42,12 @@ class Game {
         void run();
     private:
         void gameInput(std::shared_ptr<Inputs> inputSystem);
-        void playerInput(std::shared_ptr<Inputs> inputSystem);
 
         void createCamera();
         void createPlayer();
-        void createBullet(int entityId);
+        void createBackground();
         void createEnemy(float x, float y, int type);
 
-        void bulletMovement();
         void bulletShooting();
 
         World _world;

@@ -19,15 +19,18 @@
 */
 class Velocity : public Component {
     public:
-        explicit Velocity(float velocity);
+        explicit Velocity(float velocityX, float velocityY);
         ~Velocity() override = default;
 
-    [[nodiscard]] float getVelocity() const;
+    [[nodiscard]] float getVelocityX() const;
+    [[nodiscard]] float getVelocityY() const;
 
-    void setVelocity(float velocity);
+    void setVelocityX(float velocityX);
+    void setVelocityY(float velocityY);
 
     private:
-        float _velocity;
+        float _velocityX;
+        float _velocityY;
 
 };
 

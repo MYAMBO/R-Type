@@ -44,6 +44,7 @@ include_directories(ECS/Component/Camera)
 include_directories(ECS/Component/Sprite)
 include_directories(ECS/Component/Camera)
 include_directories(ECS/Component/Script)
+include_directories(ECS/Component/Damage)
 include_directories(ECS/Component/Animator)
 include_directories(ECS/Component/Position)
 include_directories(ECS/Component/Velocity)
@@ -53,10 +54,12 @@ include_directories(ECS/System)
 include_directories(ECS/System/Draw)
 include_directories(ECS/System/Updater)
 include_directories(ECS/System/Inputs)
+include_directories(ECS/System/Collision)
 include_directories(ECS/Entity)
 include_directories(Client)
 include_directories(Client/Game)
 include_directories(Client/GameHelper)
+include_directories(Client/ScriptsHandler)
 include_directories(./Server)
 include_directories(./Server/Core)
 include_directories(./Packet)
@@ -99,10 +102,12 @@ add_executable(r-type_client
         Client/main.cpp
         Client/Game/Game.cpp
         Client/GameHelper/GameHelper.cpp
+        Client/ScriptsHandler/ScriptsHandler.cpp
         ECS/Entity/Entity.cpp
         ECS/System/Draw/Draw.cpp
         ECS/System/Inputs/Inputs.cpp
         ECS/System/Updater/Updater.cpp
+        ECS/System/Collision/Collision.cpp
         ECS/World.cpp
         ECS/Component/HP/HP.cpp
         ECS/Component/Tag/Tag.cpp
@@ -112,6 +117,7 @@ add_executable(r-type_client
         ECS/Component/Script/Script.cpp
         ECS/Component/Sprite/Sprite.cpp
         ECS/Component/Camera/Camera.cpp
+        ECS/Component/Damage/Damage.cpp
         ECS/Component/Position/Position.cpp
         ECS/Component/Velocity/Velocity.cpp
         ECS/Component/Rotation/Rotation.cpp
