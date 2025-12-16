@@ -68,5 +68,6 @@ class Server : public IGameNetwork
         std::mutex _mutex;
         std::shared_ptr<ServerGame> _game;
         Packetreader _packetReader;
+        std::vector<std::pair<std::string, unsigned short>> _udpUsers;
 };
 #endif // SERVER
