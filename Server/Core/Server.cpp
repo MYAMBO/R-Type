@@ -177,11 +177,11 @@ void Server::accepterThread()
             (_tcpClient.getRemoteAddress().has_value() ?
                 ip : ""));
         _tcpClient.setBlocking(false);
-        
+
         std::array<std::uint8_t, 6> buffer{};
         buffer[0] = 0x01;
         unsigned int playerId;
-        
+
         {
             std::lock_guard<std::mutex> lock(_mutex);
             _users.emplace_back(port, ip, std::make_shared<sf::TcpSocket>(std::move(_tcpClient)));
@@ -210,8 +210,18 @@ void Server::sendPacket(Packet& packet)
     const sf::Packet p = packet.getPacket();
 
     {
-        std::lock_guard lock(_sendQueueMutex);
-        _sendQueue.push(p);
+        std::string tmp = fst.substr(0, fst.find('.'));
+        const std::uint8_t byte0 = stoi(tmp);
+        tmp = tmp.substr(0, tmp.find('.'));
+        const std::uint8_t byte1 = stoi(tmp);
+        tmp = tmp.substr(0, tmp.find('.'));
+        const std::uint8_t byte2 = stoi(tmp);
+        tmp = tmp.substr(0, tmp.find('.'));
+        const std::uint8_t byte3 = stoi(tmp);
+
+        if (_udpSocket.send(p.getData(), p.getDataSize(), sf::IpAddress(byte0, byte1, byte2, byte3), snd) != sf::Socket::Status::Done) {
+            log("UDP | Failed to send packet to client at port " + std::to_string(snd));
+        }
     }
     log("Packet queued");
 }

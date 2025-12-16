@@ -3,12 +3,14 @@
 The HP component holds the HP (Health point)
 
 
-| Method | Signature | Description |
-| :--- | :--- | :--- |
-| **Get HP** | `unsigned int getHP() const;` | Returns the current HP. |
-| **Get MaxHP** | `unsigned int getMaxHP() const;` | Returns the current Max Hp. |
-| **Set HP** | `void setHP(unsigned int maxHp);` | Updates the HP. |
-| **Set MaxHP** | `void setMaxHP(unsigned int maxHp);` | Updates the MaxHP. |
+| Method           | Signature | Description |
+|:-----------------| :--- | :--- |
+| **Get HP**       | `unsigned int getHP() const;` | Returns the current HP. |
+| **Get MaxHP**    | `unsigned int getMaxHP() const;` | Returns the current Max Hp. |
+| **Set HP**       | `void setHP(unsigned int maxHp);` | Updates the HP. |
+| **Set MaxHP**    | `void setMaxHP(unsigned int maxHp);` | Updates the MaxHP. |
+| **Get is alive** |  `bool isAlive()` | get if the current player is alive|
+| **set alive**    |  `void setAlive(bool alive)` | update the alive value |
 
 
 ```mermaid

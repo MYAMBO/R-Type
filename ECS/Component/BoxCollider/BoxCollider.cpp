@@ -9,11 +9,16 @@
 
 /**
  * @brief Constructs a new BoxCollider component with specify size.
- * @param size The box collider size.
+ * @param width The box collider width.
+ * @param height The box collider height.
 */
-BoxCollider::BoxCollider(const sf::Vector2f &size)
-    : _size(size), _offset(-size.x / 2.0f, -size.y / 2.0f)
+BoxCollider::BoxCollider(const float width, const float height)
+    : _x(width), _y(height)
 {
+    if (width <= 0)
+        _x = 0.1f;
+    if (height <= 0)
+        _y = 0.1f;
 }
 
 /**
@@ -40,7 +45,7 @@ bool BoxCollider::isTrigger() const
 */
 sf::Vector2f BoxCollider::getSize() const
 {
-    return _size;
+    return {_x, _y};
 }
 
 /**
@@ -49,9 +54,8 @@ sf::Vector2f BoxCollider::getSize() const
 */
 sf::Vector2f BoxCollider::getOffset() const
 {
-    return _offset;
+    return {-_x / 2.f, -_y / 2.f};
 }
-
 /**
  * @brief Sets the trigger value of the box collider.
  * @param trigger The new trigger value of the box collider.
@@ -65,26 +69,23 @@ void BoxCollider::setTrigger(const bool trigger)
  * @brief Sets the visibility value of the box collider.
  * @param visible The new visibility value of the box collider.
 */
-void BoxCollider::setVisibility(bool visible)
+void BoxCollider::setVisibility(const bool visible)
 {
     _visible = visible;
 }
 
 /**
  * @brief Sets the size vector of the box collider.
- * @param size The new size vector of the box collider.
+ * @param width The new width of the box collider.
+ * @param height The new height of the box collider.
 */
-void BoxCollider::setSize(const sf::Vector2f &size)
+void BoxCollider::setSize(const float width, const float height)
 {
-    _size = size;
-    _offset = sf::Vector2f(-size.x / 2.0f, -size.y / 2.0f);
-}
+    _x = width;
+    _y = height;
 
-/**
- * @brief Sets the offset vector of the box collider.
- * @param offset The new offset vector of the box collider.
-*/
-void BoxCollider::setOffset(const sf::Vector2f &offset)
-{
-    _offset = offset;
+    if (_x <= 0.0f)
+        _x = 0.1f;
+    if (_y <= 0.0f)
+        _y = 0.1f;
 }

@@ -5,6 +5,9 @@
 ** main of the client
 */
 
+#include <iostream>
+
+#include "Network.hpp"
 #include "Game/Game.hpp"
 
 /**
@@ -18,9 +21,20 @@
  * @retval 0 Successful execution.
  * @retval 1 Execution error.
  */
-auto main() -> int
+auto main(const int ac, char **av) -> int
 {
-	Game game(1920, 1080, "R-Type");
-	game.run();
+	try
+	{
+		Network network;
+		network.parse(ac, av);
+		network.initClient();
+		network.start();
+	}
+	catch (const Network::InitServerException& e)
+	{
+		if (std::string(e.what()).empty() == false)
+			std::cerr << e.what() << std::endl;
+		return 84;
+	}
 	return 0;
 }
