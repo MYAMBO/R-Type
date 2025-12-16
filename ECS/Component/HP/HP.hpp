@@ -26,9 +26,14 @@ class HP : public Component {
 
         [[nodiscard]] unsigned int getMaxHP() const;
         void setMaxHP(unsigned int maxHp);
+
+        [[nodiscard]] bool isAlive() const;
+        void setAlive(bool alive);
+
     private:
         unsigned int _hp;
         unsigned int _maxHp;
+        bool _isAlive;
 };
 
 #endif /* !HP_HPP_ */
