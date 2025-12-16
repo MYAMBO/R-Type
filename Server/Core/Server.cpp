@@ -209,6 +209,7 @@ void Server::sendPacket(Packet& packet)
     packet.setTotalPacketNbr(1);
     const sf::Packet p = packet.getPacket();
 
+    for (auto &[fst, snd] : _udpUsers)
     {
         std::string tmp = fst.substr(0, fst.find('.'));
         const std::uint8_t byte0 = stoi(tmp);

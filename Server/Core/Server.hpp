@@ -67,8 +67,6 @@ class Server : public IGameNetwork
         bool _debugMode;
         std::vector<User> _users;
         std::mutex _mutex;
-        std::mutex _sendQueueMutex;
-        std::queue<sf::Packet> _sendQueue;
         std::shared_ptr<ServerGame> _game;
         Packetreader _packetReader;
         std::vector<std::pair<std::string, unsigned short>> _udpUsers;
