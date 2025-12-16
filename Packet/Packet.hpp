@@ -28,14 +28,14 @@ class Packet
         void setTotalPacketNbr(uint8_t totalPacketNbr);
 
         void timeSync(int time);
-        void playerPosition(int id, float x, float y);
-        void positionSpawn(int id, uint16_t type, float x, float y);
-        void hit(int id, int value);
-        void dead(int id);
+        void playerPosition(size_t id, float x, float y);
+        void positionSpawn(size_t id, uint16_t type, float x, float y);
+        void hit(size_t id, int value);
+        void dead(size_t id);
         void endGame(uint8_t status);
-        void shoot(int id);
+        void shoot(size_t id);
 
-        sf::Packet getPacket() const;
+        [[nodiscard]] sf::Packet getPacket() const;
     private:
         sf::Packet _packet;
         int _dataSize;

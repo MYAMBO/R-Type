@@ -7,6 +7,7 @@
 
 #include "HP.hpp"
 #include "Tag.hpp"
+#include "Server.hpp"
 #include "Packet.hpp"
 #include "Script.hpp"
 #include "Updater.hpp"
@@ -33,9 +34,15 @@ ServerGame::ServerGame()
  */
 void ServerGame::run()
 {
-    createWave();
+    sf::Clock clock;
 
+    createWave();
+    clock.start();
     while (true) {
+        if (clock.getElapsedTime().asMilliseconds() > 20) {
+            createWave();
+            clock.restart();
+        }
         _world.manageSystems();
     }
 }
@@ -56,6 +63,7 @@ void ServerGame::createPlayer(const float x, const float y)
     player->addComponent<Tag>("player");
     Packet packet;
     packet.positionSpawn(player->getId(), Player, x, y);
+
     // call function to send packet
 }
 
@@ -72,7 +80,7 @@ static void EnemyMovement(const int entityId, const World &world)
     if (const auto pos = entity->getComponent<Position>(); pos->getX() > 500) {
         pos->setX(pos->getX() - 10 * world.getDeltaTime());
         Packet packet;
-        packet.positionSpawn(entity->getId(), None, pos->getX(), pos->getY());
+        packet.positionSpawn(entityId, None, pos->getX(), pos->getY());
         // call function to send packet
     }
 }
@@ -92,10 +100,8 @@ void ServerGame::createEnemy(const float x, const float y)
     enemy->addComponent<BoxCollider>((sf::Vector2f){10.f, 10.f});
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<Script>(EnemyMovement);
-// call function to send packet
     Packet packet;
     packet.positionSpawn(enemy->getId(), Enemy, x, y);
-    // call function to send packet
 }
 
 /**
@@ -103,8 +109,8 @@ void ServerGame::createEnemy(const float x, const float y)
  */
 void ServerGame::createWave()
 {
-    for (auto i = 0; i < 10; ++i)
-        createEnemy(1920 + i * 50, 940);
+    for (int i = 0; i < 10; i++)
+        createEnemy(1920 + static_cast<float>(i) * 50, 940);
 }
 
 /**
@@ -123,11 +129,11 @@ static void BulletMovement(const int entityId, World &world)
         // check collisions with enemies
     }
     if (pos->getX() > 3000) {
-        world.killEntity(entity->getId());
-        packet.dead(entity->getId());
+        world.killEntity(entityId);
+        packet.dead(entityId);
     } else {
         pos->setX(pos->getX() + 10 * world.getDeltaTime());
-        packet.positionSpawn(entity->getId(), None, pos->getX(), pos->getY());
+        packet.positionSpawn(entityId, None, pos->getX(), pos->getY());
     }
     // call function to send packet
 }
@@ -148,6 +154,7 @@ void ServerGame::createBullet(const float x, const float y)
     bullet->addComponent<Script>(BulletMovement);
     Packet packet;
     packet.positionSpawn(bullet->getId(), Bullet, x, y);
+
     // call function to send packet
 }
 
