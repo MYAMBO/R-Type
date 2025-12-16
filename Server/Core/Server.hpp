@@ -13,6 +13,7 @@
 #include <iostream>
 #include <mutex>
 #include <cstring>
+#include <queue>
 #include <unistd.h>
 
 #include "IGameNetwork.hpp"
@@ -34,7 +35,7 @@ class Server : public IGameNetwork
         void udpThread();
         void tcpThread();
         void accepterThread();
-        void sendPacket(const Packet& packet) override;
+        void sendPacket(Packet& packet) override;
         void sendMessage(std::string message, sf::IpAddress ip, unsigned short port);
         void sendMessage(std::string message, unsigned int playerId);
         static void sendAll(sf::TcpSocket& socket, const void* data, std::size_t size);
@@ -66,6 +67,8 @@ class Server : public IGameNetwork
         bool _debugMode;
         std::vector<User> _users;
         std::mutex _mutex;
+        std::mutex _sendQueueMutex;
+        std::queue<sf::Packet> _sendQueue;
         std::shared_ptr<ServerGame> _game;
         Packetreader _packetReader;
         std::vector<std::pair<std::string, unsigned short>> _udpUsers;

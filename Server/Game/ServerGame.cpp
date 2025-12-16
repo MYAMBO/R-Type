@@ -37,13 +37,15 @@ void ServerGame::run()
     sf::Clock clock;
 
     createWave();
+    _world.manageSystems();
     clock.start();
     while (true) {
-        if (clock.getElapsedTime().asMilliseconds() > 20) {
-            createWave();
+        if (clock.getElapsedTime().asMilliseconds() > 50) {
+            // createWave();
+            _world.manageSystems();
             clock.restart();
         }
-        _world.manageSystems();
+
     }
 }
 
@@ -64,7 +66,7 @@ void ServerGame::createPlayer(const float x, const float y)
     Packet packet;
     packet.positionSpawn(player->getId(), Player, x, y);
 
-    // call function to send packet
+    _network.sendPacket(packet);
 }
 
 /**
@@ -72,8 +74,9 @@ void ServerGame::createPlayer(const float x, const float y)
  *
  * @param entityId the ID if the entity.
  * @param world the world where all entity are contains.
+ * @param network network interface
  */
-static void EnemyMovement(const int entityId, const World &world)
+void ServerGame::EnemyMovement(const int entityId, const World &world)
 {
     const auto entity = world.getAllEntitiesWithComponent<Tag>()[entityId];
 
@@ -81,7 +84,7 @@ static void EnemyMovement(const int entityId, const World &world)
         pos->setX(pos->getX() - 10 * world.getDeltaTime());
         Packet packet;
         packet.positionSpawn(entityId, None, pos->getX(), pos->getY());
-        // call function to send packet
+        _network.sendPacket(packet);
     }
 }
 
@@ -99,7 +102,12 @@ void ServerGame::createEnemy(const float x, const float y)
     enemy->addComponent<Position>(x, y);
     enemy->addComponent<BoxCollider>((sf::Vector2f){10.f, 10.f});
     enemy->addComponent<Tag>("enemy");
-    enemy->addComponent<Script>(EnemyMovement);
+    enemy->addComponent<Script>(
+        [this](const int entityId, const World& world)
+        {
+            this->EnemyMovement(entityId, world);
+        }
+    );
     Packet packet;
     packet.positionSpawn(enemy->getId(), Enemy, x, y);
 }
@@ -119,7 +127,7 @@ void ServerGame::createWave()
  * @param entityId the ID if the entity.
  * @param world the world where all entity are contains.
  */
-static void BulletMovement(const int entityId, World &world)
+void ServerGame::BulletMovement(const int entityId, World &world)
 {
     const auto entity = world.getAllEntitiesWithComponent<Tag>()[entityId];
     const auto pos = entity->getComponent<Position>();
@@ -135,7 +143,7 @@ static void BulletMovement(const int entityId, World &world)
         pos->setX(pos->getX() + 10 * world.getDeltaTime());
         packet.positionSpawn(entityId, None, pos->getX(), pos->getY());
     }
-    // call function to send packet
+    _network.sendPacket(packet);
 }
 
 /**
@@ -151,11 +159,16 @@ void ServerGame::createBullet(const float x, const float y)
     bullet->addComponent<Position>(x, y);
     bullet->addComponent<BoxCollider>((sf::Vector2f){5.f, 5.f});
     bullet->addComponent<Tag>("bullet");
-    bullet->addComponent<Script>(BulletMovement);
+    bullet->addComponent<Script>(
+        [this](const int entityId, World& world)
+        {
+            this->BulletMovement(entityId, world);
+        }
+    );
     Packet packet;
     packet.positionSpawn(bullet->getId(), Bullet, x, y);
 
-    // call function to send packet
+    _network.sendPacket(packet);
 }
 
 /**
@@ -188,7 +201,7 @@ void ServerGame::handleNewPlayerPosition(const int id, const float x, const floa
 
     Packet packet;
     packet.positionSpawn(id, None, x, y);
-    // call function to send packet
+    _network.sendPacket(packet);
 }
 
 /**

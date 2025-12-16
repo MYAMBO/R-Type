@@ -103,8 +103,13 @@ void Server::udpThread()
         p.clear();
         if (_udpSocket.receive(p, sender, rport) != sf::Socket::Status::Done)
         {
-            // error...
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            continue;
         }
+
+        if (!sender.has_value())
+            continue;
+
         const void* raw = p.getData();
         const std::size_t size = p.getDataSize();
 
@@ -137,6 +142,8 @@ void Server::tcpThread()
         _mutex.lock();
         auto tmp_list = _users;
         _mutex.unlock();
+
+        bool dataReceived = false;
         for (const auto& tmp : tmp_list)
         {
             std::array<char, 1024> data {};
@@ -145,10 +152,15 @@ void Server::tcpThread()
             data.fill(0);
             if (tmp.getSocket()->receive(data.data(), data.size(), received) != sf::Socket::Status::Done)
                 continue;
+
+            dataReceived = true;
             data[received - 1] = '\0';
             std::string message;
             log("TCP | Received " + std::to_string(received) + " bytes with value " + data.data() + " from client " + std::to_string(tmp.getId()) + " with port " + std::to_string(tmp.getPort()) + " with ip " + tmp.getIp());
         }
+
+        if (!dataReceived)
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 }
 
@@ -165,12 +177,17 @@ void Server::accepterThread()
             (_tcpClient.getRemoteAddress().has_value() ?
                 ip : ""));
         _tcpClient.setBlocking(false);
-        _mutex.lock();
-        _users.emplace_back(port, ip, std::make_shared<sf::TcpSocket>(std::move(_tcpClient)));
+        
         std::array<std::uint8_t, 6> buffer{};
-
         buffer[0] = 0x01;
-        buffer[1] = static_cast<std::uint8_t>(_users.back().getId());
+        unsigned int playerId;
+        
+        {
+            std::lock_guard<std::mutex> lock(_mutex);
+            _users.emplace_back(port, ip, std::make_shared<sf::TcpSocket>(std::move(_tcpClient)));
+            playerId = _users.back().getId();
+            buffer[1] = static_cast<std::uint8_t>(playerId);
+        }
 
         std::uint32_t udpPort = htonl(_udpPort);
         std::memcpy(&buffer[2], &udpPort, sizeof(udpPort));
@@ -180,31 +197,23 @@ void Server::accepterThread()
             buffer.size()
         );
 
-        sendMessage(message, _users.back().getId());
-
-        _mutex.unlock();
+        sendMessage(message, playerId);
     }
 }
 
-void Server::sendPacket(const Packet& packet)
+void Server::sendPacket(Packet& packet)
 {
-    const sf::Packet p = packet.getPacket();
-
-    for (auto &[fst, snd] : _udpUsers)
-    {
-        std::string tmp = fst.substr(0, fst.find('.'));
-        const std::uint8_t byte0 = stoi(tmp);
-        tmp = tmp.substr(0, fst.find('.'));
-        const std::uint8_t byte1 = stoi(tmp);
-        tmp = tmp.substr(0, fst.find('.'));
-        const std::uint8_t byte2 = stoi(tmp);
-        tmp = tmp.substr(0, fst.find('.'));
-        const std::uint8_t byte3 = stoi(tmp);
-
-        if (_udpSocket.send(p.getData(), p.getDataSize(), sf::IpAddress(byte0, byte1, byte2, byte3), snd) != sf::Socket::Status::Done) {
-            log("UDP | Failed to send packet to client at port " + std::to_string(snd));
-        }
-    }
+    // packet.setId(0);
+    // packet.setAck(0);
+    // packet.setPacketNbr(1);
+    // packet.setTotalPacketNbr(1);
+    // const sf::Packet p = packet.getPacket();
+    //
+    // {
+    //     std::lock_guard lock(_sendQueueMutex);
+    //     _sendQueue.push(p);
+    // }
+    log("Packet queued");
 }
 
 void Server::sendAll(sf::TcpSocket& socket, const void* data, const std::size_t size)

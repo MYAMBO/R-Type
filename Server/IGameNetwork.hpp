@@ -14,7 +14,7 @@ struct IGameNetwork
 {
     virtual ~IGameNetwork() = default;
 
-    virtual void sendPacket(const Packet& packet) = 0;
+    virtual void sendPacket(Packet& packet) = 0;
 };
 
 #endif

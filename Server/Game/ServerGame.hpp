@@ -36,6 +36,8 @@ class ServerGame {
         void createEnemy(float x, float y);
         void createWave();
         void createBullet(float x, float y);
+        void EnemyMovement(int entityId, const World &world);
+        void BulletMovement(int entityId, World &world);
 
         World _world;
         IGameNetwork& _network;
