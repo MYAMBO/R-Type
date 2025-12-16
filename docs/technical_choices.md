@@ -37,7 +37,8 @@ Systems implement behavior by operating on entities that have specific Component
 
 ---
 
-## Technical Choices – Fail-Soft Strategy for Sprites
+
+## Technical Choices – Fail-Soft Strategy
 
 In our R-Type project, we decided to implement a **fail-soft approach** for sprite loading rather than crashing the game when an image file is missing or cannot be loaded.
 
@@ -64,3 +65,32 @@ if (!_texture.loadFromFile(filepath)) {
     _sprite = std::make_shared<sf::Sprite>(_texture);
     return;
 }
+```
+
+## Why We Chose CPM as Our Package Manager
+
+We decided to use **CPM (C++ Package Manager)** for managing dependencies in our project. CPM integrates seamlessly with CMake, providing a lightweight, header-only approach that reduces configuration overhead while remaining portable and easy to maintain.
+
+### Comparison with Other Package Managers
+
+| Feature / Package Manager | CPM                        | vcpkg                     | Conan                       | Hunter                     |
+|---------------------------|----------------------------|---------------------------|-----------------------------|----------------------------|
+| **CMake Integration**      | Directly integrated        | Requires extra setup      | Requires CMake wrapper      | Integrated but verbose     |
+| **Ease of Use**            | Very simple, minimal setup | Medium, requires install  | Steep learning curve        | Medium, needs boilerplate  |
+| **Lightweight**            | Yes, header-only friendly  | Moderate                  | Heavy for large projects    | Moderate, caching overhead |
+| **Dependency Fetching**    | Automatic at configure     | Manual or script-based    | Automatic via recipes       | Automatic but cached       |
+| **Portability**            | High                       | High                      | High                        | High                       |
+| **Best For**               | Small/medium projects      | Medium/large projects     | Large, complex projects     | Medium projects            |
+| **Extra Notes**            | Minimal overhead           | Large ecosystem           | Flexible but complex        | Adds boilerplate           |
+
+### Summary
+
+CPM was chosen because it allows us to:
+
+- Automatically fetch and configure dependencies during CMake configuration.
+- Avoid installing and maintaining separate tools.
+- Keep builds simple, lightweight, and portable.
+- Focus on project development without dealing with complex package recipes or verbose configuration.
+
+In short, CPM strikes the right balance between simplicity, functionality, and maintainability, making it the ideal choice for our project.
+
