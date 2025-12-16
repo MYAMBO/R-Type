@@ -19,7 +19,7 @@
  *
  * Initializes the game.
  */
-ServerGame::ServerGame()
+ServerGame::ServerGame(IGameNetwork& network) : _network(network)
 {
     _world.addSystem<Updater>();
     _world.setDeltaTime(1.f);
@@ -34,9 +34,13 @@ ServerGame::ServerGame()
 void ServerGame::run()
 {
     createWave();
+    Packet packet;
+
+    packet.dead(1);
 
     while (true) {
         _world.manageSystems();
+        _network.sendPacket(packet);
     }
 }
 

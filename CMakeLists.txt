@@ -91,7 +91,8 @@ add_executable(r-type_server
         ECS/Component/Velocity/Velocity.cpp
         ECS/Component/Rotation/Rotation.cpp
         ECS/Component/Animator/Animator.cpp
-        ECS/Component/BoxCollider/BoxCollider.cpp)
+        ECS/Component/BoxCollider/BoxCollider.cpp
+        Server/IGameNetwork.hpp)
 
 add_executable(r-type_client
         Client/main.cpp

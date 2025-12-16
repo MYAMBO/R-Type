@@ -7,6 +7,8 @@
 
 #include "Server.hpp"
 
+#include <netinet/in.h>
+
 #include "Game.hpp"
 
 Server::Server()
@@ -14,7 +16,7 @@ Server::Server()
     _tcpPort = -1;
     _udpPort = -1;
     _debugMode = false;
-    _game = std::make_shared<ServerGame>();
+    _game = std::make_shared<ServerGame>(*this);
     _packetReader = Packetreader("", false, _game);
 }
 
@@ -103,8 +105,10 @@ void Server::udpThread()
         {
             // error...
         }
-        std::string data;
-        p >> data;
+        const void* raw = p.getData();
+        const std::size_t size = p.getDataSize();
+
+        std::string data(static_cast<const char*>(raw), size);
         _packetReader.addData(data);
         _packetReader.interpretPacket();
         log("UDP | Received " + std::to_string(p.getDataSize()) + " bytes from " + sender.value().toString() + " on port " + std::to_string(rport));
@@ -148,26 +152,39 @@ void Server::accepterThread()
         _tcpClient.setBlocking(false);
         _mutex.lock();
         _users.emplace_back(port, ip, std::make_shared<sf::TcpSocket>(std::move(_tcpClient)));
-        std::array<char, 1024> data {};
-        data.at(0) = 1;
-        data.at(1) = static_cast<char>(_users.back().getId());
-        std::memcpy(&data[2], &_udpPort, sizeof(_udpPort));
-        sendMessage(data.data(), _users.back().getId());
+        std::array<std::uint8_t, 6> buffer{};
+
+        buffer[0] = 0x01;
+        buffer[1] = static_cast<std::uint8_t>(_users.back().getId());
+
+        std::uint32_t udpPort = htonl(_udpPort);
+        std::memcpy(&buffer[2], &udpPort, sizeof(udpPort));
+
+        std::string message(
+            reinterpret_cast<const char*>(buffer.data()),
+            buffer.size()
+        );
+
+        sendMessage(message, _users.back().getId());
+
         _mutex.unlock();
     }
 }
 
-void Server::sendPacket(const Packet& packet) const
+void Server::sendPacket(const Packet& packet)
 {
-    sf::Packet p = packet.getPacket();
-
-    for (auto &user : _users)
-    {
-        if (user.getSocket()->send(p) != sf::Socket::Status::Done)
-        {
-            log("TCP | Failed to send packet to client " + std::to_string(user.getId()));
-        }
-    }
+    log("Coucou Yanis");
+    // sf::Packet p = packet.getPacket();
+    //
+    // for (auto &user : _users)
+    // {
+    //     sf::IpAddress address = sf::IpAddress::parse(user.getIp());
+    //
+    //     if (_udpSocket.send(p.getData(), p.getDataSize(), , user.getPort()) != sf::Socket::Status::Done)
+    //     {
+    //         log("TCP | Failed to send packet to client " + std::to_string(user.getId()));
+    //     }
+    // }
 }
 
 void Server::sendAll(sf::TcpSocket& socket, const void* data, const std::size_t size)

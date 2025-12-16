@@ -8,6 +8,7 @@
 #ifndef R_TYPE_GAME_H
     #define R_TYPE_GAME_H
 
+#include "IGameNetwork.hpp"
     #include "World.hpp"
 
     #define NB_PLAYER 4
@@ -22,7 +23,7 @@ enum entitiesType
 
 class ServerGame {
     public:
-        ServerGame();
+        ServerGame(IGameNetwork& network);
         ~ServerGame() = default;
 
         void run();
@@ -37,6 +38,7 @@ class ServerGame {
         void createBullet(float x, float y);
 
         World _world;
+        IGameNetwork& _network;
 };
 
 #endif //R_TYPE_GAME_H

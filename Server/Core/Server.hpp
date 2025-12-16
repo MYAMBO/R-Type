@@ -15,13 +15,14 @@
 #include <cstring>
 #include <unistd.h>
 
+#include "IGameNetwork.hpp"
 #include "Packet.hpp"
 #include "Packetreader.hpp"
 #include "ServerGame.hpp"
 #include "User.hpp"
 #include "SFML/Network.hpp"
 
-class Server
+class Server : public IGameNetwork
 {
     public:
         Server();
@@ -33,7 +34,7 @@ class Server
         void udpThread();
         void tcpThread();
         void accepterThread();
-        void sendPacket(const Packet& packet) const;
+        void sendPacket(const Packet& packet) override;
         void sendMessage(std::string message, sf::IpAddress ip, unsigned short port);
         void sendMessage(std::string message, unsigned int playerId);
         static void sendAll(sf::TcpSocket& socket, const void* data, std::size_t size);

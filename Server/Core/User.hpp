@@ -14,19 +14,20 @@
 class User
 {
     public:
-        User(unsigned int port, std::string ip,
+        User(unsigned short port, std::string ip,
              std::shared_ptr<sf::TcpSocket> socket);
         ~User() = default;
         [[nodiscard]] std::shared_ptr<sf::TcpSocket> getSocket() const;
         [[nodiscard]] unsigned int getId() const;
-        [[nodiscard]] unsigned int getPort() const;
+        [[nodiscard]] unsigned short getPort() const;
         [[nodiscard]] std::string getName() const;
         [[nodiscard]] std::string getIp() const;
 
     private:
         std::shared_ptr<sf::TcpSocket> _socket;
         unsigned int _id;
-        unsigned int _port;
+        unsigned short _port;
+        unsigned int _udpPort;
         std::string _name;
         std::string _ip;
 };
