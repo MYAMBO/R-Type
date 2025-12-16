@@ -59,7 +59,7 @@ void ServerGame::createPlayer(const float x, const float y)
     const auto player = _world.createEntity();
     player->addComponent<HP>(100);
     player->addComponent<Position>(x, y);
-    player->addComponent<BoxCollider>((sf::Vector2f){10.f, 10.f});
+    player->addComponent<BoxCollider>(10.f, 10.f);
     player->addComponent<Tag>("player");
     Packet packet;
     packet.positionSpawn(player->getId(), Player, x, y);
@@ -97,7 +97,7 @@ void ServerGame::createEnemy(const float x, const float y)
     const auto enemy = _world.createEntity();
     enemy->addComponent<HP>(100);
     enemy->addComponent<Position>(x, y);
-    enemy->addComponent<BoxCollider>((sf::Vector2f){10.f, 10.f});
+    enemy->addComponent<BoxCollider>(10.f, 10.f);
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<Script>(EnemyMovement);
     Packet packet;
@@ -149,7 +149,7 @@ void ServerGame::createBullet(const float x, const float y)
     const auto bullet = _world.createEntity();
 
     bullet->addComponent<Position>(x, y);
-    bullet->addComponent<BoxCollider>((sf::Vector2f){5.f, 5.f});
+    bullet->addComponent<BoxCollider>(5.f, 5.f);
     bullet->addComponent<Tag>("bullet");
     bullet->addComponent<Script>(BulletMovement);
     Packet packet;

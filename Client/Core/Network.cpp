@@ -26,6 +26,10 @@ Network::Network()
 
 void Network::getIpAdress(std::string option)
 {
+    if (option == "localhost") {
+        _ip = sf::IpAddress(127, 0, 0, 1);
+        return;
+    }
     std::string tmp = option.substr(0, option.find('.'));
     const std::uint8_t byte0 = stoi(tmp);
     tmp = tmp.substr(0, tmp.find('.'));
@@ -49,8 +53,15 @@ auto Network::parse(const int ac, char **av) -> void
                     _tcpPort = -1;
                 break;
 
-        case 'u':
-                getIpAdress(std::string(optarg));
+            case 'u':
+                try
+                {
+                    getIpAdress(std::string(optarg));
+                }
+                catch (std::exception e)
+                {
+                    std::cerr << e.what() << std::endl;
+                }
                 break;
 
             case 'd':
@@ -75,8 +86,6 @@ auto Network::parse(const int ac, char **av) -> void
         }
     if (_tcpPort == -1)
         throw InitServerException("TCP port must be specified. Check the helper with the -h option.");
-    if (_udpPort == -1)
-        throw InitServerException("UDP port must be specified. Check the helper with the -h option.");
 }
 
 auto Network::initClient() -> void
@@ -147,7 +156,6 @@ void Network::log(const std::string& message) const
         std::string time_string = std::ctime(&end_time);
         time_string.erase(time_string.end() - 1, time_string.end());
         std::cout << "[" << time_string << "] " << message << std::endl;
-
     }
 }
 

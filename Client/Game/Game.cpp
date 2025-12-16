@@ -49,7 +49,7 @@
 Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const std::string& title)
     : _window(sf::VideoMode({width, height}), title), _network(network)
 {
-    createPlayer();
+    //createPlayer();
     createCamera();
     createPlayer();
     createBackground();
