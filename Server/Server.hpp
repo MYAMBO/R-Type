@@ -12,7 +12,12 @@
 #include <utility>
 #include <iostream>
 #include <mutex>
-#include <unistd.h>
+
+#ifdef _WIN32
+
+#else
+    #include <unistd.h>
+#endif
 
 #include "User.hpp"
 #include "SFML/Network.hpp"

@@ -14,31 +14,10 @@ if (DEV_COMPILE)
         add_compile_options(-Werror)
 endif ()
 
-add_compile_options(-Wall -Wextra)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-include(FetchContent)
-
-FetchContent_Declare(
-        SFML
-        GIT_REPOSITORY https://github.com/SFML/SFML.git
-        GIT_TAG 3.0.x
-)
-
-FetchContent_MakeAvailable(SFML)
-
-if (WIN32)
-        message(STATUS "Configuring for Windows...")
-elseif(UNIX)
-        message(STATUS "Configuring for Linux...")
-endif()
-
-option(DEV_COMPILE "Enable strict compile warnings" OFF)
-
-if (DEV_COMPILE)
-        add_compile_options(-Werror)
-endif ()
-
-add_compile_options(-Wall -Wextra)
+add_compile_options(-Wall)
 
 include(FetchContent)
 
@@ -119,6 +98,22 @@ add_executable(r-type_client
         Packet/Packetreader.hpp
         Packet/MyString.cpp
         Packet/MyString.hpp)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR})
+
+set_target_properties(r-type_server PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}
+)
+
+set_target_properties(r-type_client PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}
+)
 
 target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network)
 
