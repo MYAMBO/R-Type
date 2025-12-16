@@ -203,16 +203,16 @@ void Server::accepterThread()
 
 void Server::sendPacket(Packet& packet)
 {
-    // packet.setId(0);
-    // packet.setAck(0);
-    // packet.setPacketNbr(1);
-    // packet.setTotalPacketNbr(1);
-    // const sf::Packet p = packet.getPacket();
-    //
-    // {
-    //     std::lock_guard lock(_sendQueueMutex);
-    //     _sendQueue.push(p);
-    // }
+    packet.setId(0);
+    packet.setAck(0);
+    packet.setPacketNbr(1);
+    packet.setTotalPacketNbr(1);
+    const sf::Packet p = packet.getPacket();
+
+    {
+        std::lock_guard lock(_sendQueueMutex);
+        _sendQueue.push(p);
+    }
     log("Packet queued");
 }
 
