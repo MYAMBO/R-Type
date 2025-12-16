@@ -37,6 +37,36 @@ Systems implement behavior by operating on entities that have specific Component
 
 ---
 
+
+## Technical Choices – Fail-Soft Strategy
+
+In our R-Type project, we decided to implement a **fail-soft approach** for sprite loading rather than crashing the game when an image file is missing or cannot be loaded.
+
+### Motivation
+
+- **Robustness:** The game must remain playable even if some assets are missing or incorrectly referenced.
+- **Development convenience:** During asset creation or testing, missing images do not interrupt gameplay or require constant recompilation.
+- **Ease of debugging:** When a texture fails to load, the system logs the error but provides a placeholder, allowing developers to continue testing other features.
+
+### Implementation Details
+
+- When a `Sprite` component is created, it attempts to load a texture from the provided file path.
+- If the texture fails to load:
+    - `_valid` is set to `false` to mark the sprite as invalid.
+    - A **1×1 pixel transparent placeholder texture** is created to ensure that the `_sprite` object is never null.
+- The `Draw` system checks `_valid` before applying logic that depends on the sprite's content.
+- This approach prevents segmentation faults caused by dereferencing null pointers or calling `getGlobalBounds()` on an invalid sprite.
+
+```cpp
+if (!_texture.loadFromFile(filepath)) {
+    std::cerr << "[Sprite] Failed to load texture: " << filepath << std::endl;
+    _valid = false;
+    _texture = sf::Texture({1,1});
+    _sprite = std::make_shared<sf::Sprite>(_texture);
+    return;
+}
+```
+
 ## Why We Chose CPM as Our Package Manager
 
 We decided to use **CPM (C++ Package Manager)** for managing dependencies in our project. CPM integrates seamlessly with CMake, providing a lightweight, header-only approach that reduces configuration overhead while remaining portable and easy to maintain.
@@ -63,3 +93,4 @@ CPM was chosen because it allows us to:
 - Focus on project development without dealing with complex package recipes or verbose configuration.
 
 In short, CPM strikes the right balance between simplicity, functionality, and maintainability, making it the ideal choice for our project.
+
