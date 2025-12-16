@@ -28,7 +28,7 @@ class Collision : public System {
         ~Collision() override = default;
 
         void update(const float& dt, World &w) override;
-        static bool checkCollision(const BoxCollider &aB, const Position &aP,
+        [[nodiscard]] static bool checkCollision(const BoxCollider &aB, const Position &aP,
                             const BoxCollider &bB, const Position &bP);
 };
 

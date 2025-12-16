@@ -12,7 +12,7 @@
  * @param maxHp The maximum HP value for the component.
 */
 HP::HP(const int maxHp)
-    : _hp(maxHp), _maxHp(maxHp)
+    : _hp(maxHp), _maxHp(maxHp), _isAlive(true)
 {
 }
 
@@ -50,4 +50,22 @@ unsigned int HP::getMaxHP() const
 void HP::setMaxHP(const unsigned int maxHp)
 {
     _maxHp = maxHp;
+}
+
+/**
+ * @brief Gets the isAlive value.
+ * @return if the current player is alive or not.
+*/
+bool HP::isAlive() const
+{
+    return _isAlive;
+}
+
+/**
+ * @brief change the alive value.
+ * @param alive update the current alive value.
+*/
+void HP::setAlive(const bool alive)
+{
+    _isAlive = alive;
 }
