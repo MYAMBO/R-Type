@@ -7,6 +7,7 @@
 
 #include "MyString.hpp"
 
+#include <iostream>
 #include <utility>
 
 /**
@@ -23,6 +24,7 @@ MyString::MyString(std::string s) : _data(std::move(s)){};
 std::string MyString::mySubStr(const size_t pos, const size_t n)
 {
     std::string output = _data.substr(pos, n);
+
     _data.erase(pos, n);
     return output;
 }
@@ -61,4 +63,24 @@ MyString::operator std::string() const
     { return _data; }
 }
 
+/**
+ * @brief A wrapped operator from std::string
+ */
+void MyString::append(const char* string)
+{
+    _data.append(string);
+}
+
+void MyString::append(const char *string, size_t len)
+{
+    _data.append(string, len);
+}
+
+/**
+ * @brief A wrapped operator from std::string
+ */
+void MyString::clear()
+{
+    _data.clear();
+}
 

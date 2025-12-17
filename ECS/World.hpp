@@ -8,6 +8,7 @@
 #ifndef WORLD_HPP_
     #define WORLD_HPP_
 
+#include <iostream>
 #include <memory>
 #include <vector>
 #include <SFML/Window/Event.hpp>

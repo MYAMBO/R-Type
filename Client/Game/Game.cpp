@@ -11,9 +11,9 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/System/Vector2.hpp>
-#include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/VideoMode.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
+#include "iostream"
 
 
 #include "HP.hpp"
@@ -42,24 +42,15 @@
  * @brief Constructs a new Game object.
  *
  * Initializes the game window with specified dimensions and title.
+ * @param network The class containing methods to send packet
  * @param width The width of the game window in pixels. Default is 800.
  * @param height The height of the game window in pixels. Default is 600.
  * @param title The title of the game window. Default is "Game".
  */
-Game::Game(unsigned int width, unsigned int height, const std::string& title)
-    : _window(sf::VideoMode({width, height}), title)
+Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const std::string& title)
+    : _window(sf::VideoMode({width, height}), title), _network(network)
 {
-    createPlayer();
-    createCamera();
-    createPlayer();
-    createBackground();
-    createEnemy(600.f, 100.f, 1);
-    _world.addSystem<Collision>();
-    _world.addSystem<Updater>();
-    _world.addSystem<Draw>();
-    _world.addSystem<Inputs>();
-    _window.setFramerateLimit(30); 
-    _world.setDeltaTime(1.f);
+
 }
 
 /**
@@ -115,6 +106,21 @@ void Game::createBackground()
  */
 void Game::run()
 {
+    Packet packet;
+    packet.setId(0);
+    packet.setAck(0);
+    packet.setPacketNbr(1);
+    packet.setTotalPacketNbr(1);
+    packet.positionSpawn(0, Player, 300, 300);
+    _network.sendPacket(packet);
+    createCamera();
+    createBackground();
+    _world.addSystem<Collision>();
+    _world.addSystem<Updater>();
+    _world.addSystem<Draw>();
+    _world.addSystem<Inputs>();
+    _window.setFramerateLimit(30);
+    _world.setDeltaTime(1.f);
     auto inputSystem = _world.getSystem<Inputs>();
     _world.setWindow(_window);
     _world.setCurrentScene(1);
@@ -171,20 +177,26 @@ void Game::createPlayer()
     player->addComponent<Scale>(2.f);
     player->addComponent<Scene>(1);
     player->addComponent<Layer>(10);
-    if (GameHelper::getEntityByTag(_world, "player")) {
-        player->addComponent<Tag>("player_mate");
-        player->addComponent<Animator>(2, 1, 3.f, 0, (playerCount * 17), 33, 19, 0, 0);
-        playerCount++;
-    } else {
+    player->addComponent<BoxCollider>(33.0f, 19.0f);
+    
+    if (playerCount == 0) {
+        // Premier joueur (joueur local)
         player->addComponent<Animator>(2, 1, 3.f, 0, 0, 33, 19, 0, 0);
-        player->addComponent<Script>(playerInput);
+        player->addComponent<Script>([this](const int entityId, World& world)
+        {
+            this->playerInput(entityId, world);
+        });
         player->addComponent<Tag>("player");
-        playerCount++;
+    } else {
+        // Autres joueurs (coéquipiers)
+        player->addComponent<Animator>(2, 1, 3.f, 0, (playerCount * 17), 33, 19, 0, 0);
+        player->addComponent<Tag>("player_mate");
     }
     player->addComponent<Script>(playerInput);
     player->addComponent<Tag>("player");
     player->addComponent<BoxCollider>(33.0f, 19.0f);
     auto fire = _world.createEntity(Side::CLIENT);
+    playerCount++;
     fire->addComponent<Position>(0.f, 85.f);
     fire->addComponent<Sprite>(std::string("../sprites/r-typesheet1.gif"));
     fire->addComponent<Animator>(2, 1, 3.f, 285, 85, 15, 15, 0, 0);
@@ -230,5 +242,88 @@ void Game::createEnemy(float x, float y, int type)
         default:
             std::cerr << "Unknown enemy type: " << type << std::endl;
             break;
+    }
+}
+
+void Game::handleSpawn(int id, int type, float x, float y)
+{
+    switch (type) {
+        case None:
+            break;
+        case Player:
+            std::cout << "Spawning player at position (" << x << ", " << y << ")" << std::endl;
+            createPlayer();
+            break;
+        case Enemy:
+            std::cout << "Spawning enemy at position (" << x << ", " << y << ")" << std::endl;
+            createEnemy(x, y, 1); // Type 1 = BASIC enemy
+            break;
+        case Bullet:
+            std::cout << "Spawning bullet" << std::endl;
+            createBullet(id, _world);
+            break;
+    }
+}
+
+/**
+ * @brief Handles player input.
+ *
+ * This function processes user input events and updates the game state accordingly.
+ * @param inputSystem The input system to check for player actions.
+ */
+void Game::playerInput(int entityId, World &world)
+{
+    (void)entityId;
+    static bool isShootKeyPressed = false;
+    bool moved = false;
+    auto inputSystem = world.getSystem<Inputs>();
+    std::shared_ptr<Camera> compCam = GameHelper::getMainCamera(world);
+    if (!compCam)
+        return;
+
+    std::shared_ptr<Entity> compPlayer = GameHelper::getEntityByTag(world, "player");
+    if (!compPlayer)
+        return;
+
+    auto pos = compPlayer->getComponent<Position>();
+
+    if (inputSystem->isKeyPressed(KeyboardKey::Key_D))
+        if (compCam->getPosition().x + compCam->getSize().x > pos->getX() + 7.0f) {
+            pos->setX(pos->getX() + 7.0f);
+            moved = true;
+        }
+    if (inputSystem->isKeyPressed(KeyboardKey::Key_Q))
+        if (compCam->getPosition().x < pos->getX() - 7.0f) {
+            pos->setX(pos->getX() - 7.0f);
+            moved = true;
+        }
+    if (inputSystem->isKeyPressed(KeyboardKey::Key_Z))
+        if (compCam->getPosition().y < pos->getY() - 7.0f) {
+            pos->setY(pos->getY() - 7.0f);
+            moved = true;
+        }
+    if (inputSystem->isKeyPressed(KeyboardKey::Key_S))
+        if (compCam->getPosition().y + compCam->getSize().y > pos->getY() + 7.0f) {
+            pos->setY(pos->getY() + 7.0f);
+            moved = true;
+        }
+    if (inputSystem->isKeyPressed(KeyboardKey::Key_Space)) {
+        if (!isShootKeyPressed) {
+            createBullet(compPlayer->getId(), world);
+            isShootKeyPressed = true;
+        }
+    } else {
+        isShootKeyPressed = false;
+    }
+    if (moved)
+    {
+        Packet packet = Packet();
+        packet.playerPosition(entityId, pos->getX(), pos->getY());
+        packet.setAck(0);
+        packet.setId(compPlayer->getId());
+        packet.setPacketNbr(1);
+        packet.setTotalPacketNbr(1);
+
+        _network.sendPacket(packet);
     }
 }

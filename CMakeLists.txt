@@ -16,39 +16,21 @@ endif ()
 
 add_compile_options(-Wall -Wextra)
 
-include(FetchContent)
+if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake")
+    file(DOWNLOAD
+        https://raw.githubusercontent.com/cpm-cmake/CPM.cmake/master/cmake/CPM.cmake
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake"
 
-FetchContent_Declare(
-        SFML
-        GIT_REPOSITORY https://github.com/SFML/SFML.git
-        GIT_TAG 3.0.x
-)
-
-FetchContent_MakeAvailable(SFML)
-
-if (WIN32)
-        message(STATUS "Configuring for Windows...")
-elseif(UNIX)
-        message(STATUS "Configuring for Linux...")
+    )
 endif()
+include("${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake")
 
-option(DEV_COMPILE "Enable strict compile warnings" OFF)
-
-if (DEV_COMPILE)
-        add_compile_options(-Werror)
-endif ()
-
-add_compile_options(-Wall -Wextra)
-
-include(FetchContent)
-
-FetchContent_Declare(
-        SFML
-        GIT_REPOSITORY https://github.com/SFML/SFML.git
-        GIT_TAG 3.0.x
+CPMAddPackage(
+    NAME SFML
+    GITHUB_REPOSITORY SFML/SFML
+    GIT_TAG 3.0.x
+    EXCLUDE_FROM_ALL YES
 )
-
-FetchContent_MakeAvailable(SFML)
 
 include_directories(.)
 include_directories(ECS)
@@ -79,19 +61,42 @@ include_directories(Client/Game)
 include_directories(Client/GameHelper)
 include_directories(Client/ScriptsHandler)
 include_directories(./Server)
+include_directories(./Server/Core)
 include_directories(./Packet)
+include_directories(Server/Game)
+include_directories(Client/Core)
 
 add_executable(r-type_server
         Server/main.cpp
-        Server/Server.cpp
-        Server/User.cpp
+        Server/Core/Server.cpp
+        Server/Core/User.cpp
+        Server/Game/ServerGame.cpp
         Packet/Packet.cpp
         Packet/Packet.hpp
         Packet/CustomError.hpp
         Packet/Packetreader.cpp
         Packet/Packetreader.hpp
         Packet/MyString.cpp
-        Packet/MyString.hpp)
+        Packet/MyString.hpp
+        ECS/Entity/Entity.cpp
+        ECS/System/Draw/Draw.cpp
+        ECS/System/Inputs/Inputs.cpp
+        ECS/System/Updater/Updater.cpp
+        ECS/World.cpp
+        ECS/Component/HP/HP.cpp
+        ECS/Component/Tag/Tag.cpp
+        ECS/Component/Scale/Scale.cpp
+        ECS/Component/Layer/Layer.cpp
+        ECS/Component/Scene/Scene.cpp
+        ECS/Component/Script/Script.cpp
+        ECS/Component/Sprite/Sprite.cpp
+        ECS/Component/Camera/Camera.cpp
+        ECS/Component/Position/Position.cpp
+        ECS/Component/Velocity/Velocity.cpp
+        ECS/Component/Rotation/Rotation.cpp
+        ECS/Component/Animator/Animator.cpp
+        ECS/Component/BoxCollider/BoxCollider.cpp
+        Server/IGameNetwork.hpp)
 
 add_executable(r-type_client
         Client/main.cpp
@@ -110,8 +115,8 @@ add_executable(r-type_client
         ECS/Component/Layer/Layer.cpp
         ECS/Component/Scene/Scene.cpp
         ECS/Component/Script/Script.cpp
-        ECS/Component/Camera/Camera.cpp
         ECS/Component/Sprite/Sprite.cpp
+        ECS/Component/Camera/Camera.cpp
         ECS/Component/Damage/Damage.cpp
         ECS/Component/Position/Position.cpp
         ECS/Component/Velocity/Velocity.cpp
@@ -119,13 +124,10 @@ add_executable(r-type_client
         ECS/Component/Animator/Animator.cpp
         ECS/Component/BoxCollider/BoxCollider.cpp
         Packet/Packet.cpp
-        Packet/Packet.hpp
-        Packet/CustomError.hpp
-        Packet/Packetreader.cpp
-        Packet/Packetreader.hpp
         Packet/MyString.cpp
-        Packet/MyString.hpp)
+        Client/Core/Network.cpp
+        Client/Core/ClientPacketreader.cpp)
 
 target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network)
 
-target_link_libraries(r-type_server sfml-network)
+target_link_libraries(r-type_server  sfml-graphics sfml-system sfml-network)
