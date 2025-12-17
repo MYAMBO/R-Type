@@ -8,6 +8,7 @@
 #ifndef R_TYPE_GAME_H
     #define R_TYPE_GAME_H
 
+#include <SFML/System.hpp>
 #include "IGameNetwork.hpp"
     #include "World.hpp"
 
@@ -41,6 +42,9 @@ class ServerGame {
 
         World _world;
         IGameNetwork& _network;
+        int _playerCount = 0;
+        bool _gameStarted = false;
+        sf::Clock _waveTimer;
 };
 
 #endif //R_TYPE_GAME_H

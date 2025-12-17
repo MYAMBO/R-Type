@@ -36,16 +36,18 @@ void ServerGame::run()
 {
     sf::Clock clock;
 
-    //createWave();
     _world.manageSystems();
     clock.start();
     while (true) {
         if (clock.getElapsedTime().asMilliseconds() > 50) {
-            // createWave();
+            // Si le jeu a démarré (4 joueurs connectés), gérer les vagues d'ennemis
+            if (_gameStarted && _waveTimer.getElapsedTime().asSeconds() >= 20.f) {
+                createWave();
+                _waveTimer.restart();
+            }
             _world.manageSystems();
             clock.restart();
         }
-
     }
 }
 
@@ -110,6 +112,7 @@ void ServerGame::createEnemy(const float x, const float y)
     );
     Packet packet;
     packet.positionSpawn(enemy->getId(), Enemy, x, y);
+    _network.sendPacket(packet);
 }
 
 /**
@@ -117,8 +120,9 @@ void ServerGame::createEnemy(const float x, const float y)
  */
 void ServerGame::createWave()
 {
+    std::cout << "Spawning enemy wave!" << std::endl;
     for (int i = 0; i < 10; i++)
-        createEnemy(1920 + static_cast<float>(i) * 50, 940);
+        createEnemy(1920 + static_cast<float>(i) * 100, 200 + static_cast<float>(i % 3) * 250);
 }
 
 /**
@@ -176,7 +180,29 @@ void ServerGame::createBullet(const float x, const float y)
  */
 void ServerGame::handleNewPlayer()
 {
-    createPlayer(300, 300);
+    if (_playerCount >= NB_PLAYER) {
+        std::cout << "Maximum number of players reached (" << NB_PLAYER << ")" << std::endl;
+        return;
+    }
+
+    float startPositions[NB_PLAYER][2] = {
+        {200.f, 200.f},
+        {200.f, 400.f},
+        {200.f, 600.f},
+        {200.f, 800.f}
+    };
+    
+    createPlayer(startPositions[_playerCount][0], startPositions[_playerCount][1]);
+    _playerCount++;
+    
+    std::cout << "Player " << _playerCount << " connected" << std::endl;
+    
+    // Démarrer le jeu quand 4 joueurs sont connectés
+    if (_playerCount == NB_PLAYER && !_gameStarted) {
+        _gameStarted = true;
+        _waveTimer.restart();
+        std::cout << "Game started! Enemy waves will spawn every 20 seconds" << std::endl;
+    }
 }
 
 /**

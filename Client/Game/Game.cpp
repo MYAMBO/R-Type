@@ -178,19 +178,21 @@ void Game::createPlayer()
     player->addComponent<Scale>(2.f);
     player->addComponent<Scene>(1);
     player->addComponent<Layer>(10);
-    if (GameHelper::getEntityByTag(_world, "player")) {
-        player->addComponent<Tag>("player_mate");
-        player->addComponent<Animator>(2, 1, 3.f, 0, (playerCount * 17), 33, 19, 0, 0);
-        playerCount++;
-    } else {
+    player->addComponent<BoxCollider>(33.0f, 19.0f);
+    
+    if (playerCount == 0) {
+        // Premier joueur (joueur local)
         player->addComponent<Animator>(2, 1, 3.f, 0, 0, 33, 19, 0, 0);
         player->addComponent<Script>(playerInput);
         player->addComponent<Tag>("player");
-        playerCount++;
+    } else {
+        // Autres joueurs (coéquipiers)
+        player->addComponent<Animator>(2, 1, 3.f, 0, (playerCount * 17), 33, 19, 0, 0);
+        player->addComponent<Tag>("player_mate");
     }
-    player->addComponent<Script>(playerInput);
-    player->addComponent<Tag>("player");
-    player->addComponent<BoxCollider>(33.0f, 19.0f);
+    
+    playerCount++;
+    
     auto fire = _world.createEntity();
     fire->addComponent<Position>(0.f, 85.f);
     fire->addComponent<Sprite>(std::string("../sprites/r-typesheet1.gif"));
@@ -242,18 +244,19 @@ void Game::createEnemy(float x, float y, int type)
 
 void Game::handleSpawn(int id, int type, float x, float y)
 {
-    std::cout << "type" << std::endl;
     switch (type) {
         case None:
             break;
         case Player:
-            std::cout << "create player" << std::endl;
+            std::cout << "Spawning player at position (" << x << ", " << y << ")" << std::endl;
             createPlayer();
             break;
         case Enemy:
-            createEnemy(x, y, type);
+            std::cout << "Spawning enemy at position (" << x << ", " << y << ")" << std::endl;
+            createEnemy(x, y, 1); // Type 1 = BASIC enemy
             break;
         case Bullet:
+            std::cout << "Spawning bullet" << std::endl;
             createBullet(id, _world);
             break;
     }

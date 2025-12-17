@@ -57,13 +57,20 @@ void Packetreader::timestamp()
  */
 void Packetreader::updateEntity()
 {
-    std::cout << "create player" << std::endl;
     int id = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
     int type = std::stoi( _data.mySubStr(0, 2), nullptr, 16);
-    int x = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
-    int y = std::stoi( _data.mySubStr(0, 4) , nullptr, 16);
+    float x = static_cast<float>(std::stoi(_data.mySubStr(0, 4), nullptr, 16));
+    float y = static_cast<float>(std::stoi(_data.mySubStr(0, 4) , nullptr, 16));
 
-    _game->handleNewPlayer();
+    if (type == 0) {
+        // type == None (0) = mise à jour de position seulement
+        std::cout << "Player " << id << " moved to (" << x << ", " << y << ")" << std::endl;
+        _game->handleNewPlayerPosition(id, x, y);
+    } else if (type == 1) {
+        // type == Player (1) = nouveau joueur qui se connecte
+        std::cout << "New player " << id << " spawning at (" << x << ", " << y << ")" << std::endl;
+        _game->handleNewPlayer();
+    }
 }
 
 void Packetreader::clear()
