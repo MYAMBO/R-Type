@@ -18,7 +18,7 @@
 class Packetreader
 {
     public:
-        explicit Packetreader(std::string data = "", bool isClient = false, std::shared_ptr<ServerGame> game = nullptr);
+        explicit Packetreader(std::string data = "", std::shared_ptr<ServerGame> game = nullptr);
         ~Packetreader() = default;
 
         void interpretPacket();

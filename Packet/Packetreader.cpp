@@ -7,6 +7,7 @@
 
 #include "Packetreader.hpp"
 
+#include <iostream>
 #include <utility>
 
 /**
@@ -15,7 +16,7 @@
  * @param isClient If it's client side or not
  * @param game Pointer to the Server-side game
  */
-Packetreader::Packetreader(std::string data, const bool isClient, std::shared_ptr<ServerGame> game) : _isClient(isClient), _data(MyString(std::move(data)))
+Packetreader::Packetreader(std::string data, std::shared_ptr<ServerGame> game) : _data(MyString(std::move(data)))
 {
     _game = std::move(game);
 }
@@ -25,6 +26,7 @@ Packetreader::Packetreader(std::string data, const bool isClient, std::shared_pt
  */
 void Packetreader::interpretPacket()
 {
+    std::cout << "server received packet" << std::endl;
     while (_data.size() > 0)
     {
         switch (std::stoi( _data.mySubStr(0, 2) , nullptr, 16)) {
@@ -55,27 +57,13 @@ void Packetreader::timestamp()
  */
 void Packetreader::updateEntity()
 {
-    if (_isClient)
-    {
-        int id = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
-        int type = std::stoi( _data.mySubStr(0, 2), nullptr, 16);
-        int x = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
-        int y = std::stoi( _data.mySubStr(0, 4) , nullptr, 16);
+    std::cout << "create player" << std::endl;
+    int id = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
+    int type = std::stoi( _data.mySubStr(0, 2), nullptr, 16);
+    int x = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
+    int y = std::stoi( _data.mySubStr(0, 4) , nullptr, 16);
 
-        if (type == 0) {
-            // update position
-        } else {
-            // création
-        }
-
-        // call function and give parameter
-    } else {
-        int id = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
-        int x = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
-        int y = std::stoi( _data.mySubStr(0, 4) , nullptr, 16);
-
-
-    }
+    _game->handleNewPlayer();
 }
 
 void Packetreader::clear()

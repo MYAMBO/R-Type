@@ -36,7 +36,7 @@ void ServerGame::run()
 {
     sf::Clock clock;
 
-    createWave();
+    //createWave();
     _world.manageSystems();
     clock.start();
     while (true) {

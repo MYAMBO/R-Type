@@ -8,6 +8,7 @@
 
 #include "ClientPacketreader.hpp"
 
+#include <iostream>
 #include <utility>
 #include <cstring>
 
@@ -17,7 +18,7 @@
  * @param isClient If it's client side or not
  * @param game Pointer to the Server-side game
  */
-ClientPacketreader::ClientPacketreader(std::string data, const bool isClient, std::shared_ptr<Game> game) : _isClient(isClient), _data(MyString(std::move(data)))
+ClientPacketreader::ClientPacketreader(std::string data, std::shared_ptr<Game> game) : _data(MyString(std::move(data)))
 {
     _game = std::move(game);
 }
@@ -27,9 +28,11 @@ ClientPacketreader::ClientPacketreader(std::string data, const bool isClient, st
  */
 void ClientPacketreader::interpretPacket()
 {
+    std::cout << "packet" << std::endl;
     while (_data.size() > 0)
     {
-        switch (std::stoi( _data.mySubStr(0, 2) , nullptr, 16)) {
+        auto truc = std::stoi( _data.mySubStr(0, 2) , nullptr, 16);
+        switch (truc) {
             case 0x06: timestamp(); break;
             case 0x07: updateEntity(); break;
             case 0x08: hit(); break;
@@ -51,34 +54,17 @@ void ClientPacketreader::timestamp()
     // call function and give int
 }
 
-static float hexToFloat(const std::string& hex)
-{
-    const auto raw = static_cast<uint32_t>(std::stoul(hex, nullptr, 16));
-    float value;
-    std::memcpy(&value, &raw, sizeof(float));
-    return value;
-}
-
 /**
  * @brief interpret updateEntity action
  */
 void ClientPacketreader::updateEntity()
 {
-    if (_isClient)
-    {
-        int id = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
-        int type = std::stoi( _data.mySubStr(0, 2), nullptr, 16);
-        float x = hexToFloat(_data.mySubStr(6, 8));
-        float y = hexToFloat(_data.mySubStr(14, 8));
+    int id = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
+    int type = std::stoi( _data.mySubStr(0, 2), nullptr, 16);
+    float x = static_cast<float>(std::stoi(_data.mySubStr(0, 4), nullptr, 16));
+    float y = static_cast<float>(std::stoi(_data.mySubStr(0, 4), nullptr, 16));
 
-        _game->handleSpawn(id, type, x, y);
-
-        // call function and give parameter
-    } else {
-        int id = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
-        int x = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
-        int y = std::stoi( _data.mySubStr(0, 4) , nullptr, 16);
-    }
+    _game->handleSpawn(id, type, x, y);
 }
 
 void ClientPacketreader::clear()
@@ -122,5 +108,5 @@ void ClientPacketreader::endGame()
  */
 void ClientPacketreader::addData(const std::string& data)
 {
-    _data.append(data.c_str());
+    _data.append(data.data(), data.size());
 }

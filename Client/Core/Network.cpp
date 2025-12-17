@@ -21,8 +21,7 @@ Network::Network()
     _tcpPort = -1;
     _udpPort = -1;
     _debugMode = false;
-    _game = std::make_shared<Game>(*this);
-    _packetReader = ClientPacketreader("", false, _game);
+    _packetReader = ClientPacketreader("", nullptr);
 }
 
 void Network::getIpAdress(std::string option)
@@ -99,6 +98,8 @@ auto Network::initClient() -> void
     log("TCP server listening on port " + std::to_string(_tcpPort));
     if (_udpSocket.bind(sf::Socket::AnyPort) != sf::Socket::Status::Done)
         throw InitClientException();
+    _game = std::make_shared<Game>(*this);
+    _packetReader = ClientPacketreader("", _game);
 }
 
 void Network::udpThread()
@@ -115,11 +116,10 @@ void Network::udpThread()
         {
             // error...
         }
-        std::cout << p.getData() << std::endl;
         const void* raw = p.getData();
         const std::size_t size = p.getDataSize();
 
-        std::string data(static_cast<const char*>(raw), size);
+        const std::string data(static_cast<const char*>(raw), size);
         _packetReader.addData(data);
         try
         {

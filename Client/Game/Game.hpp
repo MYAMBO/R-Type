@@ -30,6 +30,13 @@ enum PlayerColor {
     GREEN
 };
 
+enum entitiesType
+{
+    None = 0,
+    Player = 1,
+    Enemy,
+    Bullet
+};
 
 /**
  * @brief Main Game class to handle the game window and loop.

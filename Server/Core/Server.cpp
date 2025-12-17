@@ -9,15 +9,13 @@
 
 #include <netinet/in.h>
 
-#include "Game.hpp"
-
 Server::Server()
 {
     _tcpPort = -1;
     _udpPort = -1;
     _debugMode = false;
     _game = std::make_shared<ServerGame>(*this);
-    _packetReader = Packetreader("", false, _game);
+    _packetReader = Packetreader("", _game);
 }
 
 auto Server::parse(int ac, char **av) -> void
@@ -106,7 +104,6 @@ void Server::udpThread()
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
             continue;
         }
-
         if (!sender.has_value())
             continue;
 

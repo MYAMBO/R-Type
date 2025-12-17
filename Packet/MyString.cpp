@@ -7,6 +7,7 @@
 
 #include "MyString.hpp"
 
+#include <iostream>
 #include <utility>
 
 /**
@@ -67,6 +68,11 @@ MyString::operator std::string() const
 void MyString::append(const char* string)
 {
     _data.append(string);
+}
+
+void MyString::append(const char *string, size_t len)
+{
+    _data.append(string, len);
 }
 
 /**

@@ -29,6 +29,7 @@ class Network : public IGameNetwork {
         void sendMessage(const std::string &message);
         void log(const std::string& message) const;
         void sendPacket(Packet& packet) override;
+        void setGameToPacketReader();
         static void sendAll(sf::TcpSocket& socket, const void* data, std::size_t size);
 
         class InitClientException : public std::exception

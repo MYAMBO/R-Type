@@ -49,17 +49,7 @@
 Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const std::string& title)
     : _window(sf::VideoMode({width, height}), title), _network(network)
 {
-    //createPlayer();
-    createCamera();
-    //createPlayer();
-    createBackground();
-    createEnemy(600.f, 100.f, 1);
-    _world.addSystem<Collision>();
-    _world.addSystem<Updater>();
-    _world.addSystem<Draw>();
-    _world.addSystem<Inputs>();
-    _window.setFramerateLimit(30); 
-    _world.setDeltaTime(1.f);
+
 }
 
 /**
@@ -115,6 +105,23 @@ void Game::createBackground()
  */
 void Game::run()
 {
+    Packet packet;
+    packet.setId(0);
+    packet.setAck(0);
+    packet.setPacketNbr(1);
+    packet.setTotalPacketNbr(1);
+    packet.positionSpawn(0, Player, 300, 300);
+    _network.sendPacket(packet);
+    createCamera();
+    //createPlayer();
+    createBackground();
+    createEnemy(600.f, 100.f, 1);
+    _world.addSystem<Collision>();
+    _world.addSystem<Updater>();
+    _world.addSystem<Draw>();
+    _world.addSystem<Inputs>();
+    _window.setFramerateLimit(30);
+    _world.setDeltaTime(1.f);
     auto inputSystem = _world.getSystem<Inputs>();
     _world.setWindow(_window);
     _world.setCurrentScene(1);
@@ -235,16 +242,19 @@ void Game::createEnemy(float x, float y, int type)
 
 void Game::handleSpawn(int id, int type, float x, float y)
 {
-    std::cout << std::to_string(id) + " " + std::to_string(type);
-    /*switch (type) {
+    std::cout << "type" << std::endl;
+    switch (type) {
         case None:
             break;
         case Player:
+            std::cout << "create player" << std::endl;
             createPlayer();
             break;
         case Enemy:
             createEnemy(x, y, type);
+            break;
         case Bullet:
             createBullet(id, _world);
-    }*/
+            break;
+    }
 }

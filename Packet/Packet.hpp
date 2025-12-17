@@ -8,6 +8,7 @@
 #ifndef R_TYPE_PACKET_HPP
     #define R_TYPE_PACKET_HPP
 #include <SFML/Network.hpp>
+#include <string>
 
 inline int MAX_DATA_SIZE = 116;
 inline int HEADER_SIZE = 12;
@@ -37,14 +38,15 @@ class Packet
 
         [[nodiscard]] sf::Packet getPacket() const;
     private:
-        sf::Packet _packet;
+        std::string _hexData;  // Store data as hex string instead of sf::Packet
         int _dataSize;
         bool _idSetted;
         bool _ackSetted;
         bool _packetNumberSetted;
         bool _totalPacketNumberSetted;
 
-        void setDataSize(uint16_t dataSize) const;
+        void appendHex(const std::string& hex);
+        std::string toHex(int value, int digits) const;
 };
 
 #endif //R_TYPE_PACKET_HPP

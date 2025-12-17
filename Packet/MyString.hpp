@@ -23,6 +23,7 @@ class MyString {
         std::string mySubStr(size_t pos, size_t n);
 
         void append(const char *string);
+        void append(const char *string, size_t len);
 
         void clear();
 
