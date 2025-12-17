@@ -19,8 +19,8 @@ enum entitiesType
 {
     None = 0,
     Player = 1,
-    Enemy,
-    Bullet
+    Enemy = 2,
+    Bullet = 3
 };
 
 class ServerGame {

@@ -91,7 +91,7 @@ void ServerGame::EnemyMovement(const int entityId, const World &world)
 }
 
 /**
- * @brief Creates the player entity.
+ * @brief Creates a Ennemy entity.
  *
  * @param x The x position of the enemy.
  * @param y The y position of the enemy.

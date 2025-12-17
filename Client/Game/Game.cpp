@@ -113,9 +113,7 @@ void Game::run()
     packet.positionSpawn(0, Player, 300, 300);
     _network.sendPacket(packet);
     createCamera();
-    //createPlayer();
     createBackground();
-    createEnemy(600.f, 100.f, 1);
     _world.addSystem<Collision>();
     _world.addSystem<Updater>();
     _world.addSystem<Draw>();
