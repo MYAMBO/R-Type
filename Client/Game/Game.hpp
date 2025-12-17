@@ -40,6 +40,7 @@ class Game {
         ~Game();
 
         void run();
+        void handleSpawn(int id, int type, float x, float y);
     private:
         void gameInput(std::shared_ptr<Inputs> inputSystem);
 

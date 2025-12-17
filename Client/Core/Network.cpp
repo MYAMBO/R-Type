@@ -12,6 +12,7 @@
 
 #include "Game.hpp"
 #include "Network.hpp"
+#include "MyString.hpp"
 #include "ClientPacketreader.hpp"
 
 Network::Network()
@@ -32,10 +33,13 @@ void Network::getIpAdress(std::string option)
     }
     std::string tmp = option.substr(0, option.find('.'));
     const std::uint8_t byte0 = stoi(tmp);
+    tmp = tmp.erase(0, tmp.find('.'));
     tmp = tmp.substr(0, tmp.find('.'));
     const std::uint8_t byte1 = stoi(tmp);
+    tmp = tmp.erase(0, tmp.find('.'));
     tmp = tmp.substr(0, tmp.find('.'));
     const std::uint8_t byte2 = stoi(tmp);
+    tmp = tmp.erase(0, tmp.find('.'));
     tmp = tmp.substr(0, tmp.find('.'));
     const std::uint8_t byte3 = stoi(tmp);
     _ip = sf::IpAddress(byte0, byte1, byte2, byte3);
@@ -82,23 +86,19 @@ auto Network::parse(const int ac, char **av) -> void
                 std::cerr << std::endl << "\td : debug mode" << std::endl;
                 std::cerr <<  "\tp : specify the TCP port (mandatory)" << std::endl;
                 std::cerr <<  "\tu : specify the UDP port (mandatory)" << std::endl;
-                throw InitServerException("");
+                throw InitClientException("");
         }
     if (_tcpPort == -1)
-        throw InitServerException("TCP port must be specified. Check the helper with the -h option.");
+        throw InitClientException("TCP port must be specified. Check the helper with the -h option.");
 }
 
 auto Network::initClient() -> void
 {
-    _tcpListener = sf::TcpListener();
-    _udpSocket = sf::UdpSocket();
-
-    if (_tcpListener.listen(_tcpPort) != sf::Socket::Status::Done)
-        throw InitServerException();
+    if (_tcpClient.connect(_ip, _tcpPort) != sf::Socket::Status::Done)
+        throw InitClientException();
     log("TCP server listening on port " + std::to_string(_tcpPort));
-    if (_udpSocket.bind(_udpPort) != sf::Socket::Status::Done)
-        throw InitServerException();
-    log("UDP server listening on port " + std::to_string(_udpPort));
+    if (_udpSocket.bind(sf::Socket::AnyPort) != sf::Socket::Status::Done)
+        throw InitClientException();
 }
 
 void Network::udpThread()
@@ -114,6 +114,7 @@ void Network::udpThread()
         {
             // error...
         }
+        std::cout << p.getData() << std::endl;
         const void* raw = p.getData();
         const std::size_t size = p.getDataSize();
 
@@ -136,14 +137,17 @@ void Network::tcpThread()
 {
     while (true)
     {
-        std::array<char, 1024> data {};
+        char data[1024];
         std::size_t received;
 
-        data.fill(0);
-        if (_tcpClient.receive(data.data(), data.size(), received) != sf::Socket::Status::Done)
+        if (_tcpClient.receive(data, sizeof(data), received) != sf::Socket::Status::Done)
             continue;
-        data[received - 1] = '\0';
-        std::string message;
+
+        uint32_t value32;
+        std::memcpy(&value32, &data[2], sizeof(value32));
+        value32 = ntohl(value32);
+        _udpPort = value32;
+        _udpSocket.send("", 0, _ip, _udpPort);
     }
 }
 
@@ -159,7 +163,7 @@ void Network::log(const std::string& message) const
     }
 }
 
-void Network::sendPacket(const Packet& packet)
+void Network::sendPacket(Packet& packet)
 {
     const sf::Packet p = packet.getPacket();
 
@@ -195,8 +199,6 @@ void Network::sendMessage(const std::string &message)
 
 void Network::start()
 {
-    _tcpClient = sf::TcpSocket();
-
     std::thread tcpThread(&Network::tcpThread, this);
     std::thread udpThread(&Network::udpThread, this);
     _game->run();

@@ -51,7 +51,7 @@ Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const
 {
     //createPlayer();
     createCamera();
-    createPlayer();
+    //createPlayer();
     createBackground();
     createEnemy(600.f, 100.f, 1);
     _world.addSystem<Collision>();
@@ -231,4 +231,20 @@ void Game::createEnemy(float x, float y, int type)
             std::cerr << "Unknown enemy type: " << type << std::endl;
             break;
     }
+}
+
+void Game::handleSpawn(int id, int type, float x, float y)
+{
+    std::cout << std::to_string(id) + " " + std::to_string(type);
+    /*switch (type) {
+        case None:
+            break;
+        case Player:
+            createPlayer();
+            break;
+        case Enemy:
+            createEnemy(x, y, type);
+        case Bullet:
+            createBullet(id, _world);
+    }*/
 }

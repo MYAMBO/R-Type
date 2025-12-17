@@ -9,6 +9,7 @@
 #include "ClientPacketreader.hpp"
 
 #include <utility>
+#include <cstring>
 
 /**
  * @brief Construct a packetReader
@@ -50,6 +51,14 @@ void ClientPacketreader::timestamp()
     // call function and give int
 }
 
+static float hexToFloat(const std::string& hex)
+{
+    const auto raw = static_cast<uint32_t>(std::stoul(hex, nullptr, 16));
+    float value;
+    std::memcpy(&value, &raw, sizeof(float));
+    return value;
+}
+
 /**
  * @brief interpret updateEntity action
  */
@@ -59,8 +68,10 @@ void ClientPacketreader::updateEntity()
     {
         int id = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
         int type = std::stoi( _data.mySubStr(0, 2), nullptr, 16);
-        int x = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
-        int y = std::stoi( _data.mySubStr(0, 4) , nullptr, 16);
+        float x = hexToFloat(_data.mySubStr(6, 8));
+        float y = hexToFloat(_data.mySubStr(14, 8));
+
+        _game->handleSpawn(id, type, x, y);
 
         // call function and give parameter
     } else {

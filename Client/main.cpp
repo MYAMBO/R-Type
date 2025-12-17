@@ -30,7 +30,7 @@ auto main(const int ac, char **av) -> int
 		network.initClient();
 		network.start();
 	}
-	catch (const Network::InitServerException& e)
+	catch (const Network::InitClientException& e)
 	{
 		if (std::string(e.what()).empty() == false)
 			std::cerr << e.what() << std::endl;

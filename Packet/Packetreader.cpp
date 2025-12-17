@@ -62,6 +62,12 @@ void Packetreader::updateEntity()
         int x = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
         int y = std::stoi( _data.mySubStr(0, 4) , nullptr, 16);
 
+        if (type == 0) {
+            // update position
+        } else {
+            // création
+        }
+
         // call function and give parameter
     } else {
         int id = std::stoi( _data.mySubStr(0, 4), nullptr, 16);

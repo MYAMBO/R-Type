@@ -28,13 +28,13 @@ class Network : public IGameNetwork {
         void tcpThread();
         void sendMessage(const std::string &message);
         void log(const std::string& message) const;
-        void sendPacket(const Packet& packet) override;
+        void sendPacket(Packet& packet) override;
         static void sendAll(sf::TcpSocket& socket, const void* data, std::size_t size);
 
-        class InitServerException : public std::exception
+        class InitClientException : public std::exception
         {
         public:
-            explicit InitServerException(std::string message = "")
+            explicit InitClientException(std::string message = "")
             {
                 _message = std::move(message);
             };
@@ -51,7 +51,6 @@ class Network : public IGameNetwork {
     private:
         void getIpAdress(std::string option);
         sf::UdpSocket _udpSocket;
-        sf::TcpListener _tcpListener;
         sf::TcpSocket _tcpClient;
         sf::IpAddress _ip;
         std::thread _udpThread;
