@@ -107,6 +107,7 @@ void Network::udpThread()
 
     std::optional<sf::IpAddress> sender;
     unsigned short rport;
+    _mutex.lock();
     while (true)
     {
         p.clear();
@@ -148,6 +149,7 @@ void Network::tcpThread()
         value32 = ntohl(value32);
         _udpPort = value32;
         _udpSocket.send("", 0, _ip, _udpPort);
+        _mutex.unlock();
     }
 }
 
@@ -199,6 +201,7 @@ void Network::sendMessage(const std::string &message)
 
 void Network::start()
 {
+    _mutex.lock();
     std::thread tcpThread(&Network::tcpThread, this);
     std::thread udpThread(&Network::udpThread, this);
     _game->run();
