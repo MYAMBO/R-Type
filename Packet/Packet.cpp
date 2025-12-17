@@ -105,8 +105,10 @@ void Packet::timeSync(const int time)
  */
 void Packet::playerPosition(const size_t id, const float x, const float y)
 {
+    _hexData.clear();
     appendHex("07");  // opcode
-    appendHex(toHex(static_cast<int>(id), 4));  // 4 hex digits for id
+    appendHex(toHex(static_cast<uint64_t>(id), 16));  // 16 hex digits for id
+    appendHex(toHex(0, 2));   // 2 hex digits for type (unused here)
     appendHex(toHex(static_cast<int>(x), 4));   // 4 hex digits for x
     appendHex(toHex(static_cast<int>(y), 4));   // 4 hex digits for y
 }
@@ -120,8 +122,9 @@ void Packet::playerPosition(const size_t id, const float x, const float y)
  */
 void Packet::positionSpawn(const size_t id, const uint16_t type, const float x, const float y)
 {
+    _hexData.clear();
     appendHex("07");  // opcode (same as playerPosition)
-    appendHex(toHex(static_cast<int>(id), 4));    // 4 hex digits for id
+    appendHex(toHex(static_cast<uint64_t>(id), 16));    // 16 hex digits for id
     appendHex(toHex(static_cast<int>(type), 2));  // 2 hex digits for type
     appendHex(toHex(static_cast<int>(x), 4));     // 4 hex digits for x
     appendHex(toHex(static_cast<int>(y), 4));     // 4 hex digits for y
@@ -135,7 +138,7 @@ void Packet::positionSpawn(const size_t id, const uint16_t type, const float x, 
 void Packet::hit(const size_t id, const int value)
 {
     appendHex("08");  // opcode
-    appendHex(toHex(static_cast<int>(id), 4));    // 4 hex digits for id
+    appendHex(toHex(static_cast<uint64_t>(id), 16));    // 16 hex digits for id
     appendHex(toHex(value, 4));                    // 4 hex digits for damage
 }
 
@@ -146,7 +149,7 @@ void Packet::hit(const size_t id, const int value)
 void Packet::dead(const size_t id)
 {
     appendHex("09");  // opcode
-    appendHex(toHex(static_cast<int>(id), 4));  // 4 hex digits for id
+    appendHex(toHex(static_cast<uint64_t>(id), 16));  // 16 hex digits for id
 }
 
 /**
@@ -165,5 +168,5 @@ void Packet::endGame(const uint8_t status)
  */
 void Packet::shoot(const size_t id) {
     appendHex("0B");  // opcode
-    appendHex(toHex(static_cast<int>(id), 4));  // 4 hex digits for id
+    appendHex(toHex(static_cast<uint64_t>(id), 16));  // 16 hex digits for id
 }
