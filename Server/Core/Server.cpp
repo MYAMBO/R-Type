@@ -250,7 +250,7 @@ void Server::sendPacket(Packet& packet)
             byte3 = 0;
         }
 
-        if (_udpSocket.send(p.getData(), p.getDataSize(), sf::IpAddress(127, 0, 0, 1), snd) != sf::Socket::Status::Done) {
+        if (_udpSocket.send(p.getData(), p.getDataSize(), sf::IpAddress(byte0, byte1, byte2, byte3), snd) != sf::Socket::Status::Done) {
             log("UDP | Failed to send packet to client at port " + std::to_string(snd));
         }
         log("port : " + std::to_string(snd) + " ip : " + str);
