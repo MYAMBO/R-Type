@@ -180,25 +180,17 @@ void ServerGame::createBullet(const float x, const float y)
  */
 void ServerGame::handleNewPlayer()
 {
-    if (_playerCount >= NB_PLAYER) {
-        std::cout << "Maximum number of players reached (" << NB_PLAYER << ")" << std::endl;
+    if (_playerCount >= MAX_PLAYER) {
+        std::cout << "Maximum number of players reached (" << MAX_PLAYER << ")" << std::endl;
         return;
     }
-
-    float startPositions[NB_PLAYER][2] = {
-        {200.f, 200.f},
-        {200.f, 400.f},
-        {200.f, 600.f},
-        {200.f, 800.f}
-    };
     
-    createPlayer(startPositions[_playerCount][0], startPositions[_playerCount][1]);
+    createPlayer(200, 200);
     _playerCount++;
     
     std::cout << "Player " << _playerCount << " connected" << std::endl;
     
-    // Démarrer le jeu quand 4 joueurs sont connectés
-    if (_playerCount == NB_PLAYER && !_gameStarted) {
+    if (_playerCount == NB_PLAYER_TO_START && !_gameStarted) {
         _gameStarted = true;
         _waveTimer.restart();
         std::cout << "Game started! Enemy waves will spawn every 20 seconds" << std::endl;
