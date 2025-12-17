@@ -10,16 +10,26 @@
 /**
  * @brief Constructs a new Entity object with a unique ID.
 */
-Entity::Entity()
+Entity::Entity(int side)
+    : _side(side)
 {
     static int id = 0;
-    _id = id++;
+    static int clientId = 0;
+    if (side == 0) {
+        _id = id;
+        id++;
+    } else {
+        _clientId = clientId;
+        clientId--;
+    }
 }
 
 /**
  * @brief Return the id of the entity
  */
-std::size_t Entity::getId(void) const
+int Entity::getId(void) const
 {
-    return _id;
+    if (_side == SERVER)
+        return static_cast<int>(_id);
+    return _clientId;
 }

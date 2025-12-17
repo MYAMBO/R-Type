@@ -32,7 +32,7 @@ void createBullet(int entityId, World &world)
     auto shooter = world.getAllEntitiesWithComponent<Tag>()[entityId];
     if (shooter->getComponent<Tag>()->getTag() == "player" || shooter->getComponent<Tag>()->getTag() == "player_mate")
         isPlayer = true;
-    auto bullet = world.createEntity();
+    auto bullet = world.createEntity(Side::SERVER);
     auto shooterPos = shooter->getComponent<Position>();
     if (isPlayer) {
         bullet->addComponent<Position>(shooterPos->getX() + 60.f, shooterPos->getY() + 15.f);
@@ -80,7 +80,7 @@ void backgroundScrollScript(int entityId, World &world)
  */
 void playerfire(int entityId, World &world)
 {
-    auto player = GameHelper::getEntityById(world, entityId - 1);
+    auto player = GameHelper::getEntityById(world, entityId);
     if (!player)
         return;
     auto posPlayer = player->getComponent<Position>();
