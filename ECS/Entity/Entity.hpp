@@ -16,6 +16,14 @@
 #include "Component.hpp"
 
 /**
+ * @brief Enumeration for the side of the entity (server or client).
+*/
+enum Side {
+    SERVER = 0,
+    CLIENT = 1
+};
+
+/**
  * @brief Entity class representing an object in the ECS architecture.
  *
  * An entity is a container for components that define its data and behavior.
@@ -23,7 +31,7 @@
 */
 class Entity {
     public:
-        Entity();
+        Entity(int side);
         ~Entity() = default;
 
         template<typename T, typename ... Args>
@@ -32,8 +40,10 @@ class Entity {
         template<typename T>
         [[nodiscard]] std::shared_ptr<T> getComponent() const;
 
-        [[nodiscard]] std::size_t getId(void) const;
+        [[nodiscard]] int getId(void) const;
     private:
+        int _side;
+        int _clientId;
         std::size_t _id;
         std::vector<std::shared_ptr<Component>> _components;
 };

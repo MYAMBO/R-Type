@@ -77,7 +77,7 @@ std::shared_ptr<Entity> GameHelper::getEntityById(World &world, int id)
 */
 void GameHelper::createBasicEnemy(World &world, float x, float y)
 {
-    auto enemy = world.createEntity();
+    auto enemy = world.createEntity(Side::SERVER);
     enemy->addComponent<HP>(50);
     enemy->addComponent<Position>(x, y);
     enemy->addComponent<Sprite>(std::string("../sprites/r-typesheet42.gif"));
