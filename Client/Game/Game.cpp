@@ -149,12 +149,6 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
             sf::FloatRect visibleArea({0, 0}, {static_cast<float>(_window.getSize().x), static_cast<float>( _window.getSize().y)});
             _window.setView(sf::View(visibleArea));
         }
-        if (inputSystem->isKeyPressed(KeyboardKey::Key_M)) {
-            auto enemy = GameHelper::getEntityByTag(_world, "enemy");
-            if (enemy) {
-                createBullet(enemy->getId(), _world);
-            }
-        }
         inputSystem->update(0.0f, _world);
     }
 }
@@ -179,12 +173,15 @@ void Game::createPlayer()
     player->addComponent<BoxCollider>(33.0f, 19.0f);
     
     if (playerCount == 0) {
-        // Premier joueur (joueur local)
         player->addComponent<Animator>(2, 1, 3.f, 0, 0, 33, 19, 0, 0);
-        player->addComponent<Script>(playerInput);
+        player->addComponent<Script>(
+            [this](const int entityId, World &world)
+            {
+                this->playerInput(entityId, world);
+            }
+        );
         player->addComponent<Tag>("player");
     } else {
-        // Autres joueurs (coéquipiers)
         player->addComponent<Animator>(2, 1, 3.f, 0, (playerCount * 17), 33, 19, 0, 0);
         player->addComponent<Tag>("player_mate");
     }
@@ -197,6 +194,7 @@ void Game::createPlayer()
     fire->addComponent<Animator>(2, 1, 3.f, 285, 85, 15, 15, 0, 0);
     fire->addComponent<Scale>(2.f);
     fire->addComponent<Scene>(1);
+    fire->addComponent<BoxCollider>(15.f, 15.f);
     fire->addComponent<Script>(playerfire);
     fire->addComponent<Layer>(10);
     fire->addComponent<Tag>("fire");
@@ -240,10 +238,74 @@ void Game::createEnemy(float x, float y, int type)
     }
 }
 
+/**
+ * @brief Handles player input.
+ *
+ * This function processes user input events and updates the game state accordingly.
+ * @param inputSystem The input system to check for player actions.
+ */
+void Game::playerInput(int entityId, World &world)
+{
+    (void)entityId;
+    static bool isShootKeyPressed = false;
+    auto inputSystem = world.getSystem<Inputs>();
+    std::shared_ptr<Camera> compCam = GameHelper::getMainCamera(world);
+    if (!compCam)
+        return;
+
+    std::shared_ptr<Entity> compPlayer = GameHelper::getEntityByTag(world, "player");
+    if (!compPlayer)
+        return;
+
+    auto pos = compPlayer->getComponent<Position>();
+
+    if (inputSystem->isKeyPressed(KeyboardKey::Key_D))
+        if (compCam->getPosition().x + compCam->getSize().x > pos->getX() + 7.0f)
+            pos->setX(pos->getX() + 7.0f);
+    if (inputSystem->isKeyPressed(KeyboardKey::Key_Q))
+        if (compCam->getPosition().x < pos->getX() - 7.0f)
+            pos->setX(pos->getX() - 7.0f);
+    if (inputSystem->isKeyPressed(KeyboardKey::Key_Z))
+        if (compCam->getPosition().y < pos->getY() - 7.0f)
+            pos->setY(pos->getY() - 7.0f);
+    if (inputSystem->isKeyPressed(KeyboardKey::Key_S))
+        if (compCam->getPosition().y + compCam->getSize().y > pos->getY() + 7.0f)
+            pos->setY(pos->getY() + 7.0f);
+    if (inputSystem->isKeyPressed(KeyboardKey::Key_Space)) {
+        if (!isShootKeyPressed) {
+            createBullet(compPlayer->getId(), world);
+            Packet packet;
+            packet.shoot(compPlayer->getId());
+            packet.setId(compPlayer->getId());
+            packet.setAck(0);
+            packet.setPacketNbr(1);
+            packet.setTotalPacketNbr(1);
+            _network.sendPacket(packet);
+            isShootKeyPressed = true;
+        }
+    } else {
+        isShootKeyPressed = false;
+    }
+}
+
+
+void Game::UpdatePosition(int id, float x, float y)
+{
+    auto entity = GameHelper::getEntityById(_world, id);
+    if (entity) {
+        auto positionComp = entity->getComponent<Position>();
+        if (positionComp) {
+            positionComp->setX(x);
+            positionComp->setY(y);
+        }
+    }
+}
+
 void Game::handleSpawn(int id, int type, float x, float y)
 {
     switch (type) {
         case None:
+            UpdatePosition(id, x, y);
             break;
         case Player:
             std::cout << "Spawning player at position (" << x << ", " << y << ")" << std::endl;

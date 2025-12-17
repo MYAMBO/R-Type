@@ -64,6 +64,7 @@ void ClientPacketreader::updateEntity()
     float x = static_cast<float>(std::stoi(_data.mySubStr(0, 4), nullptr, 16));
     float y = static_cast<float>(std::stoi(_data.mySubStr(0, 4), nullptr, 16));
 
+    std::cout << "Update Entity - ID: " << id << ", Type: " << type << ", X: " << x << ", Y: " << y << std::endl;
     _game->handleSpawn(id, type, x, y);
 }
 

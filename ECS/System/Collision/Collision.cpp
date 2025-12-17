@@ -7,6 +7,8 @@
 
 #include "Collision.hpp"
 
+#include "Tag.hpp"
+#include "GameHelper.hpp"
 
 
 /**
@@ -28,10 +30,13 @@ void Collision::update(const float &, World &w)
             std::shared_ptr<Position>  posB = b->getComponent<Position>();
             if (!colA || !colB || !posA || !posB)
                 continue;
+
             if (checkCollision(*colA, *posA, *colB, *posB)) {
                 std::cout << "[Collision] Entity "
-              << a->getId() << " <-> "
-              << b->getId() << std::endl;
+              << a->getId() << ", with Tag: " << GameHelper::getEntityById(w, a->getId())->getComponent<Tag>()->getTag()
+              << " collided with Entity "
+              << b->getId() << ", with Tag: " << GameHelper::getEntityById(w, b->getId())->getComponent<Tag>()->getTag()
+              << std::endl;
             }
         }
     }

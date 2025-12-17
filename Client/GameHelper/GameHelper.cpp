@@ -9,6 +9,7 @@
 #include "Tag.hpp"
 #include "Scale.hpp"
 #include "Scene.hpp"
+#include "Layer.hpp"
 #include "Camera.hpp"
 #include "Sprite.hpp"
 #include "Position.hpp"
@@ -84,6 +85,7 @@ void GameHelper::createBasicEnemy(World &world, float x, float y)
     enemy->addComponent<Animator>(2, 1, 3.0f, 0, 0, 33, 19, 33, 0);
     enemy->addComponent<Scale>(2.f);
     enemy->addComponent<Scene>(1);
+    enemy->addComponent<Layer>(5);
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(33.0f, 19.0f);
 }
