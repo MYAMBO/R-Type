@@ -211,18 +211,49 @@ void Server::sendPacket(Packet& packet)
 
     for (auto &[fst, snd] : _udpUsers)
     {
-        std::string tmp = fst.substr(0, fst.find('.'));
-        const std::uint8_t byte0 = stoi(tmp);
-        tmp = tmp.substr(0, tmp.find('.'));
-        const std::uint8_t byte1 = stoi(tmp);
-        tmp = tmp.substr(0, tmp.find('.'));
-        const std::uint8_t byte2 = stoi(tmp);
-        tmp = tmp.substr(0, tmp.find('.'));
-        const std::uint8_t byte3 = stoi(tmp);
+        std::string str = fst;
 
-        if (_udpSocket.send(p.getData(), p.getDataSize(), sf::IpAddress(byte0, byte1, byte2, byte3), snd) != sf::Socket::Status::Done) {
+        std::uint8_t byte0;
+        std::uint8_t byte1;
+        std::uint8_t byte2;
+        std::uint8_t byte3;
+
+        std::string tmp = fst.substr(0, fst.find('.'));
+        if (!tmp.empty()) {
+            byte0 = stoi(tmp);
+            std::cout << byte0 << std::endl;
+        } else {
+            byte0 = 0;
+        }
+        fst = fst.erase(0, fst.find('.'));
+        tmp = fst.substr(0, fst.find('.'));
+        if (!tmp.empty()) {
+            byte1 = stoi(tmp);
+            std::cout << byte1 << std::endl;
+        } else {
+            byte1 = 0;
+        }
+        fst = fst.erase(0, fst.find('.'));
+        tmp = fst.substr(0, fst.find('.'));
+        if (!tmp.empty()) {
+            byte2 = stoi(tmp);
+            std::cout << byte2 << std::endl;
+        } else {
+            byte2 = 0;
+        }
+        fst = fst.erase(0, fst.find('.'));
+        tmp = fst.substr(0, fst.find('.'));
+        if (!tmp.empty()) {
+            byte3 = stoi(tmp);
+            std::cout << byte3 << std::endl;
+        } else {
+            byte3 = 0;
+        }
+
+        if (_udpSocket.send(p.getData(), p.getDataSize(), sf::IpAddress(127, 0, 0, 1), snd) != sf::Socket::Status::Done) {
             log("UDP | Failed to send packet to client at port " + std::to_string(snd));
         }
+        log("port : " + std::to_string(snd) + " ip : " + str);
     }
     log("Packet queued");
 }
