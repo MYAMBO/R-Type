@@ -5,8 +5,11 @@
 ** Draw
 */
 
+#include <algorithm>
+
 #include "Draw.hpp"
 #include "Scene.hpp"
+#include "Layer.hpp"
 #include "Sprite.hpp"
 
 /**
@@ -18,7 +21,23 @@
 void Draw::update(const float& dt, World &w)
 {
     (void) dt;
-    const auto entities = w.getAllEntitiesWithComponent<Sprite>();
+    auto entities = w.getAllEntitiesWithComponent<Sprite>();
+    std::sort(entities.begin(), entities.end(), [](const std::shared_ptr<Entity>& a, const std::shared_ptr<Entity>& b) {
+        auto layerAComp = a->getComponent<Layer>();
+        auto layerBComp = b->getComponent<Layer>();
+        int valA = 0;
+        int valB = 0;
+        if (!layerAComp)
+            valA = 1;
+        else
+            valA = layerAComp->getLayerId();
+        if (!layerBComp)
+            valB = 1;
+        else
+            valB = layerBComp->getLayerId();
+        return valA < valB;
+    });
+
     for (auto& entity : entities) {
         const auto objectComponent = entity->getComponent<Sprite>();
         const auto sceneComponent = entity->getComponent<Scene>();

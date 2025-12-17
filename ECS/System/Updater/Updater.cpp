@@ -63,8 +63,8 @@ void Updater::updateSprites(const float& dt, const World &w)
         if (rotComp)
             sprite->setRotation(sf::degrees(rotComp->getRotation()));
         if (velComp) {
-            posComp->setX(posComp->getX() + velComp->getVelocity() * dt);
-            posComp->setY(posComp->getY() + velComp->getVelocity() * dt);
+            posComp->setX(posComp->getX() + velComp->getVelocityX() * dt);
+            posComp->setY(posComp->getY() + velComp->getVelocityY() * dt);
         }
     }
 }
@@ -98,6 +98,7 @@ void Updater::updateAnimations(const float &dt, const World &w)
 */
 void Updater::updateCameras(const float &dt, const World &w)
 {
+    (void)dt;
     for (auto &entity : w.getAllEntitiesWithComponent<Camera>()) {
         auto cameraComp = entity->getComponent<Camera>();
         if (!cameraComp)

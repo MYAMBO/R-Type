@@ -18,9 +18,13 @@
  */
 Sprite::Sprite(const std::string& filepath)
 {
-    if (!_texture.loadFromFile(filepath))
-        throw std::runtime_error("Failed to load texture from file: " + filepath);
-    
+    if (!_texture.loadFromFile(filepath)) {
+        std::cerr << "[Sprite] Failed to load texture: " << filepath << std::endl;
+        const sf::Texture texture({1, 1});
+        _texture = texture;
+        _sprite = std::make_shared<sf::Sprite>(_texture);
+        return;
+    }
     _sprite = std::make_shared<sf::Sprite>(_texture);
 }
 

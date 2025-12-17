@@ -2,13 +2,15 @@
 ** EPITECH PROJECT, 2025
 ** R-Type
 ** File description:
-** Packetreader.cpp
+** ClientPacketreader
 */
 
-#include "Packetreader.hpp"
+
+#include "ClientPacketreader.hpp"
 
 #include <iostream>
 #include <utility>
+#include <cstring>
 
 /**
  * @brief Construct a packetReader
@@ -16,7 +18,7 @@
  * @param isClient If it's client side or not
  * @param game Pointer to the Server-side game
  */
-Packetreader::Packetreader(std::string data, std::shared_ptr<ServerGame> game) : _data(MyString(std::move(data)))
+ClientPacketreader::ClientPacketreader(std::string data, std::shared_ptr<Game> game) : _data(MyString(std::move(data)))
 {
     _game = std::move(game);
 }
@@ -24,18 +26,18 @@ Packetreader::Packetreader(std::string data, std::shared_ptr<ServerGame> game) :
 /**
  * @brief parse the Packet and interpret it
  */
-void Packetreader::interpretPacket()
+void ClientPacketreader::interpretPacket()
 {
-    std::cout << "server received packet" << std::endl;
+    std::cout << "packet" << std::endl;
     while (_data.size() > 0)
     {
-        switch (std::stoi( _data.mySubStr(0, 2) , nullptr, 16)) {
+        auto truc = std::stoi( _data.mySubStr(0, 2) , nullptr, 16);
+        switch (truc) {
             case 0x06: timestamp(); break;
             case 0x07: updateEntity(); break;
             case 0x08: hit(); break;
             case 0x09: dead(); break;
             case 0x0A: endGame(); break;
-            case 0x0B: shoot(); break;
             default:
                 break;
         }
@@ -45,7 +47,7 @@ void Packetreader::interpretPacket()
 /**
  * @brief interpret timeStamp action
  */
-void Packetreader::timestamp()
+void ClientPacketreader::timestamp()
 {
     int  time = std::stoi( _data.mySubStr(0, 4) , nullptr, 16);
 
@@ -55,25 +57,17 @@ void Packetreader::timestamp()
 /**
  * @brief interpret updateEntity action
  */
-void Packetreader::updateEntity()
+void ClientPacketreader::updateEntity()
 {
     int id = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
     int type = std::stoi( _data.mySubStr(0, 2), nullptr, 16);
     float x = static_cast<float>(std::stoi(_data.mySubStr(0, 4), nullptr, 16));
-    float y = static_cast<float>(std::stoi(_data.mySubStr(0, 4) , nullptr, 16));
+    float y = static_cast<float>(std::stoi(_data.mySubStr(0, 4), nullptr, 16));
 
-    if (type == 0) {
-        // type == None (0) = mise à jour de position seulement
-        std::cout << "Player " << id << " moved to (" << x << ", " << y << ")" << std::endl;
-        _game->handleNewPlayerPosition(id, x, y);
-    } else if (type == 1) {
-        // type == Player (1) = nouveau joueur qui se connecte
-        std::cout << "New player " << id << " spawning at (" << x << ", " << y << ")" << std::endl;
-        _game->handleNewPlayer();
-    }
+    _game->handleSpawn(id, type, x, y);
 }
 
-void Packetreader::clear()
+void ClientPacketreader::clear()
 {
     _data.clear();
 }
@@ -81,7 +75,7 @@ void Packetreader::clear()
 /**
  * @brief interpret hit action
  */
-void Packetreader::hit()
+void ClientPacketreader::hit()
 {
     int id = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
     int damage = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
@@ -92,7 +86,7 @@ void Packetreader::hit()
 /**
  * @brief interpret dead action
  */
-void Packetreader::dead()
+void ClientPacketreader::dead()
 {
     int id = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
 
@@ -102,7 +96,7 @@ void Packetreader::dead()
 /**
  * @brief interpret endGame action
  */
-void Packetreader::endGame()
+void ClientPacketreader::endGame()
 {
     int id = std::stoi(_data.mySubStr(0, 4), nullptr, 16);
 
@@ -112,17 +106,7 @@ void Packetreader::endGame()
 /**
  * @brief interpret shoot action
  */
-void Packetreader::shoot()
+void ClientPacketreader::addData(const std::string& data)
 {
-    const int id = std::stoi(_data.mySubStr(0, 4), nullptr, 16);
-
-    _game->handleShoot(id);
-}
-
-/**
- * @brief interpret shoot action
- */
-void Packetreader::addData(const std::string& data)
-{
-    _data.append(data.c_str());
+    _data.append(data.data(), data.size());
 }
