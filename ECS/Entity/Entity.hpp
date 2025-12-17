@@ -19,8 +19,8 @@
  * @brief Enumeration for the side of the entity (server or client).
 */
 enum Side {
-    SERVER = 0,
-    CLIENT = 1
+    SERVERSIDE = 0,
+    CLIENTSIDE
 };
 
 /**

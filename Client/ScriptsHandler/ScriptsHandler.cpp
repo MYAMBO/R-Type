@@ -29,17 +29,21 @@
 void createBullet(int entityId, World &world)
 {
     bool isPlayer = false;
-    auto shooter = world.getAllEntitiesWithComponent<Tag>()[entityId];
+    auto shooter = GameHelper::getEntityById(world, entityId);
+    if (!shooter)
+        std::cerr << "Error: Shooter entity not found." << std::endl;
     if (shooter->getComponent<Tag>()->getTag() == "player" || shooter->getComponent<Tag>()->getTag() == "player_mate")
         isPlayer = true;
-    auto bullet = world.createEntity(Side::SERVER);
+    auto bullet = world.createEntity(Side::SERVERSIDE);
     auto shooterPos = shooter->getComponent<Position>();
+    if (!shooterPos)
+        std::cerr << "Error: Shooter entity has no Position component." << std::endl;
     if (isPlayer) {
-        bullet->addComponent<Position>(shooterPos->getX() + 60.f, shooterPos->getY() + 15.f);
+        bullet->addComponent<Position>(100 + 60.f, 100 + 15.f);
         bullet->addComponent<Velocity>(15.f, 0.f);
         bullet->addComponent<Animator>(2, 1, 1.5f, 200, 120, 32, 15, 32, 0);
     } else {
-        bullet->addComponent<Position>(shooterPos->getX() - 20.f , shooterPos->getY() + 15.f);
+        bullet->addComponent<Position>(100 - 20.f , 100 + 15.f);
         bullet->addComponent<Rotation>(180.f);
         bullet->addComponent<Velocity>(-15.f, 0.f);
     }
@@ -57,7 +61,7 @@ void createBullet(int entityId, World &world)
  */
 void backgroundScrollScript(int entityId, World &world)
 {
-    auto entity = world.getAllEntitiesWithComponent<Tag>()[entityId];
+    auto entity = GameHelper::getEntityById(world, entityId);
     if (!entity)
         return;
     auto posComp = entity->getComponent<Position>();

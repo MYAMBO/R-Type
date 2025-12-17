@@ -61,7 +61,7 @@ void ServerGame::run()
  */
 void ServerGame::createPlayer(const float x, const float y)
 {
-    const auto player = _world.createEntity();
+    const auto player = _world.createEntity(Side::SERVERSIDE);
     player->addComponent<HP>(100);
     player->addComponent<Position>(x, y);
     player->addComponent<BoxCollider>(10.f, 10.f);
@@ -100,7 +100,7 @@ void ServerGame::EnemyMovement(const int entityId, const World &world)
  */
 void ServerGame::createEnemy(const float x, const float y)
 {
-    const auto enemy = _world.createEntity();
+    const auto enemy = _world.createEntity(Side::SERVERSIDE);
     enemy->addComponent<HP>(100);
     enemy->addComponent<Position>(x, y);
     enemy->addComponent<BoxCollider>(10.f, 10.f);
@@ -159,7 +159,7 @@ void ServerGame::BulletMovement(const int entityId, World &world)
  */
 void ServerGame::createBullet(const float x, const float y)
 {
-    const auto bullet = _world.createEntity();
+    const auto bullet = _world.createEntity(Side::SERVERSIDE);
 
     bullet->addComponent<Position>(x, y);
     bullet->addComponent<BoxCollider>(5.f, 5.f);

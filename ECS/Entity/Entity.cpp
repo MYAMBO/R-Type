@@ -29,7 +29,7 @@ Entity::Entity(int side)
  */
 int Entity::getId(void) const
 {
-    if (_side == SERVER)
+    if (_side == SERVERSIDE)
         return static_cast<int>(_id);
     return _clientId;
 }

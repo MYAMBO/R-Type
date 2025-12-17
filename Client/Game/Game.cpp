@@ -67,7 +67,7 @@ Game::~Game()
 */
 void Game::createBackground()
 {
-    auto backgroundFirst = _world.createEntity(Side::CLIENT);
+    auto backgroundFirst = _world.createEntity(Side::CLIENTSIDE);
     backgroundFirst->addComponent<Sprite>(std::string("../sprites/background.png"));
     
     auto windowSize = _window.getSize();
@@ -86,7 +86,7 @@ void Game::createBackground()
     backgroundFirst->addComponent<Layer>(LayerType::BACKGROUND);
     backgroundFirst->addComponent<Velocity>(-4.f, 0.f);
     backgroundFirst->addComponent<Tag>("background_first");
-    auto backgroundSecond = _world.createEntity(Side::CLIENT);
+    auto backgroundSecond = _world.createEntity(Side::CLIENTSIDE);
     backgroundSecond->addComponent<Sprite>(std::string("../sprites/background.png"));
     backgroundSecond->addComponent<Scale>(1.f);
     backgroundSecond->addComponent<Scene>(_world.getCurrentScene());
@@ -170,7 +170,7 @@ void Game::createPlayer()
     static int playerCount = 0;
     if (playerCount >= 4)
         return;
-    auto player = _world.createEntity(Side::SERVER);
+    auto player = _world.createEntity(Side::SERVERSIDE);
     player->addComponent<HP>(100);
     player->addComponent<Position>(75.0f, 75.0f);
     player->addComponent<Sprite>(std::string("../sprites/r-typesheet42.gif"));
@@ -184,7 +184,7 @@ void Game::createPlayer()
         player->addComponent<Animator>(2, 1, 3.f, 0, 0, 33, 19, 0, 0);
         player->addComponent<Script>([this](const int entityId, World& world)
         {
-            this->playerInput(entityId, world);
+            this->playerInput(entityId, _world);
         });
         player->addComponent<Tag>("player");
     } else {
@@ -192,10 +192,9 @@ void Game::createPlayer()
         player->addComponent<Animator>(2, 1, 3.f, 0, (playerCount * 17), 33, 19, 0, 0);
         player->addComponent<Tag>("player_mate");
     }
-    player->addComponent<Script>(playerInput);
     player->addComponent<Tag>("player");
     player->addComponent<BoxCollider>(33.0f, 19.0f);
-    auto fire = _world.createEntity(Side::CLIENT);
+    auto fire = _world.createEntity(Side::CLIENTSIDE);
     playerCount++;
     fire->addComponent<Position>(0.f, 85.f);
     fire->addComponent<Sprite>(std::string("../sprites/r-typesheet1.gif"));
@@ -213,7 +212,7 @@ void Game::createPlayer()
 */
 void Game::createCamera()
 {
-    auto cameraEntity = _world.createEntity(Side::CLIENT);
+    auto cameraEntity = _world.createEntity(Side::CLIENTSIDE);
     cameraEntity->addComponent<Camera>(sf::Vector2f(1920.f, 1080.f), sf::Vector2f(0.f, 0.f));
     cameraEntity->addComponent<Tag>("main_camera");
 }
@@ -323,7 +322,6 @@ void Game::playerInput(int entityId, World &world)
         packet.setId(compPlayer->getId());
         packet.setPacketNbr(1);
         packet.setTotalPacketNbr(1);
-
         _network.sendPacket(packet);
     }
 }
