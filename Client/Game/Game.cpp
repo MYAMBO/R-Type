@@ -113,9 +113,7 @@ void Game::run()
     packet.positionSpawn(0, Player, 300, 300);
     _network.sendPacket(packet);
     createCamera();
-    //createPlayer();
     createBackground();
-    createEnemy(600.f, 100.f, 1);
     _world.addSystem<Collision>();
     _world.addSystem<Updater>();
     _world.addSystem<Draw>();
@@ -183,7 +181,10 @@ void Game::createPlayer()
     if (playerCount == 0) {
         // Premier joueur (joueur local)
         player->addComponent<Animator>(2, 1, 3.f, 0, 0, 33, 19, 0, 0);
-        player->addComponent<Script>(playerInput);
+        player->addComponent<Script>([this](const int entityId, World& world)
+        {
+            this->playerInput(entityId, world);
+        });
         player->addComponent<Tag>("player");
     } else {
         // Autres joueurs (coéquipiers)
@@ -259,5 +260,68 @@ void Game::handleSpawn(int id, int type, float x, float y)
             std::cout << "Spawning bullet" << std::endl;
             createBullet(id, _world);
             break;
+    }
+}
+
+/**
+ * @brief Handles player input.
+ *
+ * This function processes user input events and updates the game state accordingly.
+ * @param inputSystem The input system to check for player actions.
+ */
+void Game::playerInput(int entityId, World &world)
+{
+    (void)entityId;
+    static bool isShootKeyPressed = false;
+    bool moved = false;
+    auto inputSystem = world.getSystem<Inputs>();
+    std::shared_ptr<Camera> compCam = GameHelper::getMainCamera(world);
+    if (!compCam)
+        return;
+
+    std::shared_ptr<Entity> compPlayer = GameHelper::getEntityByTag(world, "player");
+    if (!compPlayer)
+        return;
+
+    auto pos = compPlayer->getComponent<Position>();
+
+    if (inputSystem->isKeyPressed(KeyboardKey::Key_D))
+        if (compCam->getPosition().x + compCam->getSize().x > pos->getX() + 7.0f) {
+            pos->setX(pos->getX() + 7.0f);
+            moved = true;
+        }
+    if (inputSystem->isKeyPressed(KeyboardKey::Key_Q))
+        if (compCam->getPosition().x < pos->getX() - 7.0f) {
+            pos->setX(pos->getX() - 7.0f);
+            moved = true;
+        }
+    if (inputSystem->isKeyPressed(KeyboardKey::Key_Z))
+        if (compCam->getPosition().y < pos->getY() - 7.0f) {
+            pos->setY(pos->getY() - 7.0f);
+            moved = true;
+        }
+    if (inputSystem->isKeyPressed(KeyboardKey::Key_S))
+        if (compCam->getPosition().y + compCam->getSize().y > pos->getY() + 7.0f) {
+            pos->setY(pos->getY() + 7.0f);
+            moved = true;
+        }
+    if (inputSystem->isKeyPressed(KeyboardKey::Key_Space)) {
+        if (!isShootKeyPressed) {
+            createBullet(compPlayer->getId(), world);
+            isShootKeyPressed = true;
+        }
+    } else {
+        isShootKeyPressed = false;
+    }
+    if (moved)
+    {
+        Packet packet = Packet();
+        packet.playerPosition(entityId, pos->getX(), pos->getY());
+        packet.setAck(0);
+        packet.setId(compPlayer->getId());
+        packet.setPacketNbr(1);
+        packet.setTotalPacketNbr(1);
+
+        _network.sendPacket(packet);
     }
 }

@@ -55,6 +55,7 @@ class Game {
         void createPlayer();
         void createBackground();
         void createEnemy(float x, float y, int type);
+        void playerInput(int entityId, World &world);
 
         void bulletShooting();
 

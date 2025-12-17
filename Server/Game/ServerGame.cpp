@@ -13,6 +13,7 @@
 #include "Updater.hpp"
 #include "Position.hpp"
 #include "ServerGame.hpp"
+#include <algorithm>
 #include "BoxCollider.hpp"
 
 /**
@@ -91,7 +92,7 @@ void ServerGame::EnemyMovement(const int entityId, const World &world)
 }
 
 /**
- * @brief Creates the player entity.
+ * @brief Creates a Ennemy entity.
  *
  * @param x The x position of the enemy.
  * @param y The y position of the enemy.
@@ -180,25 +181,17 @@ void ServerGame::createBullet(const float x, const float y)
  */
 void ServerGame::handleNewPlayer()
 {
-    if (_playerCount >= NB_PLAYER) {
-        std::cout << "Maximum number of players reached (" << NB_PLAYER << ")" << std::endl;
+    if (_playerCount >= MAX_PLAYER) {
+        std::cout << "Maximum number of players reached (" << MAX_PLAYER << ")" << std::endl;
         return;
     }
-
-    float startPositions[NB_PLAYER][2] = {
-        {200.f, 200.f},
-        {200.f, 400.f},
-        {200.f, 600.f},
-        {200.f, 800.f}
-    };
     
-    createPlayer(startPositions[_playerCount][0], startPositions[_playerCount][1]);
+    createPlayer(200, 200);
     _playerCount++;
     
     std::cout << "Player " << _playerCount << " connected" << std::endl;
     
-    // Démarrer le jeu quand 4 joueurs sont connectés
-    if (_playerCount == NB_PLAYER && !_gameStarted) {
+    if (_playerCount == NB_PLAYER_TO_START && !_gameStarted) {
         _gameStarted = true;
         _waveTimer.restart();
         std::cout << "Game started! Enemy waves will spawn every 20 seconds" << std::endl;
@@ -214,7 +207,7 @@ void ServerGame::handleNewPlayer()
  */
 void ServerGame::handleNewPlayerPosition(const int id, const float x, const float y) const
 {
-    const auto entity = _world.getAllEntitiesWithComponent<Tag>()[id];
+    const auto entity = _world.getAllEntitiesWithComponent<Tag>()[0];
     const auto pos = entity->getComponent<Position>();
 
     const auto distanceX = pos->getX() - x;

@@ -114,7 +114,7 @@ void Network::udpThread()
         p.clear();
         if (_udpSocket.receive(p, sender, rport) != sf::Socket::Status::Done)
         {
-            // error...
+
         }
         const void* raw = p.getData();
         const std::size_t size = p.getDataSize();

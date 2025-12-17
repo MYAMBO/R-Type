@@ -12,14 +12,15 @@
 #include "IGameNetwork.hpp"
     #include "World.hpp"
 
-    #define NB_PLAYER 4
+    #define NB_PLAYER_TO_START 2
+    #define MAX_PLAYER 4
 
 enum entitiesType
 {
     None = 0,
     Player = 1,
-    Enemy,
-    Bullet
+    Enemy = 2,
+    Bullet = 3
 };
 
 class ServerGame {
