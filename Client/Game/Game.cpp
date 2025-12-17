@@ -13,6 +13,7 @@
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/VideoMode.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
+#include "iostream"
 
 
 #include "HP.hpp"
