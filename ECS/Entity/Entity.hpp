@@ -12,16 +12,9 @@
 #include <vector>
 #include <utility>
 #include <cstddef>
+#include <cstdint>
 
 #include "Component.hpp"
-
-/**
- * @brief Enumeration for the side of the entity (server or client).
-*/
-enum Side {
-    SERVERSIDE = 0,
-    CLIENTSIDE
-};
 
 /**
  * @brief Entity class representing an object in the ECS architecture.
@@ -31,7 +24,7 @@ enum Side {
 */
 class Entity {
     public:
-        Entity(int side);
+        Entity(uint32_t _id = 0);
         ~Entity() = default;
 
         template<typename T, typename ... Args>
@@ -40,11 +33,9 @@ class Entity {
         template<typename T>
         [[nodiscard]] std::shared_ptr<T> getComponent() const;
 
-        [[nodiscard]] int getId(void) const;
+        [[nodiscard]] uint32_t getId(void) const;
     private:
-        int _side;
-        int _clientId;
-        std::size_t _id;
+        uint32_t _id;
         std::vector<std::shared_ptr<Component>> _components;
 };
 
