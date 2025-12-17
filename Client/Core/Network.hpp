@@ -11,6 +11,7 @@
 #include <mutex>
 #include <thread>
 #include <utility>
+#include <condition_variable>
 #include <Packet.hpp>
 #include <ClientPacketreader.hpp>
 
@@ -59,6 +60,9 @@ class Network : public IGameNetwork {
         long _udpPort;
         bool _debugMode;
         std::mutex _mutex;
+        std::condition_variable _readyCond;
+        bool _ready = false;
+        unsigned int _playerId = 0;
         std::shared_ptr<Game> _game;
         ClientPacketreader _packetReader;
 };

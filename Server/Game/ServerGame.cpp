@@ -13,6 +13,7 @@
 #include "Updater.hpp"
 #include "Position.hpp"
 #include "ServerGame.hpp"
+#include <algorithm>
 #include "BoxCollider.hpp"
 
 /**
@@ -206,7 +207,7 @@ void ServerGame::handleNewPlayer()
  */
 void ServerGame::handleNewPlayerPosition(const int id, const float x, const float y) const
 {
-    const auto entity = _world.getAllEntitiesWithComponent<Tag>()[id];
+    const auto entity = _world.getAllEntitiesWithComponent<Tag>()[0];
     const auto pos = entity->getComponent<Position>();
 
     const auto distanceX = pos->getX() - x;

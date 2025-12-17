@@ -7,6 +7,7 @@
 
 #include <cstring>
 #include <iostream>
+#include <optional>
 #include <netinet/in.h>
 #include <bits/getopt_core.h>
 
@@ -108,13 +109,12 @@ void Network::udpThread()
 
     std::optional<sf::IpAddress> sender;
     unsigned short rport;
-    _mutex.lock();
     while (true)
     {
         p.clear();
         if (_udpSocket.receive(p, sender, rport) != sf::Socket::Status::Done)
         {
-            // error...
+
         }
         const void* raw = p.getData();
         const std::size_t size = p.getDataSize();
@@ -144,12 +144,22 @@ void Network::tcpThread()
         if (_tcpClient.receive(data, sizeof(data), received) != sf::Socket::Status::Done)
             continue;
 
+        if (received < 6)
+            continue;
+
         uint32_t value32;
         std::memcpy(&value32, &data[2], sizeof(value32));
         value32 = ntohl(value32);
         _udpPort = value32;
+        _playerId = static_cast<unsigned char>(data[1]);
+
         _udpSocket.send("", 0, _ip, _udpPort);
-        _mutex.unlock();
+
+        {
+            std::lock_guard<std::mutex> lock(_mutex);
+            _ready = true;
+        }
+        _readyCond.notify_all();
     }
 }
 
@@ -167,6 +177,11 @@ void Network::log(const std::string& message) const
 
 void Network::sendPacket(Packet& packet)
 {
+    {
+        std::unique_lock<std::mutex> lock(_mutex);
+        _readyCond.wait(lock, [this]{ return _udpPort != -1; });
+    }
+
     const sf::Packet p = packet.getPacket();
 
     if (_udpSocket.send(p.getData(), p.getDataSize(), _ip, _udpPort) != sf::Socket::Status::Done) {
@@ -201,9 +216,12 @@ void Network::sendMessage(const std::string &message)
 
 void Network::start()
 {
-    _mutex.lock();
+    std::unique_lock<std::mutex> lock(_mutex);
     std::thread tcpThread(&Network::tcpThread, this);
     std::thread udpThread(&Network::udpThread, this);
+    _readyCond.wait(lock, [this]{ return _udpPort != -1; });
+    lock.unlock();
+
     _game->run();
     tcpThread.join();
     udpThread.join();
