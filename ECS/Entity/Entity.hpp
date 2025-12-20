@@ -12,6 +12,7 @@
 #include <vector>
 #include <utility>
 #include <cstddef>
+#include <cstdint>
 
 #include "Component.hpp"
 
@@ -23,7 +24,7 @@
 */
 class Entity {
     public:
-        Entity();
+        Entity(uint32_t _id = 0);
         ~Entity() = default;
 
         template<typename T, typename ... Args>
@@ -32,9 +33,9 @@ class Entity {
         template<typename T>
         [[nodiscard]] std::shared_ptr<T> getComponent() const;
 
-        [[nodiscard]] std::size_t getId(void) const;
+        [[nodiscard]] uint32_t getId(void) const;
     private:
-        std::size_t _id;
+        uint32_t _id;
         std::vector<std::shared_ptr<Component>> _components;
 };
 

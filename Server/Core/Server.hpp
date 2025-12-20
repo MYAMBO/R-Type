@@ -5,24 +5,25 @@
 ** Server.hpp
 */
 
-#ifndef SEVER
+#ifndef SERVER
 #define SERVER
 
 #include <thread>
 #include <utility>
 #include <iostream>
 #include <mutex>
+#include <cstring>
+#include <queue>
+#include <unistd.h>
 
-#ifdef _WIN32
-
-#else
-    #include <unistd.h>
-#endif
-
+#include "IGameNetwork.hpp"
+#include "Packet.hpp"
+#include "Packetreader.hpp"
+#include "ServerGame.hpp"
 #include "User.hpp"
 #include "SFML/Network.hpp"
 
-class Server
+class Server : public IGameNetwork
 {
     public:
         Server();
@@ -33,6 +34,11 @@ class Server
         void log(const std::string& message) const;
         void udpThread();
         void tcpThread();
+        void accepterThread();
+        void sendPacket(Packet& packet) override;
+        void sendMessage(std::string message, sf::IpAddress ip, unsigned short port);
+        void sendMessage(std::string message, unsigned int playerId);
+        static void sendAll(sf::TcpSocket& socket, const void* data, std::size_t size);
 
         class InitServerException : public std::exception
         {
@@ -61,5 +67,8 @@ class Server
         bool _debugMode;
         std::vector<User> _users;
         std::mutex _mutex;
+        std::shared_ptr<ServerGame> _game;
+        Packetreader _packetReader;
+        std::vector<std::pair<std::string, unsigned short>> _udpUsers;
 };
 #endif // SERVER

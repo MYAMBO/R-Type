@@ -9,28 +9,50 @@
 
 /**
  * @brief Constructs a new Velocity component with specified velocity.
- * @param velocity The velocity value.
+ * @param velocityX The velocity of the entity on the X axis.
+ * @param velocityY The velocity of the entity on the Y axis.
 */
-Velocity::Velocity(const float velocity) : _velocity(velocity)
+Velocity::Velocity(float velocityX, float velocityY)
+    : _velocityX(velocityX), _velocityY(velocityY)
 {
 }
 
 /**
  * @brief Gets the velocity of an entity.
  *
- * @return A float to the actual velocity of the entity.
+ * @return A float to the actual velocity on the X axis of the entity.
  */
-float Velocity::getVelocity() const
+float Velocity::getVelocityX() const
 {
-    return _velocity;
+    return _velocityX;
 }
 
 /**
  * @brief Updates the velocity of an entity.
  *
- * @param velocity value used to change the velocity of the entity.
+ * @param velocityX value used to change the velocity on the X axis of the entity.
  */
-void Velocity::setVelocity(const float velocity)
+void Velocity::setVelocityX(float velocityX)
 {
-    _velocity = velocity;
+    _velocityX = velocityX;
+}
+
+/**
+ * @brief Gets the velocity of an entity.
+ *
+ * @return A float to the actual velocity on the Y axis of the entity.
+ */
+float Velocity::getVelocityY() const
+{
+    return _velocityY;
+}
+
+/**
+ * @brief Updates the velocity of an entity.
+ *
+ * @param velocityY value used to change the velocity on the Y axis of the entity.
+ */
+void Velocity::setVelocityY(float velocityY)
+{
+    _velocityY = velocityY;
 }

@@ -2,41 +2,38 @@
 ** EPITECH PROJECT, 2025
 ** R-Type
 ** File description:
-** Packetreader.hpp
+** ClientPacketreader
 */
 
 #ifndef R_TYPE_PACKETREADER_HPP
     #define R_TYPE_PACKETREADER_HPP
 
 #include <string>
+
+#include "Game.hpp"
 #include "MyString.hpp"
-#include "ServerGame.hpp"
 
 /**
  * @brief PacketReader class to read and interpret received data
  */
-class Packetreader
+class ClientPacketreader
 {
     public:
-        explicit Packetreader(std::string data = "", std::shared_ptr<ServerGame> game = nullptr);
-        ~Packetreader() = default;
+        explicit ClientPacketreader(std::string data = "", std::shared_ptr<Game> game = nullptr);
+        ~ClientPacketreader() = default;
 
         void interpretPacket();
         void addData(const std::string& data);
         void clear();
-
-        std::string extract(int length);
     private:
-        bool _isClient;
         MyString _data;
-        std::shared_ptr<ServerGame> _game;
+        std::shared_ptr<Game> _game;
 
         void timestamp();
         void updateEntity();
         void hit();
         void dead();
         void endGame();
-        void shoot();
 };
 
 

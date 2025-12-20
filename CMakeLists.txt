@@ -14,20 +14,23 @@ if (DEV_COMPILE)
         add_compile_options(-Werror)
 endif ()
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+add_compile_options(-Wall -Wextra)
 
-add_compile_options(-Wall)
+if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake")
+    file(DOWNLOAD
+        https://raw.githubusercontent.com/cpm-cmake/CPM.cmake/master/cmake/CPM.cmake
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake"
 
-include(FetchContent)
+    )
+endif()
+include("${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake")
 
-FetchContent_Declare(
-        SFML
-        GIT_REPOSITORY https://github.com/SFML/SFML.git
-        GIT_TAG 3.0.x
+CPMAddPackage(
+    NAME SFML
+    GITHUB_REPOSITORY SFML/SFML
+    GIT_TAG 3.0.x
+    EXCLUDE_FROM_ALL YES
 )
-
-FetchContent_MakeAvailable(SFML)
 
 include_directories(.)
 include_directories(ECS)
@@ -41,6 +44,7 @@ include_directories(ECS/Component/Camera)
 include_directories(ECS/Component/Sprite)
 include_directories(ECS/Component/Camera)
 include_directories(ECS/Component/Script)
+include_directories(ECS/Component/Damage)
 include_directories(ECS/Component/Animator)
 include_directories(ECS/Component/Position)
 include_directories(ECS/Component/Velocity)
@@ -50,33 +54,61 @@ include_directories(ECS/System)
 include_directories(ECS/System/Draw)
 include_directories(ECS/System/Updater)
 include_directories(ECS/System/Inputs)
+include_directories(ECS/System/Collision)
 include_directories(ECS/Entity)
 include_directories(Client)
 include_directories(Client/Game)
 include_directories(Client/GameHelper)
+include_directories(Client/ScriptsHandler)
 include_directories(./Server)
+include_directories(./Server/Core)
 include_directories(./Packet)
+include_directories(Server/Game)
+include_directories(Client/Core)
 
 add_executable(r-type_server
         Server/main.cpp
-        Server/Server.cpp
-        Server/User.cpp
+        Server/Core/Server.cpp
+        Server/Core/User.cpp
+        Server/Game/ServerGame.cpp
         Packet/Packet.cpp
         Packet/Packet.hpp
         Packet/CustomError.hpp
         Packet/Packetreader.cpp
         Packet/Packetreader.hpp
         Packet/MyString.cpp
-        Packet/MyString.hpp)
+        Packet/MyString.hpp
+        ECS/Entity/Entity.cpp
+        ECS/System/Draw/Draw.cpp
+        ECS/System/Inputs/Inputs.cpp
+        ECS/System/Updater/Updater.cpp
+        ECS/World.cpp
+        ECS/Component/HP/HP.cpp
+        Client/GameHelper/GameHelper.cpp
+        ECS/Component/Tag/Tag.cpp
+        ECS/Component/Scale/Scale.cpp
+        ECS/Component/Layer/Layer.cpp
+        ECS/Component/Scene/Scene.cpp
+        ECS/Component/Script/Script.cpp
+        ECS/Component/Sprite/Sprite.cpp
+        ECS/Component/Camera/Camera.cpp
+        ECS/Component/Position/Position.cpp
+        ECS/Component/Velocity/Velocity.cpp
+        ECS/Component/Rotation/Rotation.cpp
+        ECS/Component/Animator/Animator.cpp
+        ECS/Component/BoxCollider/BoxCollider.cpp
+        Server/IGameNetwork.hpp)
 
 add_executable(r-type_client
         Client/main.cpp
         Client/Game/Game.cpp
         Client/GameHelper/GameHelper.cpp
+        Client/ScriptsHandler/ScriptsHandler.cpp
         ECS/Entity/Entity.cpp
         ECS/System/Draw/Draw.cpp
         ECS/System/Inputs/Inputs.cpp
         ECS/System/Updater/Updater.cpp
+        ECS/System/Collision/Collision.cpp
         ECS/World.cpp
         ECS/Component/HP/HP.cpp
         ECS/Component/Tag/Tag.cpp
@@ -84,37 +116,19 @@ add_executable(r-type_client
         ECS/Component/Layer/Layer.cpp
         ECS/Component/Scene/Scene.cpp
         ECS/Component/Script/Script.cpp
-        ECS/Component/Camera/Camera.cpp
         ECS/Component/Sprite/Sprite.cpp
+        ECS/Component/Camera/Camera.cpp
+        ECS/Component/Damage/Damage.cpp
         ECS/Component/Position/Position.cpp
         ECS/Component/Velocity/Velocity.cpp
         ECS/Component/Rotation/Rotation.cpp
         ECS/Component/Animator/Animator.cpp
         ECS/Component/BoxCollider/BoxCollider.cpp
         Packet/Packet.cpp
-        Packet/Packet.hpp
-        Packet/CustomError.hpp
-        Packet/Packetreader.cpp
-        Packet/Packetreader.hpp
         Packet/MyString.cpp
-        Packet/MyString.hpp)
-
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR})
-
-set_target_properties(r-type_server PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
-    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}
-)
-
-set_target_properties(r-type_client PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
-    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}
-)
+        Client/Core/Network.cpp
+        Client/Core/ClientPacketreader.cpp)
 
 target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network)
 
-target_link_libraries(r-type_server sfml-network)
+target_link_libraries(r-type_server  sfml-graphics sfml-system sfml-network)

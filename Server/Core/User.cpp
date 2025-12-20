@@ -7,18 +7,17 @@
 
 #include "User.hpp"
 
-#include <utility>
-
 static auto getUserId() -> unsigned int
 {
     static unsigned int id = 0;
     return id++;
 }
 
-User::User(const unsigned int port, std::string ip, std::shared_ptr<sf::TcpSocket> socket)
+User::User(const unsigned short port, std::string ip, std::shared_ptr<sf::TcpSocket> socket)
 {
     _id = getUserId();
     _port = port;
+    _udpPort = 0;
     _ip = std::move(ip);
     _socket = std::move(socket);
 }
@@ -38,7 +37,7 @@ std::string User::getName() const
     return _name;
 }
 
-unsigned int User::getPort() const
+unsigned short User::getPort() const
 {
     return _port;
 }
