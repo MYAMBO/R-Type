@@ -59,11 +59,12 @@ void ClientPacketreader::timestamp()
  */
 void ClientPacketreader::updateEntity()
 {
-    int id = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
+    unsigned int id = std::stoul( _data.mySubStr(0, 16), nullptr, 16);
     int type = std::stoi( _data.mySubStr(0, 2), nullptr, 16);
     float x = static_cast<float>(std::stoi(_data.mySubStr(0, 4), nullptr, 16));
     float y = static_cast<float>(std::stoi(_data.mySubStr(0, 4), nullptr, 16));
 
+    printf("Update entity received: id=%u, type=%d, x=%f, y=%f\n", id, type, x, y);
     _game->handleSpawn(id, type, x, y);
 }
 
@@ -77,7 +78,7 @@ void ClientPacketreader::clear()
  */
 void ClientPacketreader::hit()
 {
-    int id = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
+    int id = std::stoi( _data.mySubStr(0, 16), nullptr, 16);
     int damage = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
 
     // call function and give parameter
@@ -88,7 +89,7 @@ void ClientPacketreader::hit()
  */
 void ClientPacketreader::dead()
 {
-    int id = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
+    int id = std::stoi( _data.mySubStr(0, 16), nullptr, 16);
 
     // call function and give parameter
 }
@@ -98,7 +99,7 @@ void ClientPacketreader::dead()
  */
 void ClientPacketreader::endGame()
 {
-    int id = std::stoi(_data.mySubStr(0, 4), nullptr, 16);
+    unsigned int id = std::stoi(_data.mySubStr(0, 16), nullptr, 16);
 
     // call function and give parameter
 }

@@ -24,6 +24,8 @@ class Packetreader
         void interpretPacket();
         void addData(const std::string& data);
         void clear();
+
+        std::string extract(int length);
     private:
         bool _isClient;
         MyString _data;

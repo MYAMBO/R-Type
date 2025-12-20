@@ -29,7 +29,7 @@ class ServerGame {
         ~ServerGame() = default;
 
         void run();
-        void handleNewPlayerPosition(int id, float x, float y) const;
+        void handleNewPlayerPosition(int id, float x, float y);
         void handleShoot(int id);
         void handleNewPlayer();
 
@@ -38,7 +38,7 @@ class ServerGame {
         void createEnemy(float x, float y);
         void createWave();
         void createBullet(float x, float y);
-        void EnemyMovement(int entityId, const World &world);
+        void EnemyMovement(int entityId, World &world);
         void BulletMovement(int entityId, World &world);
 
         World _world;

@@ -52,8 +52,8 @@ class Game {
         void gameInput(std::shared_ptr<Inputs> inputSystem);
 
         void createCamera();
-        void createPlayer();
         void createBackground();
+        void createPlayer(uint64_t id = 0);
         void createEnemy(float x, float y, int type);
         void playerInput(int entityId, World &world);
 

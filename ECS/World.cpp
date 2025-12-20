@@ -35,9 +35,9 @@ World::~World()
  *
  * @return A shared pointer to the newly created entity.
  */
-std::shared_ptr<Entity> World::createEntity(Side side)
+std::shared_ptr<Entity> World::createEntity(uint64_t id)
 {
-    auto entity = std::make_shared<Entity>(side);
+    auto entity = std::make_shared<Entity>(id);
     _entities.push_back(entity);
     return entity;
 }
@@ -136,7 +136,7 @@ int World::getCurrentScene() const
  * @brief kill an entity by its ID.
 * @param id The ID of the entity to kill.
 */
-void World::killEntity(int id)
+void World::killEntity(uint64_t id)
 {
     auto it = std::remove_if(_entities.begin(), _entities.end(),
         [id](const std::shared_ptr<Entity>& entity) {

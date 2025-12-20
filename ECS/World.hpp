@@ -28,7 +28,7 @@ class World {
         World();
         ~World();
 
-        std::shared_ptr<Entity> createEntity(Side side);
+        std::shared_ptr<Entity> createEntity(uint64_t id = 0);
 
         template<typename T>
         [[nodiscard]] std::vector<std::shared_ptr<Entity>> getAllEntitiesWithComponent() const;
@@ -56,7 +56,7 @@ class World {
         template<typename T>
         std::shared_ptr<T> getSystem() const;
 
-        void killEntity(int id);
+        void killEntity(uint64_t id);
     private:
         sf::Event _event;
         int _currentScene = 1;

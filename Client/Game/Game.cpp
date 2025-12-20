@@ -67,7 +67,7 @@ Game::~Game()
 */
 void Game::createBackground()
 {
-    auto backgroundFirst = _world.createEntity(Side::CLIENTSIDE);
+    auto backgroundFirst = _world.createEntity();
     backgroundFirst->addComponent<Sprite>(std::string("../sprites/background.png"));
     
     auto windowSize = _window.getSize();
@@ -86,7 +86,7 @@ void Game::createBackground()
     backgroundFirst->addComponent<Layer>(LayerType::BACKGROUND);
     backgroundFirst->addComponent<Velocity>(-4.f, 0.f);
     backgroundFirst->addComponent<Tag>("background_first");
-    auto backgroundSecond = _world.createEntity(Side::CLIENTSIDE);
+    auto backgroundSecond = _world.createEntity();
     backgroundSecond->addComponent<Sprite>(std::string("../sprites/background.png"));
     backgroundSecond->addComponent<Scale>(1.f);
     backgroundSecond->addComponent<Scene>(_world.getCurrentScene());
@@ -150,12 +150,6 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
             sf::FloatRect visibleArea({0, 0}, {static_cast<float>(_window.getSize().x), static_cast<float>( _window.getSize().y)});
             _window.setView(sf::View(visibleArea));
         }
-        if (inputSystem->isKeyPressed(KeyboardKey::Key_M)) {
-            auto enemy = GameHelper::getEntityByTag(_world, "enemy");
-            if (enemy) {
-                createBullet(enemy->getId(), _world);
-            }
-        }
         inputSystem->update(0.0f, _world);
     }
 }
@@ -165,12 +159,14 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
  * 
  * This function initializes the player entity with necessary components.
  */
-void Game::createPlayer()
+void Game::createPlayer(uint64_t id)
 {
+    if (GameHelper::getEntityById(_world, id) != nullptr)
+        return;
     static int playerCount = 0;
     if (playerCount >= 4)
         return;
-    auto player = _world.createEntity(Side::SERVERSIDE);
+    auto player = _world.createEntity(id);
     player->addComponent<HP>(100);
     player->addComponent<Position>(75.0f, 75.0f);
     player->addComponent<Sprite>(std::string("../sprites/r-typesheet42.gif"));
@@ -179,6 +175,7 @@ void Game::createPlayer()
     player->addComponent<Layer>(10);
     player->addComponent<BoxCollider>(33.0f, 19.0f);
     
+    printf("Creating player with id: %ld\n", player->getId());
     if (playerCount == 0) {
         // Premier joueur (joueur local)
         player->addComponent<Animator>(2, 1, 3.f, 0, 0, 33, 19, 0, 0);
@@ -194,7 +191,7 @@ void Game::createPlayer()
     }
     player->addComponent<Tag>("player");
     player->addComponent<BoxCollider>(33.0f, 19.0f);
-    auto fire = _world.createEntity(Side::CLIENTSIDE);
+    auto fire = _world.createEntity();
     playerCount++;
     fire->addComponent<Position>(0.f, 85.f);
     fire->addComponent<Sprite>(std::string("../sprites/r-typesheet1.gif"));
@@ -212,7 +209,7 @@ void Game::createPlayer()
 */
 void Game::createCamera()
 {
-    auto cameraEntity = _world.createEntity(Side::CLIENTSIDE);
+    auto cameraEntity = _world.createEntity();
     cameraEntity->addComponent<Camera>(sf::Vector2f(1920.f, 1080.f), sf::Vector2f(0.f, 0.f));
     cameraEntity->addComponent<Tag>("main_camera");
 }
@@ -246,20 +243,22 @@ void Game::createEnemy(float x, float y, int type)
 
 void Game::handleSpawn(int id, int type, float x, float y)
 {
+    auto entity = GameHelper::getEntityById(_world, id);
     switch (type) {
         case None:
+            if (entity) {
+                entity->getComponent<Position>()->setX(x);
+                entity->getComponent<Position>()->setY(y);
+            }
             break;
         case Player:
-            std::cout << "Spawning player at position (" << x << ", " << y << ")" << std::endl;
-            createPlayer();
+            createPlayer(id);
             break;
         case Enemy:
-            std::cout << "Spawning enemy at position (" << x << ", " << y << ")" << std::endl;
             createEnemy(x, y, 1); // Type 1 = BASIC enemy
             break;
         case Bullet:
-            std::cout << "Spawning bullet" << std::endl;
-            createBullet(id, _world);
+            createBullet(id, _world, x, y, type);
             break;
     }
 }
@@ -308,7 +307,13 @@ void Game::playerInput(int entityId, World &world)
         }
     if (inputSystem->isKeyPressed(KeyboardKey::Key_Space)) {
         if (!isShootKeyPressed) {
-            createBullet(compPlayer->getId(), world);
+            Packet packet;
+            packet.shoot(compPlayer->getId());
+            packet.setAck(0);
+            packet.setId(compPlayer->getId());
+            packet.setPacketNbr(1);
+            packet.setTotalPacketNbr(1);
+            _network.sendPacket(packet);
             isShootKeyPressed = true;
         }
     } else {
