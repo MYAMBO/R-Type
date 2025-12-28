@@ -37,6 +37,7 @@ include_directories(ECS)
 include_directories(ECS/Component)
 include_directories(ECS/Component/HP)
 include_directories(ECS/Component/Tag)
+include_directories(ECS/Component/Text)
 include_directories(ECS/Component/Scene)
 include_directories(ECS/Component/Layer)
 include_directories(ECS/Component/Scale)
@@ -54,14 +55,16 @@ include_directories(ECS/Component/BoxCollider)
 include_directories(ECS/System)
 include_directories(ECS/System/Draw)
 include_directories(ECS/System/Mouse)
+include_directories(ECS/System/Inputs)
+include_directories(ECS/System/TextSys)
 include_directories(ECS/System/Movement)
 include_directories(ECS/System/Animation)
 include_directories(ECS/System/CameraSys)
 include_directories(ECS/System/ScriptsSys)
-include_directories(ECS/System/Inputs)
 include_directories(ECS/System/Collision)
 include_directories(ECS/Entity)
 include_directories(Client)
+include_directories(Client/Core)
 include_directories(Client/Game)
 include_directories(Client/GameHelper)
 include_directories(Client/ScriptsHandler)
@@ -69,7 +72,6 @@ include_directories(./Server)
 include_directories(./Server/Core)
 include_directories(./Packet)
 include_directories(Server/Game)
-include_directories(Client/Core)
 
 add_executable(r-type_server
         Server/main.cpp
@@ -84,7 +86,6 @@ add_executable(r-type_server
         Packet/MyString.cpp
         Packet/MyString.hpp
         ECS/Entity/Entity.cpp
-        ECS/System/Draw/Draw.cpp
         ECS/System/Inputs/Inputs.cpp
         ECS/System/Animation/Animation.cpp
         ECS/System/CameraSys/CameraSys.cpp
@@ -116,6 +117,7 @@ add_executable(r-type_client
         ECS/System/Draw/Draw.cpp
         ECS/System/Mouse/Mouse.cpp
         ECS/System/Inputs/Inputs.cpp
+        ECS/System/TextSys/TextSys.cpp
         ECS/System/Movement/Movement.cpp
         ECS/System/Animation/Animation.cpp
         ECS/System/CameraSys/CameraSys.cpp
@@ -124,6 +126,7 @@ add_executable(r-type_client
         ECS/World.cpp
         ECS/Component/HP/HP.cpp
         ECS/Component/Tag/Tag.cpp
+        ECS/Component/Text/Text.cpp
         ECS/Component/Scale/Scale.cpp
         ECS/Component/Layer/Layer.cpp
         ECS/Component/Scene/Scene.cpp

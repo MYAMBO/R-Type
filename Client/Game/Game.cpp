@@ -19,6 +19,7 @@
 
 #include "HP.hpp"
 #include "Tag.hpp" 
+#include "Text.hpp"
 #include "Layer.hpp"
 #include "Scale.hpp"
 #include "Scene.hpp"
@@ -38,6 +39,7 @@
 #include "Draw.hpp"
 #include "Mouse.hpp"
 #include "Inputs.hpp"
+#include "TextSys.hpp"
 #include "Movement.hpp"
 #include "CameraSys.hpp"
 #include "Animation.hpp"
@@ -57,6 +59,7 @@ Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const
     : _window(sf::VideoMode({width, height}), title), _network(network)
 {
     _world.addSystem<CameraSys>();
+    _world.addSystem<TextSystem>();
     _world.addSystem<ScriptsSys>();
     _world.addSystem<Movement>();
     _world.addSystem<Animation>();
@@ -74,6 +77,14 @@ Game::~Game()
     _window.close();
 }
 
+static void changeSceneScript(int entityId, World& world)
+{
+    auto entity = GameHelper::getEntityById(world, entityId);
+    if (!entity)
+        return;
+    entity->getComponent<Scene>()->setScene(world.getCurrentScene());
+}
+
 void Game::createMenu()
 {
     auto playBtn = _world.createEntity();
@@ -87,19 +98,27 @@ void Game::createMenu()
     
     auto btnComp = playBtn->getComponent<Button>();
 
-    // 3. Configuration des zones de texture (Idle, Hover, Pressed)
-    // Supposons que ta texture a les boutons les uns sous les autres
     btnComp->setTextureRects(
-        sf::IntRect({0, 0}, {20, 18}),   // Idle
-        sf::IntRect({20, 18}, {20, 18}),  // Hover
-        sf::IntRect({40, 18}, {20, 18})  // Pressed
+        sf::IntRect({0, 0}, {20, 18}),
+        sf::IntRect({20, 0}, {20, 18}),
+        sf::IntRect({40, 0}, {20, 18})
     );
 
     btnComp->setOnClick([this]() {
         std::cout << "Play Button Clicked!" << std::endl;
         _world.setCurrentScene(1);
     });
+    auto scoreEntity = _world.createEntity();
+    
+    scoreEntity->addComponent<Position>(400, 400);
+    scoreEntity->addComponent<Scene>(1);
+    scoreEntity->addComponent<Text>("Score: 0", "../sprites/title.ttf", 30);
+    scoreEntity->addComponent<Layer>(LayerType::UI);
+    scoreEntity->getComponent<Text>()->setColor(sf::Color::Red);
+    scoreEntity->addComponent<Script>(changeSceneScript);
+    scoreEntity->addComponent<Tag>("score_text");
 }
+
 
 /**
  * @brief Create Background
