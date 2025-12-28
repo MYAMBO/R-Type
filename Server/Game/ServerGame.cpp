@@ -12,9 +12,10 @@
 #include "Server.hpp"
 #include "Packet.hpp"
 #include "Script.hpp"
-#include "Updater.hpp"
 #include "Velocity.hpp"
+#include "Movement.hpp"
 #include "Position.hpp"
+#include "ScriptsSys.hpp"
 #include "ServerGame.hpp"
 #include "GameHelper.hpp"
 #include "BoxCollider.hpp"
@@ -26,7 +27,8 @@
  */
 ServerGame::ServerGame(IGameNetwork& network) : _network(network)
 {
-    _world.addSystem<Updater>();
+    _world.addSystem<ScriptsSys>();
+    _world.addSystem<Movement>();
     _world.setDeltaTime(1.f);
 }
 
