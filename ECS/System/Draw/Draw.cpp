@@ -73,6 +73,11 @@ void Draw::update(const float& dt, World &w)
     }
     for (auto &entity : w.getAllEntitiesWithComponent<Text>()) {
         auto textComp = entity->getComponent<Text>();
+        auto sceneComp = entity->getComponent<Scene>();
+        if (!textComp || !sceneComp)
+            continue;
+        if (sceneComp->getScene() != w.getCurrentScene())
+            continue;
         if (textComp) {
             w.getWindow()->draw(textComp->getSfText());
         }

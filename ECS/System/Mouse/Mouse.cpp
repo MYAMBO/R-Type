@@ -56,6 +56,10 @@ void Mouse::update(const float& dt, World &world)
             newState = IDLE;
         }
         button->setState(newState);
+        if (button->useColorFilter() && spriteComp) {
+            sf::Color targetColor = button->getColor(newState);
+            spriteComp->getSprite()->setColor(targetColor);
+        }
         if (button->hasTextureRects() && spriteComp) {
             spriteComp->getSprite()->setTextureRect(button->getRect(newState));
         }

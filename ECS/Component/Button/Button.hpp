@@ -8,9 +8,11 @@
 #ifndef BUTTON_HPP_
     #define BUTTON_HPP_
 
-#include "Component.hpp"
-#include <functional>
-#include <SFML/Graphics/Rect.hpp>
+    #include "Component.hpp"
+
+    #include <functional>
+    #include <SFML/Graphics/Rect.hpp>
+    #include <SFML/Graphics/Color.hpp>
 
 enum ButtonState {
     IDLE = 0,
@@ -37,6 +39,10 @@ class Button : public Component {
         void setTextureRects(const sf::IntRect& idle, const sf::IntRect& hover, const sf::IntRect& pressed);
         [[nodiscard]] bool hasTextureRects() const;
         [[nodiscard]] const sf::IntRect& getRect(ButtonState s) const;
+
+        void setColorStates(const sf::Color& idle, const sf::Color& hover, const sf::Color& pressed);
+        bool useColorFilter() const;
+        sf::Color getColor(ButtonState state) const;
     private:
         float _width;
         float _height;
@@ -49,6 +55,11 @@ class Button : public Component {
         sf::IntRect _rectIdle;
         sf::IntRect _rectHover;
         sf::IntRect _rectPressed;
+
+        bool _useColorFilter = false;
+        sf::Color _idleColor = sf::Color::White;
+        sf::Color _hoverColor = sf::Color::White;
+        sf::Color _pressedColor = sf::Color::White;
 };
 
 #endif /* !BUTTON_HPP_ */

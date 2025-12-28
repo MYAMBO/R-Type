@@ -123,3 +123,44 @@ const sf::IntRect& Button::getRect(ButtonState s) const
         return _rectPressed;
     return _rectIdle;
 }
+
+
+/**
+ * @brief Sets the color states for different button states.
+ * @param idle The color for the idle state.
+ * @param hover The color for the hover state.
+ * @param pressed The color for the pressed state.
+ */
+void Button::setColorStates(const sf::Color& idle, const sf::Color& hover, const sf::Color& pressed)
+{
+    _idleColor = idle;
+    _hoverColor = hover;
+    _pressedColor = pressed;
+    _useColorFilter = true;
+}
+
+/**
+ * @brief Checks if color filtering is used for the button.
+ * @return true if color filtering is used, false otherwise.
+ */
+bool Button::useColorFilter() const
+{
+    return _useColorFilter;
+}
+
+/**
+ * @brief Gets the color for a specific button state.
+ * @param state The ButtonState for which to get the color.
+ * @return The corresponding color.
+ */
+sf::Color Button::getColor(ButtonState state) const
+{
+    switch (state) {
+        case HOVER:
+            return _hoverColor;
+        case PRESSED:
+            return _pressedColor;
+        default:
+            return _idleColor;
+    }
+}
