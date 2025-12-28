@@ -6,6 +6,7 @@
 */
 
 #include "Server.hpp"
+
 /**
  * @brief Entry point of the server application.
  *
@@ -31,7 +32,7 @@ auto main(int ac, char **av) -> int
 	{
 		if (std::string(e.what()).empty() == false)
 			std::cerr << e.what() << std::endl;
-		return 84;
+		return 1;
 	}
 	return 0;
 }

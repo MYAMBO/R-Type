@@ -52,6 +52,7 @@ class Game {
     private:
         void gameInput(std::shared_ptr<Inputs> inputSystem);
 
+        void createMenu();
         void createCamera();
         void createBackground();
         void createPlayer(uint64_t id = 0);
