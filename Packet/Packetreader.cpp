@@ -37,6 +37,7 @@ void Packetreader::interpretPacket()
             case 0x0A: endGame(); break;
             case 0x0B: shoot(); break;
             default:
+                _data.clear();
                 break;
         }
     }
@@ -57,7 +58,7 @@ void Packetreader::timestamp()
  */
 void Packetreader::updateEntity()
 {
-    int id = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
+    uint64_t id = std::stoull( _data.mySubStr(0, 16), nullptr, 16);
     int type = std::stoi( _data.mySubStr(0, 2), nullptr, 16);
     float x = static_cast<float>(std::stoi(_data.mySubStr(0, 4), nullptr, 16));
     float y = static_cast<float>(std::stoi(_data.mySubStr(0, 4) , nullptr, 16));
@@ -83,7 +84,7 @@ void Packetreader::clear()
  */
 void Packetreader::hit()
 {
-    int id = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
+    uint64_t id = std::stoull( _data.mySubStr(0, 16), nullptr, 16);
     int damage = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
 
     // call function and give parameter
@@ -94,7 +95,7 @@ void Packetreader::hit()
  */
 void Packetreader::dead()
 {
-    int id = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
+    uint64_t id = std::stoull( _data.mySubStr(0, 16), nullptr, 16);
 
     // call function and give parameter
 }
@@ -104,7 +105,7 @@ void Packetreader::dead()
  */
 void Packetreader::endGame()
 {
-    int id = std::stoi(_data.mySubStr(0, 4), nullptr, 16);
+    uint64_t id = std::stoull(_data.mySubStr(0, 16), nullptr, 16);
 
     // call function and give parameter
 }
@@ -114,7 +115,7 @@ void Packetreader::endGame()
  */
 void Packetreader::shoot()
 {
-    const int id = std::stoi(_data.mySubStr(0, 4), nullptr, 16);
+    const uint64_t id = std::stoull(_data.mySubStr(0, 16), nullptr, 16);
 
     _game->handleShoot(id);
 }

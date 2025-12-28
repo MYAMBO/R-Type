@@ -28,7 +28,6 @@ ClientPacketreader::ClientPacketreader(std::string data, std::shared_ptr<Game> g
  */
 void ClientPacketreader::interpretPacket()
 {
-    std::cout << "packet" << std::endl;
     while (_data.size() > 0)
     {
         auto truc = std::stoi( _data.mySubStr(0, 2) , nullptr, 16);
@@ -59,7 +58,7 @@ void ClientPacketreader::timestamp()
  */
 void ClientPacketreader::updateEntity()
 {
-    int id = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
+    unsigned int id = std::stoul( _data.mySubStr(0, 16), nullptr, 16);
     int type = std::stoi( _data.mySubStr(0, 2), nullptr, 16);
     float x = static_cast<float>(std::stoi(_data.mySubStr(0, 4), nullptr, 16));
     float y = static_cast<float>(std::stoi(_data.mySubStr(0, 4), nullptr, 16));
@@ -77,7 +76,7 @@ void ClientPacketreader::clear()
  */
 void ClientPacketreader::hit()
 {
-    int id = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
+    int id = std::stoi( _data.mySubStr(0, 16), nullptr, 16);
     int damage = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
 
     // call function and give parameter
@@ -88,9 +87,9 @@ void ClientPacketreader::hit()
  */
 void ClientPacketreader::dead()
 {
-    int id = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
+    int id = std::stoi( _data.mySubStr(0, 16), nullptr, 16);
 
-    // call function and give parameter
+    _game->killEntity(id);
 }
 
 /**
@@ -98,7 +97,7 @@ void ClientPacketreader::dead()
  */
 void ClientPacketreader::endGame()
 {
-    int id = std::stoi(_data.mySubStr(0, 4), nullptr, 16);
+    unsigned int id = std::stoi(_data.mySubStr(0, 16), nullptr, 16);
 
     // call function and give parameter
 }

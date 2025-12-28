@@ -26,26 +26,21 @@
  * This function initializes a bullet entity with necessary components.
  * @param entityId The ID of the entity that fired the bullet.
  */
-void createBullet(int entityId, World &world)
+void createBullet(int entityId, World &world, int x, int y, int type)
 {
-    bool isPlayer = false;
-    auto shooter = GameHelper::getEntityById(world, entityId);
-    if (!shooter)
-        std::cerr << "Error: Shooter entity not found." << std::endl;
-    if (shooter->getComponent<Tag>()->getTag() == "player" || shooter->getComponent<Tag>()->getTag() == "player_mate")
-        isPlayer = true;
-    auto bullet = world.createEntity(Side::SERVERSIDE);
-    auto shooterPos = shooter->getComponent<Position>();
-    if (!shooterPos)
-        std::cerr << "Error: Shooter entity has no Position component." << std::endl;
+    auto entity = GameHelper::getEntityById(world, entityId);
+    if (entity)
+        return;
+    bool isPlayer = (type == Bullet);
+    auto bullet = world.createEntity(entityId);
     if (isPlayer) {
-        bullet->addComponent<Position>(100 + 60.f, 100 + 15.f);
-        bullet->addComponent<Velocity>(15.f, 0.f);
-        bullet->addComponent<Animator>(2, 1, 1.5f, 200, 120, 32, 15, 32, 0);
+        bullet->addComponent<Position>(x, y);
+        bullet->addComponent<Velocity>(10.f, 0.f);
+        bullet->addComponent<Animator>(2, 1, 3.0f, 200, 120, 32, 15, 0, 0);
     } else {
-        bullet->addComponent<Position>(100 - 20.f , 100 + 15.f);
+        bullet->addComponent<Position>(x - 20.f , y + 15.f);
         bullet->addComponent<Rotation>(180.f);
-        bullet->addComponent<Velocity>(-15.f, 0.f);
+        bullet->addComponent<Velocity>(-10.f, 0.f);
     }
     bullet->addComponent<Sprite>(std::string("../sprites/r-typesheet1.gif"));
     bullet->addComponent<Scale>(2.f);

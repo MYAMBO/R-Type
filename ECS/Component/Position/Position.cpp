@@ -37,3 +37,27 @@ void Position::setX(const float x) { _x = x; }
  * @param y The new Y coordinate.
 */
 void Position::setY(const float y) { _y = y; }
+
+/**
+ * @brief Gets the target X coordinate.
+ * @return The target X coordinate.
+*/
+float Position::getTargetX() const { return _targetX; }
+
+/**
+ * @brief Gets the target Y coordinate.
+ * @return The target Y coordinate.
+*/
+float Position::getTargetY() const { return _targetY; }
+
+/**
+ * @brief Sets the target X coordinate.
+ * @param x The new target X coordinate.
+*/
+void Position::setTargetX(const float x) { _targetX = x; }
+
+/**
+ * @brief Sets the target Y coordinate.
+ * @param y The new target Y coordinate.
+*/
+void Position::setTargetY(const float y) { _targetY = y; }

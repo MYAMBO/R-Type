@@ -84,6 +84,7 @@ add_executable(r-type_server
         ECS/System/Updater/Updater.cpp
         ECS/World.cpp
         ECS/Component/HP/HP.cpp
+        Client/GameHelper/GameHelper.cpp
         ECS/Component/Tag/Tag.cpp
         ECS/Component/Scale/Scale.cpp
         ECS/Component/Layer/Layer.cpp

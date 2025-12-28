@@ -24,13 +24,19 @@ class Position : public Component {
 
         [[nodiscard]] float getX() const;
         [[nodiscard]] float getY() const;
+        [[nodiscard]] float getTargetX() const;
+        [[nodiscard]] float getTargetY() const;
 
         void setX(float x);
         void setY(float y);
+        void setTargetX(float x);
+        void setTargetY(float y);
         
     private:
         float _x;
         float _y;
+        float _targetX;
+        float _targetY;
 };
 
 #endif /* !POSITION_HPP_ */
