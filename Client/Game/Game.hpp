@@ -47,6 +47,7 @@ class Game {
         ~Game();
 
         void run();
+        int killEntity(int id);
         void handleSpawn(int id, int type, float x, float y);
     private:
         void gameInput(std::shared_ptr<Inputs> inputSystem);
@@ -56,6 +57,7 @@ class Game {
         void createPlayer(uint64_t id = 0);
         void createEnemy(float x, float y, int type);
         void playerInput(int entityId, World &world);
+        void smootherMovement(int entityId, World &world, float targetX, float targetY); 
 
         void bulletShooting();
 

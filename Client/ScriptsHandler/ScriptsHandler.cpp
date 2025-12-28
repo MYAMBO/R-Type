@@ -28,16 +28,19 @@
  */
 void createBullet(int entityId, World &world, int x, int y, int type)
 {
+    auto entity = GameHelper::getEntityById(world, entityId);
+    if (entity)
+        return;
     bool isPlayer = (type == Bullet);
     auto bullet = world.createEntity(entityId);
     if (isPlayer) {
-        bullet->addComponent<Position>(x + 60.f, y + 15.f);
-        bullet->addComponent<Velocity>(15.f, 0.f);
-        bullet->addComponent<Animator>(2, 1, 1.5f, 200, 120, 32, 15, 32, 0);
+        bullet->addComponent<Position>(x, y);
+        bullet->addComponent<Velocity>(10.f, 0.f);
+        bullet->addComponent<Animator>(2, 1, 3.0f, 200, 120, 32, 15, 0, 0);
     } else {
         bullet->addComponent<Position>(x - 20.f , y + 15.f);
         bullet->addComponent<Rotation>(180.f);
-        bullet->addComponent<Velocity>(-15.f, 0.f);
+        bullet->addComponent<Velocity>(-10.f, 0.f);
     }
     bullet->addComponent<Sprite>(std::string("../sprites/r-typesheet1.gif"));
     bullet->addComponent<Scale>(2.f);

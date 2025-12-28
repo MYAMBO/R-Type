@@ -8,6 +8,7 @@
 #include "Game.hpp"
 
 #include <iostream>
+#include <cmath>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/System/Vector2.hpp>
@@ -115,8 +116,8 @@ void Game::run()
     _network.sendPacket(packet);
     createCamera();
     createBackground();
-    _world.addSystem<Collision>();
     _world.addSystem<Updater>();
+    _world.addSystem<Collision>();
     _world.addSystem<Draw>();
     _world.addSystem<Inputs>();
     _window.setFramerateLimit(30);
@@ -128,8 +129,7 @@ void Game::run()
         _window.clear(sf::Color::Black);
         gameInput(inputSystem);
         _world.manageSystems();
-        _window.display();
-    }
+        _window.display();    }
 }
 
 /**
@@ -178,21 +178,20 @@ void Game::createPlayer(uint64_t id)
     printf("Creating player with id: %ld\n", player->getId());
     if (playerCount == 0) {
         // Premier joueur (joueur local)
+        player->addComponent<Velocity>(0.f, 0.f);
         player->addComponent<Animator>(2, 1, 3.f, 0, 0, 33, 19, 0, 0);
+        player->addComponent<Tag>("player");
         player->addComponent<Script>([this](const int entityId, World& world)
         {
             this->playerInput(entityId, _world);
         });
-        player->addComponent<Tag>("player");
     } else {
         // Autres joueurs (coéquipiers)
         player->addComponent<Animator>(2, 1, 3.f, 0, (playerCount * 17), 33, 19, 0, 0);
         player->addComponent<Tag>("player_mate");
     }
-    player->addComponent<Tag>("player");
-    player->addComponent<BoxCollider>(33.0f, 19.0f);
-    auto fire = _world.createEntity();
     playerCount++;
+    auto fire = _world.createEntity();
     fire->addComponent<Position>(0.f, 85.f);
     fire->addComponent<Sprite>(std::string("../sprites/r-typesheet1.gif"));
     fire->addComponent<Animator>(2, 1, 3.f, 285, 85, 15, 15, 0, 0);
@@ -241,12 +240,32 @@ void Game::createEnemy(float x, float y, int type)
     }
 }
 
+void Game::smootherMovement(int entityId, World &world, float serverX, float serverY)
+{
+    auto entity = GameHelper::getEntityById(world, entityId);
+    if (!entity) return;
+
+    auto pos = entity->getComponent<Position>();
+
+    float dist = std::hypot(serverX - pos->getX(), serverY - pos->getY());
+
+    if (dist > 100.0f) {
+        pos->setX(serverX);
+        pos->setY(serverY);
+    }
+    pos->setTargetX(serverX);
+    pos->setTargetY(serverY);
+
+}
+
 void Game::handleSpawn(int id, int type, float x, float y)
 {
     auto entity = GameHelper::getEntityById(_world, id);
     switch (type) {
         case None:
-            if (entity) {
+            if (entity->getComponent<Velocity>())
+                smootherMovement(id, _world, x, y);
+            else {
                 entity->getComponent<Position>()->setX(x);
                 entity->getComponent<Position>()->setY(y);
             }
@@ -264,47 +283,60 @@ void Game::handleSpawn(int id, int type, float x, float y)
 }
 
 /**
- * @brief Handles player input.
+ * @brief Handles player input for movement and shooting.
  *
- * This function processes user input events and updates the game state accordingly.
- * @param inputSystem The input system to check for player actions.
+ * This function processes input events to control the player's movement
+ * and shooting actions, updating the player's velocity and sending
+ * position updates to the server.
+ * @param entityId The unique ID of the player entity.
+ * @param world The game world containing entities and components.
  */
 void Game::playerInput(int entityId, World &world)
 {
     (void)entityId;
     static bool isShootKeyPressed = false;
-    bool moved = false;
+
     auto inputSystem = world.getSystem<Inputs>();
     std::shared_ptr<Camera> compCam = GameHelper::getMainCamera(world);
-    if (!compCam)
-        return;
-
     std::shared_ptr<Entity> compPlayer = GameHelper::getEntityByTag(world, "player");
-    if (!compPlayer)
+
+    if (!compCam || !compPlayer)
         return;
 
     auto pos = compPlayer->getComponent<Position>();
+    auto vel = compPlayer->getComponent<Velocity>();
 
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_D))
+    float targetVx = 0.0f;
+    float targetVy = 0.0f;
+    bool moved = false;
+
+    if (inputSystem->isKeyPressed(KeyboardKey::Key_D)) {
         if (compCam->getPosition().x + compCam->getSize().x > pos->getX() + 7.0f) {
-            pos->setX(pos->getX() + 7.0f);
+            targetVx = 7.0f;
             moved = true;
         }
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_Q))
+    }
+    if (inputSystem->isKeyPressed(KeyboardKey::Key_Q)) {
         if (compCam->getPosition().x < pos->getX() - 7.0f) {
-            pos->setX(pos->getX() - 7.0f);
+            targetVx = -7.0f;
             moved = true;
         }
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_Z))
+    }
+    if (inputSystem->isKeyPressed(KeyboardKey::Key_Z)) {
         if (compCam->getPosition().y < pos->getY() - 7.0f) {
-            pos->setY(pos->getY() - 7.0f);
+            targetVy = -7.0f;
             moved = true;
         }
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_S))
+    }
+    if (inputSystem->isKeyPressed(KeyboardKey::Key_S)) {
         if (compCam->getPosition().y + compCam->getSize().y > pos->getY() + 7.0f) {
-            pos->setY(pos->getY() + 7.0f);
+            targetVy = 7.0f;
             moved = true;
         }
+    }
+    vel->setVelocityX(targetVx);
+    vel->setVelocityY(targetVy);
+
     if (inputSystem->isKeyPressed(KeyboardKey::Key_Space)) {
         if (!isShootKeyPressed) {
             Packet packet;
@@ -321,12 +353,27 @@ void Game::playerInput(int entityId, World &world)
     }
     if (moved)
     {
-        Packet packet = Packet();
+        Packet packet;
         packet.playerPosition(entityId, pos->getX(), pos->getY());
-        packet.setAck(0);
+        packet.setAck(1);
         packet.setId(compPlayer->getId());
         packet.setPacketNbr(1);
         packet.setTotalPacketNbr(1);
         _network.sendPacket(packet);
     }
+}
+
+/**
+ * @brief Kills an entity by its ID.
+ *
+ * This function removes the entity with the specified ID from the game world.
+ * @param id The unique ID of the entity to be killed.
+*/
+int Game::killEntity(int id)
+{
+    auto entity = GameHelper::getEntityById(_world, id);
+    if (!entity)
+        return -1;
+    _world.killEntity(id);
+    return 0;
 }
