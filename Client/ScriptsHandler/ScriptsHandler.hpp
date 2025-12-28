@@ -11,9 +11,8 @@
     #include "World.hpp"
     #include "Script.hpp"
 
-void playerfire(int entityId, World &world);
-void playerInput(int entityId, World &world);
-void backgroundScrollScript(int entityId, World &world);
-void createBullet(int entityId, World &world, int x, int y, int type);
+void playerfire(size_t entityId, World &world);
+void backgroundScrollScript(size_t entityId, World &world);
+void createBullet(size_t entityId, World &world, int x, int y, int type);
 
 #endif /* !SCRIPTS_HPP_ */

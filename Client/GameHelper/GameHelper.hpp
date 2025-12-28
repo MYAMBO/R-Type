@@ -23,6 +23,7 @@ class GameHelper {
         static std::shared_ptr<Camera> getMainCamera(World &world);
         static std::shared_ptr<Entity> getEntityById(World &world, uint64_t id);
         static std::shared_ptr<Entity> getEntityByTag(World &world, const std::string &tag);
+        static std::vector<std::shared_ptr<Entity>> getEntitiesByGroup(World &world, size_t groupId);
 
         static void createBasicEnemy(World &world, float x, float y);
 };

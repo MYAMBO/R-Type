@@ -23,6 +23,8 @@
 #include "Layer.hpp"
 #include "Scale.hpp"
 #include "Scene.hpp"
+#include "Group.hpp"
+#include "Inputs.hpp"
 #include "Sprite.hpp"
 #include "Entity.hpp"
 #include "Script.hpp"
@@ -228,6 +230,7 @@ void Game::createPlayer(uint64_t id)
     player->addComponent<Scale>(2.f);
     player->addComponent<Scene>(1);
     player->addComponent<Layer>(10);
+    player->addComponent<Group>(playerCount + 1);
     player->addComponent<BoxCollider>(33.0f, 19.0f);
 
     if (playerCount == 0) {
@@ -252,6 +255,7 @@ void Game::createPlayer(uint64_t id)
     fire->addComponent<Scale>(2.f);
     fire->addComponent<Scene>(1);
     fire->addComponent<Script>(playerfire);
+    fire->addComponent<Group>(playerCount);
     fire->addComponent<Layer>(10);
     fire->addComponent<Tag>("fire");
 }

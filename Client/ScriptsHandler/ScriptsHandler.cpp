@@ -8,6 +8,7 @@
 #include "Tag.hpp"
 #include "Scale.hpp"
 #include "Scene.hpp"
+#include "Group.hpp"
 #include "Inputs.hpp"
 #include "Sprite.hpp"
 #include "Rotation.hpp"
@@ -26,7 +27,7 @@
  * This function initializes a bullet entity with necessary components.
  * @param entityId The ID of the entity that fired the bullet.
  */
-void createBullet(int entityId, World &world, int x, int y, int type)
+void createBullet(size_t entityId, World &world, int x, int y, int type)
 {
     auto entity = GameHelper::getEntityById(world, entityId);
     if (entity)
@@ -54,7 +55,7 @@ void createBullet(int entityId, World &world, int x, int y, int type)
  * This function moves the background entities to create a scrolling effect.
  * @param entityId The ID of the background entity.
  */
-void backgroundScrollScript(int entityId, World &world)
+void backgroundScrollScript(size_t entityId, World &world)
 {
     auto entity = GameHelper::getEntityById(world, entityId);
     if (!entity)
@@ -77,14 +78,20 @@ void backgroundScrollScript(int entityId, World &world)
  * @param entityId The ID of the fire entity.
  * @param world The game world containing entities and components.
  */
-void playerfire(int entityId, World &world)
+void playerfire(size_t entityId, World &world)
 {
-    auto player = GameHelper::getEntityById(world, entityId);
-    if (!player)
-        return;
+    auto fire = GameHelper::getEntityById(world, entityId);
+    size_t groupId = fire->getComponent<Group>()->getId();
+    auto list = GameHelper::getEntitiesByGroup(world, groupId);
+    std::shared_ptr<Entity> player = nullptr;
+    for (const auto& e : list) {
+        if (e->getId() == entityId)
+            continue;
+        if (e->getComponent<Tag>()->getTag() == "player" || e->getComponent<Tag>()->getTag() == "player_mate")
+            player = e;
+    }
     auto posPlayer = player->getComponent<Position>();
 
-    auto fire = GameHelper::getEntityById(world, entityId);
     if (!fire)
         return;
     auto posFire = fire->getComponent<Position>();
