@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include "Draw.hpp"
+#include "Text.hpp"
 #include "Scale.hpp"
 #include "Scene.hpp"
 #include "Layer.hpp"
@@ -69,5 +70,11 @@ void Draw::update(const float& dt, World &w)
         if (sceneComponent->getScene() != w.getCurrentScene())
             continue;
         w.getWindow()->draw(*objectComponent->getSprite());
+    }
+    for (auto &entity : w.getAllEntitiesWithComponent<Text>()) {
+        auto textComp = entity->getComponent<Text>();
+        if (textComp) {
+            w.getWindow()->draw(textComp->getSfText());
+        }
     }
 }
