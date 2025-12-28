@@ -7,6 +7,7 @@
 
 #include "Animation.hpp"
 
+#include "Scene.hpp"
 #include "Sprite.hpp"
 #include "Animator.hpp"
 
@@ -20,6 +21,8 @@
 void Animation::update(const float &dt, World &w)
 {
     for (const auto &entity : w.getAllEntitiesWithComponent<Animator>()) {
+        if (w.getCurrentScene() !=  entity->getComponent<Scene>()->getScene())
+            continue;
         const auto anim = entity->getComponent<Animator>();
         const auto spriteComp = entity->getComponent<Sprite>();
         if (!anim || !spriteComp)

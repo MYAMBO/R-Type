@@ -26,6 +26,7 @@
 #include "Entity.hpp"
 #include "Script.hpp"
 #include "Camera.hpp"
+#include "Button.hpp"
 #include "Velocity.hpp"
 #include "Position.hpp"
 #include "Animator.hpp"
@@ -35,6 +36,7 @@
 #include "ScriptsHandler.hpp"
 
 #include "Draw.hpp"
+#include "Mouse.hpp"
 #include "Inputs.hpp"
 #include "Movement.hpp"
 #include "CameraSys.hpp"
@@ -59,6 +61,7 @@ Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const
     _world.addSystem<Movement>();
     _world.addSystem<Animation>();
     _world.addSystem<Collision>();
+    _world.addSystem<Mouse>();
     _world.addSystem<Draw>();
     _world.addSystem<Inputs>();
 }
@@ -69,6 +72,33 @@ Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const
 Game::~Game()
 {
     _window.close();
+}
+
+void Game::createMenu()
+{
+    auto playBtn = _world.createEntity();
+
+    playBtn->addComponent<Position>(100, 100);
+    playBtn->addComponent<Sprite>("../sprites/r-typesheet3.gif");
+    playBtn->addComponent<Scale>(2.f);
+    playBtn->addComponent<Scene>(2);
+    playBtn->addComponent<Button>(200.f, 50.f);
+    playBtn->addComponent<Layer>(LayerType::UI);
+    
+    auto btnComp = playBtn->getComponent<Button>();
+
+    // 3. Configuration des zones de texture (Idle, Hover, Pressed)
+    // Supposons que ta texture a les boutons les uns sous les autres
+    btnComp->setTextureRects(
+        sf::IntRect({0, 0}, {20, 18}),   // Idle
+        sf::IntRect({20, 18}, {20, 18}),  // Hover
+        sf::IntRect({40, 18}, {20, 18})  // Pressed
+    );
+
+    btnComp->setOnClick([this]() {
+        std::cout << "Play Button Clicked!" << std::endl;
+        _world.setCurrentScene(1);
+    });
 }
 
 /**
@@ -124,12 +154,13 @@ void Game::run()
     packet.positionSpawn(0, Player, 300, 300);
     _network.sendPacket(packet);
     createCamera();
+    createMenu();
     createBackground();
     _window.setFramerateLimit(30);
     _world.setDeltaTime(1.f);
     auto inputSystem = _world.getSystem<Inputs>();
     _world.setWindow(_window);
-    _world.setCurrentScene(1);
+    _world.setCurrentScene(2);
     while (_window.isOpen()) {
         _window.clear(sf::Color::Black);
         gameInput(inputSystem);

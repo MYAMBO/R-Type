@@ -40,6 +40,7 @@ include_directories(ECS/Component/Tag)
 include_directories(ECS/Component/Scene)
 include_directories(ECS/Component/Layer)
 include_directories(ECS/Component/Scale)
+include_directories(ECS/Component/Button)
 include_directories(ECS/Component/Camera)
 include_directories(ECS/Component/Sprite)
 include_directories(ECS/Component/Camera)
@@ -52,9 +53,10 @@ include_directories(ECS/Component/Rotation)
 include_directories(ECS/Component/BoxCollider)
 include_directories(ECS/System)
 include_directories(ECS/System/Draw)
+include_directories(ECS/System/Mouse)
+include_directories(ECS/System/Movement)
 include_directories(ECS/System/Animation)
 include_directories(ECS/System/CameraSys)
-include_directories(ECS/System/Movement)
 include_directories(ECS/System/ScriptsSys)
 include_directories(ECS/System/Inputs)
 include_directories(ECS/System/Collision)
@@ -112,6 +114,7 @@ add_executable(r-type_client
         Client/ScriptsHandler/ScriptsHandler.cpp
         ECS/Entity/Entity.cpp
         ECS/System/Draw/Draw.cpp
+        ECS/System/Mouse/Mouse.cpp
         ECS/System/Inputs/Inputs.cpp
         ECS/System/Movement/Movement.cpp
         ECS/System/Animation/Animation.cpp
@@ -124,6 +127,7 @@ add_executable(r-type_client
         ECS/Component/Scale/Scale.cpp
         ECS/Component/Layer/Layer.cpp
         ECS/Component/Scene/Scene.cpp
+        ECS/Component/Button/Button.cpp
         ECS/Component/Script/Script.cpp
         ECS/Component/Sprite/Sprite.cpp
         ECS/Component/Camera/Camera.cpp
