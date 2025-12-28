@@ -7,6 +7,7 @@
 
 #include "Updater.hpp"
 
+#include "Tag.hpp"
 #include "Scale.hpp"
 #include "Sprite.hpp"
 #include "Script.hpp"
@@ -30,10 +31,32 @@ Updater::Updater() = default;
 */
 void Updater::update(const float& dt, World &w)
 {
+    updatePositions(dt, w);
     updateCameras(dt, w);
     updateScripts(dt, w);
     updateAnimations(dt, w);
     updateSprites(dt, w);
+}
+
+
+/**
+* @brief Update the positions of all entities if they have it in the world
+ * @param dt Delta time since last update
+ * @param w Reference to the world containing entities and components
+ */
+void Updater::updatePositions(const float& dt, World &w)
+{
+    for (const auto &entity : w.getAllEntitiesWithComponent<Position>()) {
+        const auto posComp = entity->getComponent<Position>();
+        const auto velComp = entity->getComponent<Velocity>();
+        if (posComp && velComp) {
+            posComp->setX(posComp->getX() + velComp->getVelocityX() * dt);
+            posComp->setY(posComp->getY() + velComp->getVelocityY() * dt);
+        } else if (posComp) {
+            posComp->setX(posComp->getX());
+            posComp->setY(posComp->getY());
+        }
+    }
 }
 
 /**
@@ -52,7 +75,6 @@ void Updater::updateSprites(const float& dt, const World &w)
         auto scaleComp = entity->getComponent<Scale>();
         auto posComp   = entity->getComponent<Position>();
         auto rotComp   = entity->getComponent<Rotation>();
-        auto velComp   = entity->getComponent<Velocity>();
 
         if (scaleComp) {
             float s = scaleComp->getScale();
@@ -62,10 +84,6 @@ void Updater::updateSprites(const float& dt, const World &w)
             sprite->setPosition({posComp->getX(), posComp->getY()});
         if (rotComp)
             sprite->setRotation(sf::degrees(rotComp->getRotation()));
-        if (velComp) {
-            posComp->setX(posComp->getX() + velComp->getVelocityX() * dt);
-            posComp->setY(posComp->getY() + velComp->getVelocityY() * dt);
-        }
     }
 }
 

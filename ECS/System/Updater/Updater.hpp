@@ -26,6 +26,7 @@ class Updater : public System {
         void update(const float& dt, World &w) override;
     private:
         void updateScripts(const float& dt, World &w);
+        void updatePositions(const float& dt, World &w);
         void updateSprites(const float& dt, const World &w);
         void updateCameras(const float& dt, const World &w);
         void updateAnimations(const float& dt, const World &w);

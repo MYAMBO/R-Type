@@ -58,6 +58,7 @@ class Inputs : public System {
         void update(const float& dt, World &w) override;
 
         [[nodiscard]] bool isKeyPressed(KeyboardKey key) const;
+        [[nodiscard]] bool isKeyReleased(KeyboardKey key) const;
 
         void clearInputs();
 
