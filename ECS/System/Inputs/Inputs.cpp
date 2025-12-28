@@ -95,14 +95,3 @@ KeyboardKey Inputs::convertSfKey(const sf::Keyboard::Key key)
 {
     return static_cast<KeyboardKey>(static_cast<int>(key));
 }
-
-/**
- * @brief Checks if a specific key is currently released.
- *
- * @param key The key to check.
- * @return true if the key is released, false otherwise.
- */
-bool Inputs::isKeyReleased(const KeyboardKey key) const
-{
-    return std::find(_pressedKeys.begin(), _pressedKeys.end(), key) == _pressedKeys.end();
-}
