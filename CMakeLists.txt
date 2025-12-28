@@ -40,6 +40,7 @@ include_directories(ECS/Component/Tag)
 include_directories(ECS/Component/Scene)
 include_directories(ECS/Component/Layer)
 include_directories(ECS/Component/Scale)
+include_directories(ECS/Component/Group)
 include_directories(ECS/Component/Camera)
 include_directories(ECS/Component/Sprite)
 include_directories(ECS/Component/Camera)
@@ -89,6 +90,7 @@ add_executable(r-type_server
         ECS/Component/Scale/Scale.cpp
         ECS/Component/Layer/Layer.cpp
         ECS/Component/Scene/Scene.cpp
+        ECS/Component/Group/Group.cpp
         ECS/Component/Script/Script.cpp
         ECS/Component/Sprite/Sprite.cpp
         ECS/Component/Camera/Camera.cpp
@@ -114,6 +116,7 @@ add_executable(r-type_client
         ECS/Component/Tag/Tag.cpp
         ECS/Component/Scale/Scale.cpp
         ECS/Component/Layer/Layer.cpp
+        ECS/Component/Group/Group.cpp
         ECS/Component/Scene/Scene.cpp
         ECS/Component/Script/Script.cpp
         ECS/Component/Sprite/Sprite.cpp
