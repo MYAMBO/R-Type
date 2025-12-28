@@ -8,9 +8,12 @@
 #include <algorithm>
 
 #include "Draw.hpp"
+#include "Scale.hpp"
 #include "Scene.hpp"
 #include "Layer.hpp"
 #include "Sprite.hpp"
+#include "Rotation.hpp"
+#include "Position.hpp"
 
 /**
  * @brief Updates the draw system by rendering all entities with a Sprite component.
@@ -37,6 +40,26 @@ void Draw::update(const float& dt, World &w)
             valB = layerBComp->getLayerId();
         return valA < valB;
     });
+
+    for (const auto &entity : w.getAllEntitiesWithComponent<Sprite>()) {
+        const auto spriteComp = entity->getComponent<Sprite>();
+        if (!spriteComp) {
+            continue; 
+        }
+        const auto sprite = spriteComp->getSprite();
+        auto scaleComp = entity->getComponent<Scale>();
+        auto posComp   = entity->getComponent<Position>();
+        auto rotComp   = entity->getComponent<Rotation>();
+
+        if (scaleComp) {
+            float s = scaleComp->getScale();
+            sprite->setScale({s, s});
+        }
+        if (posComp)
+            sprite->setPosition({posComp->getX(), posComp->getY()});
+        if (rotComp)
+            sprite->setRotation(sf::degrees(rotComp->getRotation()));
+    }
 
     for (auto& entity : entities) {
         const auto objectComponent = entity->getComponent<Sprite>();
