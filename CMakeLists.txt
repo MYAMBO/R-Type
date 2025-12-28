@@ -52,7 +52,10 @@ include_directories(ECS/Component/Rotation)
 include_directories(ECS/Component/BoxCollider)
 include_directories(ECS/System)
 include_directories(ECS/System/Draw)
-include_directories(ECS/System/Updater)
+include_directories(ECS/System/Animation)
+include_directories(ECS/System/CameraSys)
+include_directories(ECS/System/Movement)
+include_directories(ECS/System/ScriptsSys)
 include_directories(ECS/System/Inputs)
 include_directories(ECS/System/Collision)
 include_directories(ECS/Entity)
@@ -81,7 +84,10 @@ add_executable(r-type_server
         ECS/Entity/Entity.cpp
         ECS/System/Draw/Draw.cpp
         ECS/System/Inputs/Inputs.cpp
-        ECS/System/Updater/Updater.cpp
+        ECS/System/Animation/Animation.cpp
+        ECS/System/CameraSys/CameraSys.cpp
+        ECS/System/Movement/Movement.cpp
+        ECS/System/ScriptsSys/ScriptsSys.cpp
         ECS/World.cpp
         ECS/Component/HP/HP.cpp
         Client/GameHelper/GameHelper.cpp
@@ -107,8 +113,11 @@ add_executable(r-type_client
         ECS/Entity/Entity.cpp
         ECS/System/Draw/Draw.cpp
         ECS/System/Inputs/Inputs.cpp
-        ECS/System/Updater/Updater.cpp
+        ECS/System/Movement/Movement.cpp
+        ECS/System/Animation/Animation.cpp
+        ECS/System/CameraSys/CameraSys.cpp
         ECS/System/Collision/Collision.cpp
+        ECS/System/ScriptsSys/ScriptsSys.cpp
         ECS/World.cpp
         ECS/Component/HP/HP.cpp
         ECS/Component/Tag/Tag.cpp

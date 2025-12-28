@@ -19,25 +19,28 @@
 
 #include "HP.hpp"
 #include "Tag.hpp" 
-#include "Draw.hpp"
 #include "Layer.hpp"
 #include "Scale.hpp"
 #include "Scene.hpp"
-#include "Inputs.hpp"
 #include "Sprite.hpp"
 #include "Entity.hpp"
 #include "Script.hpp"
 #include "Camera.hpp"
-#include "Updater.hpp"
 #include "Velocity.hpp"
 #include "Position.hpp"
 #include "Animator.hpp"
 #include "Rotation.hpp"
 #include "GameHelper.hpp"
 #include "BoxCollider.hpp"
-#include "Collision.hpp"
 #include "ScriptsHandler.hpp"
 
+#include "Draw.hpp"
+#include "Inputs.hpp"
+#include "Movement.hpp"
+#include "CameraSys.hpp"
+#include "Animation.hpp"
+#include "Collision.hpp"
+#include "ScriptsSys.hpp"
 
 /**
  * @brief Constructs a new Game object.
@@ -51,7 +54,13 @@
 Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const std::string& title)
     : _window(sf::VideoMode({width, height}), title), _network(network)
 {
-
+    _world.addSystem<CameraSys>();
+    _world.addSystem<ScriptsSys>();
+    _world.addSystem<Movement>();
+    _world.addSystem<Animation>();
+    _world.addSystem<Collision>();
+    _world.addSystem<Draw>();
+    _world.addSystem<Inputs>();
 }
 
 /**
@@ -116,10 +125,6 @@ void Game::run()
     _network.sendPacket(packet);
     createCamera();
     createBackground();
-    _world.addSystem<Updater>();
-    _world.addSystem<Collision>();
-    _world.addSystem<Draw>();
-    _world.addSystem<Inputs>();
     _window.setFramerateLimit(30);
     _world.setDeltaTime(1.f);
     auto inputSystem = _world.getSystem<Inputs>();
@@ -174,8 +179,7 @@ void Game::createPlayer(uint64_t id)
     player->addComponent<Scene>(1);
     player->addComponent<Layer>(10);
     player->addComponent<BoxCollider>(33.0f, 19.0f);
-    
-    printf("Creating player with id: %ld\n", player->getId());
+
     if (playerCount == 0) {
         // Premier joueur (joueur local)
         player->addComponent<Velocity>(0.f, 0.f);
@@ -244,7 +248,13 @@ void Game::smootherMovement(int entityId, World &world, float serverX, float ser
 {
     auto entity = GameHelper::getEntityById(world, entityId);
     if (!entity) return;
-
+    if (!entity->getComponent<Velocity>()) {
+        printf("Entity with id %d has no Velocity component.\n", entityId);
+        auto pos = entity->getComponent<Position>();
+        pos->setX(serverX);
+        pos->setY(serverY);
+        return;
+    }
     auto pos = entity->getComponent<Position>();
 
     float dist = std::hypot(serverX - pos->getX(), serverY - pos->getY());
@@ -260,15 +270,9 @@ void Game::smootherMovement(int entityId, World &world, float serverX, float ser
 
 void Game::handleSpawn(int id, int type, float x, float y)
 {
-    auto entity = GameHelper::getEntityById(_world, id);
     switch (type) {
         case None:
-            if (entity->getComponent<Velocity>())
-                smootherMovement(id, _world, x, y);
-            else {
-                entity->getComponent<Position>()->setX(x);
-                entity->getComponent<Position>()->setY(y);
-            }
+            smootherMovement(id, _world, x, y);
             break;
         case Player:
             createPlayer(id);
