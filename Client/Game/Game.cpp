@@ -7,15 +7,12 @@
 
 #include "Game.hpp"
 
-#include <iostream>
 #include <cmath>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/VideoMode.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
-#include "iostream"
-
 
 #include "HP.hpp"
 #include "Tag.hpp" 
@@ -35,6 +32,7 @@
 #include "Animator.hpp"
 #include "Rotation.hpp"
 #include "GameHelper.hpp"
+#include "Creator.hpp"
 #include "BoxCollider.hpp"
 #include "ScriptsHandler.hpp"
 
@@ -58,7 +56,7 @@
  * @param title The title of the game window. Default is "Game".
  */
 Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const std::string& title)
-    : _window(sf::VideoMode({width, height}), title), _network(network)
+    : _window(sf::VideoMode({width, height}), title), _network(network), _creator(_world)
 {
     _world.addSystem<CameraSys>();
     _world.addSystem<TextSystem>();
@@ -79,86 +77,6 @@ Game::~Game()
     _window.close();
 }
 
-static void changeSceneScript(int entityId, World& world)
-{
-    auto entity = GameHelper::getEntityById(world, entityId);
-    if (!entity)
-        return;
-    entity->getComponent<Scene>()->setScene(world.getCurrentScene());
-}
-
-void Game::createMenu()
-{
-    auto playBtn = _world.createEntity();
-
-    playBtn->addComponent<Position>(100, 100);
-    playBtn->addComponent<Sprite>("../sprites/r-typesheet3.gif");
-    playBtn->addComponent<Scale>(2.f);
-    playBtn->addComponent<Scene>(2);
-    playBtn->addComponent<Button>(200.f, 50.f);
-    playBtn->addComponent<Layer>(LayerType::UI);
-    
-    auto btnComp = playBtn->getComponent<Button>();
-
-    btnComp->setTextureRects(
-        sf::IntRect({0, 0}, {20, 18}),
-        sf::IntRect({20, 0}, {20, 18}),
-        sf::IntRect({40, 0}, {20, 18})
-    );
-
-    btnComp->setOnClick([this]() {
-        std::cout << "Play Button Clicked!" << std::endl;
-        _world.setCurrentScene(1);
-    });
-    auto scoreEntity = _world.createEntity();
-    
-    scoreEntity->addComponent<Position>(400, 400);
-    scoreEntity->addComponent<Scene>(1);
-    scoreEntity->addComponent<Text>("Score: 0", "../sprites/title.ttf", 30);
-    scoreEntity->addComponent<Layer>(LayerType::UI);
-    scoreEntity->getComponent<Text>()->setColor(sf::Color::Red);
-    scoreEntity->addComponent<Script>(changeSceneScript);
-    scoreEntity->addComponent<Tag>("score_text");
-}
-
-
-/**
- * @brief Create Background
- * This function initializes the background entities with necessary components.
-*/
-void Game::createBackground()
-{
-    auto backgroundFirst = _world.createEntity();
-    backgroundFirst->addComponent<Sprite>(std::string("../sprites/background.png"));
-    
-    auto windowSize = _window.getSize();
-    auto spriteComp = backgroundFirst->getComponent<Sprite>();
-    auto boundsSize = spriteComp->getSprite()->getGlobalBounds(); 
-    float scaleX = static_cast<float>(windowSize.x) / boundsSize.size.x;
-    float scaleY = static_cast<float>(windowSize.y) / boundsSize.size.y;
-    float finalScale = std::max(scaleX, scaleY);
-    if (finalScale < 1.0f)
-        finalScale = 1.0f;
-    backgroundFirst->addComponent<Scale>(finalScale);
-
-    backgroundFirst->addComponent<Scene>(_world.getCurrentScene());
-    backgroundFirst->addComponent<Position>(0.f, 0.f);
-    backgroundFirst->addComponent<Script>(backgroundScrollScript);
-    backgroundFirst->addComponent<Layer>(LayerType::BACKGROUND);
-    backgroundFirst->addComponent<Velocity>(-4.f, 0.f);
-    backgroundFirst->addComponent<Tag>("background_first");
-    auto backgroundSecond = _world.createEntity();
-    backgroundSecond->addComponent<Sprite>(std::string("../sprites/background.png"));
-    backgroundSecond->addComponent<Scale>(1.f);
-    backgroundSecond->addComponent<Scene>(_world.getCurrentScene());
-    auto bounds = backgroundFirst->getComponent<Sprite>()->getSprite()->getGlobalBounds();
-    backgroundSecond->addComponent<Position>(bounds.size.x - 10.f, 0.f);
-    backgroundSecond->addComponent<Velocity>(-4.f, 0.f);
-    backgroundSecond->addComponent<Script>(backgroundScrollScript);
-    backgroundSecond->addComponent<Layer>(LayerType::BACKGROUND);
-    backgroundSecond->addComponent<Tag>("background_second");
-}
-
 /**
  * @brief Runs the main game loop.
  *
@@ -174,9 +92,9 @@ void Game::run()
     packet.setTotalPacketNbr(1);
     packet.positionSpawn(0, Player, 300, 300);
     _network.sendPacket(packet);
-    createCamera();
-    createMenu();
-    createBackground();
+    _creator.createCamera();
+    _creator.createMenu();
+    _creator.createBackground(_window);
     _window.setFramerateLimit(30);
     _world.setDeltaTime(1.f);
     auto inputSystem = _world.getSystem<Inputs>();
@@ -186,7 +104,8 @@ void Game::run()
         _window.clear(sf::Color::Black);
         gameInput(inputSystem);
         _world.manageSystems();
-        _window.display();    }
+        _window.display();
+    }
 }
 
 /**
@@ -211,92 +130,6 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
     }
 }
 
-/**
- * @brief Creates the player entity.
- * 
- * This function initializes the player entity with necessary components.
- */
-void Game::createPlayer(uint64_t id)
-{
-    if (GameHelper::getEntityById(_world, id) != nullptr)
-        return;
-    static int playerCount = 0;
-    if (playerCount >= 4)
-        return;
-    auto player = _world.createEntity(id);
-    player->addComponent<HP>(100);
-    player->addComponent<Position>(75.0f, 75.0f);
-    player->addComponent<Sprite>(std::string("../sprites/r-typesheet42.gif"));
-    player->addComponent<Scale>(2.f);
-    player->addComponent<Scene>(1);
-    player->addComponent<Layer>(10);
-    player->addComponent<Group>(playerCount + 1);
-    player->addComponent<BoxCollider>(33.0f, 19.0f);
-
-    if (playerCount == 0) {
-        // Premier joueur (joueur local)
-        player->addComponent<Velocity>(0.f, 0.f);
-        player->addComponent<Animator>(2, 1, 3.f, 0, 0, 33, 19, 0, 0);
-        player->addComponent<Tag>("player");
-        player->addComponent<Script>([this](const int entityId, World& world)
-        {
-            this->playerInput(entityId, _world);
-        });
-    } else {
-        // Autres joueurs (coéquipiers)
-        player->addComponent<Animator>(2, 1, 3.f, 0, (playerCount * 17), 33, 19, 0, 0);
-        player->addComponent<Tag>("player_mate");
-    }
-    playerCount++;
-    auto fire = _world.createEntity();
-    fire->addComponent<Position>(0.f, 85.f);
-    fire->addComponent<Sprite>(std::string("../sprites/r-typesheet1.gif"));
-    fire->addComponent<Animator>(2, 1, 3.f, 285, 85, 15, 15, 0, 0);
-    fire->addComponent<Scale>(2.f);
-    fire->addComponent<Scene>(1);
-    fire->addComponent<Script>(playerfire);
-    fire->addComponent<Group>(playerCount);
-    fire->addComponent<Layer>(10);
-    fire->addComponent<Tag>("fire");
-}
-
-/**
- * @brief Create Camera
- * This function initializes a camera entity with necessary components.
-*/
-void Game::createCamera()
-{
-    auto cameraEntity = _world.createEntity();
-    cameraEntity->addComponent<Camera>(sf::Vector2f(1920.f, 1080.f), sf::Vector2f(0.f, 0.f));
-    cameraEntity->addComponent<Tag>("main_camera");
-}
-
-/**
- * @brief Create Enemy
- * This function initializes an enemy entity with necessary components.
-*/
-void Game::createEnemy(float x, float y, int type)
-{
-    enum EnemyType {
-        BASIC = 1,
-        FAST,
-        TANK
-    };
-    switch (type) {
-        case BASIC:
-            GameHelper::createBasicEnemy(_world, x, y);
-            break;
-        case FAST:
-            // Implement fast enemy creation
-            break;
-        case TANK:
-            // Implement tank enemy creation
-            break;
-        default:
-            std::cerr << "Unknown enemy type: " << type << std::endl;
-            break;
-    }
-}
 
 void Game::smootherMovement(int entityId, World &world, float serverX, float serverY)
 {
@@ -328,14 +161,22 @@ void Game::handleSpawn(int id, int type, float x, float y)
         case None:
             smootherMovement(id, _world, x, y);
             break;
-        case Player:
-            createPlayer(id);
+        case Player : {
+            _creator.createPlayer(id);
+            auto entity = GameHelper::getEntityById(_world, id);
+            if (entity->getComponent<Tag>()->getTag() == "player") {
+                entity->addComponent<Script>([this](const int entityId, World& world)
+                {
+                    this->playerInput(entityId, world);
+                });
+            }
             break;
+        }
         case Enemy:
-            createEnemy(x, y, 1); // Type 1 = BASIC enemy
+            _creator.createEnemy(x, y, 1); // Type 1 = BASIC enemy
             break;
         case Bullet:
-            createBullet(id, _world, x, y, type);
+            _creator.createBullet(id, x, y, type);
             break;
     }
 }
