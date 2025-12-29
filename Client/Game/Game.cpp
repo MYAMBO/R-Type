@@ -8,6 +8,7 @@
 #include "Game.hpp"
 
 #include <cmath>
+#include <thread>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/System/Vector2.hpp>
@@ -65,8 +66,8 @@ Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const
     _world.addSystem<Animation>();
     _world.addSystem<Collision>();
     _world.addSystem<Mouse>();
-    _world.addSystem<Draw>();
     _world.addSystem<Inputs>();
+    _world.addSystem<Draw>();
 }
 
 /**
@@ -76,15 +77,61 @@ Game::~Game()
 {
     _window.close();
 }
+/**
+ * @brief Updates the ECS loading screen entities and forces a frame render.
+ */
+void Game::updateLoadingState(float progress, const std::string& status)
+{
+    auto statusEnt = GameHelper::getEntityByTag(_world, "loading_status");
+    if (statusEnt) {
+        auto textComp = statusEnt->getComponent<Text>();
+        if (textComp) textComp->setString(status);
+        
+        auto posComp = statusEnt->getComponent<Position>();
+        sf::FloatRect bounds = textComp->getGlobalBounds();
+        float centerX = _window.getSize().x / 2.0f - 200.f;
+        if (posComp)
+            posComp->setX(centerX - (bounds.size.x / 2.0f));
+    }
+
+    auto barEnt = GameHelper::getEntityByTag(_world, "loading_bar");
+    if (barEnt) {
+        auto spriteComp = barEnt->getComponent<Sprite>();
+        if (spriteComp) {
+            float currentWidth = 400.0f * progress;
+            spriteComp->getSprite()->setScale({currentWidth, 20.f});
+        }
+    }
+
+    _window.clear(sf::Color::Black);
+    _world.manageSystems();
+    _window.display();
+}
 
 /**
  * @brief Runs the main game loop.
  *
- * This function initializes the game world, creates entities,
- * and handles the main event loop for rendering and user input.
+ * This function initializes the game, handles loading screens,
+ * and enters the main game loop to process input and update the world.
  */
 void Game::run()
 {
+    _window.setFramerateLimit(30);
+    _world.setWindow(_window);
+    _world.setDeltaTime(1.f);
+
+    _world.setCurrentScene(0);
+    _creator.createLoadingScreen();
+    
+    updateLoadingState(0.0f, "Initializing systems...");
+    updateLoadingState(0.1f, "Loading assets...");
+    _creator.createCamera();
+    updateLoadingState(0.3f, "Generating Menu...");
+    _creator.createMenu();
+    updateLoadingState(0.6f, "Generating Background...");
+    _creator.createBackground(_window); 
+    updateLoadingState(0.8f, "Connecting to server...");
+    
     Packet packet;
     packet.setId(0);
     packet.setAck(0);
@@ -92,14 +139,14 @@ void Game::run()
     packet.setTotalPacketNbr(1);
     packet.positionSpawn(0, Player, 300, 300);
     _network.sendPacket(packet);
-    _creator.createCamera();
-    _creator.createMenu();
-    _creator.createBackground(_window);
-    _window.setFramerateLimit(30);
-    _world.setDeltaTime(1.f);
-    auto inputSystem = _world.getSystem<Inputs>();
-    _world.setWindow(_window);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    updateLoadingState(1.0f, "Ready!");
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+
     _world.setCurrentScene(2);
+    auto inputSystem = _world.getSystem<Inputs>();
+
     while (_window.isOpen()) {
         _window.clear(sf::Color::Black);
         gameInput(inputSystem);
@@ -192,6 +239,8 @@ void Game::handleSpawn(int id, int type, float x, float y)
  */
 void Game::playerInput(int entityId, World &world)
 {
+    if (world.getCurrentScene() != 1)
+        return;
     (void)entityId;
     static bool isShootKeyPressed = false;
 

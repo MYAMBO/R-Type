@@ -38,6 +38,7 @@ include_directories(ECS/Component)
 include_directories(ECS/Component/HP)
 include_directories(ECS/Component/Tag)
 include_directories(ECS/Component/Text)
+include_directories(ECS/Component/Data)
 include_directories(ECS/Component/Scene)
 include_directories(ECS/Component/Layer)
 include_directories(ECS/Component/Scale)
@@ -131,6 +132,7 @@ add_executable(r-type_client
         ECS/Component/HP/HP.cpp
         ECS/Component/Tag/Tag.cpp
         ECS/Component/Text/Text.cpp
+        ECS/Component/Data/Data.cpp
         ECS/Component/Scale/Scale.cpp
         ECS/Component/Layer/Layer.cpp
         ECS/Component/Group/Group.cpp

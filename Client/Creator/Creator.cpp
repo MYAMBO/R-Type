@@ -5,27 +5,28 @@
 ** Creator
 */
 
+#include "Game.hpp"
 #include "Creator.hpp"
 #include "GameHelper.hpp"
+#include "ScriptsHandler.hpp"
 
+#include "HP.hpp"
 #include "Tag.hpp"
-#include "Position.hpp"
-#include "Sprite.hpp"
+#include "Data.hpp"
+#include "Text.hpp"
 #include "Scale.hpp"
+#include "Layer.hpp"
+#include "Group.hpp"
 #include "Scene.hpp"
+#include "Sprite.hpp"
 #include "Camera.hpp"
 #include "Button.hpp"
-#include "Text.hpp"
 #include "Script.hpp"
-#include "HP.hpp"
+#include "Position.hpp"
 #include "Velocity.hpp"
 #include "Animator.hpp"
 #include "Rotation.hpp"
-#include "Layer.hpp"
-#include "Group.hpp"
 #include "BoxCollider.hpp"
-#include "Game.hpp"
-#include "ScriptsHandler.hpp"
 
 Creator::Creator(World& world)
 : _world(world)
@@ -44,12 +45,12 @@ void Creator::createMenuButton(const std::string& label, int sceneId, float x, f
 {
     auto btnEntity = _world.createEntity();
     btnEntity->addComponent<Sprite>("../sprites/Elements-01.png");
-    btnEntity->addComponent<Scale>(0.25f);
+    btnEntity->addComponent<Scale>(0.3f);
     btnEntity->addComponent<Scene>(sceneId);
     btnEntity->addComponent<Layer>(LayerType::UI);
     
-    float width = (1200.f * 0.25f);
-    float height = (500.f * 0.25f);
+    float width = (1200.f * 0.3f);
+    float height = (500.f * 0.3f);
     
     float btnLeft = x - (width / 2.f);
     float btnTop = y;
@@ -89,7 +90,7 @@ void Creator::createMenu()
     createOptions(); 
 
     auto window = _world.getWindow();
-    unsigned int width = (window) ? window->getSize().x : 1920;
+    unsigned int width = window->getSize().x;
     float centerX = static_cast<float>(width) / 2.0f;
     float btnX = centerX;
 
@@ -97,7 +98,7 @@ void Creator::createMenu()
     titleEntity->addComponent<Scene>(2);
     titleEntity->addComponent<Layer>(LayerType::UI);
     titleEntity->addComponent<Text>("R-TYPE", "../sprites/title.ttf", 80);
-    titleEntity->addComponent<Position>(centerX - 150.f, 100.f); // Centrage approximatif titre
+    titleEntity->addComponent<Position>(centerX - titleEntity->getComponent<Text>()->getGlobalBounds().size.x / 2.0f, 100.f);
     titleEntity->getComponent<Text>()->setColor(sf::Color::Cyan);
 
     createMenuButton("PLAY", 2, btnX, 300.f, [this]() {
@@ -117,18 +118,37 @@ void Creator::createMenu()
     });
 }
 
+std::shared_ptr<Entity> Creator::createStatusText(float y, bool initialState)
+{
+    auto window = _world.getWindow();
+    unsigned int width = window->getSize().x;
+    float centerX = static_cast<float>(width) / 2.0f;
+
+    auto statusEntity = _world.createEntity();
+    statusEntity->addComponent<Scene>(3);
+    statusEntity->addComponent<Layer>(LayerType::UI);
+    
+    std::string label = initialState ? "ON" : "OFF";
+    statusEntity->addComponent<Text>(label, "../sprites/title.ttf", 30);
+    
+    sf::Color color = initialState ? sf::Color::Green : sf::Color::Red;
+    statusEntity->getComponent<Text>()->setColor(color);
+
+    statusEntity->addComponent<Position>(centerX + 250.f, y + 15.f);
+    return statusEntity;
+}
+
 /**
  * @brief Create Options (Scene 3)
  */
 void Creator::createOptions()
 {
     auto window = _world.getWindow();
-    unsigned int width = (window) ? window->getSize().x : 1920;
+    unsigned int width = window->getSize().x;
     float centerX = static_cast<float>(width) / 2.0f;
-    float btnX = centerX;
 
     auto titleEntity = _world.createEntity();
-    titleEntity->addComponent<Scene>(3); // Scene 3
+    titleEntity->addComponent<Scene>(3);
     titleEntity->addComponent<Layer>(LayerType::UI);
     titleEntity->addComponent<Text>("OPTIONS", "../sprites/title.ttf", 80);
     titleEntity->addComponent<Position>(centerX - 180.f, 50.f);
@@ -136,25 +156,95 @@ void Creator::createOptions()
 
     static bool godMode = false;
     static bool colorBlind = false;
-    createMenuButton("GOD MODE", 3, btnX, 200.f, []() {
+    static bool easyMode = false;
+    static bool hardMode = false;
+
+    
+
+    float godY = 200.f;
+    auto godStatus = createStatusText(godY, godMode);
+
+    createMenuButton("GOD MODE", 3, centerX, godY, [this, godStatus]() {
         godMode = !godMode;
-        std::cout << "God Mode: " << (godMode ? "ON" : "OFF") << std::endl;
+        
+        auto textComp = godStatus->getComponent<Text>();
+        textComp->setString(godMode ? "ON" : "OFF");
+        textComp->setColor(godMode ? sf::Color::Green : sf::Color::Red);
+
+        auto entity = GameHelper::getEntityByTag(_world, "player");
+        if (entity) {
+            auto dataComp = entity->getComponent<Data>();
+            if (dataComp) dataComp->setData("is_god_mode", godMode ? "true" : "false");
+        }
     });
 
-    createMenuButton("EASY MODE", 3, btnX, 325.f, []() {
-        std::cout << "Difficulty set to: EASY" << std::endl;
+    float easyY = 325.f;
+    float hardY = 450.f;
+    
+    auto easyStatus = createStatusText(easyY, easyMode);
+    auto hardStatus = createStatusText(hardY, hardMode);
+
+    createMenuButton("EASY MODE", 3, centerX, easyY, [this, easyStatus, hardStatus]() {
+        easyMode = !easyMode;
+        if (easyMode) hardMode = false;
+
+        easyStatus->getComponent<Text>()->setString(easyMode ? "ON" : "OFF");
+        easyStatus->getComponent<Text>()->setColor(easyMode ? sf::Color::Green : sf::Color::Red);
+
+        hardStatus->getComponent<Text>()->setString(hardMode ? "ON" : "OFF");
+        hardStatus->getComponent<Text>()->setColor(hardMode ? sf::Color::Green : sf::Color::Red);
+
+        auto entity = GameHelper::getEntityByTag(_world, "player");
+        if (entity) {
+            auto dataComp = entity->getComponent<Data>();
+            if (dataComp) {
+                dataComp->setData("is_easy_mode", easyMode ? "true" : "false");
+                dataComp->setData("is_hard_mode", hardMode ? "true" : "false");
+            }
+        }
+        std::cout << "Difficulty set to: " << (easyMode ? "EASY" : "NORMAL") << std::endl;
     });
 
-    createMenuButton("HARD MODE", 3, btnX, 450.f, []() {
-        std::cout << "Difficulty set to: HARD" << std::endl;
+    createMenuButton("HARD MODE", 3, centerX, hardY, [this, easyStatus, hardStatus]() {
+        hardMode = !hardMode;
+        if (hardMode) easyMode = false;
+
+        hardStatus->getComponent<Text>()->setString(hardMode ? "ON" : "OFF");
+        hardStatus->getComponent<Text>()->setColor(hardMode ? sf::Color::Green : sf::Color::Red);
+
+        easyStatus->getComponent<Text>()->setString(easyMode ? "ON" : "OFF");
+        easyStatus->getComponent<Text>()->setColor(easyMode ? sf::Color::Green : sf::Color::Red);
+
+        auto entity = GameHelper::getEntityByTag(_world, "player");
+        if (entity) {
+            auto dataComp = entity->getComponent<Data>();
+            if (dataComp) {
+                dataComp->setData("is_easy_mode", easyMode ? "true" : "false");
+                dataComp->setData("is_hard_mode", hardMode ? "true" : "false");
+            }
+        }
+        std::cout << "Difficulty set to: " << (hardMode ? "HARD" : "NORMAL") << std::endl;
     });
 
-    createMenuButton("DALTONIAN", 3, btnX, 575.f, []() {
+    float daltonianY = 575.f;
+    auto daltStatus = createStatusText(daltonianY, colorBlind);
+
+    createMenuButton("DALTONIAN", 3, centerX, daltonianY, [this, daltStatus]() {
         colorBlind = !colorBlind;
+
+        auto textComp = daltStatus->getComponent<Text>();
+        textComp->setString(colorBlind ? "ON" : "OFF");
+        textComp->setColor(colorBlind ? sf::Color::Green : sf::Color::Red);
+
+        auto entity = GameHelper::getEntityByTag(_world, "player");
+        if (entity) {
+            auto dataComp = entity->getComponent<Data>();
+            if (dataComp) dataComp->setData("is_color_blind", colorBlind ? "true" : "false");
+        }
         std::cout << "Colorblind Mode: " << (colorBlind ? "ON" : "OFF") << std::endl;
     });
 
-    createMenuButton("RETURN", 3, btnX, 750.f, [this]() {
+    createMenuButton("RETURN", 3, centerX, 750.f, [this]() {
         std::cout << "Returning to Main Menu" << std::endl;
         _world.setCurrentScene(2);
     });
@@ -182,16 +272,23 @@ void Creator::createPlayer(uint64_t id)
     player->addComponent<Group>(playerCount + 1);
     player->addComponent<BoxCollider>(33.0f, 19.0f);
 
+    std::map<std::string, std::string> dataMap = {
+        {"is_god_mode", "false"},
+        {"is_easy_mode", "false"},
+        {"is_color_blind", "false"},
+        {"is_hard_mode", "false"}
+    };
+    player->addComponent<Data>(dataMap);
+    
     if (playerCount == 0) {
-        // Premier joueur (joueur local)
         player->addComponent<Velocity>(0.f, 0.f);
         player->addComponent<Animator>(2, 1, 3.f, 0, 0, 33, 19, 0, 0);
         player->addComponent<Tag>("player");
     } else {
-        // Autres joueurs (coéquipiers)
         player->addComponent<Animator>(2, 1, 3.f, 0, (playerCount * 17), 33, 19, 0, 0);
         player->addComponent<Tag>("player_mate");
     }
+
     playerCount++;
     auto fire = _world.createEntity();
     fire->addComponent<Position>(0.f, 85.f);
@@ -307,4 +404,52 @@ void Creator::createBullet(size_t entityId, int x, int y, int type)
     bullet->addComponent<Scale>(2.f);
     bullet->addComponent<Scene>(1);
     bullet->addComponent<Tag>("bullet");
+}
+
+/**
+ * @brief Creates the loading screen entities.
+ *
+ * This function initializes the loading screen with text and a progress bar.
+ */
+void Creator::createLoadingScreen()
+{
+    auto window = _world.getWindow();
+    float centerX = window->getSize().x / 2.0f - 200.f;
+    float centerY = window->getSize().y / 2.0f;
+
+    auto title = _world.createEntity();
+    title->addComponent<Scene>(0);
+    title->addComponent<Text>("LOADING...", "../sprites/title.ttf", 40);
+    title->addComponent<Position>(centerX - title->getComponent<Text>()->getGlobalBounds().size.x / 2.0f, centerY - 100.f);
+    title->addComponent<Layer>(LayerType::UI);
+
+    auto status = _world.createEntity();
+    status->addComponent<Scene>(0);
+    status->addComponent<Text>("Initializing...", "../sprites/title.ttf", 20);
+    status->addComponent<Position>(centerX - status->getComponent<Text>()->getGlobalBounds().size.x / 2.0f, centerY + 60.f);
+    status->addComponent<Layer>(LayerType::UI);
+    status->getComponent<Text>()->setColor(sf::Color(200, 200, 200));
+    status->addComponent<Tag>("loading_status");
+
+    auto bgBar = _world.createEntity();
+    bgBar->addComponent<Scene>(0);
+    bgBar->addComponent<Position>(centerX - 200.f, centerY);
+    bgBar->addComponent<Sprite>("../sprites/Elements-01.png");
+    bgBar->getComponent<Sprite>()->getSprite()->setTextureRect(sf::IntRect({0, 0}, {1, 1}));
+    bgBar->addComponent<Scale>(400.f);
+    bgBar->getComponent<Sprite>()->getSprite()->setScale({400.f, 20.f}); 
+    bgBar->getComponent<Sprite>()->getSprite()->setColor(sf::Color(50, 50, 50));
+    bgBar->addComponent<Layer>(LayerType::UI);
+
+    auto fillBar = _world.createEntity();
+    fillBar->addComponent<Scene>(0);
+    fillBar->addComponent<Position>(centerX - 200.f, centerY);
+    fillBar->addComponent<Sprite>("../sprites/Elements-01.png");
+    fillBar->getComponent<Sprite>()->getSprite()->setTextureRect(sf::IntRect({0, 0}, {1, 1}));
+    fillBar->getComponent<Sprite>()->getSprite()->setScale({0.f, 20.f});
+    fillBar->getComponent<Sprite>()->getSprite()->setColor(sf::Color(100, 250, 50));
+    
+    fillBar->addComponent<Layer>(LayerType::UI + 1);
+    fillBar->addComponent<Tag>("loading_bar");
+    fillBar->addComponent<Scale>(0.f); 
 }

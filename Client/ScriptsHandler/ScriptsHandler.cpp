@@ -37,6 +37,8 @@ void backgroundScrollScript(size_t entityId, World &world)
     if (!posComp || !spriteComp)
         return;
 
+    if (world.getCurrentScene() != entity->getComponent<Scene>()->getScene())
+        entity->getComponent<Scene>()->setScene(world.getCurrentScene());
     auto bounds = spriteComp->getSprite()->getGlobalBounds();
     float width = bounds.size.x; 
     if (posComp->getX() <= -width)

@@ -44,7 +44,7 @@ enum entitiesType
  */
 class Game {
     public:
-        Game(IGameNetwork& network, unsigned int width = 800, unsigned int height = 600, const std::string& title = "Game");
+        Game(IGameNetwork& network, unsigned int width = 1920, unsigned int height = 1080, const std::string& title = "Game");
         ~Game();
 
         void run();
@@ -58,7 +58,9 @@ class Game {
         void gameInput(std::shared_ptr<Inputs> inputSystem);
 
         void playerInput(int entityId, World &world);
+        void updateLoadingState(float progress, const std::string& status);
         void smootherMovement(int entityId, World &world, float targetX, float targetY); 
+        
 
         void bulletShooting();
 
