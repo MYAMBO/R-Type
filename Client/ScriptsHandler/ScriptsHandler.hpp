@@ -13,6 +13,6 @@
 
 void playerfire(size_t entityId, World &world);
 void backgroundScrollScript(size_t entityId, World &world);
-void createBullet(size_t entityId, World &world, int x, int y, int type);
+void changeSceneScript(int entityId, World& world);
 
 #endif /* !SCRIPTS_HPP_ */

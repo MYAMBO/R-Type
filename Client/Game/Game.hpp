@@ -12,6 +12,7 @@
 
     #include "World.hpp"
     #include "Inputs.hpp"
+    #include "Creator.hpp"
     #include "IGameNetwork.hpp"
 
 /**
@@ -43,28 +44,31 @@ enum entitiesType
  */
 class Game {
     public:
-        Game(IGameNetwork& network, unsigned int width = 800, unsigned int height = 600, const std::string& title = "Game");
+        Game(IGameNetwork& network, unsigned int width = 1920, unsigned int height = 1080, const std::string& title = "Game");
         ~Game();
 
         void run();
         int killEntity(int id);
         void handleSpawn(int id, int type, float x, float y);
+
+        void menudisplay();
+        void gameplaydisplay();
+
     private:
         void gameInput(std::shared_ptr<Inputs> inputSystem);
 
-        void createMenu();
-        void createCamera();
-        void createBackground();
-        void createPlayer(uint64_t id = 0);
-        void createEnemy(float x, float y, int type);
         void playerInput(int entityId, World &world);
+        void updateLoadingState(float progress, const std::string& status);
         void smootherMovement(int entityId, World &world, float targetX, float targetY); 
+        
 
         void bulletShooting();
 
-        World _world;
         sf::RenderWindow _window;
+        World _world;
         IGameNetwork& _network;
+        Creator _creator;
+
         bool _isShootKeyPressed = false;
 };
 

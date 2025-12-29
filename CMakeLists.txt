@@ -38,6 +38,7 @@ include_directories(ECS/Component)
 include_directories(ECS/Component/HP)
 include_directories(ECS/Component/Tag)
 include_directories(ECS/Component/Text)
+include_directories(ECS/Component/Data)
 include_directories(ECS/Component/Scene)
 include_directories(ECS/Component/Layer)
 include_directories(ECS/Component/Scale)
@@ -67,6 +68,7 @@ include_directories(ECS/Entity)
 include_directories(Client)
 include_directories(Client/Core)
 include_directories(Client/Game)
+include_directories(Client/Creator)
 include_directories(Client/GameHelper)
 include_directories(Client/ScriptsHandler)
 include_directories(./Server)
@@ -113,6 +115,7 @@ add_executable(r-type_server
 add_executable(r-type_client
         Client/main.cpp
         Client/Game/Game.cpp
+        Client/Creator/Creator.cpp
         Client/GameHelper/GameHelper.cpp
         Client/ScriptsHandler/ScriptsHandler.cpp
         ECS/Entity/Entity.cpp
@@ -129,6 +132,7 @@ add_executable(r-type_client
         ECS/Component/HP/HP.cpp
         ECS/Component/Tag/Tag.cpp
         ECS/Component/Text/Text.cpp
+        ECS/Component/Data/Data.cpp
         ECS/Component/Scale/Scale.cpp
         ECS/Component/Layer/Layer.cpp
         ECS/Component/Group/Group.cpp
