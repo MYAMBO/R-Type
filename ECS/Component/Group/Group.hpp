@@ -22,20 +22,12 @@ class Group : public Component {
         Group(size_t id);
         ~Group() override = default;
 
-        /**
-         * @brief Gets the ID of the group.
-         * @return The group ID.
-         */
         [[nodiscard]] size_t getId() const;
 
-        /**
-         * @brief Sets a new ID for the group.
-         * @param id The new group ID.
-         */
         void setId(size_t id);
         
     private:
-        size_t _id; // L'ID du groupe
+        size_t _id;
 };
 
 #endif /* !GROUP_HPP_ */
