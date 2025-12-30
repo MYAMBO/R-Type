@@ -19,11 +19,11 @@ void CameraSys::update(const float &dt, World &w)
     (void)dt;
     for (auto &entity : w.getAllEntitiesWithComponent<Camera>()) {
         auto cameraComp = entity->getComponent<Camera>();
-        if (!cameraComp)
-            continue; 
         auto posComp = entity->getComponent<Position>();
-        if (posComp)
-            cameraComp->setPosition({posComp->getX(), posComp->getY()});
+        if (!cameraComp || !posComp)
+            continue; 
+        
+        cameraComp->setPosition({posComp->getX(), posComp->getY()});
         w.getWindow()->setView(cameraComp->getView());
     }
 }

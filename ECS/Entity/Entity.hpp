@@ -15,6 +15,7 @@
 #include <cstdint>
 
 #include "Component.hpp"
+#include "EcsError.hpp"
 
 /**
  * @brief Entity class representing an object in the ECS architecture.
@@ -34,6 +35,9 @@ class Entity {
         [[nodiscard]] std::shared_ptr<T> getComponent() const;
 
         [[nodiscard]] uint32_t getId(void) const;
+
+        template<typename T>
+        [[nodiscard]] std::shared_ptr<T> getComponentSafe() const;
     private:
         uint32_t _id;
         std::vector<std::shared_ptr<Component>> _components;
@@ -67,6 +71,24 @@ std::shared_ptr<T> Entity::getComponent() const
         if (std::shared_ptr<T> comType = std::dynamic_pointer_cast<T>(comp))
             return comType;
     return nullptr;
+}
+
+/**
+ * @brief Retrieves a component of type T from the entity.
+ * Throws an exception if the component is not found.
+ *
+ * @tparam T The type of the component to retrieve. Must be derived from Component.
+ * @return A shared pointer to the component.
+ * @throws ECSComponentNotFoundException<T> if the component is not found.
+ */
+template<typename T>
+std::shared_ptr<T> Entity::getComponentSafe() const
+{
+    static_assert(std::is_base_of_v<Component, T>, "T must be a Component");
+    for (const auto& comp : _components)
+        if (std::shared_ptr<T> comType = std::dynamic_pointer_cast<T>(comp))
+            return comType;
+    throw ECSComponentNotFoundException<T>();
 }
 
 #endif /* !ENTITY_HPP_ */

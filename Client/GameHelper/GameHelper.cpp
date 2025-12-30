@@ -26,7 +26,7 @@
  */
 std::shared_ptr<Camera> GameHelper::getMainCamera(World &world)
 {
-    for (const auto& entity : world.getAllEntitiesWithComponent<Tag>()) {
+    for (const auto& entity : world.getAllEntitiesWithComponent<Camera>()) {
         auto tagComp = entity->getComponent<Tag>();
         if (tagComp && tagComp->getTag() == "main_camera") {
             return entity->getComponent<Camera>();

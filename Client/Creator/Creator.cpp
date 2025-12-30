@@ -28,6 +28,7 @@
 #include "Rotation.hpp"
 #include "BoxCollider.hpp"
 #include "Damage.hpp"
+#include "RectangleShape.hpp"
 
 Creator::Creator(World& world)
 : _world(world)
@@ -436,22 +437,16 @@ void Creator::createLoadingScreen()
     auto bgBar = _world.createEntity();
     bgBar->addComponent<Scene>(0);
     bgBar->addComponent<Position>(centerX - 200.f, centerY);
-    bgBar->addComponent<Sprite>("../sprites/Elements-01.png");
-    bgBar->getComponent<Sprite>()->getSprite()->setTextureRect(sf::IntRect({0, 0}, {1, 1}));
-    bgBar->addComponent<Scale>(400.f);
-    bgBar->getComponent<Sprite>()->getSprite()->setScale({400.f, 20.f}); 
-    bgBar->getComponent<Sprite>()->getSprite()->setColor(sf::Color(50, 50, 50));
+    bgBar->addComponent<RectangleShape>(400.f, 20.f, 50, 50, 50, 255);
+    bgBar->addComponent<Tag>("loading_bg_bar");
+    bgBar->addComponent<Scale>(1.f);
     bgBar->addComponent<Layer>(LayerType::UI);
 
     auto fillBar = _world.createEntity();
     fillBar->addComponent<Scene>(0);
     fillBar->addComponent<Position>(centerX - 200.f, centerY);
-    fillBar->addComponent<Sprite>("../sprites/Elements-01.png");
-    fillBar->getComponent<Sprite>()->getSprite()->setTextureRect(sf::IntRect({0, 0}, {1, 1}));
-    fillBar->getComponent<Sprite>()->getSprite()->setScale({0.f, 20.f});
-    fillBar->getComponent<Sprite>()->getSprite()->setColor(sf::Color(100, 250, 50));
-    
+    fillBar->addComponent<RectangleShape>(1.f, 20.f, 100, 250, 50, 255);
     fillBar->addComponent<Layer>(LayerType::UI + 1);
     fillBar->addComponent<Tag>("loading_bar");
-    fillBar->addComponent<Scale>(0.f); 
+    fillBar->addComponent<Scale>(1.f);
 }

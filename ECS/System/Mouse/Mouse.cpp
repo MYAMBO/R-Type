@@ -28,14 +28,15 @@ void Mouse::update(const float& dt, World &world)
     bool isMousePressed = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
 
     for (auto &entity : world.getAllEntitiesWithComponent<Button>()) {
-        if (world.getCurrentScene() != entity->getComponent<Scene>()->getScene())
-            continue;
+        auto sceneComp = entity->getComponent<Scene>();
         auto button = entity->getComponent<Button>();
         auto pos = entity->getComponent<Position>();
         auto spriteComp = entity->getComponent<Sprite>();
-
-        if (!pos) continue;
-
+        if (!button || !pos || !sceneComp || !spriteComp)
+            continue;
+        
+        if (world.getCurrentScene() != sceneComp->getScene())
+            continue;
         sf::FloatRect bounds({pos->getX(), pos->getY()}, {button->getWidth(), button->getHeight()});
 
         ButtonState oldState = button->getState();
