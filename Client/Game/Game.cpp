@@ -35,6 +35,7 @@
 #include "GameHelper.hpp"
 #include "Creator.hpp"
 #include "BoxCollider.hpp"
+#include "RectangleShape.hpp"
 #include "ScriptsHandler.hpp"
 
 #include "Draw.hpp"
@@ -96,10 +97,9 @@ void Game::updateLoadingState(float progress, const std::string& status)
 
     auto barEnt = GameHelper::getEntityByTag(_world, "loading_bar");
     if (barEnt) {
-        auto spriteComp = barEnt->getComponent<Sprite>();
-        if (spriteComp) {
-            float currentWidth = 400.0f * progress;
-            spriteComp->getSprite()->setScale({currentWidth, 20.f});
+        auto rectComp = barEnt->getComponent<RectangleShape>();
+        if (rectComp) {
+            rectComp->setSize(400.f * progress, 20.f);
         }
     }
 
@@ -183,7 +183,6 @@ void Game::smootherMovement(int entityId, World &world, float serverX, float ser
     auto entity = GameHelper::getEntityById(world, entityId);
     if (!entity) return;
     if (!entity->getComponent<Velocity>()) {
-        printf("Entity with id %d has no Velocity component.\n", entityId);
         auto pos = entity->getComponent<Position>();
         pos->setX(serverX);
         pos->setY(serverY);
