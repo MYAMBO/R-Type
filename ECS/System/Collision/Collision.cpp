@@ -22,12 +22,14 @@ void Collision::update(const float &, World &w)
         for (size_t j = i + 1; j < entities.size(); j++) {
             const std::shared_ptr<Entity> &a = entities[i];
             const std::shared_ptr<Entity> &b = entities[j];
-            std::shared_ptr<BoxCollider> colA = a->getComponent<BoxCollider>();
-            std::shared_ptr<BoxCollider>  colB = b->getComponent<BoxCollider>();
-            std::shared_ptr<Position>  posA = a->getComponent<Position>();
-            std::shared_ptr<Position>  posB = b->getComponent<Position>();
+            auto colA = a->getComponent<BoxCollider>();
+            auto colB = b->getComponent<BoxCollider>();
+            auto posA = a->getComponent<Position>();
+            auto posB = b->getComponent<Position>();
+
             if (!colA || !colB || !posA || !posB)
                 continue;
+
             if (checkCollision(*colA, *posA, *colB, *posB)) {
                 std::cout << "[Collision] Entity "
               << a->getId() << " <-> "

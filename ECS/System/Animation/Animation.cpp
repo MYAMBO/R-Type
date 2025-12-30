@@ -21,11 +21,13 @@
 void Animation::update(const float &dt, World &w)
 {
     for (const auto &entity : w.getAllEntitiesWithComponent<Animator>()) {
-        if (w.getCurrentScene() !=  entity->getComponent<Scene>()->getScene())
-            continue;
+        const auto sceneComp = entity->getComponent<Scene>();
         const auto anim = entity->getComponent<Animator>();
         const auto spriteComp = entity->getComponent<Sprite>();
-        if (!anim || !spriteComp)
+
+        if (!anim || !spriteComp || !sceneComp)
+            continue;
+        if (w.getCurrentScene() !=  sceneComp->getScene())
             continue;
         auto sprite = spriteComp->getSprite();
         anim->setCurrentTime(anim->getCurrentTime() + dt);
