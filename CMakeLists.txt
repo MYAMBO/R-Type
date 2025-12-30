@@ -96,6 +96,7 @@ add_executable(r-type_server
         ECS/System/ScriptsSys/ScriptsSys.cpp
         ECS/World.cpp
         ECS/Component/HP/HP.cpp
+        ECS/Component/Damage/Damage.cpp
         Client/GameHelper/GameHelper.cpp
         ECS/Component/Tag/Tag.cpp
         ECS/Component/Scale/Scale.cpp
