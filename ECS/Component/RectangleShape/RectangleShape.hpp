@@ -5,8 +5,8 @@
 ** RectangleShape
 */
 
-#ifndef R_TYPE_RECTANGLESHAPE_HPP
-    #define R_TYPE_RECTANGLESHAPE_HPP
+#ifndef RECTANGLESHAPE_HPP
+    #define RECTANGLESHAPE_HPP
 
 #include "Component.hpp"
 #include <SFML/Graphics/RectangleShape.hpp>
@@ -34,4 +34,4 @@ class RectangleShape : public Component {
         sf::RectangleShape _shape;
 };
 
-#endif //R_TYPE_RECTANGLESHAPE_HPP
+#endif //RECTANGLESHAPE_HPP
