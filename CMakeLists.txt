@@ -54,6 +54,7 @@ include_directories(ECS/Component/Position)
 include_directories(ECS/Component/Velocity)
 include_directories(ECS/Component/Rotation)
 include_directories(ECS/Component/BoxCollider)
+include_directories(ECS/Component/RectangleShape)
 include_directories(ECS/System)
 include_directories(ECS/System/Draw)
 include_directories(ECS/System/Mouse)
@@ -147,6 +148,7 @@ add_executable(r-type_client
         ECS/Component/Rotation/Rotation.cpp
         ECS/Component/Animator/Animator.cpp
         ECS/Component/BoxCollider/BoxCollider.cpp
+        ECS/Component/RectangleShape/RectangleShape.cpp
         Packet/Packet.cpp
         Packet/MyString.cpp
         Client/Core/Network.cpp
