@@ -16,6 +16,7 @@
 #include "Animator.hpp"
 #include "GameHelper.hpp"
 #include "BoxCollider.hpp"
+#include "Damage.hpp"
 
 /**
  * @brief Retrieves the main camera from the world.
@@ -80,6 +81,7 @@ void GameHelper::createBasicEnemy(World &world, float x, float y)
 {
     auto enemy = world.createEntity();
     enemy->addComponent<HP>(50);
+    enemy->addComponent<Damage>(20);
     enemy->addComponent<Position>(x, y);
     enemy->addComponent<Sprite>(std::string("../sprites/r-typesheet42.gif"));
     enemy->addComponent<Animator>(2, 1, 3.0f, 0, 0, 33, 19, 33, 0);

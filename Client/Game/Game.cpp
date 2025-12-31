@@ -169,6 +169,15 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
             _window.close();
         if (eventOpt->is<sf::Event::Closed>())
             _window.close();
+        if (inputSystem->isKeyPressed(KeyboardKey::Key_E)) {
+            static sf::Clock spawnClock;
+            if (spawnClock.getElapsedTime().asSeconds() > 0.5f) {
+                _creator.createEnemy(800.0f, 300.0f, 1);
+                std::cout << "[Debug] Enemy spawned at (800, 300)" << std::endl;
+                spawnClock.restart();
+            }
+        }
+
         if (eventOpt->is<sf::Event::Resized>()) {
             sf::FloatRect visibleArea({0, 0}, {static_cast<float>(_window.getSize().x), static_cast<float>( _window.getSize().y)});
             _window.setView(sf::View(visibleArea));

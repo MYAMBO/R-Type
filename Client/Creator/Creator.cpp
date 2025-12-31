@@ -27,6 +27,7 @@
 #include "Animator.hpp"
 #include "Rotation.hpp"
 #include "BoxCollider.hpp"
+#include "Damage.hpp"
 #include "RectangleShape.hpp"
 
 Creator::Creator(World& world)
@@ -271,6 +272,7 @@ void Creator::createPlayer(uint64_t id)
     player->addComponent<Scene>(1);
     player->addComponent<Layer>(10);
     player->addComponent<Group>(playerCount + 1);
+    player->addComponent<Damage>(10);
     player->addComponent<BoxCollider>(33.0f, 19.0f);
 
     std::map<std::string, std::string> dataMap = {
