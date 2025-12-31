@@ -22,6 +22,8 @@ HP::HP(const int maxHp)
 */
 void HP::setHP(const unsigned int hp)
 {
+    if (_hp == 0)
+        return;
     _hp = hp;
 }
 
