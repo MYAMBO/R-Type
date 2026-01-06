@@ -23,10 +23,10 @@ class Packet
         Packet();
         ~Packet() = default;
 
-        void setId(int id);
-        void setAck(int ack);
-        void setPacketNbr(uint8_t packetNbr);
-        void setTotalPacketNbr(uint8_t totalPacketNbr);
+        Packet &setId(int id);
+        Packet &setAck(int ack);
+        Packet &setPacketNbr(uint8_t packetNbr);
+        Packet &setTotalPacketNbr(uint8_t totalPacketNbr);
 
         void timeSync(int time);
         void playerPosition(size_t id, float x, float y);

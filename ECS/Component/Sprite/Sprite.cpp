@@ -47,3 +47,13 @@ void Sprite::setSprite(const std::shared_ptr<sf::Sprite>& sprite)
 {
     _sprite = sprite;
 }
+
+void Sprite::setTexture(const std::string& filepath)
+{
+    if (!_texture.loadFromFile(filepath))
+    {
+        std::cerr << "[Sprite] Failed to load texture: " << filepath << std::endl;
+        return;
+    }
+    _sprite->setTexture(_texture);
+}

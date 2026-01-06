@@ -27,22 +27,10 @@ Network::Network()
 
 void Network::getIpAdress(std::string option)
 {
-    if (option == "localhost") {
-        _ip = sf::IpAddress(127, 0, 0, 1);
-        return;
-    }
-    std::string tmp = option.substr(0, option.find('.'));
-    const std::uint8_t byte0 = stoi(tmp);
-    tmp = tmp.erase(0, tmp.find('.'));
-    tmp = tmp.substr(0, tmp.find('.'));
-    const std::uint8_t byte1 = stoi(tmp);
-    tmp = tmp.erase(0, tmp.find('.'));
-    tmp = tmp.substr(0, tmp.find('.'));
-    const std::uint8_t byte2 = stoi(tmp);
-    tmp = tmp.erase(0, tmp.find('.'));
-    tmp = tmp.substr(0, tmp.find('.'));
-    const std::uint8_t byte3 = stoi(tmp);
-    _ip = sf::IpAddress(byte0, byte1, byte2, byte3);
+    std::optional<sf::IpAddress> optionalAddress = sf::IpAddress::resolve(option);
+    if (!optionalAddress.has_value())
+        throw std::runtime_error("Invalid IP address");
+    _ip = optionalAddress.value();
 }
 
 auto Network::parse(const int ac, char **av) -> void

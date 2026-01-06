@@ -28,7 +28,6 @@ ClientPacketreader::ClientPacketreader(std::string data, std::shared_ptr<Game> g
  */
 void ClientPacketreader::interpretPacket()
 {
-    std::cout << "packet" << std::endl;
     while (_data.size() > 0)
     {
         auto truc = std::stoi( _data.mySubStr(0, 2) , nullptr, 16);
@@ -64,7 +63,6 @@ void ClientPacketreader::updateEntity()
     float x = static_cast<float>(std::stoi(_data.mySubStr(0, 4), nullptr, 16));
     float y = static_cast<float>(std::stoi(_data.mySubStr(0, 4), nullptr, 16));
 
-    printf("Update entity received: id=%u, type=%d, x=%f, y=%f\n", id, type, x, y);
     _game->handleSpawn(id, type, x, y);
 }
 
@@ -91,7 +89,7 @@ void ClientPacketreader::dead()
 {
     int id = std::stoi( _data.mySubStr(0, 16), nullptr, 16);
 
-    // call function and give parameter
+    _game->killEntity(id);
 }
 
 /**

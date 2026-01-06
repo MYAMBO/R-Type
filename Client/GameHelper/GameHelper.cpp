@@ -9,12 +9,14 @@
 #include "Tag.hpp"
 #include "Scale.hpp"
 #include "Scene.hpp"
+#include "Group.hpp"
 #include "Camera.hpp"
 #include "Sprite.hpp"
 #include "Position.hpp"
 #include "Animator.hpp"
 #include "GameHelper.hpp"
 #include "BoxCollider.hpp"
+#include "Damage.hpp"
 
 /**
  * @brief Retrieves the main camera from the world.
@@ -24,7 +26,7 @@
  */
 std::shared_ptr<Camera> GameHelper::getMainCamera(World &world)
 {
-    for (const auto& entity : world.getAllEntitiesWithComponent<Tag>()) {
+    for (const auto& entity : world.getAllEntitiesWithComponent<Camera>()) {
         auto tagComp = entity->getComponent<Tag>();
         if (tagComp && tagComp->getTag() == "main_camera") {
             return entity->getComponent<Camera>();
@@ -79,6 +81,7 @@ void GameHelper::createBasicEnemy(World &world, float x, float y)
 {
     auto enemy = world.createEntity();
     enemy->addComponent<HP>(50);
+    enemy->addComponent<Damage>(20);
     enemy->addComponent<Position>(x, y);
     enemy->addComponent<Sprite>(std::string("../sprites/r-typesheet42.gif"));
     enemy->addComponent<Animator>(2, 1, 3.0f, 0, 0, 33, 19, 33, 0);
@@ -86,4 +89,24 @@ void GameHelper::createBasicEnemy(World &world, float x, float y)
     enemy->addComponent<Scene>(1);
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(33.0f, 19.0f);
+}
+
+
+/**
+ * @brief Retrieves all entities belonging to a specific group from the world.
+ *
+ * @param world The world containing entities and components.
+ * @param groupId The ID of the group to retrieve entities from.
+ * @return A vector of shared pointers to the entities in the specified group.
+ */
+std::vector<std::shared_ptr<Entity>> GameHelper::getEntitiesByGroup(World &world, size_t groupId)
+{
+    std::vector<std::shared_ptr<Entity>> members;
+
+    for (const auto& entity : world.getAllEntitiesWithComponent<Group>()) {
+        if (entity->getComponent<Group>()->getId() == groupId) {
+            members.push_back(entity);
+        }
+    }
+    return members;
 }
