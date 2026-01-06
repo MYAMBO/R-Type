@@ -54,37 +54,41 @@ sf::Packet Packet::getPacket() const
 /**
  * @brief Setter for packet id (unused in hex format)
  */
-void Packet::setId(const int id)
+Packet &Packet::setId(const int id)
 {
     (void)id;
     _idSetted = true;
+    return *this;
 }
 
 /**
  * @brief Setter for packet ack (unused in hex format)
  */
-void Packet::setAck(const int ack)
+Packet &Packet::setAck(const int ack)
 {
     (void)ack;
     _ackSetted = true;
+    return *this;
 }
 
 /**
  * @brief Setter for Packet packetNbr (unused in hex format)
  */
-void Packet::setPacketNbr(const uint8_t packetNbr)
+Packet &Packet::setPacketNbr(const uint8_t packetNbr)
 {
     (void)packetNbr;
     _packetNumberSetted = true;
+    return *this;
 }
 
 /**
  * @brief Setter for Packet totalPacketNbr (unused in hex format)
  */
-void Packet::setTotalPacketNbr(const uint8_t totalPacketNbr)
+Packet &Packet::setTotalPacketNbr(const uint8_t totalPacketNbr)
 {
     (void)totalPacketNbr;
     _totalPacketNumberSetted = true;
+    return *this;
 }
 
 /**
@@ -105,7 +109,6 @@ void Packet::timeSync(const int time)
  */
 void Packet::playerPosition(const size_t id, const float x, const float y)
 {
-    _hexData.clear();
     appendHex("07");  // opcode
     appendHex(toHex(static_cast<uint64_t>(id), 16));  // 16 hex digits for id
     appendHex(toHex(0, 2));   // 2 hex digits for type (unused here)
@@ -122,7 +125,6 @@ void Packet::playerPosition(const size_t id, const float x, const float y)
  */
 void Packet::positionSpawn(const size_t id, const uint16_t type, const float x, const float y)
 {
-    _hexData.clear();
     appendHex("07");  // opcode (same as playerPosition)
     appendHex(toHex(static_cast<uint64_t>(id), 16));    // 16 hex digits for id
     appendHex(toHex(static_cast<int>(type), 2));  // 2 hex digits for type

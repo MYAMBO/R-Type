@@ -9,6 +9,15 @@
 
 #include <netinet/in.h>
 
+/**
+ * @brief Represents a server that handles client connections and processes requests.
+ *
+ * Provides functionality to initialize, manage connections, handle client requests,
+ * and perform related server operations. This class acts as the core component
+ * for running a server and executing defined tasks for connected clients.
+ *
+ * @return None
+ */
 Server::Server()
 {
     _tcpPort = -1;
@@ -18,6 +27,18 @@ Server::Server()
     _packetReader = Packetreader("", _game);
 }
 
+/**
+ * @brief Parses the command-line arguments to configure the server.
+ *
+ * Processes the provided command-line arguments to set the TCP port, UDP port,
+ * and debug mode for the server. If invalid arguments are provided or required
+ * options are missing, appropriate exceptions are thrown.
+ *
+ * @param ac The number of command-line arguments.
+ * @param av The array of command-line arguments.
+ *
+ * @throws InitServerException If the TCP port or UDP port is not specified or invalid.
+ */
 auto Server::parse(int ac, char **av) -> void
 {
     char *endPtr;
@@ -62,21 +83,42 @@ auto Server::parse(int ac, char **av) -> void
         throw InitServerException("UDP port must be specified. Check the helper with the -h option.");
 }
 
-
+/**
+ * @brief Initializes the server by setting up TCP and UDP listeners.
+ *
+ * Creates and configures a TCP listener to listen on the specified
+ * port for incoming connections. Also sets up a UDP socket to bind to
+ * a designated port for handling UDP communication.
+ *
+ * Logs the status of each listener upon successful initialization.
+ * If setting up either the TCP or UDP listeners fails, throws
+ * an InitServerException.
+ *
+ * @throws InitServerException If TCP or UDP listener initialization fails.
+ */
 auto Server::initServer() -> void
 {
     _tcpListener = sf::TcpListener();
     _udpSocket = sf::UdpSocket();
 
-    if (_tcpListener.listen(_tcpPort) != sf::Socket::Status::Done)
+    if (_tcpListener.listen(_tcpPort, sf::IpAddress::Any) != sf::Socket::Status::Done)
         throw InitServerException();
     log("TCP server listening on port " + std::to_string(_tcpPort));
-    if (_udpSocket.bind(_udpPort) != sf::Socket::Status::Done)
+    if (_udpSocket.bind(_udpPort, sf::IpAddress::Any) != sf::Socket::Status::Done)
         throw InitServerException();
     log("UDP server listening on port " + std::to_string(_udpPort));
 
 }
 
+/**
+ * @brief Logs a message with a timestamp if debug mode is enabled.
+ *
+ * Outputs the provided message to the standard output stream, preceded by
+ * the current timestamp, in the format "[YYYY-MM-DD HH:MM:SS] message".
+ * This logging is conditional on the `_debugMode` flag being enabled.
+ *
+ * @param message The string message to be logged.
+ */
 void Server::log(const std::string& message) const
 {
     if (_debugMode)
@@ -90,6 +132,22 @@ void Server::log(const std::string& message) const
     }
 }
 
+/**
+ * @brief Manages the reception and processing of incoming UDP packets in a separate thread.
+ *
+ * This function handles continuous listening on the UDP socket for incoming data packets.
+ * Upon receiving a packet, it extracts the sender's IP address and port, processes the data,
+ * and attempts to interpret it using the packet reader.
+ *
+ * Logs errors if the interpretation of the packet fails due to any exception. The sender's
+ * details are stored and maintained to track unique clients. If a sender is not currently
+ * recorded in the UDP users list, it is added. Each successful packet reception, along with
+ * relevant metadata (size, sender address, port), is logged.
+ *
+ * The function ensures robust handling of non-successful packet reception by introducing
+ * a delay and retrying until data is successfully received. It operates indefinitely unless
+ * externally interrupted.
+ */
 void Server::udpThread()
 {
     sf::Packet p;
@@ -132,6 +190,16 @@ void Server::udpThread()
     }
 }
 
+/**
+ * @brief Manages incoming TCP messages from connected clients in a separate thread.
+ *
+ * This function processes incoming TCP messages from all currently connected clients.
+ * It continuously checks for data reception from connected client sockets in a thread-safe manner.
+ * Logs received data along with client details (ID, port, IP) if data is successfully received.
+ * If no data is received from any client during an iteration, the thread waits briefly before retrying.
+ *
+ * The function runs indefinitely and handles concurrent access to the list of connected users using a mutex.
+ */
 void Server::tcpThread()
 {
     while (true)
@@ -161,6 +229,21 @@ void Server::tcpThread()
     }
 }
 
+/**
+ * @brief Continuously accepts incoming TCP client connections and initializes them for server communication.
+ *
+ * This method runs in a dedicated thread and listens for incoming TCP client connection requests.
+ * Upon successfully accepting a connection, it extracts the client's port and IP address for logging
+ * and further processing. The connected socket is then set to non-blocking mode.
+ *
+ * A buffer is prepared to store metadata, including a unique player ID and the server's UDP port.
+ * The player ID is generated and assigned to the new client while ensuring thread safety
+ * with a mutex-protected list of connected users. The buffer is updated with this information
+ * before being sent as an initial message to the new client.
+ *
+ * The method indefinitely loops to handle new incoming connections and ensures all
+ * required initialization for newly connected clients is handled properly.
+ */
 void Server::accepterThread()
 {
     while (true)
@@ -198,63 +281,48 @@ void Server::accepterThread()
     }
 }
 
+/**
+ * @brief Sends a UDP packet to all connected clients.
+ *
+ * This method constructs the packet with initial parameters and retrieves the
+ * packet data. It iterates through the connected UDP users, determines the IP
+ * address from the user string by splitting it into four bytes, and sends
+ * the packet to each client using `sf::UdpSocket::send`. In case of a failure
+ * to send the packet, it logs an error for the respective client. Once the
+ * process concludes, it logs that the packet was queued successfully.
+ *
+ * @param packet The Packet object to be sent, which is configured and serialized
+ *               before sending to clients.
+ */
 void Server::sendPacket(Packet& packet)
 {
-    packet.setId(0);
-    packet.setAck(0);
-    packet.setPacketNbr(1);
-    packet.setTotalPacketNbr(1);
+    packet.setId(0).setAck(0).setPacketNbr(1).setTotalPacketNbr(1);
     const sf::Packet p = packet.getPacket();
 
     for (auto &[fst, snd] : _udpUsers)
     {
-        std::string str = fst;
+        std::optional<sf::IpAddress> optIp = sf::IpAddress::resolve(fst);
 
-        std::uint8_t byte0;
-        std::uint8_t byte1;
-        std::uint8_t byte2;
-        std::uint8_t byte3;
-
-        std::string tmp = fst.substr(0, fst.find('.'));
-        if (!tmp.empty()) {
-            byte0 = stoi(tmp);
-            std::cout << byte0 << std::endl;
-        } else {
-            byte0 = 0;
-        }
-        fst = fst.erase(0, fst.find('.'));
-        tmp = fst.substr(0, fst.find('.'));
-        if (!tmp.empty()) {
-            byte1 = stoi(tmp);
-            std::cout << byte1 << std::endl;
-        } else {
-            byte1 = 0;
-        }
-        fst = fst.erase(0, fst.find('.'));
-        tmp = fst.substr(0, fst.find('.'));
-        if (!tmp.empty()) {
-            byte2 = stoi(tmp);
-            std::cout << byte2 << std::endl;
-        } else {
-            byte2 = 0;
-        }
-        fst = fst.erase(0, fst.find('.'));
-        tmp = fst.substr(0, fst.find('.'));
-        if (!tmp.empty()) {
-            byte3 = stoi(tmp);
-            std::cout << byte3 << std::endl;
-        } else {
-            byte3 = 0;
-        }
-
-        if (_udpSocket.send(p.getData(), p.getDataSize(), sf::IpAddress(byte0, byte1, byte2, byte3), snd) != sf::Socket::Status::Done) {
+        if (!optIp.has_value() || _udpSocket.send(p.getData(), p.getDataSize(), optIp.value(), snd) != sf::Socket::Status::Done) {
             log("UDP | Failed to send packet to client at port " + std::to_string(snd));
         }
-        log("port : " + std::to_string(snd) + " ip : " + str);
+        log("port : " + std::to_string(snd) + " ip : " + optIp.value().toString());
     }
     log("Packet queued");
 }
 
+/**
+ * @brief Sends the entire specified data buffer over a TCP socket.
+ *
+ * This function ensures that all data in the given buffer is sent over the specified TCP socket.
+ * It handles partial sends by repeatedly sending the remaining data until the entire buffer is transmitted.
+ * If the transmission fails at any point, it throws a runtime exception.
+ *
+ * @param socket The TCP socket over which the data will be sent.
+ * @param data A pointer to the data buffer to be sent.
+ * @param size The size of the data buffer in bytes.
+ * @throws std::runtime_error If the send operation fails for any reason.
+ */
 void Server::sendAll(sf::TcpSocket& socket, const void* data, const std::size_t size)
 {
     std::size_t sent = 0;
@@ -275,6 +343,16 @@ void Server::sendAll(sf::TcpSocket& socket, const void* data, const std::size_t 
     }
 }
 
+/**
+ * @brief Sends a message to a specific player identified by their ID.
+ *
+ * This function iterates through the list of connected users to locate the user with the given player ID.
+ * If the user is found and their associated socket is valid, the message is sent using the specified socket.
+ * The operation stops as soon as the intended player is located.
+ *
+ * @param message The message to be sent to the player.
+ * @param playerId The unique identifier of the player to whom the message is sent.
+ */
 void Server::sendMessage(std::string message, unsigned int playerId)
 {
     for (auto& user : _users)
@@ -289,6 +367,17 @@ void Server::sendMessage(std::string message, unsigned int playerId)
     }
 }
 
+/**
+ * @brief Initiates server operation by starting network communication threads and game logic.
+ *
+ * This function sets up required threads for handling different aspects of the server:
+ * - Manages incoming TCP connections and communication through a dedicated TCP handling thread.
+ * - Oversees UDP communication using a separate UDP handling thread.
+ * - Handles new client connections through an acceptor thread.
+ *
+ * Additionally, the function initiates the game's main logic loop, which operates sequentially with the network threads.
+ * All threads are joined at the end to ensure orderly termination of the server's operation.
+ */
 void Server::start()
 {
     _tcpClient = sf::TcpSocket();
