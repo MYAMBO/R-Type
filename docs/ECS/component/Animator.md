@@ -3,6 +3,13 @@
 The **Animator** component handles sprite animations for entities using a sprite sheet.  
 It manages frame switching, animation timing, and texture rectangle computation.
 
+### Dependencies & Integration
+
+This component does not work in isolation. It requires a specific system to function and acts upon another component.
+
+| Type | Name | Description |
+|:---|:---|:---|
+| **System** | `Animation` | The **Animation** system is responsible for calculating the delta time and updating the frame logic of the **Animator** component. |
 ---
 
 ### Public Methods
@@ -21,8 +28,8 @@ It manages frame switching, animation timing, and texture rectangle computation.
 
 ### Constructor
 
-| Constructor | Signature                                                                                                                                             | Description |
-|:------------|:------------------------------------------------------------------------------------------------------------------------------------------------------|:------------|
+| Constructor | Signature | Description |
+|:------------|:----------|:------------|
 | **Animator** | `Animator(int nbFrame, int framePerRow, float frameRate, int startX, int startY, int frameWidth, int frameHeight, int offsetX = 0, int offsetY = 0);` | Create an animator using a sprite sheet layout. |
 
 ---
@@ -32,16 +39,24 @@ It manages frame switching, animation timing, and texture rectangle computation.
 ```mermaid
 classDiagram
   class Animator {
-    _startX: int
-    _startY: int
-    _offsetX: int
-    _offsetY: int
-    _frameWidth: int
-    _frameHeight: int
-    _nbFrame: int
-    _frameRate: float
-    _currentFrame: int
-    _currentTime: float
-    _framePerRow: int
-  }
+    - _startX: int
+    - _startY: int
+    - _offsetX: int
+    - _offsetY: int
+    - _frameWidth: int
+    - _frameHeight: int
+    - _nbFrame: int
+    - _frameRate: float
+    - _currentFrame: int
+    - _currentTime: float
+    - _framePerRow: int
+    + Animator(nbFrame: int, framePerRow: int, frameRate: float, startX: int, startY: int, frameWidth: int, frameHeight: int, offsetX: int, offsetY: int)
+    + getCurrentFrame() int
+    + getFrameRate() float
+    + getCurrentTime() float
+    + getFrameRect() sf::IntRect
+    + setFrameRate(frameRate: float) void
+    + setCurrentFrame(currentFrame: int) void
+    + setCurrentTime(currentTime: float) void
+}
 ```

@@ -1,33 +1,68 @@
 ## World
 
+The **World** class is the central manager of the ECS (Entity Component System) architecture.  
+It acts as the container for all **Entities** and **Systems**, manages the main game loop execution (`manageSystems`), and holds global states like the Window, Events, Delta Time, and the current Scene.
+
+### Dependencies & Integration
+
+The World is the root object of the game engine.
+
+| Type | Name | Description |
+|:---|:---|:---|
+| **Manages** | [`Entity`](ECS/Entity/Entity.md) | Creates, stores, and destroys entities. |
+| **Manages** | [`System`](ECS/System/System.md) | Stores and executes systems. |
+| **Context** | **SFML** | Holds the `sf::RenderWindow` and `sf::Event` used by inputs and rendering systems. |
+
+---
+
+### Public Methods
 
 | Method | Signature | Description |
-| :--- | :--- | :--- |
-| **create Entity** | `std::shared_ptr<Entity> createEntity(void)` | Add an Entity to the world.
-| **get all entities with component** | `std::vector<std::shared_ptr<Entity>> getAllEntitiesWithComponent() const` | return all the entities with the component given in parameters.
-| **get all entities with components** | `std::vector<std::shared_ptr<Entity>> getAllEntitiesWithComponents() const` | return all the entities with the components given in parameters.
-| **add system** | `std::shared_ptr<T> addSystem(Args&&... args)` | add a system to the world. | 
-| **manager of systems** | `void manageSystems(void)` | call the update of all the system in world |
-| **get event** | `sf::Event& getEvent(void)` | return event variable |
-| **set event** | `void setEvent(const sf::Event& event)` | set the pointer of the event given in parameters. |
-| **get delta time** | `float getDeltaTime(void) const` | get the delta time. |
-| **set delta time** | `void setDeltaTime(const float& dt)` | set the delta time. |
-| **get window** | `sf::RenderWindow* getWindow(void)` | get the reference of the window. |
-| **set window** | `void setWindow(sf::RenderWindow& window)` | set the reference of the window to the world. |
-| **get system** | `template<typename T> / std::shared_ptr<T> getSystem() const` | return the system in the world who have the system class in parameters" |
-| **set scene** | `void setScene(int Scene)` | set the current scene of the world. |
-| **get scene** | `int getScene()` | get the current scene of the world. |
-| **kill entity** | ` void killEntity(std::size_t id)` | destory the entity with the id given. |
+|:------|:----------|:------------|
+| **Create Entity** | `std::shared_ptr<Entity> createEntity(uint64_t id = 0);` | Creates a new entity in the world. If `id` is 0, a random UUID is generated. |
+| **Kill Entity** | `void killEntity(uint64_t id);` | Removes an entity from the world by its ID. |
+| **Query (Single)** | `std::vector<...> getAllEntitiesWithComponent<T>() const;` | Returns all entities possessing the specific component `T`. |
+| **Query (Any)** | `std::vector<...> getEntitiesWithAnyComponent<T...>() const;` | Returns entities possessing **at least one** of the specified components. |
+| **Query (All)** | `std::vector<...> getEntitiesWithAllComponents<T...>() const;` | Returns entities possessing **all** of the specified components. |
+| **Add System** | `std::shared_ptr<T> addSystem(Args&&... args);` | Creates and registers a new system of type `T`. |
+| **Get System** | `std::shared_ptr<T> getSystem() const;` | Retrieves a registered system by its type. |
+| **Run Systems** | `void manageSystems();` | Iterates through all registered systems and calls their `update` method. |
+| **Get Event** | `sf::Event& getEvent();` | Returns a mutable reference to the current SFML event (used by Input/Mouse systems). |
+| **Set Event** | `void setEvent(const sf::Event& event);` | Updates the current global event. |
+| **Get Delta Time** | `float getDeltaTime() const;` | Returns the time elapsed since the last frame (in seconds). |
+| **Set Delta Time** | `void setDeltaTime(const float& dt);` | Updates the delta time. |
+| **Get Window** | `sf::RenderWindow* getWindow() const;` | Returns a pointer to the game window (used by Draw systems). |
+| **Set Window** | `void setWindow(sf::RenderWindow& window);` | Sets the reference to the main render window. |
+| **Get Scene** | `int getCurrentScene() const;` | Returns the ID of the currently active scene. |
+| **Set Scene** | `void setCurrentScene(int scene);` | Changes the active scene ID (used to filter entity rendering/logic). |
 
+---
+
+### Constructor
+
+| Constructor | Signature | Description |
+|:------------|:----------|:------------|
+| **World** | `World();` | Initializes the world, clearing entities and systems lists, and setting default values for global states. |
+
+---
+
+### Internal Data
 
 ```mermaid
 classDiagram
   class World {
-    _deltaTime: float
-    _event: sf::Event
-    _currentScene: int
-    _window: sf::RenderWindow *
-    _entities: std::vector< std::shared_ptr< Entity>>
-    _systems: std::vector< std::shared_ptr< System>>
+    -_event: sf::Event
+    -_currentScene: int
+    -_deltaTime: float
+    -_window: sf::RenderWindow*
+    -_entities: vector~shared_ptr~Entity~~
+    -_systems: vector~shared_ptr~System~~
+    +createEntity(id: uint64_t) shared_ptr~Entity~
+    +killEntity(id: uint64_t) void
+    +addSystem(args...) shared_ptr~T~
+    +manageSystems() void
+    +getEvent() sf::Event&
+    +getWindow() sf::RenderWindow*
+    +getCurrentScene() int
   }
 ```
