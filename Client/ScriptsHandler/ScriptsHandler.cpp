@@ -16,6 +16,7 @@
 #include "Velocity.hpp"
 #include "Animator.hpp"
 #include "GameHelper.hpp"
+#include "HP.hpp"
 
 #include "Network.hpp"
 #include "Packet.hpp"
@@ -52,22 +53,45 @@ void backgroundScrollScript(size_t entityId, World &world)
  * @param entityId The ID of the fire entity.
  * @param world The game world containing entities and components.
  */
+
 void playerfire(size_t entityId, World &world)
 {
     auto fire = GameHelper::getEntityById(world, entityId);
-    size_t groupId = fire->getComponent<Group>()->getId();
-    auto list = GameHelper::getEntitiesByGroup(world, groupId);
-    std::shared_ptr<Entity> player = nullptr;
-    for (const auto& e : list) {
-        if (e->getId() == entityId)
-            continue;
-        if (e->getComponent<Tag>()->getTag() == "player" || e->getComponent<Tag>()->getTag() == "player_mate")
-            player = e;
-    }
-    auto posPlayer = player->getComponent<Position>();
-
     if (!fire)
         return;
+    auto hp = fire->getComponent<HP>();
+    if (hp && hp->getHP() <= 0)
+        return;
+
+    auto groupComp = fire->getComponent<Group>();
+    if (!groupComp)
+        return;
+
+    size_t groupId = groupComp->getId();
+    auto list = GameHelper::getEntitiesByGroup(world, groupId);
+    std::shared_ptr<Entity> player = nullptr;
+
+    for (const auto& e : list) {
+        if (!e)
+            continue;
+        if (e->getId() == entityId)
+            continue;
+
+        auto tag = e->getComponent<Tag>();
+        if (!tag)
+            continue;
+
+        if (tag->getTag() == "player" || tag->getTag() == "player_mate") {
+            auto playerHp = e->getComponent<HP>();
+            if (playerHp && playerHp->getHP() <= 0)
+                continue;
+            player = e;
+            break;
+        }
+    }
+    if (!player)
+        return;
+    auto posPlayer = player->getComponent<Position>();
     auto posFire = fire->getComponent<Position>();
     if (!posFire || !posPlayer)
         return;
