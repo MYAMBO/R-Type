@@ -65,6 +65,7 @@ include_directories(ECS/System/Animation)
 include_directories(ECS/System/CameraSys)
 include_directories(ECS/System/Collision)
 include_directories(ECS/System/ScriptsSys)
+include_directories(ECS/System/DeathSys)
 include_directories(ECS/Entity)
 include_directories(Client)
 include_directories(Client/Core)
@@ -153,7 +154,8 @@ add_executable(r-type_client
         Packet/Packet.cpp
         Packet/MyString.cpp
         Client/Core/Network.cpp
-        Client/Core/ClientPacketreader.cpp)
+        Client/Core/ClientPacketreader.cpp
+        ECS/System/DeathSys/DeathSys.cpp)
 
 target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network)
 
