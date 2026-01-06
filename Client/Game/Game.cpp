@@ -47,6 +47,7 @@
 #include "Animation.hpp"
 #include "Collision.hpp"
 #include "ScriptsSys.hpp"
+#include "DeathSys.hpp"
 
 /**
  * @brief Constructs a new Game object.
@@ -66,6 +67,7 @@ Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const
     _world.addSystem<Movement>();
     _world.addSystem<Animation>();
     _world.addSystem<Collision>();
+    _world.addSystem<DeathSys>();
     _world.addSystem<Mouse>();
     _world.addSystem<Inputs>();
     _world.addSystem<Draw>();

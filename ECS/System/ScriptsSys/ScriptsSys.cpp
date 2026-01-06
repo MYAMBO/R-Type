@@ -8,6 +8,7 @@
 #include "ScriptsSys.hpp"
 
 #include "Script.hpp"
+#include "HP.hpp"
 
 /**
 * @brief Update the scripts of all entities if they have it in the world
@@ -18,6 +19,9 @@ void ScriptsSys::update(const float &dt, World &w)
 {
     (void)dt;
     for (auto &entity : w.getAllEntitiesWithComponent<Script>()) {
+        auto hp = entity->getComponent<HP>();
+        if (hp && hp->getHP() <= 0)
+            continue;
         auto scriptComp = entity->getComponent<Script>();
         if (!scriptComp || !scriptComp->getScript())
             continue; 
