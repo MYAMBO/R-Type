@@ -22,6 +22,8 @@ class Creator {
         void createMenu();
         void createCamera();
         void createOptions();
+        void createTguiMenu();
+        void createTguiOptions();
         void createLoadingScreen();
         void createPlayer(uint64_t id = 0);
         void createEnemy(float x, float y, int type);

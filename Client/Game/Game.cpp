@@ -47,6 +47,7 @@
 #include "TextSys.hpp"
 #include "Movement.hpp"
 #include "CameraSys.hpp"
+#include "GuiSystem.hpp"
 #include "Animation.hpp"
 #include "Collision.hpp"
 #include "DeathSys.hpp"
@@ -74,6 +75,7 @@ Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const
     _world.addSystem<Mouse>();
     _world.addSystem<Inputs>();
     _world.addSystem<Draw>();
+    _world.addSystem<GuiSystem>(_window);
     _world.addSystem<Audio>();
 }
 
@@ -84,6 +86,7 @@ Game::~Game()
 {
     _window.close();
 }
+
 /**
  * @brief Updates the ECS loading screen entities and forces a frame render.
  */
@@ -133,7 +136,7 @@ void Game::run()
     updateLoadingState(0.1f, "Loading assets...");
     _creator.createCamera();
     updateLoadingState(0.3f, "Generating Menu...");
-    _creator.createMenu();
+    _creator.createTguiMenu();
     updateLoadingState(0.6f, "Generating Background...");
     _creator.createBackground(_window); 
     updateLoadingState(0.8f, "Connecting to server...");
@@ -169,10 +172,15 @@ void Game::run()
  */
 void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
 {
+    auto guiSystem = _world.getSystem<GuiSystem>();
+
     while (const std::optional eventOpt = _window.pollEvent()) {
         _world.setEvent(*eventOpt);
-        if (inputSystem->isKeyPressed(KeyboardKey::Key_Escape))
+        if (inputSystem->isKeyPressed(KeyboardKey::Key_Escape) && _world.getCurrentScene() == 2)
             _window.close();
+        else if (inputSystem->isKeyPressed(KeyboardKey::Key_Escape) && _world.getCurrentScene() != 2) {
+            _world.setCurrentScene(2);
+        }
         if (eventOpt->is<sf::Event::Closed>())
             _window.close();
         if (inputSystem->isKeyPressed(KeyboardKey::Key_E)) {
@@ -183,7 +191,9 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
                 spawnClock.restart();
             }
         }
-
+        if (guiSystem) {
+            guiSystem->handleEvent(*eventOpt, _window);
+        }
         if (eventOpt->is<sf::Event::Resized>()) {
             sf::FloatRect visibleArea({0, 0}, {static_cast<float>(_window.getSize().x), static_cast<float>( _window.getSize().y)});
             _window.setView(sf::View(visibleArea));

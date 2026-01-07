@@ -29,6 +29,7 @@
 #include "Velocity.hpp"
 #include "Animator.hpp"
 #include "Rotation.hpp"
+#include "GuiWidget.hpp"
 #include "SoundEffect.hpp"
 #include "BoxCollider.hpp"
 #include "RectangleShape.hpp"
@@ -39,103 +40,118 @@ Creator::Creator(World& world)
 }
 
 /**
-* @brief Helper function to create a standardized menu button
-* @param label The text label of the button
-* @param sceneId The scene ID where the button will be displayed
-* @param x The x position of the button
-* @param y The y position of the button
-* @param onClick The callback function to be called when the button is clicked
+ * @brief Create a beautiful Main Menu using TGUI wrapped in ECS
  */
-void Creator::createMenuButton(const std::string& label, int sceneId, float x, float y, const std::function<void()>& onClick)
+void Creator::createTguiMenu()
 {
-    auto btnEntity = _world.createEntity();
-    btnEntity->addComponent<Sprite>("../assets/sprites/Elements-01.png");
-    btnEntity->addComponent<Scale>(0.3f);
-    btnEntity->addComponent<Scene>(sceneId);
-    btnEntity->addComponent<Layer>(LayerType::UI);
-    
-    float width = (1200.f * 0.3f);
-    float height = (500.f * 0.3f);
-    
-    float btnLeft = x - (width / 2.f);
-    float btnTop = y;
-
-    btnEntity->addComponent<Position>(btnLeft, btnTop);
-    
-    btnEntity->addComponent<Button>(width, height);
-    auto btnComp = btnEntity->getComponent<Button>();
-
-    sf::IntRect rect({100, 150}, {1200, 500});
-    btnComp->setTextureRects(rect, rect, rect);
-    btnComp->setColorStates(sf::Color::White, sf::Color(200, 200, 200), sf::Color(100, 100, 100));
-    btnComp->setOnClick(onClick);
-
-    auto textEntity = _world.createEntity();
-    textEntity->addComponent<Scene>(sceneId);
-    textEntity->addComponent<Layer>(LayerType::UI + 1);
-    
-    textEntity->addComponent<Text>(label, "../assets/font/title.ttf", 30);
-    
-    auto textComp = textEntity->getComponent<Text>();
-    sf::FloatRect bounds = textComp->getGlobalBounds();
-
-    float textX = btnLeft + (width / 2.f) - (bounds.size.x / 2.f);
-    float textY = btnTop + (height / 2.f) - (bounds.size.y / 2.f);
-
-    textX -= bounds.position.x;
-    textY -= bounds.position.y;
-    textEntity->addComponent<Position>(textX, textY);
-}
-
-/**
- * @brief Create Menu (Scene 2)
- */
-void Creator::createMenu()
-{
-    createOptions(); 
-
     auto window = _world.getWindow();
     unsigned int width = window->getSize().x;
     float centerX = static_cast<float>(width) / 2.0f;
-    float btnX = centerX;
+
+    auto menuRoot = _world.createEntity();
+    menuRoot->addComponent<Scene>(2);
+    menuRoot->addComponent<Tag>("menu_root");
+    menuRoot->addComponent<GuiWidget>(WidgetType::PANEL);
+
+    auto guiRoot = menuRoot->getComponent<GuiWidget>();
+    guiRoot->setSize(static_cast<float>(width), static_cast<float>(window->getSize().y));
+    guiRoot->setPosition(0.f, 0.f);
+    guiRoot->getRawWidget()->getRenderer()->setProperty("BackgroundColor", tgui::Color(10, 10, 30, 200));
 
     auto titleEntity = _world.createEntity();
+    titleEntity->addComponent<GuiWidget>(WidgetType::LABEL, "R-TYPE", menuRoot->getId());
     titleEntity->addComponent<Scene>(2);
-    titleEntity->addComponent<Layer>(LayerType::UI);
-    titleEntity->addComponent<Text>("R-TYPE", "../assets/font/title.ttf", 80);
-    titleEntity->addComponent<Position>(centerX - titleEntity->getComponent<Text>()->getGlobalBounds().size.x / 2.0f, 100.f);
-    titleEntity->getComponent<Text>()->setColor(sf::Color::Cyan);
-    titleEntity->addComponent<Tag>("R-TYPE Title");
+    titleEntity->addComponent<Layer>(LayerType::UI + 1);
+    titleEntity->addComponent<Tag>("menu_title");
+    titleEntity->getComponent<GuiWidget>()->setFont("../assets/font/title.ttf");
+    titleEntity->addComponent<Position>(centerX - titleEntity->getComponent<GuiWidget>()->getSize().x / 2.0f, 100.f);
+    
+    auto guiTitle = titleEntity->getComponent<GuiWidget>();
+    guiTitle->setTextSize(100);
+    guiTitle->setTextColor(sf::Color::Cyan);
+    guiTitle->setTextStyle(tgui::TextStyle::Bold);
+    guiTitle->setOrigin(0.5f, 0.5f);
+    guiTitle->setPosition(centerX, 150.f);
 
-    auto music = _world.createEntity();
-    music->addComponent<Music>("../assets/sounds/menu.mp3", 100.f, true);
-    music->addComponent<Tag>("music");
-    music->addComponent<Scene>(2);
-    music->getComponent<Music>()->play();
+    auto styleNeonButton = [](std::shared_ptr<GuiWidget> gui) {
+        auto renderer = gui->getRawWidget()->getRenderer();
+        renderer->setProperty("BackgroundColor", tgui::Color(20, 20, 40, 200));
+        renderer->setProperty("BackgroundColorHover", tgui::Color(40, 40, 80, 255));
+        renderer->setProperty("TextColor", tgui::Color::White);
+        renderer->setProperty("TextColorHover", tgui::Color::Cyan);
+        renderer->setProperty("BorderColor", tgui::Color::Cyan);
+        renderer->setProperty("BorderColorHover", tgui::Color::White);
+        renderer->setProperty("Borders", tgui::Borders(2));
+        renderer->setProperty("RoundedBorderRadius", 10);
+        gui->getRawWidget()->setMouseCursor(tgui::Cursor::Type::Hand);
+    };
 
-    createMenuButton("PLAY", 2, btnX, 300.f, [this]() {
+    auto btnPlay = _world.createEntity();
+    btnPlay->addComponent<GuiWidget>(WidgetType::BUTTON, "START", menuRoot->getId());
+    btnPlay->addComponent<Scene>(2);
+    btnPlay->addComponent<Layer>(LayerType::UI + 1);
+    btnPlay->addComponent<Tag>("menu_button_play");
+    
+    auto guiPlay = btnPlay->getComponent<GuiWidget>();
+    styleNeonButton(guiPlay);
+    guiPlay->setFont("../assets/font/title.ttf");
+    guiPlay->setCallback([this]() {
         auto music = GameHelper::getEntityByTag(_world, "music");
         if (music) {
             auto musicComp = music->getComponent<Music>();
             if (musicComp)
-                musicComp->stop();
+            musicComp->stop();
         }
-        _world.setCurrentScene(1);
+        _world.setCurrentScene(1); 
     });
-    
-    createMenuButton("OPTIONS", 2, btnX, 450.f, [this]() {
-        std::cout << "Switching to Options Scene" << std::endl;
+    guiPlay->setSize(400.f, 120.f);
+    guiPlay->setOrigin(0.5f, 0.5f);
+    guiPlay->setPosition("50%", "50%");
+
+    auto btnQuit = _world.createEntity();
+    btnQuit->addComponent<GuiWidget>(WidgetType::BUTTON, "EXIT", menuRoot->getId());
+    btnQuit->addComponent<Scene>(2);
+    btnQuit->addComponent<Layer>(LayerType::UI + 1);
+    btnQuit->addComponent<Tag>("menu_button_quit");
+
+
+    auto guiQuit = btnQuit->getComponent<GuiWidget>();
+    styleNeonButton(guiQuit);
+    guiQuit->getRawWidget()->getRenderer()->setProperty("BorderColor", tgui::Color(255, 50, 50));
+    guiQuit->setCallback([this]() {
+        if (_world.getWindow())
+            _world.getWindow()->close();
+    });
+    guiQuit->setFont("../assets/font/title.ttf");
+    guiQuit->setSize(400.f, 120.f);
+    guiQuit->setPosition("50%", "80%");
+    guiQuit->setOrigin(0.5f, 0.5f);
+
+    auto guiOptions = _world.createEntity();
+    guiOptions->addComponent<GuiWidget>(WidgetType::BUTTON, "OPTIONS", menuRoot->getId());
+    guiOptions->addComponent<Scene>(2);
+    guiOptions->addComponent<Layer>(LayerType::UI + 1);
+    guiOptions->addComponent<Tag>("menu_button_options");
+
+    auto guiOpt = guiOptions->getComponent<GuiWidget>();
+    styleNeonButton(guiOpt);
+    guiOpt->setFont("../assets/font/title.ttf");
+    guiOpt->setSize(400.f, 120.f);
+    guiOpt->setOrigin(0.5f, 0.5f);
+    guiOpt->setPosition("50%", "65%");
+    guiOpt->setCallback([this]() {
         _world.setCurrentScene(3);
     });
-    
-    createMenuButton("QUIT", 2, btnX, 600.f, [this]() {
-        std::cout << "Quit Clicked" << std::endl;
-        if (_world.getWindow()) {
-            _world.getWindow()->close();
-        }
-    });
+
+    createTguiOptions();
 }
 
+/**
+ * @brief Create a status text entity for options menu
+ * @param y The y position
+ * @param initialState The initial state (on/off)
+ * @return The created entity
+ */
 std::shared_ptr<Entity> Creator::createStatusText(float y, bool initialState)
 {
     auto window = _world.getWindow();
@@ -156,116 +172,100 @@ std::shared_ptr<Entity> Creator::createStatusText(float y, bool initialState)
     return statusEntity;
 }
 
-/**
- * @brief Create Options (Scene 3)
- */
-void Creator::createOptions()
+void Creator::createTguiOptions()
 {
-    auto window = _world.getWindow();
-    unsigned int width = window->getSize().x;
-    float centerX = static_cast<float>(width) / 2.0f;
+    auto optionsRoot = _world.createEntity();
+    optionsRoot->addComponent<Scene>(3);
+    optionsRoot->addComponent<Layer>(LayerType::UI);
+    optionsRoot->addComponent<Position>(0.f, 0.f);
+    optionsRoot->addComponent<Tag>("options_root");
+    optionsRoot->addComponent<GuiWidget>(WidgetType::PANEL);
+    
+    auto rootGui = optionsRoot->getComponent<GuiWidget>();
+    rootGui->setSize("100%", "100%");
+    rootGui->getRawWidget()->getRenderer()->setProperty("BackgroundColor", tgui::Color(10, 10, 30, 240));
 
     auto titleEntity = _world.createEntity();
+    titleEntity->addComponent<GuiWidget>(WidgetType::LABEL, "OPTIONS", optionsRoot->getId());
     titleEntity->addComponent<Scene>(3);
-    titleEntity->addComponent<Layer>(LayerType::UI);
-    titleEntity->addComponent<Text>("OPTIONS", "../assets/font/title.ttf", 80);
-    titleEntity->addComponent<Position>(centerX - 180.f, 50.f);
-    titleEntity->getComponent<Text>()->setColor(sf::Color::Green);
+    titleEntity->addComponent<Tag>("options_title");
+    titleEntity->addComponent<Layer>(LayerType::UI + 1);
+    
+    auto guiTitle = titleEntity->getComponent<GuiWidget>();
+    guiTitle->setFont("../assets/font/title.ttf");
+    guiTitle->setTextSize(80);
+    guiTitle->setTextColor(sf::Color::Green);
+    guiTitle->setOrigin(0.5f, 0.5f);
+    guiTitle->setPosition("50%", "10%");
+
+    auto mainLayoutEntity = _world.createEntity();
+    mainLayoutEntity->addComponent<GuiWidget>(WidgetType::VERTICAL_LAYOUT, "", optionsRoot->getId());
+    mainLayoutEntity->addComponent<Scene>(3);
+    mainLayoutEntity->addComponent<Tag>("options_main_layout");
+    mainLayoutEntity->addComponent<Layer>(LayerType::UI + 1);
+
+    auto guiMainLayout = mainLayoutEntity->getComponent<GuiWidget>();
+    guiMainLayout->setSize("60%", "60%");
+    guiMainLayout->setOrigin(0.5f, 0.5f);
+    guiMainLayout->setPosition("50%", "50%");
+
+    auto createOptionToggle = [this, mainLayoutEntity](const std::string& label, bool& stateValue) {
+        printf("Creating option toggle: %s\n", label.c_str());
+        auto rowEntity = _world.createEntity();
+        rowEntity->addComponent<GuiWidget>(WidgetType::PANEL, "", mainLayoutEntity->getId());
+        rowEntity->addComponent<Scene>(3);
+        rowEntity->addComponent<Tag>("option_row");
+        auto guiRow = rowEntity->getComponent<GuiWidget>();
+        guiRow->setSize("100%", "100");
+
+        auto btnEntity = _world.createEntity();
+        btnEntity->addComponent<GuiWidget>(WidgetType::BUTTON, label, rowEntity->getId());
+        btnEntity->addComponent<Scene>(3);
+        btnEntity->addComponent<Tag>("option_button");
+        auto guiBtn = btnEntity->getComponent<GuiWidget>();
+        guiBtn->setSize("50%", "70%");
+        guiBtn->setOrigin(0.5f, 0.5f);
+        guiBtn->setPosition("30%", "50%");
+        guiBtn->setFont("../assets/font/title.ttf");
+
+        auto statusEntity = _world.createEntity();
+        statusEntity->addComponent<GuiWidget>(WidgetType::LABEL, stateValue ? "ON" : "OFF", rowEntity->getId());
+        statusEntity->addComponent<Scene>(3);
+        statusEntity->addComponent<Tag>("option_status");
+        auto guiStatus = statusEntity->getComponent<GuiWidget>();
+        guiStatus->setTextSize(30);
+        guiStatus->setOrigin(0.5f, 0.5f);
+        guiStatus->setPosition("80%", "50%");
+        guiStatus->setTextColor(stateValue ? sf::Color::Green : sf::Color::Red);
+
+        guiBtn->setCallback([&stateValue, guiStatus]() {
+            stateValue = !stateValue;
+            guiStatus->setText(stateValue ? "ON" : "OFF");
+            guiStatus->setTextColor(stateValue ? sf::Color::Green : sf::Color::Red);
+        });
+    };
 
     static bool godMode = false;
-    static bool colorBlind = false;
     static bool easyMode = false;
     static bool hardMode = false;
-
+    static bool colorBlindMode = false;
     
+    createOptionToggle("GOD MODE", godMode);
+    createOptionToggle("EASY MODE", easyMode);
+    createOptionToggle("HARD MODE", hardMode);
+    createOptionToggle("COLOR BLIND MODE", colorBlindMode);
 
-    float godY = 200.f;
-    auto godStatus = createStatusText(godY, godMode);
-
-    createMenuButton("GOD MODE", 3, centerX, godY, [this, godStatus]() {
-        godMode = !godMode;
-        
-        auto textComp = godStatus->getComponent<Text>();
-        textComp->setString(godMode ? "ON" : "OFF");
-        textComp->setColor(godMode ? sf::Color::Green : sf::Color::Red);
-
-        auto entity = GameHelper::getEntityByTag(_world, "player");
-        if (entity) {
-            auto dataComp = entity->getComponent<Data>();
-            if (dataComp) dataComp->setData("is_god_mode", godMode ? "true" : "false");
-        }
-    });
-
-    float easyY = 325.f;
-    float hardY = 450.f;
-    
-    auto easyStatus = createStatusText(easyY, easyMode);
-    auto hardStatus = createStatusText(hardY, hardMode);
-
-    createMenuButton("EASY MODE", 3, centerX, easyY, [this, easyStatus, hardStatus]() {
-        easyMode = !easyMode;
-        if (easyMode) hardMode = false;
-
-        easyStatus->getComponent<Text>()->setString(easyMode ? "ON" : "OFF");
-        easyStatus->getComponent<Text>()->setColor(easyMode ? sf::Color::Green : sf::Color::Red);
-
-        hardStatus->getComponent<Text>()->setString(hardMode ? "ON" : "OFF");
-        hardStatus->getComponent<Text>()->setColor(hardMode ? sf::Color::Green : sf::Color::Red);
-
-        auto entity = GameHelper::getEntityByTag(_world, "player");
-        if (entity) {
-            auto dataComp = entity->getComponent<Data>();
-            if (dataComp) {
-                dataComp->setData("is_easy_mode", easyMode ? "true" : "false");
-                dataComp->setData("is_hard_mode", hardMode ? "true" : "false");
-            }
-        }
-        std::cout << "Difficulty set to: " << (easyMode ? "EASY" : "NORMAL") << std::endl;
-    });
-
-    createMenuButton("HARD MODE", 3, centerX, hardY, [this, easyStatus, hardStatus]() {
-        hardMode = !hardMode;
-        if (hardMode) easyMode = false;
-
-        hardStatus->getComponent<Text>()->setString(hardMode ? "ON" : "OFF");
-        hardStatus->getComponent<Text>()->setColor(hardMode ? sf::Color::Green : sf::Color::Red);
-
-        easyStatus->getComponent<Text>()->setString(easyMode ? "ON" : "OFF");
-        easyStatus->getComponent<Text>()->setColor(easyMode ? sf::Color::Green : sf::Color::Red);
-
-        auto entity = GameHelper::getEntityByTag(_world, "player");
-        if (entity) {
-            auto dataComp = entity->getComponent<Data>();
-            if (dataComp) {
-                dataComp->setData("is_easy_mode", easyMode ? "true" : "false");
-                dataComp->setData("is_hard_mode", hardMode ? "true" : "false");
-            }
-        }
-        std::cout << "Difficulty set to: " << (hardMode ? "HARD" : "NORMAL") << std::endl;
-    });
-
-    float daltonianY = 575.f;
-    auto daltStatus = createStatusText(daltonianY, colorBlind);
-
-    createMenuButton("DALTONIAN", 3, centerX, daltonianY, [this, daltStatus]() {
-        colorBlind = !colorBlind;
-
-        auto textComp = daltStatus->getComponent<Text>();
-        textComp->setString(colorBlind ? "ON" : "OFF");
-        textComp->setColor(colorBlind ? sf::Color::Green : sf::Color::Red);
-
-        auto entity = GameHelper::getEntityByTag(_world, "player");
-        if (entity) {
-            auto dataComp = entity->getComponent<Data>();
-            if (dataComp) dataComp->setData("is_color_blind", colorBlind ? "true" : "false");
-        }
-        std::cout << "Colorblind Mode: " << (colorBlind ? "ON" : "OFF") << std::endl;
-    });
-
-    createMenuButton("RETURN", 3, centerX, 750.f, [this]() {
-        std::cout << "Returning to Main Menu" << std::endl;
-        _world.setCurrentScene(2);
-    });
+    // 4. BOUTON RETOUR
+    auto btnReturn = _world.createEntity();
+    btnReturn->addComponent<GuiWidget>(WidgetType::BUTTON, "BACK TO MENU", optionsRoot->getId());
+    btnReturn->addComponent<Scene>(3);
+    btnReturn->addComponent<Layer>(LayerType::UI + 2);
+    btnReturn->addComponent<Tag>("options_button_return");
+    auto guiReturn = btnReturn->getComponent<GuiWidget>();
+    guiReturn->setSize(200, 60);
+    guiReturn->setOrigin(0.5f, 0.5f);
+    guiReturn->setPosition("50%", "90%");
+    guiReturn->setCallback([this]() { _world.setCurrentScene(2); });
 }
 
 /**
