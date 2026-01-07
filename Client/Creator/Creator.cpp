@@ -18,16 +18,19 @@
 #include "Layer.hpp"
 #include "Group.hpp"
 #include "Scene.hpp"
+#include "Audio.hpp"
+#include "Music.hpp"
 #include "Sprite.hpp"
 #include "Camera.hpp"
 #include "Button.hpp"
 #include "Script.hpp"
+#include "Damage.hpp"
 #include "Position.hpp"
 #include "Velocity.hpp"
 #include "Animator.hpp"
 #include "Rotation.hpp"
+#include "SoundEffect.hpp"
 #include "BoxCollider.hpp"
-#include "Damage.hpp"
 #include "RectangleShape.hpp"
 
 Creator::Creator(World& world)
@@ -46,7 +49,7 @@ Creator::Creator(World& world)
 void Creator::createMenuButton(const std::string& label, int sceneId, float x, float y, const std::function<void()>& onClick)
 {
     auto btnEntity = _world.createEntity();
-    btnEntity->addComponent<Sprite>("../sprites/Elements-01.png");
+    btnEntity->addComponent<Sprite>("../assets/sprites/Elements-01.png");
     btnEntity->addComponent<Scale>(0.3f);
     btnEntity->addComponent<Scene>(sceneId);
     btnEntity->addComponent<Layer>(LayerType::UI);
@@ -71,7 +74,7 @@ void Creator::createMenuButton(const std::string& label, int sceneId, float x, f
     textEntity->addComponent<Scene>(sceneId);
     textEntity->addComponent<Layer>(LayerType::UI + 1);
     
-    textEntity->addComponent<Text>(label, "../sprites/title.ttf", 30);
+    textEntity->addComponent<Text>(label, "../assets/font/title.ttf", 30);
     
     auto textComp = textEntity->getComponent<Text>();
     sf::FloatRect bounds = textComp->getGlobalBounds();
@@ -99,11 +102,24 @@ void Creator::createMenu()
     auto titleEntity = _world.createEntity();
     titleEntity->addComponent<Scene>(2);
     titleEntity->addComponent<Layer>(LayerType::UI);
-    titleEntity->addComponent<Text>("R-TYPE", "../sprites/title.ttf", 80);
+    titleEntity->addComponent<Text>("R-TYPE", "../assets/font/title.ttf", 80);
     titleEntity->addComponent<Position>(centerX - titleEntity->getComponent<Text>()->getGlobalBounds().size.x / 2.0f, 100.f);
     titleEntity->getComponent<Text>()->setColor(sf::Color::Cyan);
+    titleEntity->addComponent<Tag>("R-TYPE Title");
+
+    auto music = _world.createEntity();
+    music->addComponent<Music>("../assets/sounds/menu.mp3", 100.f, true);
+    music->addComponent<Tag>("music");
+    music->addComponent<Scene>(2);
+    music->getComponent<Music>()->play();
 
     createMenuButton("PLAY", 2, btnX, 300.f, [this]() {
+        auto music = GameHelper::getEntityByTag(_world, "music");
+        if (music) {
+            auto musicComp = music->getComponent<Music>();
+            if (musicComp)
+                musicComp->stop();
+        }
         _world.setCurrentScene(1);
     });
     
@@ -131,7 +147,7 @@ std::shared_ptr<Entity> Creator::createStatusText(float y, bool initialState)
     statusEntity->addComponent<Layer>(LayerType::UI);
     
     std::string label = initialState ? "ON" : "OFF";
-    statusEntity->addComponent<Text>(label, "../sprites/title.ttf", 30);
+    statusEntity->addComponent<Text>(label, "../assets/font/title.ttf", 30);
     
     sf::Color color = initialState ? sf::Color::Green : sf::Color::Red;
     statusEntity->getComponent<Text>()->setColor(color);
@@ -152,7 +168,7 @@ void Creator::createOptions()
     auto titleEntity = _world.createEntity();
     titleEntity->addComponent<Scene>(3);
     titleEntity->addComponent<Layer>(LayerType::UI);
-    titleEntity->addComponent<Text>("OPTIONS", "../sprites/title.ttf", 80);
+    titleEntity->addComponent<Text>("OPTIONS", "../assets/font/title.ttf", 80);
     titleEntity->addComponent<Position>(centerX - 180.f, 50.f);
     titleEntity->getComponent<Text>()->setColor(sf::Color::Green);
 
@@ -267,9 +283,10 @@ void Creator::createPlayer(uint64_t id)
     auto player = _world.createEntity(id);
     player->addComponent<HP>(100);
     player->addComponent<Position>(75.0f, 75.0f);
-    player->addComponent<Sprite>(std::string("../sprites/r-typesheet42.gif"));
+    player->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet42.gif"));
     player->addComponent<Scale>(2.f);
     player->addComponent<Scene>(1);
+    player->addComponent<SoundEffect>(std::string("../assets/sounds/lazershoot.mp3"));
     player->addComponent<Layer>(10);
     player->addComponent<Group>(playerCount + 1);
     player->addComponent<Damage>(10);
@@ -295,11 +312,12 @@ void Creator::createPlayer(uint64_t id)
     playerCount++;
     auto fire = _world.createEntity();
     fire->addComponent<Position>(0.f, 85.f);
-    fire->addComponent<Sprite>(std::string("../sprites/r-typesheet1.gif"));
+    fire->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet1.gif"));
     fire->addComponent<Animator>(2, 1, 3.f, 285, 85, 15, 15, 0, 0);
     fire->addComponent<Scale>(2.f);
     fire->addComponent<Scene>(1);
     fire->addComponent<Script>(playerfire);
+    fire->addComponent<Music>("../assets/sounds/game.mp3", 100.f, true);
     fire->addComponent<Group>(playerCount);
     fire->addComponent<Layer>(10);
     fire->addComponent<Tag>("fire");
@@ -312,7 +330,7 @@ void Creator::createPlayer(uint64_t id)
 void Creator::createBackground(sf::RenderWindow& window)
 {
     auto backgroundFirst = _world.createEntity();
-    backgroundFirst->addComponent<Sprite>(std::string("../sprites/background.png"));
+    backgroundFirst->addComponent<Sprite>(std::string("../assets/sprites/background.png"));
     
     auto windowSize = window.getSize();
     auto spriteComp = backgroundFirst->getComponent<Sprite>();
@@ -328,15 +346,15 @@ void Creator::createBackground(sf::RenderWindow& window)
     backgroundFirst->addComponent<Position>(0.f, 0.f);
     backgroundFirst->addComponent<Script>(backgroundScrollScript);
     backgroundFirst->addComponent<Layer>(LayerType::BACKGROUND);
-    backgroundFirst->addComponent<Velocity>(-4.f, 0.f);
+    backgroundFirst->addComponent<Velocity>(-5.f, 0.f);
     backgroundFirst->addComponent<Tag>("background_first");
     auto backgroundSecond = _world.createEntity();
-    backgroundSecond->addComponent<Sprite>(std::string("../sprites/background.png"));
+    backgroundSecond->addComponent<Sprite>(std::string("../assets/sprites/background.png"));
     backgroundSecond->addComponent<Scale>(1.f);
     backgroundSecond->addComponent<Scene>(_world.getCurrentScene());
     auto bounds = backgroundFirst->getComponent<Sprite>()->getSprite()->getGlobalBounds();
     backgroundSecond->addComponent<Position>(bounds.size.x - 10.f, 0.f);
-    backgroundSecond->addComponent<Velocity>(-4.f, 0.f);
+    backgroundSecond->addComponent<Velocity>(-5.f, 0.f);
     backgroundSecond->addComponent<Script>(backgroundScrollScript);
     backgroundSecond->addComponent<Layer>(LayerType::BACKGROUND);
     backgroundSecond->addComponent<Tag>("background_second");
@@ -403,7 +421,7 @@ void Creator::createBullet(size_t entityId, int x, int y, int type)
         bullet->addComponent<Rotation>(180.f);
         bullet->addComponent<Velocity>(-10.f, 0.f);
     }
-    bullet->addComponent<Sprite>(std::string("../sprites/r-typesheet1.gif"));
+    bullet->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet1.gif"));
     bullet->addComponent<Scale>(2.f);
     bullet->addComponent<Scene>(1);
     bullet->addComponent<Tag>("bullet");
@@ -422,13 +440,13 @@ void Creator::createLoadingScreen()
 
     auto title = _world.createEntity();
     title->addComponent<Scene>(0);
-    title->addComponent<Text>("LOADING...", "../sprites/title.ttf", 40);
+    title->addComponent<Text>("LOADING...", "../assets/font/title.ttf", 40);
     title->addComponent<Position>(centerX - title->getComponent<Text>()->getGlobalBounds().size.x / 2.0f, centerY - 100.f);
     title->addComponent<Layer>(LayerType::UI);
 
     auto status = _world.createEntity();
     status->addComponent<Scene>(0);
-    status->addComponent<Text>("Initializing...", "../sprites/title.ttf", 20);
+    status->addComponent<Text>("Initializing...", "../assets/font/title.ttf", 20);
     status->addComponent<Position>(centerX - status->getComponent<Text>()->getGlobalBounds().size.x / 2.0f, centerY + 60.f);
     status->addComponent<Layer>(LayerType::UI);
     status->getComponent<Text>()->setColor(sf::Color(200, 200, 200));
