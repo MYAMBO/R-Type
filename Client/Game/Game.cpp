@@ -49,6 +49,8 @@
 #include "ScriptsSys.hpp"
 #include "DeathSys.hpp"
 
+#include "LevelLoader.hpp"
+
 /**
  * @brief Constructs a new Game object.
  *
@@ -148,6 +150,10 @@ void Game::run()
 
     _world.setCurrentScene(2);
     auto inputSystem = _world.getSystem<Inputs>();
+
+    std::cout << "\nTEST LEVELLOADER\n";
+    LevelLoader::loadFromFile("../Levels/level1.json", _world);
+    std::cout << "Test finished\n\n";
 
     while (_window.isOpen()) {
         _window.clear(sf::Color::Black);
