@@ -14,7 +14,7 @@ if (DEV_COMPILE)
         add_compile_options(-Werror)
 endif ()
 
-add_compile_options(-Wall -Wextra)
+add_compile_options(-Wall -Wextra -g)
 
 if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake")
     file(DOWNLOAD
@@ -42,8 +42,9 @@ include_directories(ECS/Component/Data)
 include_directories(ECS/Component/Scene)
 include_directories(ECS/Component/Layer)
 include_directories(ECS/Component/Scale)
-include_directories(ECS/Component/Button)
+include_directories(ECS/Component/Music)
 include_directories(ECS/Component/Group)
+include_directories(ECS/Component/Button)
 include_directories(ECS/Component/Camera)
 include_directories(ECS/Component/Sprite)
 include_directories(ECS/Component/Camera)
@@ -54,10 +55,12 @@ include_directories(ECS/Component/Position)
 include_directories(ECS/Component/Velocity)
 include_directories(ECS/Component/Rotation)
 include_directories(ECS/Component/BoxCollider)
+include_directories(ECS/Component/SoundEffect)
 include_directories(ECS/Component/RectangleShape)
 include_directories(ECS/System)
 include_directories(ECS/System/Draw)
 include_directories(ECS/System/Mouse)
+include_directories(ECS/System/Audio)
 include_directories(ECS/System/Inputs)
 include_directories(ECS/System/TextSys)
 include_directories(ECS/System/Movement)
@@ -124,6 +127,7 @@ add_executable(r-type_client
         ECS/Entity/Entity.cpp
         ECS/System/Draw/Draw.cpp
         ECS/System/Mouse/Mouse.cpp
+        ECS/System/Audio/Audio.cpp
         ECS/System/Inputs/Inputs.cpp
         ECS/System/TextSys/TextSys.cpp
         ECS/System/Movement/Movement.cpp
@@ -140,6 +144,7 @@ add_executable(r-type_client
         ECS/Component/Layer/Layer.cpp
         ECS/Component/Group/Group.cpp
         ECS/Component/Scene/Scene.cpp
+        ECS/Component/Music/Music.cpp
         ECS/Component/Button/Button.cpp
         ECS/Component/Script/Script.cpp
         ECS/Component/Sprite/Sprite.cpp
@@ -150,6 +155,7 @@ add_executable(r-type_client
         ECS/Component/Rotation/Rotation.cpp
         ECS/Component/Animator/Animator.cpp
         ECS/Component/BoxCollider/BoxCollider.cpp
+        ECS/Component/SoundEffect/SoundEffect.cpp
         ECS/Component/RectangleShape/RectangleShape.cpp
         Packet/Packet.cpp
         Packet/MyString.cpp
@@ -157,6 +163,6 @@ add_executable(r-type_client
         Client/Core/ClientPacketreader.cpp
         ECS/System/DeathSys/DeathSys.cpp)
 
-target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network)
+target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network sfml-audio)
 
 target_link_libraries(r-type_server  sfml-graphics sfml-system sfml-network)

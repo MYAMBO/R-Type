@@ -21,6 +21,7 @@
 #include "Layer.hpp"
 #include "Scale.hpp"
 #include "Scene.hpp"
+#include "Audio.hpp"
 #include "Group.hpp"
 #include "Inputs.hpp"
 #include "Sprite.hpp"
@@ -28,26 +29,28 @@
 #include "Script.hpp"
 #include "Camera.hpp"
 #include "Button.hpp"
+#include "Creator.hpp"
 #include "Velocity.hpp"
 #include "Position.hpp"
 #include "Animator.hpp"
 #include "Rotation.hpp"
 #include "GameHelper.hpp"
-#include "Creator.hpp"
+#include "SoundEffect.hpp"
 #include "BoxCollider.hpp"
 #include "RectangleShape.hpp"
 #include "ScriptsHandler.hpp"
 
 #include "Draw.hpp"
 #include "Mouse.hpp"
+#include "Audio.hpp"
 #include "Inputs.hpp"
 #include "TextSys.hpp"
 #include "Movement.hpp"
 #include "CameraSys.hpp"
 #include "Animation.hpp"
 #include "Collision.hpp"
-#include "ScriptsSys.hpp"
 #include "DeathSys.hpp"
+#include "ScriptsSys.hpp"
 
 /**
  * @brief Constructs a new Game object.
@@ -71,6 +74,7 @@ Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const
     _world.addSystem<Mouse>();
     _world.addSystem<Inputs>();
     _world.addSystem<Draw>();
+    _world.addSystem<Audio>();
 }
 
 /**
@@ -305,6 +309,7 @@ void Game::playerInput(int entityId, World &world)
             packet.setTotalPacketNbr(1);
             _network.sendPacket(packet);
             isShootKeyPressed = true;
+            compPlayer->getComponent<SoundEffect>()->play();
         }
     } else {
         isShootKeyPressed = false;
