@@ -66,7 +66,6 @@ std::shared_ptr<Entity> GameHelper::getEntityById(World &world, uint64_t id)
             return entity;
         }
     }
-    //std::cerr << "Entity with id " << id << " not found." << std::endl;
     return nullptr;
 }
 
@@ -83,8 +82,8 @@ void GameHelper::createBasicEnemy(World &world, float x, float y)
     enemy->addComponent<HP>(50);
     enemy->addComponent<Damage>(20);
     enemy->addComponent<Position>(x, y);
-    enemy->addComponent<Sprite>(std::string("../sprites/r-typesheet42.gif"));
-    enemy->addComponent<Animator>(2, 1, 3.0f, 0, 0, 33, 19, 33, 0);
+    enemy->addComponent<Sprite>(std::string("../sprites/r-typesheet11.gif"));
+    enemy->addComponent<Animator>(2, 6, 5.0f, 0, 0, 33, 30, 33, 0);
     enemy->addComponent<Scale>(2.f);
     enemy->addComponent<Scene>(1);
     enemy->addComponent<Tag>("enemy");
