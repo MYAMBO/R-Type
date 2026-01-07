@@ -24,6 +24,7 @@ SoundEffect::SoundEffect(const std::string& filePath, float volume)
         return;
     }
     _sound.setVolume(volume);
+    _state = AudioState::STOPPED;
 }
 
 
