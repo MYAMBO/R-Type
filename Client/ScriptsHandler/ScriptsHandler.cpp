@@ -9,6 +9,7 @@
 #include "Scale.hpp"
 #include "Scene.hpp"
 #include "Group.hpp"
+#include "Music.hpp"
 #include "Inputs.hpp"
 #include "Sprite.hpp"
 #include "Rotation.hpp"
@@ -90,7 +91,15 @@ void playerfire(size_t entityId, World &world)
         }
     }
     if (!player)
+    return;
+    auto musicComp = fire->getComponent<Music>();
+    if (!musicComp)
         return;
+    if (world.getCurrentScene() == 1) {
+        musicComp->play();
+    } else if (musicComp) {
+        musicComp->stop();
+    }
     auto posPlayer = player->getComponent<Position>();
     auto posFire = fire->getComponent<Position>();
     if (!posFire || !posPlayer)
