@@ -32,7 +32,7 @@ void DeathSys::update(const float &dt, World &w)
                     8,
                     0.08f,
                     120,
-                    248,
+                    283,
                     16,
                     16,
                     8,

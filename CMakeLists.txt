@@ -76,6 +76,7 @@ include_directories(Client/Game)
 include_directories(Client/Creator)
 include_directories(Client/GameHelper)
 include_directories(Client/ScriptsHandler)
+include_directories(Client/LevelLoader)
 include_directories(./Server)
 include_directories(./Server/Core)
 include_directories(./Packet)
@@ -103,6 +104,7 @@ add_executable(r-type_server
         ECS/Component/HP/HP.cpp
         ECS/Component/Damage/Damage.cpp
         Client/GameHelper/GameHelper.cpp
+        Client/LevelLoader/LevelLoader.cpp
         ECS/Component/Tag/Tag.cpp
         ECS/Component/Scale/Scale.cpp
         ECS/Component/Layer/Layer.cpp
@@ -157,11 +159,12 @@ add_executable(r-type_client
         ECS/Component/BoxCollider/BoxCollider.cpp
         ECS/Component/SoundEffect/SoundEffect.cpp
         ECS/Component/RectangleShape/RectangleShape.cpp
+        ECS/System/DeathSys/DeathSys.cpp
         Packet/Packet.cpp
         Packet/MyString.cpp
         Client/Core/Network.cpp
         Client/Core/ClientPacketreader.cpp
-        ECS/System/DeathSys/DeathSys.cpp)
+        Client/LevelLoader/LevelLoader.cpp)
 
 target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network sfml-audio)
 

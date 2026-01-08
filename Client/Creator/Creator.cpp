@@ -302,10 +302,10 @@ void Creator::createPlayer(uint64_t id)
     
     if (playerCount == 0) {
         player->addComponent<Velocity>(0.f, 0.f);
-        player->addComponent<Animator>(2, 1, 3.f, 0, 0, 33, 19, 0, 0);
+        player->addComponent<Animator>(2, 2, 3.f, 0, 0, 33, 19, 0, 0);
         player->addComponent<Tag>("player");
     } else {
-        player->addComponent<Animator>(2, 1, 3.f, 0, (playerCount * 17), 33, 19, 0, 0);
+        player->addComponent<Animator>(2, 2, 3.f, 0, (playerCount * 17), 33, 19, 0, 0);
         player->addComponent<Tag>("player_mate");
     }
 
