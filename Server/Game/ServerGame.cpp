@@ -19,6 +19,7 @@
 #include "ServerGame.hpp"
 #include "GameHelper.hpp"
 #include "BoxCollider.hpp"
+#include "LevelLoader.hpp"
 
 /**
  * @brief Constructs a new Game object.
@@ -219,6 +220,7 @@ void ServerGame::handleNewPlayer()
     if (_playerCount == NB_PLAYER_TO_START && !_gameStarted) {
         _gameStarted = true;
         _waveTimer.restart();
+        startLevel(1);   // Need to change that later to have a level management
         std::cout << "Game started! Enemy waves will spawn every 20 seconds" << std::endl;
     }
 }
@@ -267,4 +269,29 @@ void ServerGame::handleShoot(const int id)
     const auto entity = GameHelper::getEntityById(_world, id);
     const auto pos = entity->getComponent<Position>();
     createBullet(pos->getX(), pos->getY());
+}
+
+
+/**
+ * @brief Create the level and place the enemies via the packet sent.
+ *
+ * @param levelId The number id of the chosen level.
+ */
+void ServerGame::startLevel(const int levelId)
+{
+    const std::string levelPath = "../Levels/level" + std::to_string(levelId) + ".json";
+    LevelLoader::loadFromFile(levelPath, _world);
+    const auto entities = _world.getAllEntitiesWithComponent<Tag>();
+    for (const auto& entity : entities) {
+        if (!entity) continue;
+        auto tag = entity->getComponent<Tag>();
+        if (!tag || tag->getTag() != "enemy")  // be aware here because if we nedd to add tank or medium enemies
+            continue;
+        const auto pos = entity->getComponent<Position>();
+        if (!pos)
+            continue;
+        Packet packet;
+        packet.positionSpawn(entity->getId(), Enemy, pos->getX(), pos->getY());
+        _network.sendPacket(packet);
+    }
 }

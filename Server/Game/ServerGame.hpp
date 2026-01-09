@@ -32,6 +32,7 @@ class ServerGame {
         void handleNewPlayerPosition(int id, float x, float y);
         void handleShoot(int id);
         void handleNewPlayer();
+        void startLevel(int levelId);
 
     private:
         void createPlayer(float x, float y);
