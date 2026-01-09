@@ -17,6 +17,7 @@
 #include "GameHelper.hpp"
 #include "BoxCollider.hpp"
 #include "Damage.hpp"
+#include "Velocity.hpp"
 
 /**
  * @brief Retrieves the main camera from the world.
@@ -94,6 +95,7 @@ void GameHelper::createBasicEnemy(World &world, float x, float y)
     enemy->addComponent<Scene>(1);
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+    enemy->addComponent<Velocity>(-2.0f, 0.0f);
 }
 
 
