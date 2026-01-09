@@ -20,6 +20,8 @@ class Creator {
         ~Creator() = default;
 
         void createMenu();
+        void createKayu();
+        void createMyambo();
         void createCamera();
         void createOptions();
         void createTguiMenu();
@@ -32,6 +34,8 @@ class Creator {
         void createMenuButton(const std::string& label, int sceneId, float x, float y, const std::function<void()>& onClick);
 
         std::shared_ptr<Entity> createStatusText(float y, bool initialState);
+
+        static void createSparks(World &world, float x, float y, int amount);
     private:
         World& _world;
 };
