@@ -25,6 +25,7 @@ GuiWidget::GuiWidget(WidgetType type, const std::string& content, uint64_t paren
         case WidgetType::EDIT_BOX:          _widget = tgui::EditBox::create();          break;
         case WidgetType::CHECKBOX:          _widget = tgui::CheckBox::create();         break;
         case WidgetType::SLIDER:            _widget = tgui::Slider::create();           break;
+        case WidgetType::SCROLLABLE_PANEL: _widget = tgui::ScrollablePanel::create();   break;
         default:                            _widget = tgui::ClickableWidget::create();  break;
     }
 }
@@ -66,6 +67,17 @@ void GuiWidget::setPosition(const std::string& x, const std::string& y)
 }
 
 /**
+ * @brief Set the scale of the widget.
+ * 
+ * @param x X scale factor
+ * @param y Y scale factor
+ */
+void GuiWidget::setScale(float x, float y)
+{
+    _widget->setScale({x, y});
+}
+
+/**
  * @brief Set the visibility of the widget.
  * 
  * @param visible True to make visible, false to hide
@@ -73,6 +85,40 @@ void GuiWidget::setPosition(const std::string& x, const std::string& y)
 void GuiWidget::setVisible(bool visible)
 {
     _widget->setVisible(visible);
+}
+
+/**
+* @brief Set the text size of the widget.
+* @param size The text size to set
+*/
+float GuiWidget::getTextSize() const
+{
+    if (auto w = std::dynamic_pointer_cast<tgui::Label>(_widget))
+        return w->getTextSize();
+    else if (auto w = std::dynamic_pointer_cast<tgui::Button>(_widget))
+        return w->getTextSize();
+    else if (auto w = std::dynamic_pointer_cast<tgui::EditBox>(_widget))
+        return w->getTextSize();
+    return 0.0f;
+}
+
+/**
+ * @brief Get the scale of the widget.
+ * @return The current scale of the widget
+ */
+sf::Vector2f GuiWidget::getScale() const
+{
+    return {_widget->getScale().x, _widget->getScale().y};
+}
+
+/**
+ * @brief Set auto size for Label widgets.
+ * @param autoSize True to enable auto size, false otherwise
+ */
+void GuiWidget::setAutoSize(bool autoSize)
+{
+    if (auto w = std::dynamic_pointer_cast<tgui::Label>(_widget))
+        w->setAutoSize(autoSize);
 }
 
 /**

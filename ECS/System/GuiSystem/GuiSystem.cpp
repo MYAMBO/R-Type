@@ -93,7 +93,7 @@ void GuiSystem::update(const float& dt, World& w)
         auto guiComp = entity->getComponent<GuiWidget>();
         auto posComp = entity->getComponent<Position>();
         auto widget = guiComp->getRawWidget();
-        if (posComp && guiComp->getParentId() == 0) {
+        if (posComp) {
             widget->setPosition(posComp->getX(), posComp->getY());
         }
         widget->moveToFront();

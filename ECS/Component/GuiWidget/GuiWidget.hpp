@@ -21,6 +21,7 @@ enum class WidgetType {
     HORIZONTAL_LAYOUT,
     EDIT_BOX,
     PICTURE,
+    SCROLLABLE_PANEL,
     CHECKBOX,
     SLIDER
 };
@@ -41,6 +42,7 @@ class GuiWidget : public Component {
         void setEnabled(bool enabled);
         void setOrigin(float x, float y);
         void setFocus();
+        void setScale(float x, float y);
         
         void setFont(const std::string& fontPath);
         void setText(const std::string& text);
@@ -60,11 +62,14 @@ class GuiWidget : public Component {
         void setValue(float value);
         void setRange(float min, float max);
         void setChecked(bool checked);
+        void setAutoSize(bool autoSize);
 
         [[nodiscard]] std::string getText() const;
         [[nodiscard]] float getValue() const;
         [[nodiscard]] bool isChecked() const;
         [[nodiscard]] sf::Vector2f getSize() const;
+        [[nodiscard]] sf::Vector2f getScale() const;
+        [[nodiscard]] float getTextSize() const;
         [[nodiscard]] sf::Vector2f getPosition() const;
         [[nodiscard]] WidgetType getType() const;
 
