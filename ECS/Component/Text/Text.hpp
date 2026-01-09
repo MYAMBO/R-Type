@@ -24,10 +24,11 @@ class Text : public Component {
 
         void setString(const std::string& str);
         void setSize(unsigned int size);
-        void setColor(const sf::Color& color);
+        void setColor(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255);
         
         sf::Text& getSfText();
         std::string getText();
+        unsigned int getSize() const;
         sf::FloatRect getGlobalBounds() const;
 
     private:
