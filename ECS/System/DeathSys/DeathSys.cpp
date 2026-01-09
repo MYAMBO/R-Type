@@ -26,7 +26,7 @@ void DeathSys::update(const float &dt, World &w)
             auto sprite = entity->getComponent<Sprite>();
             auto animator = entity->getComponent<Animator>();
             if (sprite && animator) {
-                sprite->setTexture("../sprites/r-typesheet1.gif");  // need to change and adjust with a real explosion spritesheet
+                sprite->setTexture("../assets/sprites/r-typesheet1.gif");  // need to change and adjust with a real explosion spritesheet
                 *animator = Animator(
                     8,
                     8,

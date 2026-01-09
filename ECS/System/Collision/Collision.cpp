@@ -96,6 +96,7 @@ void Collision::handleCollisionDamage(const std::shared_ptr<Entity> &a,
         auto target = (strTagA == "enemy") ? a : b;
         auto bullet = (strTagA == "player_bullet") ? a : b;
         applyDamage(bullet, target);
+        applyDamage(target, bullet);
     }
     else if ((strTagA == "player" && strTagB == "enemy") ||
              (strTagB == "player" && strTagA == "enemy")) {
@@ -120,7 +121,7 @@ void Collision::handleCollisionDamage(const std::shared_ptr<Entity> &a,
  */
 
 void Collision::applyDamage(const std::shared_ptr<Entity> &attacker,
-                            const std::shared_ptr<Entity> &target)
+     const std::shared_ptr<Entity> &target)
 {
     auto damage = attacker->getComponent<Damage>();
     auto hp = target->getComponent<HP>();

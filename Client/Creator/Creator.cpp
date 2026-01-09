@@ -424,7 +424,7 @@ void Creator::createBullet(size_t entityId, int x, int y, int type)
         bullet->addComponent<Rotation>(180.f);
         bullet->addComponent<Velocity>(-10.f, 0.f);
     }
-    bullet->addComponent<Sprite>(std::string("../sprites/r-typesheet1.gif"));
+    bullet->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet1.gif"));
     bullet->addComponent<Scale>(2.f);
     bullet->addComponent<Scene>(1);
     bullet->addComponent<Tag>("player_bullet");
