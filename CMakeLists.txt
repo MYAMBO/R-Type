@@ -32,6 +32,14 @@ CPMAddPackage(
     EXCLUDE_FROM_ALL YES
 )
 
+set(TGUI_BACKEND SFML_GRAPHICS CACHE STRING "" FORCE)
+
+CPMAddPackage(
+    NAME tgui
+    URL "https://github.com/texus/TGUI/archive/refs/heads/1.x.zip"
+    DOWNLOAD_ONLY NO
+)
+
 include_directories(.)
 include_directories(ECS)
 include_directories(ECS/Component)
@@ -54,6 +62,7 @@ include_directories(ECS/Component/Animator)
 include_directories(ECS/Component/Position)
 include_directories(ECS/Component/Velocity)
 include_directories(ECS/Component/Rotation)
+include_directories(ECS/Component/GuiWidget)
 include_directories(ECS/Component/BoxCollider)
 include_directories(ECS/Component/SoundEffect)
 include_directories(ECS/Component/RectangleShape)
@@ -67,6 +76,7 @@ include_directories(ECS/System/Movement)
 include_directories(ECS/System/Animation)
 include_directories(ECS/System/CameraSys)
 include_directories(ECS/System/Collision)
+include_directories(ECS/System/GuiSystem)
 include_directories(ECS/System/ScriptsSys)
 include_directories(ECS/System/DeathSys)
 include_directories(ECS/Entity)
@@ -135,6 +145,7 @@ add_executable(r-type_client
         ECS/System/Movement/Movement.cpp
         ECS/System/Animation/Animation.cpp
         ECS/System/CameraSys/CameraSys.cpp
+        ECS/System/GuiSystem/GuiSystem.cpp
         ECS/System/Collision/Collision.cpp
         ECS/System/ScriptsSys/ScriptsSys.cpp
         ECS/World.cpp
@@ -156,6 +167,7 @@ add_executable(r-type_client
         ECS/Component/Velocity/Velocity.cpp
         ECS/Component/Rotation/Rotation.cpp
         ECS/Component/Animator/Animator.cpp
+        ECS/Component/GuiWidget/GuiWidget.cpp
         ECS/Component/BoxCollider/BoxCollider.cpp
         ECS/Component/SoundEffect/SoundEffect.cpp
         ECS/Component/RectangleShape/RectangleShape.cpp
@@ -166,6 +178,6 @@ add_executable(r-type_client
         Client/Core/ClientPacketreader.cpp
         Client/LevelLoader/LevelLoader.cpp)
 
-target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network sfml-audio)
+target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network sfml-audio tgui)
 
 target_link_libraries(r-type_server  sfml-graphics sfml-system sfml-network)

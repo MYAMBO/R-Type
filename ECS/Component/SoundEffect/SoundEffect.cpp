@@ -98,3 +98,21 @@ std::shared_ptr<sf::SoundBuffer> SoundEffect::getBuffer() const
 {
     return _buffer;
 }
+
+/**
+ * @brief Set whether the sound is global (not affected by scene changes).
+ * @param global True if global, false otherwise
+*/
+void SoundEffect::setGlobal(bool global)
+{
+    _global = global;
+}
+
+/**
+ * @brief Check if the sound is global.
+ * @return bool True if global, false otherwise
+*/
+bool SoundEffect::isGlobal() const
+{
+    return _global;
+}

@@ -29,7 +29,7 @@ void Audio::update(const float &dt, World &w)
         auto sceneComp = entity->getComponent<Scene>();
         if (!sceneComp || !audioComp)
             continue;
-        if (sceneComp->getScene() != w.getCurrentScene())
+        if (sceneComp->getScene() != w.getCurrentScene() && !audioComp->isGlobal())
             continue;
 
         if (audioComp->getStatus() != AudioState::PLAYING)

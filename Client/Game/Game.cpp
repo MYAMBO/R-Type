@@ -18,11 +18,13 @@
 #include "HP.hpp"
 #include "Tag.hpp" 
 #include "Text.hpp"
+#include "Data.hpp"
 #include "Layer.hpp"
 #include "Scale.hpp"
 #include "Scene.hpp"
 #include "Audio.hpp"
 #include "Group.hpp"
+#include "Music.hpp"
 #include "Inputs.hpp"
 #include "Sprite.hpp"
 #include "Entity.hpp"
@@ -47,6 +49,7 @@
 #include "TextSys.hpp"
 #include "Movement.hpp"
 #include "CameraSys.hpp"
+#include "GuiSystem.hpp"
 #include "Animation.hpp"
 #include "Collision.hpp"
 #include "DeathSys.hpp"
@@ -67,8 +70,8 @@ Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const
     : _window(sf::VideoMode({width, height}), title), _network(network), _creator(_world)
 {
     _world.addSystem<CameraSys>();
-    _world.addSystem<TextSystem>();
     _world.addSystem<ScriptsSys>();
+    _world.addSystem<TextSystem>();
     _world.addSystem<Movement>();
     _world.addSystem<Animation>();
     _world.addSystem<Collision>();
@@ -76,6 +79,7 @@ Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const
     _world.addSystem<Mouse>();
     _world.addSystem<Inputs>();
     _world.addSystem<Draw>();
+    _world.addSystem<GuiSystem>(_window);
     _world.addSystem<Audio>();
 }
 
@@ -86,32 +90,54 @@ Game::~Game()
 {
     _window.close();
 }
+
 /**
- * @brief Updates the ECS loading screen entities and forces a frame render.
+ * @brief Updates the ECS loading screen entities with a professional AAA look.
  */
 void Game::updateLoadingState(float progress, const std::string& status)
 {
+    float width = static_cast<float>(_window.getSize().x);
+    float height = static_cast<float>(_window.getSize().y);
+    float centerX = width / 2.0f;
+    float centerY = height / 2.0f;
+    float barFullWidth = 600.f;
+
     auto statusEnt = GameHelper::getEntityByTag(_world, "loading_status");
     if (statusEnt) {
         auto textComp = statusEnt->getComponent<Text>();
-        if (textComp) textComp->setString(status);
-        
         auto posComp = statusEnt->getComponent<Position>();
-        sf::FloatRect bounds = textComp->getGlobalBounds();
-        float centerX = _window.getSize().x / 2.0f - 200.f;
-        if (posComp)
-            posComp->setX(centerX - (bounds.size.x / 2.0f));
+        if (textComp && posComp) {
+            textComp->setString(status);
+            textComp->setColor(0, 255, 255, 255);
+            posComp->setX(centerX - textComp->getGlobalBounds().size.x / 2.0f);
+            posComp->setY(centerY - 50.f);
+        }
+    }
+
+    auto bgBarEnt = GameHelper::getEntityByTag(_world, "loading_bg_bar");
+    if (bgBarEnt) {
+        auto bgRect = bgBarEnt->getComponent<RectangleShape>();
+        auto bgPos = bgBarEnt->getComponent<Position>();
+        if (bgRect && bgPos) {
+            bgRect->setSize(barFullWidth, 20.f);
+            bgRect->setColor(20, 20, 40, 255);
+            bgPos->setX(centerX - (barFullWidth / 2.0f));
+            bgPos->setY(centerY + 40.f);
+        }
     }
 
     auto barEnt = GameHelper::getEntityByTag(_world, "loading_bar");
     if (barEnt) {
         auto rectComp = barEnt->getComponent<RectangleShape>();
-        if (rectComp) {
-            rectComp->setSize(400.f * progress, 20.f);
+        auto posComp = barEnt->getComponent<Position>();
+        if (rectComp && posComp) {
+            rectComp->setSize(barFullWidth * progress, 20.f);
+            rectComp->setColor(0, 255, 255, 255);
+            posComp->setX(centerX - (barFullWidth / 2.0f));
+            posComp->setY(centerY + 40.f);
         }
     }
-
-    _window.clear(sf::Color::Black);
+    _window.clear(sf::Color(5, 5, 15)); 
     _world.manageSystems();
     _window.display();
 }
@@ -128,16 +154,64 @@ void Game::run()
     _world.setWindow(_window);
     _world.setDeltaTime(1.f);
 
+    _world.setCurrentScene(10);
+
+    auto inputSystem = _world.getSystem<Inputs>();
+
+    _creator.createMyambo();
+    _creator.createKayu();
+    int timeout = 180;
+
+    while (_world.getCurrentScene() == 10) {
+        _window.clear(sf::Color::Black);
+        _world.manageSystems();
+        gameInput(inputSystem);
+        _window.display();
+        timeout--;
+        if (timeout <= 0)
+            break;
+    }
+    _world.setCurrentScene(1000);
+    timeout = 10;
+    while (timeout > 0) {
+        _window.clear(sf::Color::Black);
+        _world.manageSystems();
+        gameInput(inputSystem);
+        _window.display();
+        timeout--;
+    }
+    _world.setCurrentScene(11);
+    timeout = 180;
+
+    while (_world.getCurrentScene() == 11) {
+        _window.clear(sf::Color::Black);
+        _world.manageSystems();
+        gameInput(inputSystem);
+        _window.display();
+        timeout--;
+        if (timeout <= 0)
+            break;
+    }
     _world.setCurrentScene(0);
+
     _creator.createLoadingScreen();
+    auto entermusic = _world.createEntity();
+    entermusic->addComponent<SoundEffect>("../assets/sounds/loading.mp3", 100.f);
+    entermusic->addComponent<Scene>(0);
+    entermusic->addComponent<Tag>("entering_game_music");
     
     updateLoadingState(0.0f, "Initializing systems...");
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
     updateLoadingState(0.1f, "Loading assets...");
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _creator.createCamera();
     updateLoadingState(0.3f, "Generating Menu...");
-    _creator.createMenu();
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    _creator.createTguiMenu();
     updateLoadingState(0.6f, "Generating Background...");
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _creator.createBackground(_window); 
+    _creator.createCredits();
     updateLoadingState(0.8f, "Connecting to server...");
     
     Packet packet;
@@ -147,19 +221,25 @@ void Game::run()
     packet.setTotalPacketNbr(1);
     packet.positionSpawn(0, Player, 300, 300);
     _network.sendPacket(packet);
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    updateLoadingState(1.0f, "Ready!");
+    
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
-
-    _world.setCurrentScene(2);
-    auto inputSystem = _world.getSystem<Inputs>();
-
+    entermusic->getComponent<SoundEffect>()->play();
+    updateLoadingState(1.0f, "Ready!");
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    
+    _world.setCurrentScene(42);
+    auto musicmenu = GameHelper::getEntityByTag(_world, "menu_music");
+    if (musicmenu) {
+        auto musicComp = musicmenu->getComponent<Music>();
+        if (musicComp)
+            musicComp->play();
+    }
     while (_window.isOpen()) {
         _window.clear(sf::Color::Black);
         gameInput(inputSystem);
         _world.manageSystems();
         _window.display();
+        printf("sizewindow: %d sizeheight: %d\n", _window.getSize().x, _window.getSize().y);
     }
 }
 
@@ -171,10 +251,17 @@ void Game::run()
  */
 void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
 {
+    auto guiSystem = _world.getSystem<GuiSystem>();
+
     while (const std::optional eventOpt = _window.pollEvent()) {
         _world.setEvent(*eventOpt);
-        if (inputSystem->isKeyPressed(KeyboardKey::Key_Escape))
+        if (inputSystem->isKeyPressed(KeyboardKey::Key_Escape) && _world.getCurrentScene() == 2)
             _window.close();
+        else if (inputSystem->isKeyPressed(KeyboardKey::Key_Escape)
+            && _world.getCurrentScene() != 2 && _world.getCurrentScene() != 10
+            && _world.getCurrentScene() != 11) {
+            _world.setCurrentScene(2);
+        }
         if (eventOpt->is<sf::Event::Closed>())
             _window.close();
         if (inputSystem->isKeyPressed(KeyboardKey::Key_E)) {
@@ -185,7 +272,9 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
                 spawnClock.restart();
             }
         }
-
+        if (guiSystem) {
+            guiSystem->handleEvent(*eventOpt, _window);
+        }
         if (eventOpt->is<sf::Event::Resized>()) {
             sf::FloatRect visibleArea({0, 0}, {static_cast<float>(_window.getSize().x), static_cast<float>( _window.getSize().y)});
             _window.setView(sf::View(visibleArea));
@@ -302,7 +391,8 @@ void Game::playerInput(int entityId, World &world)
     vel->setVelocityY(targetVy);
 
     if (inputSystem->isKeyPressed(KeyboardKey::Key_Space)) {
-        if (!isShootKeyPressed) {
+        auto dataComp = compPlayer->getComponent<Data>();
+        if (!isShootKeyPressed && dataComp && std::stoi(dataComp->getData("mana")) >= 20) {
             Packet packet;
             packet.shoot(compPlayer->getId());
             packet.setAck(0);
@@ -312,6 +402,13 @@ void Game::playerInput(int entityId, World &world)
             _network.sendPacket(packet);
             isShootKeyPressed = true;
             compPlayer->getComponent<SoundEffect>()->play();
+            int mana = std::stoi(dataComp->getData("mana"));
+            if (mana >= 20) {
+                mana -= 20;
+                if (mana < 0)
+                    mana = 0;
+                dataComp->setData("mana", std::to_string(mana));
+            }
         }
     } else {
         isShootKeyPressed = false;
@@ -326,6 +423,7 @@ void Game::playerInput(int entityId, World &world)
         packet.setTotalPacketNbr(1);
         _network.sendPacket(packet);
     }
+    playerScript(entityId, world);
 }
 
 /**
@@ -341,4 +439,24 @@ int Game::killEntity(int id)
         return -1;
     _world.killEntity(id);
     return 0;
+}
+
+void Game::setMusicVolume(int volume)
+{
+    _musicVolume = volume;
+}
+
+void Game::setSfxVolume(int volume)
+{
+    _sfxVolume = volume;
+}
+
+int Game::getMusicVolume()
+{
+    return _musicVolume;
+}
+
+int Game::getSfxVolume()
+{
+    return _sfxVolume;
 }
