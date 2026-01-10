@@ -400,3 +400,13 @@ void GuiWidget::setAttached(bool attached)
 {
     _isAttached = attached;
 }
+
+/**
+ * @brief Add space in a VerticalLayout widget.
+ * @param ratio The ratio of space to add
+ */
+void GuiWidget::addSpace(float ratio)
+{
+    if (auto layout = std::dynamic_pointer_cast<tgui::VerticalLayout>(_widget))
+        layout->addSpace(ratio);
+}

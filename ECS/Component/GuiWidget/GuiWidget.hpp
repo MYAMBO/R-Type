@@ -63,6 +63,7 @@ class GuiWidget : public Component {
         void setRange(float min, float max);
         void setChecked(bool checked);
         void setAutoSize(bool autoSize);
+        void addSpace(float ratio);
 
         [[nodiscard]] std::string getText() const;
         [[nodiscard]] float getValue() const;
