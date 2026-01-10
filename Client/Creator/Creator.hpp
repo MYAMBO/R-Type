@@ -24,8 +24,11 @@ class Creator {
         void createMyambo();
         void createCamera();
         void createOptions();
+        void createCredits();
         void createTguiMenu();
+        void createPauseMenu();
         void createTguiOptions();
+        void createLevelSelect();
         void createLoadingScreen();
         void createPlayer(uint64_t id = 0);
         void createEnemy(float x, float y, int type);

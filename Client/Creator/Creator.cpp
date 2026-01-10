@@ -46,6 +46,7 @@ static void styleNeonButton(std::shared_ptr<GuiWidget> gui)
     renderer->setProperty("BorderColorHover", tgui::Color::White);
     renderer->setProperty("Borders", tgui::Borders(2));
     renderer->setProperty("RoundedBorderRadius", 10);
+    gui->setTextSize(40); 
     gui->getRawWidget()->setMouseCursor(tgui::Cursor::Type::Hand);
 }
 
@@ -181,107 +182,351 @@ void Creator::createKayu()
 }
 
 /**
- * @brief Create a Main Menu with TGUI
+ * @brief Create a beautiful and clean Main Menu using TGUI wrapped in ECS (Scene 2)
  */
 void Creator::createTguiMenu()
 {
-    auto window = _world.getWindow();
-    unsigned int width = window->getSize().x;
-    float centerX = static_cast<float>(width) / 2.0f;
-
     auto music = _world.createEntity();
-    music->addComponent<Music>("../assets/sounds/menu.mp3", 100.f, true);
+    music->addComponent<Music>("../assets/sounds/menu.mp3", 50.f, true);
     music->addComponent<Scene>(2);
     music->addComponent<Tag>("menu_music");
+    music->getComponent<Music>()->play();
+    music->addComponent<Script>([](int entityId, World& world) {
+        auto entity = GameHelper::getEntityById(world, entityId);
+        auto scene = world.getCurrentScene();
+        if (!entity)
+            return;
+        if (scene == 2 || scene == 3) {
+            auto musicComp = entity->getComponent<Music>();
+            if (musicComp && musicComp->getState() != MusicState::PLAYING) {
+                musicComp->play();
+            }
+        }
+        else {
+            auto musicComp = entity->getComponent<Music>();
+            if (musicComp && musicComp->getState() == MusicState::PLAYING) {
+                musicComp->stop();
+            }
+        }
+    });
 
     auto menuRoot = _world.createEntity();
     menuRoot->addComponent<Scene>(2);
+    menuRoot->addComponent<Layer>(LayerType::UI);
     menuRoot->addComponent<Tag>("menu_root");
+    menuRoot->addComponent<Position>(0.f, 0.f);
     menuRoot->addComponent<GuiWidget>(WidgetType::PANEL);
-
-    auto guiRoot = menuRoot->getComponent<GuiWidget>();
-    guiRoot->setSize(static_cast<float>(width), static_cast<float>(window->getSize().y));
-    guiRoot->setPosition(0.f, 0.f);
-    guiRoot->getRawWidget()->getRenderer()->setProperty("BackgroundColor", tgui::Color(10, 10, 30, 200));
+    
+    auto rootGui = menuRoot->getComponent<GuiWidget>();
+    rootGui->setSize("100%", "100%");
+    rootGui->getRawWidget()->getRenderer()->setProperty("BackgroundColor", tgui::Color(5, 5, 15, 220));
 
     auto titleEntity = _world.createEntity();
     titleEntity->addComponent<GuiWidget>(WidgetType::LABEL, "R-TYPE", menuRoot->getId());
     titleEntity->addComponent<Scene>(2);
-    titleEntity->addComponent<Layer>(LayerType::UI + 1);
     titleEntity->addComponent<Tag>("menu_title");
-    titleEntity->getComponent<GuiWidget>()->setFont("../assets/font/title.ttf");
-    titleEntity->addComponent<Position>(centerX - titleEntity->getComponent<GuiWidget>()->getSize().x / 2.0f, 100.f);
+    titleEntity->addComponent<Layer>(LayerType::UI + 1);
     
     auto guiTitle = titleEntity->getComponent<GuiWidget>();
-    guiTitle->setTextSize(100);
+    guiTitle->setFont("../assets/font/title.ttf");
+    guiTitle->setTextSize(120);
     guiTitle->setTextColor(sf::Color::Cyan);
     guiTitle->setTextStyle(tgui::TextStyle::Bold);
     guiTitle->setOrigin(0.5f, 0.5f);
-    guiTitle->setPosition(centerX, 150.f);
+    guiTitle->setPosition("50%", "20%");
+
+    auto layoutEntity = _world.createEntity();
+    layoutEntity->addComponent<GuiWidget>(WidgetType::VERTICAL_LAYOUT, "", menuRoot->getId());
+    layoutEntity->addComponent<Scene>(2);
+    layoutEntity->addComponent<Tag>("menu_button_layout");
+    layoutEntity->addComponent<Layer>(LayerType::UI + 1);
+    
+    auto guiLayout = layoutEntity->getComponent<GuiWidget>();
+    guiLayout->setSize("30%", "50%");
+    guiLayout->setPosition("50%", "60%");
+    guiLayout->setOrigin(0.5f, 0.5f);
 
     auto btnPlay = _world.createEntity();
-    btnPlay->addComponent<GuiWidget>(WidgetType::BUTTON, "START", menuRoot->getId());
+    btnPlay->addComponent<GuiWidget>(WidgetType::BUTTON, "START MISSION", layoutEntity->getId());
     btnPlay->addComponent<Scene>(2);
-    btnPlay->addComponent<Layer>(LayerType::UI + 1);
-    btnPlay->addComponent<Tag>("menu_button_play");
-    
+    btnPlay->addComponent<Tag>("menu_button_start");
+    btnPlay->addComponent<SoundEffect>("../assets/sounds/clics.mp3", 100.f);
+    btnPlay->getComponent<SoundEffect>()->setGlobal(true);
     auto guiPlay = btnPlay->getComponent<GuiWidget>();
     styleNeonButton(guiPlay);
     guiPlay->setFont("../assets/font/title.ttf");
     guiPlay->setCallback([this]() {
-        auto music = GameHelper::getEntityByTag(_world, "menu_music");
-        if (music) {
-            auto musicComp = music->getComponent<Music>();
-            if (musicComp)
-            musicComp->stop();
-        }
-        _world.setCurrentScene(1); 
+        auto sfx = GameHelper::getEntityByTag(_world, "menu_button_start")->getComponent<SoundEffect>();
+        if (sfx)
+            sfx->play();
+        auto m = GameHelper::getEntityByTag(_world, "menu_music");
+        if (m) m->getComponent<Music>()->stop();
+        _world.setCurrentScene(12); 
     });
-    guiPlay->setSize(400.f, 120.f);
-    guiPlay->setOrigin(0.5f, 0.5f);
-    guiPlay->setPosition("50%", "50%");
+    guiLayout->addSpace(0.2f);
 
-    auto btnQuit = _world.createEntity();
-    btnQuit->addComponent<GuiWidget>(WidgetType::BUTTON, "EXIT", menuRoot->getId());
-    btnQuit->addComponent<Scene>(2);
-    btnQuit->addComponent<Layer>(LayerType::UI + 1);
-    btnQuit->addComponent<Tag>("menu_button_quit");
+    auto spaceEntity = _world.createEntity();
+    spaceEntity->addComponent<GuiWidget>(WidgetType::LABEL, "", layoutEntity->getId());
+    spaceEntity->addComponent<Scene>(2);
+    spaceEntity->addComponent<Tag>("menu_button_space");
 
-
-    auto guiQuit = btnQuit->getComponent<GuiWidget>();
-    styleNeonButton(guiQuit);
-    guiQuit->getRawWidget()->getRenderer()->setProperty("BorderColor", tgui::Color(255, 50, 50));
-    guiQuit->setCallback([this]() {
-        if (_world.getWindow())
-            _world.getWindow()->close();
-    });
-    guiQuit->setFont("../assets/font/title.ttf");
-    guiQuit->setSize(400.f, 120.f);
-    guiQuit->setPosition("50%", "80%");
-    guiQuit->setOrigin(0.5f, 0.5f);
-
-    auto guiOptions = _world.createEntity();
-    guiOptions->addComponent<GuiWidget>(WidgetType::BUTTON, "OPTIONS", menuRoot->getId());
-    guiOptions->addComponent<Scene>(2);
-    guiOptions->addComponent<Layer>(LayerType::UI + 1);
-    guiOptions->addComponent<Tag>("menu_button_options");
-
-    auto guiOpt = guiOptions->getComponent<GuiWidget>();
+    auto btnOptions = _world.createEntity();
+    btnOptions->addComponent<GuiWidget>(WidgetType::BUTTON, "SETTINGS", layoutEntity->getId());
+    btnOptions->addComponent<Scene>(2);
+    btnOptions->addComponent<Tag>("menu_button_options");
+    btnOptions->addComponent<SoundEffect>("../assets/sounds/clics.mp3", 100.f);
+    btnOptions->getComponent<SoundEffect>()->setGlobal(true);
+    auto guiOpt = btnOptions->getComponent<GuiWidget>();
     styleNeonButton(guiOpt);
     guiOpt->setFont("../assets/font/title.ttf");
-    guiOpt->setSize(400.f, 120.f);
-    guiOpt->setOrigin(0.5f, 0.5f);
-    guiOpt->setPosition("50%", "65%");
-    guiOpt->setCallback([this]() {
+    guiOpt->setCallback([this]() { 
+        auto sfx = GameHelper::getEntityByTag(_world, "menu_button_options")->getComponent<SoundEffect>();
+        if (sfx)
+            sfx->play();
         _world.setCurrentScene(3);
+    });
+    auto spaceEntity2 = _world.createEntity();
+    spaceEntity2->addComponent<GuiWidget>(WidgetType::LABEL, "", layoutEntity->getId());
+    spaceEntity2->addComponent<Scene>(2);
+    spaceEntity2->addComponent<Tag>("menu_button_space2");
+
+    auto btnQuit = _world.createEntity();
+    btnQuit->addComponent<GuiWidget>(WidgetType::BUTTON, "ABORT", layoutEntity->getId());
+    btnQuit->addComponent<Scene>(2);
+    btnQuit->addComponent<Tag>("menu_button_quit");
+    btnQuit->addComponent<SoundEffect>("../assets/sounds/clics.mp3", 100.f);
+    btnQuit->getComponent<SoundEffect>()->setGlobal(true);
+    auto guiQuit = btnQuit->getComponent<GuiWidget>();
+    styleNeonButton(guiQuit);
+    guiQuit->setFont("../assets/font/title.ttf");
+    guiQuit->getRawWidget()->getRenderer()->setProperty("BorderColor", tgui::Color(255, 50, 50));
+    guiQuit->getRawWidget()->getRenderer()->setProperty("TextColorHover", tgui::Color::Red);
+    guiQuit->setCallback([this]() {
+        auto sfx = GameHelper::getEntityByTag(_world, "menu_button_quit")->getComponent<SoundEffect>();
+        if (sfx)
+            sfx->play();
+        if (_world.getWindow())
+            _world.getWindow()->close();
     });
 
     createTguiOptions();
 }
 
+void Creator::createLevelSelect()
+{
+    // Implementation for level selection menu can be added here
+}
+
+void Creator::createPauseMenu()
+{
+    // Implementation for pause menu can be added here
+}
+
 /**
- * @brief Create an Options Menu with TGUI
+ * @brief Create a scrolling credits screen (Scene 4) using pure ECS
  */
+void Creator::createCredits()
+{
+    auto window = _world.getWindow();
+    float width = static_cast<float>(window->getSize().x);
+    float height = static_cast<float>(window->getSize().y);
+    float centerX = width / 8.f;
+    float centerX2 = width / 2.f;
+
+    std::vector<std::pair<std::string, std::string>> credits = {
+        {"A Cinematic Experience by", "MYAMBO STUDIOS"},
+        {"In Strategic Alliance with", "KAYU CORP"},
+        {"", ""},
+        {"--- DIRECTION & PRODUCTION ---", ""},
+        {"Chief Executive Producer", "Antoine"},
+        {"Global Creative Director", "Martin"},
+        {"Lead Technical Supervisor", "Pierre"},
+        {"Head of Production Logic", "Yanis"},
+        {"Operations Strategy Manager", "Timote"},
+        {"", ""},
+        {"--- SOFTWARE ENGINEERING ---", ""},
+        {"Core Engine Architect", "Pierre"},
+        {"Low-Level Systems Specialist", "Martin"},
+        {"Memory Management Lead", "Pierre"},
+        {"Logic & Mathematics Analyst", "Yanis"},
+        {"Scripting Pipeline Engineer", "Antoine"},
+        {"", ""},
+        {"--- NETWORK ARCHITECTURE ---", ""},
+        {"Network Infrastructure Lead", "Antoine"},
+        {"Synchronous State Strategist", "Timote"},
+        {"Packet Loss Mitigation Expert", "Yanis"},
+        {"UDP Protocol Ambassador", "Antoine"},
+        {"", ""},
+        {"--- VISUAL DESIGN ---", ""},
+        {"Lead UI & UX Designer", "Martin"},
+        {"Senior Animator (Sprite Work)", "Pierre"},
+        {"Cinematic Lighting & Glow", "Martin"},
+        {"Background Parallax Engineer", "Pierre"},
+        {"", ""},
+        {"--- AUDIO & MUSIC ---", ""},
+        {"Director of Soundscapes", "Martin"},
+        {"Lead Orchestral Composer", "Martin"},
+        {"Atmospheric Silence Expert", "Martin"},
+        {"", ""},
+        {"--- COMPILATION TEAM ---", ""},
+        {"Senior Segfault Investigator", "Yanis"},
+        {"Junior Pointer Mismanager", "Timote"},
+        {"Memory Leak Denial Liaison", "Pierre"},
+        {"Git Conflict Crisis Manager", "Antoine"},
+        {"", ""},
+        {"--- LOGISTIC DEPARTMENT ---", ""},
+        {"Chief Caffeine Procurement", "Timote"},
+        {"Snack Distribution Coordinator", "Martin"},
+        {"Rubber Duck Conversations", "Pierre"},
+        {"Head of Keyboard Sanitation", "Martin"},
+        {"Emergency Nap Coordinator", "Antoine"},
+        {"", ""},
+        {"--- COMPLAINTS BUREAU ---", ""},
+        {"Professional Bug Apologist", "Antoine"},
+        {"'It Worked On My Machine' Officer", "Martin"},
+        {"Feature-to-Bug Translator", "Timote"},
+        {"Senior Shrug Expert", "Pierre"},
+        {"", ""},
+        {"--- SPIRITUAL DEPARTMENT ---", ""},
+        {"Supreme Divine Inspiration", "Yae Miko"},
+        {"Mental Health (What's that?)", "Our Compiler"},
+        {"", ""},
+        {"--- SPECIAL THANKS ---", ""},
+        {"The Guy who invented Ctrl+C", "The Real MVP"},
+        {"StackOverflow Thread #48291", "For the save"},
+        {"ChatGPT", "For writing this list"},
+        {"", ""},
+        {"--- DEVELOPMENT STATISTICS ---", ""},
+        {"Keyboards Destroyed", "3"},
+        {"Liters of Coffee Consumed", "237"},
+        {"Hours of Sleep Lost", "Infinity"},
+        {"Lines of Code Deleted", "More than kept"},
+        {"Merge Conflicts Resolved", "842 (mostly by crying)"},
+        {"Times 'It works on my PC' was said", "154"},
+        {"Energy Drink Cans Under the Desk", "1,294"},
+        {"Hours spent rubber ducking", "42"},
+        {"Rubber Ducks that quit their job", "2"},
+        {"Features originally reported as bugs", "34"},
+        {"Git commits named just 'fix'", "1,023"},
+        {"Git commits named 'final fix'", "87"},
+        {"Git commits named 'AAAAAAAHHHHHH'", "12"},
+        {"Sunlight exposure (last 3 months)", "0.002 seconds"},
+        {"Brain cells lost per Segfault", "1,500"},
+        {"Times we thought about using Java", "0 (Never.)"},
+        {"Remaining sanity", "Not found (404)"},
+        {"", ""},
+        {"--- DISCLAIMER ---", ""},
+        {"No Segfaults were harmed", "Actually, many died."},
+        {"This game was made by", "5 Humans & 1 Fox."},
+        {"", ""},
+        {"--- THE LEGENDARY FIVE ---", ""},
+        {"ANTOINE", "The Ping"},
+        {"MARTIN", "The Glow"},
+        {"YANIS", "The Logic"},
+        {"PIERRE", "The Engine"},
+        {"TIMOTE", "The Packet"},
+        {"", ""},
+        {"THANK YOU FOR WATCHING", "PLEASE REBOOT YOUR COMPUTER NOW"}
+    };
+
+    auto music = _world.createEntity();
+    music->addComponent<Music>("../assets/sounds/credits.mp3", 50.f, true);
+    music->addComponent<Scene>(42);
+    music->addComponent<Tag>("credits_music");
+    music->addComponent<Script>([](int id, World& w) {
+        auto entity = GameHelper::getEntityById(w, id);
+        auto sceneComp = entity->getComponent<Scene>();
+        if (w.getCurrentScene() != sceneComp->getScene())
+            return;
+        if (!entity)
+            return;
+        auto musicComp = entity->getComponent<Music>();
+        if (musicComp && musicComp->getState() != MusicState::PLAYING) {
+            musicComp->play();
+        }
+    });
+
+    auto background = _world.createEntity();
+    background->addComponent<Scene>(42);
+    background->addComponent<Layer>(LayerType::BACKGROUND + 1);
+    background->addComponent<Tag>("credits_background");
+    background->addComponent<RectangleShape>(width * 3, height * 3, 0, 0, 0, 255);
+    background->addComponent<Position>(0.f, 0.f);
+
+    float startY = height + 50.f;
+    float lineSpacing = 80.f;
+
+    auto title = _world.createEntity();
+    title->addComponent<Scene>(42);
+    title->addComponent<Layer>(LayerType::UI);
+    title->addComponent<Tag>("credits_title");
+    title->addComponent<Position>(centerX + centerX / 2.f, startY - lineSpacing * 2);
+    title->addComponent<Velocity>(0.f, -3.f);
+    title->addComponent<Text>("CREDITS R-TYPE", "../assets/font/title.ttf", 80);
+    title->getComponent<Text>()->setColor(255, 255, 255, 255);
+
+    auto subtitle = _world.createEntity();
+    subtitle->addComponent<Scene>(42);
+    subtitle->addComponent<Layer>(LayerType::UI);
+    subtitle->addComponent<Tag>("credits_subtitle");
+    subtitle->addComponent<Position>(centerX + centerX / 2.f, startY - lineSpacing);
+    subtitle->addComponent<Velocity>(0.f, -3.f);
+    subtitle->addComponent<Text>("Thank you for playing!", "../assets/font/title.ttf", 40);
+    subtitle->getComponent<Text>()->setColor(255, 255, 255, 255);
+
+    for (size_t i = 0; i < credits.size(); ++i) {
+        if (!credits[i].first.empty()) {
+            auto role = _world.createEntity();
+            role->addComponent<Scene>(42);
+            role->addComponent<Layer>(LayerType::UI);
+            role->addComponent<Tag>("credit_role_" + std::to_string(i));
+            role->addComponent<Position>(centerX, startY + (i * lineSpacing));
+            role->addComponent<Velocity>(0.f, -3.f);
+            role->addComponent<Script>([](int id, World& w) {
+                auto centerX = static_cast<float>(w.getWindow()->getSize().x) / 8.f;
+                auto pos = GameHelper::getEntityById(w, id);
+                if (!pos)
+                    return;
+                auto positionComp = pos->getComponent<Position>();
+                positionComp->setX(centerX);
+            });
+            role->addComponent<Text>(credits[i].first, "../assets/font/title.ttf", 20);
+            auto txtRole = role->getComponent<Text>();
+            txtRole->setColor(255, 255, 255, 180);
+        }
+
+        if (!credits[i].second.empty()) {
+            auto name = _world.createEntity();
+            name->addComponent<Scene>(42);
+            name->addComponent<Layer>(LayerType::UI);
+            name->addComponent<Tag>("credit_name_" + std::to_string(i));
+            name->addComponent<Position>(centerX2, startY + (i * lineSpacing));
+            name->addComponent<Velocity>(0.f, -3.f);
+            name->addComponent<Script>([](int id, World& w) {
+                auto centerX2 = static_cast<float>(w.getWindow()->getSize().x) / 2.f;
+                auto pos = GameHelper::getEntityById(w, id);
+                if (!pos)
+                    return;
+                auto positionComp = pos->getComponent<Position>();
+                positionComp->setX(centerX2);
+                
+            });
+            name->addComponent<Text>(credits[i].second, "../assets/font/title.ttf", 25);
+            auto txtName = name->getComponent<Text>();
+            txtName->setColor(255, 255, 255, 255);
+        }
+    }
+
+    auto watcher = _world.createEntity();
+    watcher->addComponent<Scene>(42);
+    watcher->addComponent<Tag>("credits_watcher");
+    watcher->addComponent<Script>([](int id, World& w) {
+        auto inputs = w.getSystem<Inputs>();
+        if (inputs && (inputs->isKeyPressed(KeyboardKey::Key_Escape) || inputs->isKeyPressed(KeyboardKey::Key_Space))) {
+            w.setCurrentScene(2);
+        }
+    });
+}
 /**
  * @brief Create an Options Menu with a Scrollable area
  */
@@ -441,7 +686,7 @@ void Creator::createPlayer(uint64_t id)
     player->addComponent<HP>(100);
     player->addComponent<Position>(75.0f, 75.0f);
     player->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet42.gif"));
-    player->addComponent<Scale>(2.f);
+    player->addComponent<Scale>(3.f);
     player->addComponent<Scene>(1);
     player->addComponent<SoundEffect>(std::string("../assets/sounds/lazershoot.mp3"));
     player->addComponent<Layer>(10);
@@ -472,7 +717,7 @@ void Creator::createPlayer(uint64_t id)
     fire->addComponent<Position>(0.f, 85.f);
     fire->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet1.gif"));
     fire->addComponent<Animator>(2, 1, 3.f, 285, 85, 15, 15, 0, 0);
-    fire->addComponent<Scale>(2.f);
+    fire->addComponent<Scale>(3.f);
     fire->addComponent<Scene>(1);
     fire->addComponent<Script>(playerfire);
     fire->addComponent<Music>("../assets/sounds/game.mp3", 100.f, true);
@@ -629,12 +874,6 @@ void Creator::createLoadingScreen()
     float centerX = window->getSize().x / 2.0f - 200.f;
     float centerY = window->getSize().y / 2.0f;
 
-    auto title = _world.createEntity();
-    title->addComponent<Scene>(0);
-    title->addComponent<Text>("LOADING...", "../assets/font/title.ttf", 40);
-    title->addComponent<Position>(centerX - title->getComponent<Text>()->getGlobalBounds().size.x / 2.0f, centerY - 100.f);
-    title->addComponent<Layer>(LayerType::UI);
-
     auto status = _world.createEntity();
     status->addComponent<Scene>(0);
     status->addComponent<Text>("Initializing...", "../assets/font/title.ttf", 20);
@@ -685,8 +924,8 @@ void Creator::createSparks(World &world, float x, float y, int amount)
             if (!e) return;
             auto r = e->getComponent<RectangleShape>();
             if (r->getSize().x > 0.1f) {
-                r->setSize(r->getSize().x * 0.9f, r->getSize().y * 0.9f);
-                r->setColor(r->getColor().r, r->getColor().g * 0.9f, r->getColor().b, r->getColor().a);
+                r->setSize(r->getSize().x * 0.8f, r->getSize().y * 0.8f);
+                r->setColor(r->getColor().r, r->getColor().g * 0.8f, r->getColor().b, r->getColor().a);
             }
             else
                 w.killEntity(id);

@@ -90,30 +90,52 @@ Game::~Game()
 }
 
 /**
- * @brief Updates the ECS loading screen entities and forces a frame render.
+ * @brief Updates the ECS loading screen entities with a professional AAA look.
  */
 void Game::updateLoadingState(float progress, const std::string& status)
 {
+    float width = static_cast<float>(_window.getSize().x);
+    float height = static_cast<float>(_window.getSize().y);
+    float centerX = width / 2.0f;
+    float centerY = height / 2.0f;
+    float barFullWidth = 600.f;
+
     auto statusEnt = GameHelper::getEntityByTag(_world, "loading_status");
     if (statusEnt) {
         auto textComp = statusEnt->getComponent<Text>();
-        if (textComp) textComp->setString(status);
-        
         auto posComp = statusEnt->getComponent<Position>();
-        sf::FloatRect bounds = textComp->getGlobalBounds();
-        float centerX = _window.getSize().x / 2.0f - 200.f;
-        if (posComp)
-            posComp->setX(centerX - (bounds.size.x / 2.0f));
-    }
-    auto barEnt = GameHelper::getEntityByTag(_world, "loading_bar");
-    if (barEnt) {
-        auto rectComp = barEnt->getComponent<RectangleShape>();
-        if (rectComp) {
-            rectComp->setSize(400.f * progress, 20.f);
+        if (textComp && posComp) {
+            textComp->setString(status);
+            textComp->setColor(0, 255, 255, 255);
+            posComp->setX(centerX - textComp->getGlobalBounds().size.x / 2.0f);
+            posComp->setY(centerY - 50.f);
         }
     }
 
-    _window.clear(sf::Color::Black);
+    auto bgBarEnt = GameHelper::getEntityByTag(_world, "loading_bg_bar");
+    if (bgBarEnt) {
+        auto bgRect = bgBarEnt->getComponent<RectangleShape>();
+        auto bgPos = bgBarEnt->getComponent<Position>();
+        if (bgRect && bgPos) {
+            bgRect->setSize(barFullWidth, 20.f);
+            bgRect->setColor(20, 20, 40, 255);
+            bgPos->setX(centerX - (barFullWidth / 2.0f));
+            bgPos->setY(centerY + 40.f);
+        }
+    }
+
+    auto barEnt = GameHelper::getEntityByTag(_world, "loading_bar");
+    if (barEnt) {
+        auto rectComp = barEnt->getComponent<RectangleShape>();
+        auto posComp = barEnt->getComponent<Position>();
+        if (rectComp && posComp) {
+            rectComp->setSize(barFullWidth * progress, 20.f);
+            rectComp->setColor(0, 255, 255, 255);
+            posComp->setX(centerX - (barFullWidth / 2.0f));
+            posComp->setY(centerY + 40.f);
+        }
+    }
+    _window.clear(sf::Color(5, 5, 15)); 
     _world.manageSystems();
     _window.display();
 }
@@ -130,7 +152,7 @@ void Game::run()
     _world.setWindow(_window);
     _world.setDeltaTime(1.f);
 
-    _world.setCurrentScene(10);
+    _world.setCurrentScene(0); // 10
 
     auto inputSystem = _world.getSystem<Inputs>();
 
@@ -147,7 +169,7 @@ void Game::run()
         if (timeout <= 0)
             break;
     }
-    _world.setCurrentScene(1000);
+    _world.setCurrentScene(0);/// 1000
     timeout = 10;
     while (timeout > 0) {
         _window.clear(sf::Color::Black);
@@ -156,8 +178,8 @@ void Game::run()
         _window.display();
         timeout--;
     }
-    _world.setCurrentScene(11);
-    timeout = 240;
+    _world.setCurrentScene(0); // 11
+    timeout = 180;
 
     while (_world.getCurrentScene() == 11) {
         _window.clear(sf::Color::Black);
@@ -177,12 +199,17 @@ void Game::run()
     entermusic->addComponent<Tag>("entering_game_music");
     
     updateLoadingState(0.0f, "Initializing systems...");
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
     updateLoadingState(0.1f, "Loading assets...");
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _creator.createCamera();
     updateLoadingState(0.3f, "Generating Menu...");
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _creator.createTguiMenu();
     updateLoadingState(0.6f, "Generating Background...");
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _creator.createBackground(_window); 
+    _creator.createCredits();
     updateLoadingState(0.8f, "Connecting to server...");
     
     Packet packet;
@@ -198,7 +225,7 @@ void Game::run()
     updateLoadingState(1.0f, "Ready!");
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     
-    _world.setCurrentScene(2);
+    _world.setCurrentScene(42);
     auto musicmenu = GameHelper::getEntityByTag(_world, "menu_music");
     if (musicmenu) {
         auto musicComp = musicmenu->getComponent<Music>();
@@ -210,6 +237,7 @@ void Game::run()
         gameInput(inputSystem);
         _world.manageSystems();
         _window.display();
+        printf("sizewindow: %d sizeheight: %d\n", _window.getSize().x, _window.getSize().y);
     }
 }
 

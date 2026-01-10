@@ -27,29 +27,47 @@
 #include "Network.hpp"
 #include "Packet.hpp"
 
-
-/**
- * @brief Script to scroll the background.
- *
- * This function moves the background entities to create a scrolling effect.
- * @param entityId The ID of the background entity.
- */
 void backgroundScrollScript(size_t entityId, World &world)
 {
     auto entity = GameHelper::getEntityById(world, entityId);
-    if (!entity)
-        return;
+    if (!entity) return;
+
     auto posComp = entity->getComponent<Position>();
     auto spriteComp = entity->getComponent<Sprite>();
-    if (!posComp || !spriteComp)
+    auto scaleComp = entity->getComponent<Scale>();
+    auto tagComp = entity->getComponent<Tag>();
+    auto windowSize = world.getWindow()->getSize();
+
+    if (!posComp || !spriteComp || !scaleComp || !tagComp)
         return;
 
+    auto sprite = spriteComp->getSprite();
+    auto textureRect = sprite->getTextureRect();
+    float scaleX = static_cast<float>(windowSize.x) / textureRect.size.x;
+    float scaleY = static_cast<float>(windowSize.y) / textureRect.size.y;
+    float finalScale = std::max(scaleX, scaleY);
+    
+    if (std::abs(scaleComp->getScale() - finalScale) > 0.001f) {
+        scaleComp->setScale(finalScale * 1.2f);
+    }
+
+    float currentWidth = static_cast<float>(textureRect.size.x) * finalScale * 1.2f;
+
+    std::string otherTag = (tagComp->getTag() == "background_first") ? "background_second" : "background_first";
+    auto otherEntity = GameHelper::getEntityByTag(world, otherTag);
+
+    if (posComp->getX() <= -currentWidth) {
+        if (otherEntity) {
+            auto otherPos = otherEntity->getComponent<Position>();
+            if (otherPos) {
+                posComp->setX(otherPos->getX() + currentWidth - 2.0f);
+            }
+        } else {
+            posComp->setX(currentWidth);
+        }
+    }
     if (world.getCurrentScene() != entity->getComponent<Scene>()->getScene())
         entity->getComponent<Scene>()->setScene(world.getCurrentScene());
-    auto bounds = spriteComp->getSprite()->getGlobalBounds();
-    float width = bounds.size.x; 
-    if (posComp->getX() <= -width)
-        posComp->setX(width);
 }
 
 /**
