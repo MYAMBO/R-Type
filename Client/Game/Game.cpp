@@ -55,6 +55,8 @@
 #include "DeathSys.hpp"
 #include "ScriptsSys.hpp"
 
+#include "LevelLoader.hpp"
+
 /**
  * @brief Constructs a new Game object.
  *

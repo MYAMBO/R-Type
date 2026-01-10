@@ -712,10 +712,10 @@ void Creator::createPlayer(uint64_t id)
     
     if (playerCount == 0) {
         player->addComponent<Velocity>(0.f, 0.f);
-        player->addComponent<Animator>(2, 1, 3.f, 0, 0, 33, 19, 0, 0);
+        player->addComponent<Animator>(2, 2, 3.f, 0, 0, 33, 19, 0, 0);
         player->addComponent<Tag>("player");
     } else {
-        player->addComponent<Animator>(2, 1, 3.f, 0, (playerCount * 17), 33, 19, 0, 0);
+        player->addComponent<Animator>(2, 2, 3.f, 0, (playerCount * 17), 33, 19, 0, 0);
         player->addComponent<Tag>("player_mate");
     }
 
@@ -858,7 +858,10 @@ void Creator::createBullet(size_t entityId, int x, int y, int type)
     if (isPlayer) {
         bullet->addComponent<Position>(x, y);
         bullet->addComponent<Velocity>(10.f, 0.f);
-        bullet->addComponent<Animator>(2, 1, 3.0f, 200, 120, 32, 15, 0, 0);
+        bullet->addComponent<Animator>(2, 2, 3.0f, 200, 120, 32, 15, 0, 0);
+        bullet->addComponent<HP>(10);
+        bullet->addComponent<Damage>(10);
+        bullet->addComponent<BoxCollider>(32.0f, 15.0f);
     } else {
         bullet->addComponent<Position>(x - 20.f , y + 15.f);
         bullet->addComponent<Rotation>(180.f);
@@ -867,9 +870,8 @@ void Creator::createBullet(size_t entityId, int x, int y, int type)
     bullet->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet1.gif"));
     bullet->addComponent<Scale>(2.f);
     bullet->addComponent<Scene>(1);
-    bullet->addComponent<Tag>("bullet");
+    bullet->addComponent<Tag>("player_bullet");
 }
-
 /**
  * @brief Creates the loading screen entities.
  *
