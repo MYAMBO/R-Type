@@ -152,7 +152,7 @@ void Game::run()
     _world.setWindow(_window);
     _world.setDeltaTime(1.f);
 
-    _world.setCurrentScene(0); // 10
+    _world.setCurrentScene(10);
 
     auto inputSystem = _world.getSystem<Inputs>();
 
@@ -169,7 +169,7 @@ void Game::run()
         if (timeout <= 0)
             break;
     }
-    _world.setCurrentScene(0);/// 1000
+    _world.setCurrentScene(1000);
     timeout = 10;
     while (timeout > 0) {
         _window.clear(sf::Color::Black);
@@ -178,7 +178,7 @@ void Game::run()
         _window.display();
         timeout--;
     }
-    _world.setCurrentScene(0); // 11
+    _world.setCurrentScene(11);
     timeout = 180;
 
     while (_world.getCurrentScene() == 11) {
@@ -437,4 +437,24 @@ int Game::killEntity(int id)
         return -1;
     _world.killEntity(id);
     return 0;
+}
+
+void Game::setMusicVolume(int volume)
+{
+    _musicVolume = volume;
+}
+
+void Game::setSfxVolume(int volume)
+{
+    _sfxVolume = volume;
+}
+
+int Game::getMusicVolume()
+{
+    return _musicVolume;
+}
+
+int Game::getSfxVolume()
+{
+    return _sfxVolume;
 }

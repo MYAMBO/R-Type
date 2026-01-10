@@ -19,7 +19,6 @@ class Creator {
         Creator(World& world);
         ~Creator() = default;
 
-        void createMenu();
         void createKayu();
         void createMyambo();
         void createCamera();

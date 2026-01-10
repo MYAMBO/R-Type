@@ -527,6 +527,7 @@ void Creator::createCredits()
         }
     });
 }
+
 /**
  * @brief Create an Options Menu with a Scrollable area
  */
@@ -657,6 +658,12 @@ void Creator::createTguiOptions()
     createOptionToggle("EASY MODE", dummy);
     createOptionToggle("HARD MODE", dummy);
     createOptionToggle("ONE HIT KILL", dummy);
+    //createOptionSlider("MUSIC VOLUME", 100.f, [](float value) {
+    //    Game::setMusicVolume(value);
+    //});
+    //createOptionSlider("SFX VOLUME", 100.f, [](float value) {
+    //    Game::setSfxVolume(value);
+    //});
 
     auto btnReturn = _world.createEntity();
     btnReturn->addComponent<GuiWidget>(WidgetType::BUTTON, "BACK", optionsRoot->getId());

@@ -54,6 +54,11 @@ class Game {
         void menudisplay();
         void gameplaydisplay();
 
+        void setMusicVolume(int volume);
+        void setSfxVolume(int volume);
+
+        int getMusicVolume();
+        int getSfxVolume();
     private:
         void gameInput(std::shared_ptr<Inputs> inputSystem);
 
@@ -70,6 +75,8 @@ class Game {
         Creator _creator;
 
         bool _isShootKeyPressed = false;
+        int _musicVolume = 100;
+        int _sfxVolume = 100;
 };
 
 #endif
