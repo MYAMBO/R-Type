@@ -48,17 +48,12 @@ class Game {
         ~Game();
 
         void run();
+        void loadingRun();
         int killEntity(int id);
         void handleSpawn(int id, int type, float x, float y);
 
         void menudisplay();
         void gameplaydisplay();
-
-        void setMusicVolume(int volume);
-        void setSfxVolume(int volume);
-
-        int getMusicVolume();
-        int getSfxVolume();
     private:
         void gameInput(std::shared_ptr<Inputs> inputSystem);
 
