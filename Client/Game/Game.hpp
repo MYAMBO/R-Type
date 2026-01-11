@@ -25,6 +25,17 @@ enum LayerType {
     UI = 1000,
 };
 
+enum class SceneType {
+    LOADING = 0,
+    GAMEPLAY = 1,
+    MENU = 2,
+    OPTIONS = 3,
+    MYAMBO = 10,
+    KAYU = 11,
+    CREDITS = 42,
+    PAUSE = 1000,
+};
+
 enum PlayerColor {
     BLUE = 0,
     PURPLE,

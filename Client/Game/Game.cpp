@@ -148,7 +148,7 @@ void Game::loadingRun()
     _world.setWindow(_window);
     _world.setDeltaTime(1.f);
 
-    _world.setCurrentScene(10);
+    _world.setCurrentScene(static_cast<int>(SceneType::MYAMBO));
 
     auto inputSystem = _world.getSystem<Inputs>();
 
@@ -156,7 +156,7 @@ void Game::loadingRun()
     _creator.createKayu();
     int timeout = 180;
 
-    while (_world.getCurrentScene() == 10) {
+    while (_world.getCurrentScene() == static_cast<int>(SceneType::MYAMBO)) {
         _window.clear(sf::Color::Black);
         _world.manageSystems();
         gameInput(inputSystem);
@@ -165,7 +165,7 @@ void Game::loadingRun()
         if (timeout <= 0)
             break;
     }
-    _world.setCurrentScene(1000);
+    _world.setCurrentScene(static_cast<int>(SceneType::PAUSE));
     timeout = 10;
     while (timeout > 0) {
         _window.clear(sf::Color::Black);
@@ -174,10 +174,10 @@ void Game::loadingRun()
         _window.display();
         timeout--;
     }
-    _world.setCurrentScene(11);
+    _world.setCurrentScene(static_cast<int>(SceneType::KAYU));
     timeout = 180;
 
-    while (_world.getCurrentScene() == 11) {
+    while (_world.getCurrentScene() == static_cast<int>(SceneType::KAYU)) {
         _window.clear(sf::Color::Black);
         _world.manageSystems();
         gameInput(inputSystem);
@@ -186,7 +186,7 @@ void Game::loadingRun()
         if (timeout <= 0)
             break;
     }
-    _world.setCurrentScene(0);
+    _world.setCurrentScene(static_cast<int>(SceneType::LOADING));
 
     _creator.createLoadingScreen();
 
@@ -218,7 +218,7 @@ void Game::run()
     auto inputSystem = _world.getSystem<Inputs>();
     auto entermusic = _world.createEntity();
     entermusic->addComponent<SoundEffect>("../assets/sounds/loading.mp3", 100.f);
-    entermusic->addComponent<Scene>(0);
+    entermusic->addComponent<Scene>(static_cast<int>(SceneType::LOADING));
     entermusic->addComponent<Tag>("entering_game_music");
     
     Packet packet;
@@ -234,7 +234,7 @@ void Game::run()
     updateLoadingState(1.0f, "Ready!");
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     
-    _world.setCurrentScene(2);
+    _world.setCurrentScene(static_cast<int>(SceneType::MENU));
     auto musicmenu = GameHelper::getEntityByTag(_world, "menu_music");
     if (musicmenu) {
         auto musicComp = musicmenu->getComponent<Music>();
@@ -263,10 +263,10 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
         _world.setEvent(*eventOpt);
         if (inputSystem->isTriggered(*eventOpt, KeyboardKey::Key_Escape)) {
             int currentScene = _world.getCurrentScene();
-            if (currentScene == 2) {
+            if (currentScene == static_cast<int>(SceneType::MENU)) {
                 _window.close();
-            } else if (currentScene != 10 && currentScene != 11) {
-                _world.setCurrentScene(2);
+            } else if (currentScene != static_cast<int>(SceneType::MYAMBO) && currentScene != static_cast<int>(SceneType::KAYU)) {
+                _world.setCurrentScene(static_cast<int>(SceneType::MENU));
             }
         }
         if (eventOpt->is<sf::Event::Closed>())
@@ -352,7 +352,7 @@ void Game::handleSpawn(int id, int type, float x, float y)
  */
 void Game::playerInput(int entityId, World &world)
 {
-    if (world.getCurrentScene() != 1)
+    if (world.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
         return;
     (void)entityId;
     static bool isShootKeyPressed = false;

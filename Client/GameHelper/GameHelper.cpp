@@ -9,6 +9,7 @@
 #include "Tag.hpp"
 #include "Scale.hpp"
 #include "Scene.hpp"
+#include "Game.hpp"
 #include "Group.hpp"
 #include "Camera.hpp"
 #include "Sprite.hpp"
@@ -92,7 +93,7 @@ void GameHelper::createBasicEnemy(World &world, float x, float y, int entityId)
     enemy->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet11.gif"));
     enemy->addComponent<Animator>(2, 6, 5.0f, 0, 0, 33, 30, 33, 0);
     enemy->addComponent<Scale>(2.f);
-    enemy->addComponent<Scene>(1);
+    enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
 }
@@ -107,7 +108,7 @@ void GameHelper::createSinusEnemy(World &world, float x, float y, int entityId)
     enemy->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet11.gif"));
     enemy->addComponent<Animator>(2, 6, 5.0f, 0, 0, 33, 30, 33, 0);
     enemy->addComponent<Scale>(2.f);
-    enemy->addComponent<Scene>(1);
+    enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
 }

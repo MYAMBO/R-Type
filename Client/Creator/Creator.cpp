@@ -86,14 +86,14 @@ void Creator::createMyambo()
     auto myambo = _world.createEntity();
     myambo->addComponent<Text>("MYAMBO", "../assets/font/title.ttf", 10);
     myambo->getComponent<Text>()->setColor(255, 255, 255, 255);
-    myambo->addComponent<Scene>(10);
+    myambo->addComponent<Scene>(static_cast<int>(SceneType::MYAMBO));
     myambo->addComponent<Layer>(2);
     myambo->addComponent<Tag>("logo_myambo");
     myambo->addComponent<SoundEffect>("../assets/sounds/logo.mp3", 100.f);
     myambo->addComponent<Position>(centerX , centerY);
 
     auto myamboGlow = _world.createEntity();
-    myamboGlow->addComponent<Scene>(10);
+    myamboGlow->addComponent<Scene>(static_cast<int>(SceneType::MYAMBO));
     myamboGlow->addComponent<Layer>(1);
     myamboGlow->addComponent<Position>(myambo->getComponent<Position>()->getX(), myambo->getComponent<Position>()->getY());
     myamboGlow->addComponent<Text>("MYAMBO", "../assets/font/title.ttf", 10);
@@ -105,7 +105,7 @@ void Creator::createMyambo()
     prod->addComponent<Text>("PRODUCTION", "../assets/font/title.ttf", 60);
     prod->getComponent<Text>()->setColor(0, 0, 0, 255);
     prod->getComponent<Text>()->setSize(60);
-    prod->addComponent<Scene>(10);
+    prod->addComponent<Scene>(static_cast<int>(SceneType::MYAMBO));
     prod->addComponent<Layer>(2);
     prod->addComponent<Tag>("logo_production");
     prod->addComponent<SoundEffect>("../assets/sounds/production.mp3", 100.f);
@@ -115,7 +115,7 @@ void Creator::createMyambo()
     prod->addComponent<Script>(productionScript);
 
     auto prodGlow = _world.createEntity();
-    prodGlow->addComponent<Scene>(10);
+    prodGlow->addComponent<Scene>(static_cast<int>(SceneType::MYAMBO));
     prodGlow->addComponent<Layer>(1);
     prodGlow->addComponent<Position>(prod->getComponent<Position>()->getX(), prod->getComponent<Position>()->getY());
     prodGlow->addComponent<Text>("PRODUCTION", "../assets/font/title.ttf", 60);
@@ -137,7 +137,7 @@ void Creator::createKayu()
     float centerY = height / 3.0f;
 
     auto kayu = _world.createEntity();
-    kayu->addComponent<Scene>(11);
+    kayu->addComponent<Scene>(static_cast<int>(SceneType::KAYU));
     kayu->addComponent<Layer>(2);
     kayu->addComponent<Tag>("logo_kayu");
     kayu->addComponent<Velocity>(10.f, 0.f);
@@ -147,7 +147,7 @@ void Creator::createKayu()
     kayu->addComponent<Script>(kayuScript);
 
     auto kayuGlow = _world.createEntity();
-    kayuGlow->addComponent<Scene>(11);
+    kayuGlow->addComponent<Scene>(static_cast<int>(SceneType::KAYU));
     kayuGlow->addComponent<Layer>(1);
     kayuGlow->addComponent<Position>(kayu->getComponent<Position>()->getX(), centerY);
     kayuGlow->addComponent<Text>("KAYU", "../assets/font/title.ttf", 120);
@@ -155,7 +155,7 @@ void Creator::createKayu()
     kayuGlow->addComponent<Script>(kayuGlowScript);
 
     auto corp = _world.createEntity();
-    corp->addComponent<Scene>(11);
+    corp->addComponent<Scene>(static_cast<int>(SceneType::KAYU));
     corp->addComponent<Layer>(2);
     corp->addComponent<Tag>("logo_corp");
     corp->addComponent<Position>(10000.f, centerY);
@@ -164,7 +164,7 @@ void Creator::createKayu()
     corp->addComponent<Script>(corpScript);
 
     auto corpGlow = _world.createEntity();
-    corpGlow->addComponent<Scene>(11);
+    corpGlow->addComponent<Scene>(static_cast<int>(SceneType::KAYU));
     corpGlow->addComponent<Layer>(1);
     corpGlow->addComponent<Position>(corp->getComponent<Position>()->getX(), centerY);
     corpGlow->addComponent<Text>("CORP", "../assets/font/title.ttf", 120);
@@ -172,7 +172,7 @@ void Creator::createKayu()
     corpGlow->addComponent<Script>(corpGlowScript);
     
     auto dot = _world.createEntity();
-    dot->addComponent<Scene>(11);
+    dot->addComponent<Scene>(static_cast<int>(SceneType::KAYU));
     dot->addComponent<Layer>(3);
     dot->addComponent<Tag>("logo_dot");
     dot->addComponent<Position>(centerX, centerY);
@@ -182,13 +182,13 @@ void Creator::createKayu()
 }
 
 /**
- * @brief Create a beautiful and clean Main Menu using TGUI wrapped in ECS (Scene 2)
+ * @brief Create a beautiful and clean Main Menu using TGUI wrapped in ECS
  */
 void Creator::createTguiMenu()
 {
     auto music = _world.createEntity();
     music->addComponent<Music>("../assets/sounds/menu.mp3", 50.f, true);
-    music->addComponent<Scene>(2);
+    music->addComponent<Scene>(static_cast<int>(SceneType::MENU));
     music->addComponent<Tag>("menu_music");
     music->getComponent<Music>()->play();
     music->addComponent<Script>([](int entityId, World& world) {
@@ -211,7 +211,7 @@ void Creator::createTguiMenu()
     });
 
     auto menuRoot = _world.createEntity();
-    menuRoot->addComponent<Scene>(2);
+    menuRoot->addComponent<Scene>(static_cast<int>(SceneType::MENU));
     menuRoot->addComponent<Layer>(LayerType::UI);
     menuRoot->addComponent<Tag>("menu_root");
     menuRoot->addComponent<Position>(0.f, 0.f);
@@ -223,7 +223,7 @@ void Creator::createTguiMenu()
 
     auto titleEntity = _world.createEntity();
     titleEntity->addComponent<GuiWidget>(WidgetType::LABEL, "R-TYPE", menuRoot->getId());
-    titleEntity->addComponent<Scene>(2);
+    titleEntity->addComponent<Scene>(static_cast<int>(SceneType::MENU));
     titleEntity->addComponent<Tag>("menu_title");
     titleEntity->addComponent<Layer>(LayerType::UI + 1);
     
@@ -237,7 +237,7 @@ void Creator::createTguiMenu()
 
     auto layoutEntity = _world.createEntity();
     layoutEntity->addComponent<GuiWidget>(WidgetType::VERTICAL_LAYOUT, "", menuRoot->getId());
-    layoutEntity->addComponent<Scene>(2);
+    layoutEntity->addComponent<Scene>(static_cast<int>(SceneType::MENU));
     layoutEntity->addComponent<Tag>("menu_button_layout");
     layoutEntity->addComponent<Layer>(LayerType::UI + 1);
     
@@ -248,7 +248,7 @@ void Creator::createTguiMenu()
 
     auto btnPlay = _world.createEntity();
     btnPlay->addComponent<GuiWidget>(WidgetType::BUTTON, "START MISSION", layoutEntity->getId());
-    btnPlay->addComponent<Scene>(2);
+    btnPlay->addComponent<Scene>(static_cast<int>(SceneType::MENU));
     btnPlay->addComponent<Tag>("menu_button_start");
     btnPlay->addComponent<SoundEffect>("../assets/sounds/clics.mp3", 100.f);
     btnPlay->getComponent<SoundEffect>()->setGlobal(true);
@@ -261,18 +261,18 @@ void Creator::createTguiMenu()
             sfx->play();
         auto m = GameHelper::getEntityByTag(_world, "menu_music");
         if (m) m->getComponent<Music>()->stop();
-        _world.setCurrentScene(12); 
+        _world.setCurrentScene(static_cast<int>(SceneType::GAMEPLAY));
     });
     guiLayout->addSpace(0.2f);
 
     auto spaceEntity = _world.createEntity();
     spaceEntity->addComponent<GuiWidget>(WidgetType::LABEL, "", layoutEntity->getId());
-    spaceEntity->addComponent<Scene>(2);
+    spaceEntity->addComponent<Scene>(static_cast<int>(SceneType::MENU));
     spaceEntity->addComponent<Tag>("menu_button_space");
 
     auto btnOptions = _world.createEntity();
     btnOptions->addComponent<GuiWidget>(WidgetType::BUTTON, "SETTINGS", layoutEntity->getId());
-    btnOptions->addComponent<Scene>(2);
+    btnOptions->addComponent<Scene>(static_cast<int>(SceneType::MENU));
     btnOptions->addComponent<Tag>("menu_button_options");
     btnOptions->addComponent<SoundEffect>("../assets/sounds/clics.mp3", 100.f);
     btnOptions->getComponent<SoundEffect>()->setGlobal(true);
@@ -283,16 +283,16 @@ void Creator::createTguiMenu()
         auto sfx = GameHelper::getEntityByTag(_world, "menu_button_options")->getComponent<SoundEffect>();
         if (sfx)
             sfx->play();
-        _world.setCurrentScene(3);
+        _world.setCurrentScene(static_cast<int>(SceneType::OPTIONS));
     });
     auto spaceEntity2 = _world.createEntity();
     spaceEntity2->addComponent<GuiWidget>(WidgetType::LABEL, "", layoutEntity->getId());
-    spaceEntity2->addComponent<Scene>(2);
+    spaceEntity2->addComponent<Scene>(static_cast<int>(SceneType::MENU));
     spaceEntity2->addComponent<Tag>("menu_button_space2");
 
     auto btnQuit = _world.createEntity();
     btnQuit->addComponent<GuiWidget>(WidgetType::BUTTON, "ABORT", layoutEntity->getId());
-    btnQuit->addComponent<Scene>(2);
+    btnQuit->addComponent<Scene>(static_cast<int>(SceneType::MENU));
     btnQuit->addComponent<Tag>("menu_button_quit");
     btnQuit->addComponent<SoundEffect>("../assets/sounds/clics.mp3", 100.f);
     btnQuit->getComponent<SoundEffect>()->setGlobal(true);
@@ -431,7 +431,7 @@ void Creator::createCredits()
 
     auto music = _world.createEntity();
     music->addComponent<Music>("../assets/sounds/credits.mp3", 50.f, true);
-    music->addComponent<Scene>(42);
+    music->addComponent<Scene>(static_cast<int>(SceneType::CREDITS));
     music->addComponent<Tag>("credits_music");
     music->addComponent<Script>([](int id, World& w) {
         auto entity = GameHelper::getEntityById(w, id);
@@ -447,7 +447,7 @@ void Creator::createCredits()
     });
 
     auto background = _world.createEntity();
-    background->addComponent<Scene>(42);
+    background->addComponent<Scene>(static_cast<int>(SceneType::CREDITS));
     background->addComponent<Layer>(LayerType::BACKGROUND + 1);
     background->addComponent<Tag>("credits_background");
     background->addComponent<RectangleShape>(width * 3, height * 3, 0, 0, 0, 255);
@@ -457,7 +457,7 @@ void Creator::createCredits()
     float lineSpacing = 80.f;
 
     auto title = _world.createEntity();
-    title->addComponent<Scene>(42);
+    title->addComponent<Scene>(static_cast<int>(SceneType::CREDITS));
     title->addComponent<Layer>(LayerType::UI);
     title->addComponent<Tag>("credits_title");
     title->addComponent<Position>(centerX + centerX / 2.f, startY - lineSpacing * 2);
@@ -466,7 +466,7 @@ void Creator::createCredits()
     title->getComponent<Text>()->setColor(255, 255, 255, 255);
 
     auto subtitle = _world.createEntity();
-    subtitle->addComponent<Scene>(42);
+    subtitle->addComponent<Scene>(static_cast<int>(SceneType::CREDITS));
     subtitle->addComponent<Layer>(LayerType::UI);
     subtitle->addComponent<Tag>("credits_subtitle");
     subtitle->addComponent<Position>(centerX + centerX / 2.f, startY - lineSpacing);
@@ -475,9 +475,10 @@ void Creator::createCredits()
     subtitle->getComponent<Text>()->setColor(255, 255, 255, 255);
 
     for (size_t i = 0; i < credits.size(); ++i) {
-        if (!credits[i].first.empty()) {
+        if (!credits[i].first.empty())
+        {
             auto role = _world.createEntity();
-            role->addComponent<Scene>(42);
+            role->addComponent<Scene>(static_cast<int>(SceneType::CREDITS));
             role->addComponent<Layer>(LayerType::UI);
             role->addComponent<Tag>("credit_role_" + std::to_string(i));
             role->addComponent<Position>(centerX, startY + (i * lineSpacing));
@@ -486,10 +487,10 @@ void Creator::createCredits()
             role->addComponent<Text>(credits[i].first, "../assets/font/title.ttf", 20);
             auto txtRole = role->getComponent<Text>();
             txtRole->setColor(255, 255, 255, 180);
-
+        }
         if (!credits[i].second.empty()) {
             auto name = _world.createEntity();
-            name->addComponent<Scene>(42);
+            name->addComponent<Scene>(static_cast<int>(SceneType::CREDITS));
             name->addComponent<Layer>(LayerType::UI);
             name->addComponent<Tag>("credit_name_" + std::to_string(i));
             name->addComponent<Position>(centerX2, startY + (i * lineSpacing));
@@ -502,9 +503,11 @@ void Creator::createCredits()
     }
 
     auto watcher = _world.createEntity();
-    watcher->addComponent<Scene>(42);
+    watcher->addComponent<Scene>(static_cast<int>(SceneType::CREDITS));
     watcher->addComponent<Tag>("credits_watcher");
     watcher->addComponent<Script>([](int id, World& w) {
+        if (w.getCurrentScene() != static_cast<int>(SceneType::CREDITS))
+            return;
         auto inputs = w.getSystem<Inputs>();
         if (inputs && (inputs->isKeyPressed(KeyboardKey::Key_Escape) || inputs->isKeyPressed(KeyboardKey::Key_Space))) {
             w.setCurrentScene(2);
@@ -518,7 +521,7 @@ void Creator::createCredits()
 void Creator::createTguiOptions()
 {
     auto optionsRoot = _world.createEntity();
-    optionsRoot->addComponent<Scene>(3);
+    optionsRoot->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
     optionsRoot->addComponent<Layer>(LayerType::UI);
     optionsRoot->addComponent<Position>(0.f, 0.f);
     optionsRoot->addComponent<GuiWidget>(WidgetType::PANEL);
@@ -529,7 +532,7 @@ void Creator::createTguiOptions()
 
     auto titleEntity = _world.createEntity();
     titleEntity->addComponent<GuiWidget>(WidgetType::LABEL, "OPTIONS", optionsRoot->getId());
-    titleEntity->addComponent<Scene>(3);
+    titleEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
     titleEntity->addComponent<Layer>(LayerType::UI + 1);
     titleEntity->addComponent<Tag>("options_title");
     auto guiTitle = titleEntity->getComponent<GuiWidget>();
@@ -541,7 +544,7 @@ void Creator::createTguiOptions()
 
     auto scrollPanelEntity = _world.createEntity();
     scrollPanelEntity->addComponent<GuiWidget>(WidgetType::SCROLLABLE_PANEL, "", optionsRoot->getId());
-    scrollPanelEntity->addComponent<Scene>(3);
+    scrollPanelEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
     scrollPanelEntity->addComponent<Layer>(LayerType::UI + 1);
     scrollPanelEntity->addComponent<Tag>("options_scroll_panel");
     auto guiScroll = scrollPanelEntity->getComponent<GuiWidget>();
@@ -558,7 +561,7 @@ void Creator::createTguiOptions()
 
     auto mainLayoutEntity = _world.createEntity();
     mainLayoutEntity->addComponent<GuiWidget>(WidgetType::VERTICAL_LAYOUT, "", scrollPanelEntity->getId());
-    mainLayoutEntity->addComponent<Scene>(3);
+    mainLayoutEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
     mainLayoutEntity->addComponent<Tag>("options_main_layout");
     auto guiLayout = mainLayoutEntity->getComponent<GuiWidget>();
     guiLayout->setSize("100%", "150%");
@@ -566,7 +569,7 @@ void Creator::createTguiOptions()
     auto createOptionToggle = [this, mainLayoutEntity](const std::string& label, bool& stateValue) {
         auto rowEntity = _world.createEntity();
         rowEntity->addComponent<GuiWidget>(WidgetType::PANEL, "", mainLayoutEntity->getId());
-        rowEntity->addComponent<Scene>(3);
+        rowEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
         rowEntity->addComponent<Tag>("option_toggle_row");
         auto guiRow = rowEntity->getComponent<GuiWidget>();
         guiRow->setSize("100%", "5%");
@@ -574,7 +577,7 @@ void Creator::createTguiOptions()
 
         auto btnEntity = _world.createEntity();
         btnEntity->addComponent<GuiWidget>(WidgetType::BUTTON, label, rowEntity->getId());
-        btnEntity->addComponent<Scene>(3);
+        btnEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
         btnEntity->addComponent<Tag>("option_toggle_button");
         auto guiBtn = btnEntity->getComponent<GuiWidget>();
         guiBtn->setSize("50%", "70%");
@@ -585,7 +588,7 @@ void Creator::createTguiOptions()
 
         auto statusEntity = _world.createEntity();
         statusEntity->addComponent<GuiWidget>(WidgetType::LABEL, stateValue ? "ON" : "OFF", rowEntity->getId());
-        statusEntity->addComponent<Scene>(3);
+        statusEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
         statusEntity->addComponent<Tag>("option_toggle_status");
         auto guiStatus = statusEntity->getComponent<GuiWidget>();
         guiStatus->setTextSize(30);
@@ -603,7 +606,7 @@ void Creator::createTguiOptions()
     auto createOptionSlider = [this, mainLayoutEntity](const std::string& label, float initialValue, std::function<void(float)> onValueChange, std::function<void(int, World&)> onUpdate = nullptr) {
         auto rowEntity = _world.createEntity();
         rowEntity->addComponent<GuiWidget>(WidgetType::PANEL, "", mainLayoutEntity->getId());
-        rowEntity->addComponent<Scene>(3);
+        rowEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
         rowEntity->addComponent<Tag>("option_slider_row");
         auto guiRow = rowEntity->getComponent<GuiWidget>();
         guiRow->setSize("100%", "100");
@@ -611,7 +614,7 @@ void Creator::createTguiOptions()
 
         auto labelEntity = _world.createEntity();
         labelEntity->addComponent<GuiWidget>(WidgetType::LABEL, label, rowEntity->getId());
-        labelEntity->addComponent<Scene>(3);
+        labelEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
         labelEntity->addComponent<Tag>("option_slider_label");
         auto guiLabel = labelEntity->getComponent<GuiWidget>();
         guiLabel->setTextSize(25);
@@ -621,7 +624,7 @@ void Creator::createTguiOptions()
 
         auto sliderEntity = _world.createEntity();
         sliderEntity->addComponent<GuiWidget>(WidgetType::SLIDER, "", rowEntity->getId());
-        sliderEntity->addComponent<Scene>(3);
+        sliderEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
         sliderEntity->addComponent<Tag>("option_slider");
         if (onUpdate)
             sliderEntity->addComponent<Script>(onUpdate);
@@ -649,15 +652,12 @@ void Creator::createTguiOptions()
     createOptionToggle("ONE HIT KILL", oneHitKill);
 
     auto settingUpdater = _world.createEntity();
-    settingUpdater->addComponent<Scene>(0);
+    settingUpdater->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
     settingUpdater->addComponent<Tag>("options_setting_updater");
     settingUpdater->addComponent<Script>([&godMode, &easyMode, &hardMode, &oneHitKill](int id, World& w) {
         auto entity = GameHelper::getEntityById(w, id);
         if (!entity)
             return;
-        //auto scene = w.getCurrentScene();
-        //if (scene != entity->getComponent<Scene>()->getScene())
-        //    entity->getComponent<Scene>()->setScene(scene);
         auto dataEntity = GameHelper::getEntityByTag(w, "game_difficulty_settings");
         if (!dataEntity)
             return;
@@ -712,13 +712,13 @@ void Creator::createTguiOptions()
 
     auto btnReturn = _world.createEntity();
     btnReturn->addComponent<GuiWidget>(WidgetType::BUTTON, "BACK", optionsRoot->getId());
-    btnReturn->addComponent<Scene>(3);
+    btnReturn->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
     btnReturn->addComponent<Layer>(LayerType::UI + 2);
     auto guiReturn = btnReturn->getComponent<GuiWidget>();
     guiReturn->setSize(200, 60);
     guiReturn->setOrigin(0.5f, 0.5f);
     guiReturn->setPosition("50%", "85%");
-    guiReturn->setCallback([this]() { _world.setCurrentScene(2); });
+    guiReturn->setCallback([this]() { _world.setCurrentScene(static_cast<int>(SceneType::MENU)); });
     styleNeonButton(guiReturn);
 }
 
@@ -739,7 +739,7 @@ void Creator::createPlayer(uint64_t id)
     player->addComponent<Position>(75.0f, 75.0f);
     player->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet42.gif"));
     player->addComponent<Scale>(3.f);
-    player->addComponent<Scene>(1);
+    player->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     player->addComponent<SoundEffect>(std::string("../assets/sounds/lazershoot.mp3"));
     player->addComponent<Layer>(10);
     player->addComponent<Group>(playerCount + 1);
@@ -766,7 +766,7 @@ void Creator::createPlayer(uint64_t id)
     fire->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet1.gif"));
     fire->addComponent<Animator>(2, 1, 3.f, 285, 85, 15, 15, 0, 0);
     fire->addComponent<Scale>(3.f);
-    fire->addComponent<Scene>(1);
+    fire->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     fire->addComponent<Script>(playerfire);
     fire->addComponent<Music>("../assets/sounds/game.mp3", 100.f, true);
     fire->addComponent<Group>(playerCount);
@@ -777,7 +777,7 @@ void Creator::createPlayer(uint64_t id)
     hpBarRed->addComponent<RectangleShape>(400.f, 20.f, 150, 0, 0, 200);
     hpBarRed->addComponent<Position>(20.f, 20.f + (playerCount - 1) * 30.f);
     hpBarRed->addComponent<Layer>(LayerType::UI);
-    hpBarRed->addComponent<Scene>(1);
+    hpBarRed->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     hpBarRed->addComponent<Tag>("hp_bar_red_" + std::to_string(playerCount));
     hpBarRed->addComponent<Group>(playerCount);
 
@@ -785,7 +785,7 @@ void Creator::createPlayer(uint64_t id)
     hpBarGreen->addComponent<RectangleShape>(400.f, 20.f, 0, 200, 0, 200);
     hpBarGreen->addComponent<Position>(21.f, 21.f + (playerCount - 1) * 30.f);
     hpBarGreen->addComponent<Layer>(LayerType::UI + 1);
-    hpBarGreen->addComponent<Scene>(1);
+    hpBarGreen->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     hpBarGreen->addComponent<Tag>("hp_bar_green_" + std::to_string(playerCount));
     hpBarGreen->addComponent<Group>(playerCount);
     hpBarGreen->addComponent<Script>(hpBarScript);
@@ -794,7 +794,7 @@ void Creator::createPlayer(uint64_t id)
     manaBarEmpty->addComponent<RectangleShape>(400.f, 10.f, 150, 150, 255, 200);
     manaBarEmpty->addComponent<Position>(20.f, 45.f + (playerCount - 1) * 30.f);
     manaBarEmpty->addComponent<Layer>(LayerType::UI);
-    manaBarEmpty->addComponent<Scene>(1);
+    manaBarEmpty->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     manaBarEmpty->addComponent<Tag>("mana_bar_empty_" + std::to_string(playerCount));
     manaBarEmpty->addComponent<Group>(playerCount);
 
@@ -802,7 +802,7 @@ void Creator::createPlayer(uint64_t id)
     manaBar->addComponent<RectangleShape>(400.f, 10.f, 0, 0, 255, 200);
     manaBar->addComponent<Position>(21.f, 46.f + (playerCount - 1) * 30.f);
     manaBar->addComponent<Layer>(LayerType::UI + 1);
-    manaBar->addComponent<Scene>(1);
+    manaBar->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     manaBar->addComponent<Tag>("mana_bar_full_" + std::to_string(playerCount));
     manaBar->addComponent<Group>(playerCount);
     manaBar->addComponent<Script>(manaBarScript);
@@ -914,7 +914,7 @@ void Creator::createBullet(size_t entityId, int x, int y, int type)
     }
     bullet->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet1.gif"));
     bullet->addComponent<Scale>(2.f);
-    bullet->addComponent<Scene>(1);
+    bullet->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     bullet->addComponent<Tag>("player_bullet");
 }
 /**
@@ -929,7 +929,7 @@ void Creator::createLoadingScreen()
     float centerY = window->getSize().y / 2.0f;
 
     auto status = _world.createEntity();
-    status->addComponent<Scene>(0);
+    status->addComponent<Scene>(static_cast<int>(SceneType::LOADING));
     status->addComponent<Text>("Initializing...", "../assets/font/title.ttf", 20);
     status->addComponent<Position>(centerX - status->getComponent<Text>()->getGlobalBounds().size.x / 2.0f, centerY + 60.f);
     status->addComponent<Layer>(LayerType::UI);
@@ -937,7 +937,7 @@ void Creator::createLoadingScreen()
     status->addComponent<Tag>("loading_status");
 
     auto bgBar = _world.createEntity();
-    bgBar->addComponent<Scene>(0);
+    bgBar->addComponent<Scene>(static_cast<int>(SceneType::LOADING));
     bgBar->addComponent<Position>(centerX - 200.f, centerY);
     bgBar->addComponent<RectangleShape>(400.f, 20.f, 50, 50, 50, 255);
     bgBar->addComponent<Tag>("loading_bg_bar");
@@ -945,7 +945,7 @@ void Creator::createLoadingScreen()
     bgBar->addComponent<Layer>(LayerType::UI);
 
     auto fillBar = _world.createEntity();
-    fillBar->addComponent<Scene>(0);
+    fillBar->addComponent<Scene>(static_cast<int>(SceneType::LOADING));
     fillBar->addComponent<Position>(centerX - 200.f, centerY);
     fillBar->addComponent<RectangleShape>(1.f, 20.f, 100, 250, 50, 255);
     fillBar->addComponent<Layer>(LayerType::UI + 1);
@@ -966,7 +966,7 @@ void Creator::createSparks(World &world, float x, float y, int amount)
 {
     for (int i = 0; i < amount; i++) {
         auto spark = world.createEntity();
-        spark->addComponent<Scene>(11);
+        spark->addComponent<Scene>(static_cast<int>(SceneType::KAYU));
         spark->addComponent<Position>(x, y);
         float vx = (rand() % 200 - 100) / 10.f;
         float vy = (rand() % 200 - 100) / 10.f;
@@ -981,7 +981,7 @@ void Creator::createSparks(World &world, float x, float y, int amount)
 void Creator::createGameTools()
 {
     auto volume = _world.createEntity();
-    volume->addComponent<Scene>(0);
+    volume->addComponent<Scene>(static_cast<int>(SceneType::LOADING));
     volume->addComponent<Data>(std::map<std::string, std::string>{
         {"music_volume_old", "100"},
         {"sfx_volume_old", "100"},
@@ -994,7 +994,7 @@ void Creator::createGameTools()
     volume->addComponent<Script>(volumeSettingsScript);
 
     auto difficulty = _world.createEntity();
-    difficulty->addComponent<Scene>(0);
+    difficulty->addComponent<Scene>(static_cast<int>(SceneType::LOADING));
     difficulty->addComponent<Data>(std::map<std::string, std::string>{
         {"is_easy_mode", "false"},
         {"is_hard_mode", "false"},
@@ -1003,7 +1003,7 @@ void Creator::createGameTools()
     difficulty->addComponent<Tag>("game_difficulty_settings");
     
     auto availability = _world.createEntity();
-    availability->addComponent<Scene>(0);
+    availability->addComponent<Scene>(static_cast<int>(SceneType::LOADING));
     availability->addComponent<Data>(std::map<std::string, std::string>{
         {"is_color_blind", "false"},
     });
