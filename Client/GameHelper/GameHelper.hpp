@@ -25,7 +25,8 @@ class GameHelper {
         static std::shared_ptr<Entity> getEntityByTag(World &world, const std::string &tag);
         static std::vector<std::shared_ptr<Entity>> getEntitiesByGroup(World &world, size_t groupId);
 
-        static void createBasicEnemy(World &world, float x, float y);
+        static void createBasicEnemy(World &world, float x, float y, int entityId);
+        static void createSinusEnemy(World &world, float x, float y, int entityId);
 };
 
 #endif /* !GAMEHELPER_HPP_ */

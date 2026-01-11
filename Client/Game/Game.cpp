@@ -177,15 +177,6 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
             _window.close();
         if (eventOpt->is<sf::Event::Closed>())
             _window.close();
-        if (inputSystem->isKeyPressed(KeyboardKey::Key_E)) {
-            static sf::Clock spawnClock;
-            if (spawnClock.getElapsedTime().asSeconds() > 0.5f) {
-                _creator.createEnemy(800.0f, 300.0f, 1);
-                std::cout << "[Debug] Enemy spawned at (800, 300)" << std::endl;
-                spawnClock.restart();
-            }
-        }
-
         if (eventOpt->is<sf::Event::Resized>()) {
             sf::FloatRect visibleArea({0, 0}, {static_cast<float>(_window.getSize().x), static_cast<float>( _window.getSize().y)});
             _window.setView(sf::View(visibleArea));
@@ -198,7 +189,8 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
 void Game::smootherMovement(int entityId, World &world, float serverX, float serverY)
 {
     auto entity = GameHelper::getEntityById(world, entityId);
-    if (!entity) return;
+    if (!entity)
+        return;
     if (!entity->getComponent<Velocity>()) {
         auto pos = entity->getComponent<Position>();
         pos->setX(serverX);
@@ -220,27 +212,35 @@ void Game::smootherMovement(int entityId, World &world, float serverX, float ser
 
 void Game::handleSpawn(int id, int type, float x, float y)
 {
+    auto entity = GameHelper::getEntityById(_world, id);
+
+    if (entity) {
+        auto hpComp = entity->getComponent<HP>();
+        if (hpComp && !hpComp->isAlive())
+            return;
+        smootherMovement(id, _world, x, y);
+        return;
+    }
     switch (type) {
-        case None:
-            smootherMovement(id, _world, x, y);
-            break;
-        case Player : {
-            _creator.createPlayer(id);
-            auto entity = GameHelper::getEntityById(_world, id);
-            if (entity->getComponent<Tag>()->getTag() == "player") {
-                entity->addComponent<Script>([this](const int entityId, World& world)
-                {
-                    this->playerInput(entityId, world);
-                });
-            }
-            break;
+    case Player:
+        _creator.createPlayer(id);
+        entity = GameHelper::getEntityById(_world, id);
+        if (entity && entity->getComponent<Tag>()->getTag() == "player") {
+            entity->addComponent<Script>([this](const int entityId, World& world)
+            {
+                this->playerInput(entityId, world);
+            });
         }
-        case Enemy:
-            _creator.createEnemy(x, y, 1); // Type 1 = BASIC enemy
-            break;
-        case Bullet:
-            _creator.createBullet(id, x, y, type);
-            break;
+        break;
+    case Enemy:
+        _creator.createEnemy(x, y, 1, id);
+        break;
+    case EnemySinus:
+        _creator.createEnemy(x, y, 4, id);
+        break;
+    case Bullet:
+        _creator.createBullet(id, x, y, type);
+        break;
     }
 }
 

@@ -83,9 +83,9 @@ std::shared_ptr<Entity> GameHelper::getEntityById(World &world, uint64_t id)
  * @param x The x-coordinate of the enemy's position.
  * @param y The y-coordinate of the enemy's position.
 */
-void GameHelper::createBasicEnemy(World &world, float x, float y)
+void GameHelper::createBasicEnemy(World &world, float x, float y, int entityId)
 {
-    auto enemy = world.createEntity();
+    auto enemy = world.createEntity(entityId);
     enemy->addComponent<HP>(50);
     enemy->addComponent<Damage>(10);
     enemy->addComponent<Position>(x, y);
@@ -95,9 +95,22 @@ void GameHelper::createBasicEnemy(World &world, float x, float y)
     enemy->addComponent<Scene>(1);
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
-    enemy->addComponent<Velocity>(-2.0f, 0.0f);
 }
 
+
+void GameHelper::createSinusEnemy(World &world, float x, float y, int entityId)
+{
+    auto enemy = world.createEntity(entityId);
+    enemy->addComponent<HP>(50);
+    enemy->addComponent<Damage>(10);
+    enemy->addComponent<Position>(x, y);
+    enemy->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet11.gif"));
+    enemy->addComponent<Animator>(2, 6, 5.0f, 0, 0, 33, 30, 33, 0);
+    enemy->addComponent<Scale>(2.f);
+    enemy->addComponent<Scene>(1);
+    enemy->addComponent<Tag>("enemy");
+    enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+}
 
 /**
  * @brief Retrieves all entities belonging to a specific group from the world.

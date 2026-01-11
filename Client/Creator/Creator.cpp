@@ -364,22 +364,26 @@ void Creator::createBackground(sf::RenderWindow& window)
  * @brief Create Enemy
  * This function initializes an enemy entity with necessary components.
 */
-void Creator::createEnemy(float x, float y, int type)
+void Creator::createEnemy(float x, float y, int type, int entityId)
 {
     enum EnemyType {
         BASIC = 1,
         FAST,
-        TANK
+        TANK,
+        SINUS = 4
     };
     switch (type) {
         case BASIC:
-            GameHelper::createBasicEnemy(_world, x, y);
+            GameHelper::createBasicEnemy(_world, x, y, entityId);
             break;
         case FAST:
             // Implement fast enemy creation
             break;
         case TANK:
             // Implement tank enemy creation
+            break;
+        case SINUS:
+            GameHelper::createSinusEnemy(_world, x, y, entityId);
             break;
         default:
             std::cerr << "Unknown enemy type: " << type << std::endl;
