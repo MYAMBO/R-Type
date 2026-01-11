@@ -76,11 +76,12 @@ include_directories(Client/Game)
 include_directories(Client/Creator)
 include_directories(Client/GameHelper)
 include_directories(Client/ScriptsHandler)
-include_directories(Client/LevelLoader)
+include_directories(Server/LevelLoader)
 include_directories(./Server)
 include_directories(./Server/Core)
 include_directories(./Packet)
 include_directories(Server/Game)
+include_directories(Common)
 
 add_executable(r-type_server
         Server/main.cpp
@@ -100,11 +101,13 @@ add_executable(r-type_server
         ECS/System/CameraSys/CameraSys.cpp
         ECS/System/Movement/Movement.cpp
         ECS/System/ScriptsSys/ScriptsSys.cpp
+        ECS/System/DeathSys/DeathSys.cpp
+        ECS/System/Collision/Collision.cpp
         ECS/World.cpp
         ECS/Component/HP/HP.cpp
         ECS/Component/Damage/Damage.cpp
         Client/GameHelper/GameHelper.cpp
-        Client/LevelLoader/LevelLoader.cpp
+        Server/LevelLoader/LevelLoader.cpp
         ECS/Component/Tag/Tag.cpp
         ECS/Component/Scale/Scale.cpp
         ECS/Component/Layer/Layer.cpp
@@ -112,6 +115,7 @@ add_executable(r-type_server
         ECS/Component/Group/Group.cpp
         ECS/Component/Script/Script.cpp
         ECS/Component/Sprite/Sprite.cpp
+        ECS/Component/Damage/Damage.cpp
         ECS/Component/Camera/Camera.cpp
         ECS/Component/Position/Position.cpp
         ECS/Component/Velocity/Velocity.cpp
@@ -163,8 +167,7 @@ add_executable(r-type_client
         Packet/Packet.cpp
         Packet/MyString.cpp
         Client/Core/Network.cpp
-        Client/Core/ClientPacketreader.cpp
-        Client/LevelLoader/LevelLoader.cpp)
+        Client/Core/ClientPacketreader.cpp)
 
 target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network sfml-audio)
 
