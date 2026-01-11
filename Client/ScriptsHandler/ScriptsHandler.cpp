@@ -613,9 +613,9 @@ void volumeSettingsScript(int entityId, World& world)
  * @param entityId The ID of the spark entity.
  * @param world The game world containing entities and components.
  */
-void sparkScript(int entityId, World& world)
+void sparkScript(int id, World& w)
 {
-    auto e = GameHelper::getEntityById(world, entityId);
+    auto e = GameHelper::getEntityById(w, id);
     if (!e) return;
     auto r = e->getComponent<RectangleShape>();
     if (r->getSize().x > 0.1f) {
@@ -633,7 +633,7 @@ void sparkScript(int entityId, World& world)
  * @param entityId The ID of the credits entity.
  * @param world The game world containing entities and components.
  */
-void creditsScript(int entityId, World& world)
+void creditsScript(int id, World& w)
 {
     auto centerX = static_cast<float>(w.getWindow()->getSize().x) / 8.f;
     auto pos = GameHelper::getEntityById(w, id);
@@ -650,7 +650,7 @@ void creditsScript(int entityId, World& world)
  * @param entityId The ID of the credits names entity.
  * @param world The game world containing entities and components.
  */
-void creditsNameScript(int entityId, World& world)
+void creditsNameScript(int id, World& w)
 {
     auto centerX2 = static_cast<float>(w.getWindow()->getSize().x) / 2.f;
     auto pos = GameHelper::getEntityById(w, id);

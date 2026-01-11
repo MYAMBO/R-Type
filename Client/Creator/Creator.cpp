@@ -261,7 +261,7 @@ void Creator::createTguiMenu()
             sfx->play();
         auto m = GameHelper::getEntityByTag(_world, "menu_music");
         if (m) m->getComponent<Music>()->stop();
-        _world.setCurrentScene(12); 
+        _world.setCurrentScene(1);
     });
     guiLayout->addSpace(0.2f);
 
@@ -475,7 +475,8 @@ void Creator::createCredits()
     subtitle->getComponent<Text>()->setColor(255, 255, 255, 255);
 
     for (size_t i = 0; i < credits.size(); ++i) {
-        if (!credits[i].first.empty()) {
+        if (!credits[i].first.empty())
+        {
             auto role = _world.createEntity();
             role->addComponent<Scene>(42);
             role->addComponent<Layer>(LayerType::UI);
@@ -486,7 +487,7 @@ void Creator::createCredits()
             role->addComponent<Text>(credits[i].first, "../assets/font/title.ttf", 20);
             auto txtRole = role->getComponent<Text>();
             txtRole->setColor(255, 255, 255, 180);
-
+        }
         if (!credits[i].second.empty()) {
             auto name = _world.createEntity();
             name->addComponent<Scene>(42);

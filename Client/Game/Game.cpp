@@ -266,7 +266,7 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
             if (currentScene == 2) {
                 _window.close();
             } else if (currentScene != 10 && currentScene != 11) {
-                _world.setCurrentScene(2);
+                _world.setCurrentScene(1);
             }
         }
         if (eventOpt->is<sf::Event::Closed>())
