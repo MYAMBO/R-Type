@@ -95,3 +95,19 @@ KeyboardKey Inputs::convertSfKey(const sf::Keyboard::Key key)
 {
     return static_cast<KeyboardKey>(static_cast<int>(key));
 }
+
+/**
+ * @brief Checks if a specific key event was triggered.
+ *
+ * @param event The SFML event to check.
+ * @param key The key to check against.
+ * @return true if the event corresponds to the specified key being pressed, false otherwise.
+ */
+bool Inputs::isTriggered(const sf::Event& event, KeyboardKey key) const
+{
+    if (const auto* keyEvent = event.getIf<sf::Event::KeyPressed>()) {
+        if (convertSfKey(keyEvent->code) == key)
+            return true;
+    }
+    return false;
+}
