@@ -18,11 +18,10 @@
 
 using json = nlohmann::json;
 
-void LevelLoader::loadFromFile(const std::string &path, World &world)
+void LevelLoader::loadFromFile(const std::string &path, ServerGame *server)
 {
     try {
         std::ifstream file(path);
-
         if (!file.is_open()) {
             std::cerr << "ERROR: file cannot be open("<< path << ")"  << std::endl;
             return;
@@ -46,7 +45,14 @@ void LevelLoader::loadFromFile(const std::string &path, World &world)
             float x = ent.value("x", 0.0f);
             float y = ent.value("y", 0.0f);
             std::string type = ent.value("type", "enemy");
-            GameHelper::createBasicEnemy(world, x, y);
+            if (server) {
+                if (type == "enemy") {
+                    server->createEnemy(x, y);
+                }
+                else if (type == "sinus_enemy") {
+                    server->createSinusEnemy(x, y);
+                }
+            }
         }
     } catch (const json::parse_error& e) {
         std::cerr << "\n ERROR JSON: " << e.what() << std::endl;

@@ -12,6 +12,7 @@
 #include <string>
 
 #include "World.hpp"
+#include "ServerGame.hpp"
 
 
 
@@ -21,7 +22,7 @@ class LevelLoader
         LevelLoader() = default;
         ~LevelLoader() = default;
 
-        static void loadFromFile(const std::string &path, World &world);
+        static void loadFromFile(const std::string &path, ServerGame *server);
 
 };
 
