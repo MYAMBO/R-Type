@@ -118,7 +118,7 @@ void playerfire(size_t entityId, World &world)
     auto musicComp = fire->getComponent<Music>();
     if (!musicComp)
         return;
-    if (world.getCurrentScene() == 1) {
+    if (world.getCurrentScene() == static_cast<int>(SceneType::GAMEPLAY)) {
         musicComp->play();
     } else if (musicComp) {
         musicComp->stop();
@@ -229,7 +229,7 @@ void playerScript(int entityId, World& world)
 void dotScript(int entityId, World& world)
 {
     auto dotEnt = GameHelper::getEntityById(world, entityId);
-    if (!dotEnt || world.getCurrentScene() != 11)
+    if (!dotEnt || world.getCurrentScene() != static_cast<int>(SceneType::KAYU))
         return;
     float width = static_cast<float>(world.getWindow()->getSize().x);
     float height = static_cast<float>(world.getWindow()->getSize().y);
@@ -379,7 +379,7 @@ void productionScript(int entityId, World& world)
 void kayuScript(int entityId, World& world)
 {
     auto e = GameHelper::getEntityById(world, entityId);
-    if (!e || world.getCurrentScene() != 11)
+    if (!e || world.getCurrentScene() != static_cast<int>(SceneType::KAYU))
         return;
     float width = static_cast<float>(world.getWindow()->getSize().x);
     float height = static_cast<float>(world.getWindow()->getSize().y);
@@ -419,7 +419,7 @@ void kayuScript(int entityId, World& world)
 void corpScript(int entityId, World& world)
 {
     auto e = GameHelper::getEntityById(world, entityId);
-    if (!e || world.getCurrentScene() != 11)
+    if (!e || world.getCurrentScene() != static_cast<int>(SceneType::KAYU))
         return;
     float width = static_cast<float>(world.getWindow()->getSize().x);
     float height = static_cast<float>(world.getWindow()->getSize().y);
@@ -613,9 +613,9 @@ void volumeSettingsScript(int entityId, World& world)
  * @param entityId The ID of the spark entity.
  * @param world The game world containing entities and components.
  */
-void sparkScript(int entityId, World& world)
+void sparkScript(int id, World& w)
 {
-    auto e = GameHelper::getEntityById(world, entityId);
+    auto e = GameHelper::getEntityById(w, id);
     if (!e) return;
     auto r = e->getComponent<RectangleShape>();
     if (r->getSize().x > 0.1f) {
@@ -633,7 +633,7 @@ void sparkScript(int entityId, World& world)
  * @param entityId The ID of the credits entity.
  * @param world The game world containing entities and components.
  */
-void creditsScript(int entityId, World& world)
+void creditsScript(int id, World& w)
 {
     auto centerX = static_cast<float>(w.getWindow()->getSize().x) / 8.f;
     auto pos = GameHelper::getEntityById(w, id);
@@ -650,7 +650,7 @@ void creditsScript(int entityId, World& world)
  * @param entityId The ID of the credits names entity.
  * @param world The game world containing entities and components.
  */
-void creditsNameScript(int entityId, World& world)
+void creditsNameScript(int id, World& w)
 {
     auto centerX2 = static_cast<float>(w.getWindow()->getSize().x) / 2.f;
     auto pos = GameHelper::getEntityById(w, id);
