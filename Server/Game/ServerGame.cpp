@@ -6,6 +6,7 @@
 */
 
 #include <algorithm>
+#include <cmath>
 
 #include "HP.hpp"
 #include "Tag.hpp"
@@ -20,6 +21,9 @@
 #include "GameHelper.hpp"
 #include "BoxCollider.hpp"
 #include "LevelLoader.hpp"
+#include "DeathSys.hpp"
+#include "Damage.hpp"
+#include "Collision.hpp"
 
 /**
  * @brief Constructs a new Game object.
@@ -30,6 +34,8 @@ ServerGame::ServerGame(IGameNetwork& network) : _network(network)
 {
     _world.addSystem<ScriptsSys>();
     _world.addSystem<Movement>();
+    _world.addSystem<Collision>();
+    _world.addSystem<DeathSys>();
     _world.setDeltaTime(1.f);
 }
 
@@ -54,6 +60,7 @@ void ServerGame::run()
         //    _waveTimer.restart();
         // }
         _world.manageSystems();
+        checkDeaths();
         auto end = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
         if (elapsed < tickRate) {
@@ -109,12 +116,47 @@ void ServerGame::EnemyMovement(const int entityId, World &world)
 {
     const auto entity = GameHelper::getEntityById(world, entityId);
 
-    if (const auto pos = entity->getComponent<Position>(); pos->getX() > 500) {
-        pos->setX(pos->getX() - 10 * world.getDeltaTime());
-        Packet packet;
-        packet.positionSpawn(entityId, None, pos->getX(), pos->getY());
-        _network.sendPacket(packet);
+    if (!entity)
+        return;
+    auto hpComp = entity->getComponent<HP>();
+    if (!hpComp || !hpComp->isAlive())
+        return;
+    auto pos = entity->getComponent<Position>();
+    pos->setX(pos->getX() - 1 * world.getDeltaTime());
+
+    Packet packet;
+    packet.playerPosition(entityId, pos->getX(), pos->getY());
+    _network.sendPacket(packet);
+}
+
+void ServerGame::EnemySinusMovement(int entityId, World& world)
+{
+    static std::map<int, float> timers;
+    static std::map<int, float> startYPos;
+
+    const auto entity = GameHelper::getEntityById(world, entityId);
+    if (!entity) {
+        return;
     }
+    auto hpComp = entity->getComponent<HP>();
+    if (!hpComp)
+        return;
+    if (!hpComp->isAlive())
+        return;
+    auto pos = entity->getComponent<Position>();
+    if (startYPos.find(entityId) == startYPos.end())
+        startYPos[entityId] = pos->getY();
+
+    float dt = world.getDeltaTime();
+    float speedX = 2.0f;
+    float sinusSpeed = 0.3f;
+    float amplitude = 30.0f;
+    pos->setX(pos->getX() - speedX * dt);
+    timers[entityId] += dt * sinusSpeed;
+    pos->setY(startYPos[entityId] + std::sin(timers[entityId]) * amplitude);
+    Packet packet;
+    packet.playerPosition(entityId, pos->getX(), pos->getY());
+    _network.sendPacket(packet);
 }
 
 /**
@@ -139,6 +181,24 @@ void ServerGame::createEnemy(const float x, const float y)
     );
     Packet packet;
     packet.positionSpawn(enemy->getId(), Enemy, x, y);
+    _network.sendPacket(packet);
+}
+
+void ServerGame::createSinusEnemy(const float x, const float y)
+{
+    const auto enemy = _world.createEntity();
+    enemy->addComponent<HP>(150);
+    enemy->addComponent<Position>(x, y);
+    enemy->addComponent<BoxCollider>(10.f, 10.f);
+    enemy->addComponent<Tag>("enemy");
+    enemy->addComponent<Script>(
+        [this](const int entityId, World& world)
+        {
+            this->EnemySinusMovement(entityId, world);
+        }
+    );
+    Packet packet;
+    packet.positionSpawn(enemy->getId(), EnemySinus, x, y);
     _network.sendPacket(packet);
 }
 
@@ -189,7 +249,8 @@ void ServerGame::createBullet(const float x, const float y)
     bullet->addComponent<Position>(x + 60.f, y + 15.f);
     bullet->addComponent<BoxCollider>(5.f, 5.f);
     bullet->addComponent<Velocity>(10.f, 0.f);
-    bullet->addComponent<Tag>("bullet");
+    bullet->addComponent<Tag>("player_bullet");
+    bullet->addComponent<Damage>(10);
     bullet->addComponent<Script>(
         [this](const int entityId, World& world)
         {
@@ -280,18 +341,28 @@ void ServerGame::handleShoot(const int id)
 void ServerGame::startLevel(const int levelId)
 {
     const std::string levelPath = "../Levels/level" + std::to_string(levelId) + ".json";
-    LevelLoader::loadFromFile(levelPath, _world);
-    const auto entities = _world.getAllEntitiesWithComponent<Tag>();
+    LevelLoader::loadFromFile(levelPath, this);
+
+}
+
+void ServerGame::checkDeaths()
+{
+    auto entities = _world.getAllEntitiesWithComponent<HP>();
+
     for (const auto& entity : entities) {
-        if (!entity) continue;
-        auto tag = entity->getComponent<Tag>();
-        if (!tag || tag->getTag() != "enemy")  // be aware here because if we nedd to add tank or medium enemies
+        if (!entity)
             continue;
-        const auto pos = entity->getComponent<Position>();
-        if (!pos)
+        auto hp = entity->getComponent<HP>();
+        if (!hp || hp->getHP() > 0)
             continue;
-        Packet packet;
-        packet.positionSpawn(entity->getId(), Enemy, pos->getX(), pos->getY());
-        _network.sendPacket(packet);
+
+        if (hp->isAlive()) {
+            hp->setAlive(false);
+
+            Packet packet;
+            packet.dead(entity->getId());
+            _network.sendPacket(packet);
+            _world.killEntity(entity->getId());
+        }
     }
 }

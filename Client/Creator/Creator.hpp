@@ -30,7 +30,7 @@ class Creator {
         void createLevelSelect();
         void createLoadingScreen();
         void createPlayer(uint64_t id = 0);
-        void createEnemy(float x, float y, int type);
+        void createEnemy(float x, float y, int type, int entityId);
         void createBackground(sf::RenderWindow& window);
         void createBullet(size_t entityId, int x, int y, int type);
         void createMenuButton(const std::string& label, int sceneId, float x, float y, const std::function<void()>& onClick);

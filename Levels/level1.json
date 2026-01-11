@@ -544,7 +544,7 @@
       }
     },
     {
-      "type": "enemy",
+      "type": "sinus_enemy",
       "tag": "enemy",
       "x": 1740,
       "y": 580,

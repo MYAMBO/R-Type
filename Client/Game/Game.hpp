@@ -14,6 +14,7 @@
     #include "Inputs.hpp"
     #include "Creator.hpp"
     #include "IGameNetwork.hpp"
+    #include "EntitiesType.hpp"
 
 /**
  * @brief Enumeration for different rendering layers in the game.
@@ -31,13 +32,13 @@ enum PlayerColor {
     GREEN
 };
 
-enum entitiesType
-{
-    None = 0,
-    Player = 1,
-    Enemy,
-    Bullet
-};
+// enum entitiesType
+// {
+//     None = 0,
+//     Player = 1,
+//     Enemy,
+//     Bullet
+// };
 
 /**
  * @brief Main Game class to handle the game window and loop.
