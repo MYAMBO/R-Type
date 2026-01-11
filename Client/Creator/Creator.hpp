@@ -25,6 +25,7 @@ class Creator {
         void createOptions();
         void createCredits();
         void createTguiMenu();
+        void createGameTools();
         void createPauseMenu();
         void createTguiOptions();
         void createLevelSelect();
