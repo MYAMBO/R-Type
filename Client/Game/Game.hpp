@@ -26,6 +26,7 @@ enum LayerType {
 };
 
 enum class SceneType {
+    LOADING = 0,
     GAMEPLAY = 1,
     MENU = 2,
     OPTIONS = 3,

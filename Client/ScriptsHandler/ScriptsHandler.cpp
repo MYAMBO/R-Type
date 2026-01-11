@@ -118,7 +118,7 @@ void playerfire(size_t entityId, World &world)
     auto musicComp = fire->getComponent<Music>();
     if (!musicComp)
         return;
-    if (world.getCurrentScene() == 1) {
+    if (world.getCurrentScene() == static_cast<int>(SceneType::GAMEPLAY)) {
         musicComp->play();
     } else if (musicComp) {
         musicComp->stop();
@@ -229,7 +229,7 @@ void playerScript(int entityId, World& world)
 void dotScript(int entityId, World& world)
 {
     auto dotEnt = GameHelper::getEntityById(world, entityId);
-    if (!dotEnt || world.getCurrentScene() != 11)
+    if (!dotEnt || world.getCurrentScene() != static_cast<int>(SceneType::KAYU))
         return;
     float width = static_cast<float>(world.getWindow()->getSize().x);
     float height = static_cast<float>(world.getWindow()->getSize().y);
@@ -379,7 +379,7 @@ void productionScript(int entityId, World& world)
 void kayuScript(int entityId, World& world)
 {
     auto e = GameHelper::getEntityById(world, entityId);
-    if (!e || world.getCurrentScene() != 11)
+    if (!e || world.getCurrentScene() != static_cast<int>(SceneType::KAYU))
         return;
     float width = static_cast<float>(world.getWindow()->getSize().x);
     float height = static_cast<float>(world.getWindow()->getSize().y);
@@ -419,7 +419,7 @@ void kayuScript(int entityId, World& world)
 void corpScript(int entityId, World& world)
 {
     auto e = GameHelper::getEntityById(world, entityId);
-    if (!e || world.getCurrentScene() != 11)
+    if (!e || world.getCurrentScene() != static_cast<int>(SceneType::KAYU))
         return;
     float width = static_cast<float>(world.getWindow()->getSize().x);
     float height = static_cast<float>(world.getWindow()->getSize().y);
