@@ -506,6 +506,8 @@ void Creator::createCredits()
     watcher->addComponent<Scene>(42);
     watcher->addComponent<Tag>("credits_watcher");
     watcher->addComponent<Script>([](int id, World& w) {
+        if (w.getCurrentScene() != 42)
+            return;
         auto inputs = w.getSystem<Inputs>();
         if (inputs && (inputs->isKeyPressed(KeyboardKey::Key_Escape) || inputs->isKeyPressed(KeyboardKey::Key_Space))) {
             w.setCurrentScene(2);

@@ -234,7 +234,7 @@ void Game::run()
     updateLoadingState(1.0f, "Ready!");
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     
-    _world.setCurrentScene(2);
+    _world.setCurrentScene(42);
     auto musicmenu = GameHelper::getEntityByTag(_world, "menu_music");
     if (musicmenu) {
         auto musicComp = musicmenu->getComponent<Music>();
