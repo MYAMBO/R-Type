@@ -142,13 +142,7 @@ void Game::updateLoadingState(float progress, const std::string& status)
     _window.display();
 }
 
-/**
- * @brief Runs the main game loop.
- *
- * This function initializes the game, handles loading screens,
- * and enters the main game loop to process input and update the world.
- */
-void Game::run()
+void Game::loadingRun()
 {
     _window.setFramerateLimit(30);
     _world.setWindow(_window);
@@ -195,12 +189,9 @@ void Game::run()
     _world.setCurrentScene(0);
 
     _creator.createLoadingScreen();
-    auto entermusic = _world.createEntity();
-    entermusic->addComponent<SoundEffect>("../assets/sounds/loading.mp3", 100.f);
-    entermusic->addComponent<Scene>(0);
-    entermusic->addComponent<Tag>("entering_game_music");
-    
+
     updateLoadingState(0.0f, "Initializing systems...");
+    _creator.createGameTools();
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     updateLoadingState(0.1f, "Loading assets...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
@@ -213,6 +204,22 @@ void Game::run()
     _creator.createBackground(_window); 
     _creator.createCredits();
     updateLoadingState(0.8f, "Connecting to server...");
+    run();
+}
+
+/**
+ * @brief Runs the main game loop.
+ *
+ * This function initializes the game, handles loading screens,
+ * and enters the main game loop to process input and update the world.
+ */
+void Game::run()
+{
+    auto inputSystem = _world.getSystem<Inputs>();
+    auto entermusic = _world.createEntity();
+    entermusic->addComponent<SoundEffect>("../assets/sounds/loading.mp3", 100.f);
+    entermusic->addComponent<Scene>(0);
+    entermusic->addComponent<Tag>("entering_game_music");
     
     Packet packet;
     packet.setId(0);
@@ -227,7 +234,7 @@ void Game::run()
     updateLoadingState(1.0f, "Ready!");
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     
-    _world.setCurrentScene(42);
+    _world.setCurrentScene(2);
     auto musicmenu = GameHelper::getEntityByTag(_world, "menu_music");
     if (musicmenu) {
         auto musicComp = musicmenu->getComponent<Music>();
@@ -239,7 +246,6 @@ void Game::run()
         gameInput(inputSystem);
         _world.manageSystems();
         _window.display();
-        printf("sizewindow: %d sizeheight: %d\n", _window.getSize().x, _window.getSize().y);
     }
 }
 
@@ -255,12 +261,13 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
 
     while (const std::optional eventOpt = _window.pollEvent()) {
         _world.setEvent(*eventOpt);
-        if (inputSystem->isKeyPressed(KeyboardKey::Key_Escape) && _world.getCurrentScene() == 2)
-            _window.close();
-        else if (inputSystem->isKeyPressed(KeyboardKey::Key_Escape)
-            && _world.getCurrentScene() != 2 && _world.getCurrentScene() != 10
-            && _world.getCurrentScene() != 11) {
-            _world.setCurrentScene(2);
+        if (inputSystem->isTriggered(*eventOpt, KeyboardKey::Key_Escape)) {
+            int currentScene = _world.getCurrentScene();
+            if (currentScene == 2) {
+                _window.close();
+            } else if (currentScene != 10 && currentScene != 11) {
+                _world.setCurrentScene(2);
+            }
         }
         if (eventOpt->is<sf::Event::Closed>())
             _window.close();
@@ -440,24 +447,4 @@ int Game::killEntity(int id)
         return -1;
     _world.killEntity(id);
     return 0;
-}
-
-void Game::setMusicVolume(int volume)
-{
-    _musicVolume = volume;
-}
-
-void Game::setSfxVolume(int volume)
-{
-    _sfxVolume = volume;
-}
-
-int Game::getMusicVolume()
-{
-    return _musicVolume;
-}
-
-int Game::getSfxVolume()
-{
-    return _sfxVolume;
 }

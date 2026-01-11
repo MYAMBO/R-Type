@@ -58,6 +58,7 @@ class Inputs : public System {
         void update(const float& dt, World &w) override;
 
         [[nodiscard]] bool isKeyPressed(KeyboardKey key) const;
+        [[nodiscard]] bool isTriggered(const sf::Event& event, KeyboardKey key) const;
 
         void clearInputs();
 

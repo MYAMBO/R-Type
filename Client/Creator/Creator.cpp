@@ -482,18 +482,10 @@ void Creator::createCredits()
             role->addComponent<Tag>("credit_role_" + std::to_string(i));
             role->addComponent<Position>(centerX, startY + (i * lineSpacing));
             role->addComponent<Velocity>(0.f, -3.f);
-            role->addComponent<Script>([](int id, World& w) {
-                auto centerX = static_cast<float>(w.getWindow()->getSize().x) / 8.f;
-                auto pos = GameHelper::getEntityById(w, id);
-                if (!pos)
-                    return;
-                auto positionComp = pos->getComponent<Position>();
-                positionComp->setX(centerX);
-            });
+            role->addComponent<Script>(creditsScript);
             role->addComponent<Text>(credits[i].first, "../assets/font/title.ttf", 20);
             auto txtRole = role->getComponent<Text>();
             txtRole->setColor(255, 255, 255, 180);
-        }
 
         if (!credits[i].second.empty()) {
             auto name = _world.createEntity();
@@ -502,15 +494,7 @@ void Creator::createCredits()
             name->addComponent<Tag>("credit_name_" + std::to_string(i));
             name->addComponent<Position>(centerX2, startY + (i * lineSpacing));
             name->addComponent<Velocity>(0.f, -3.f);
-            name->addComponent<Script>([](int id, World& w) {
-                auto centerX2 = static_cast<float>(w.getWindow()->getSize().x) / 2.f;
-                auto pos = GameHelper::getEntityById(w, id);
-                if (!pos)
-                    return;
-                auto positionComp = pos->getComponent<Position>();
-                positionComp->setX(centerX2);
-                
-            });
+            name->addComponent<Script>(creditsNameScript);
             name->addComponent<Text>(credits[i].second, "../assets/font/title.ttf", 25);
             auto txtName = name->getComponent<Text>();
             txtName->setColor(255, 255, 255, 255);
@@ -616,7 +600,7 @@ void Creator::createTguiOptions()
         });
     };
 
-    auto createOptionSlider = [this, mainLayoutEntity](const std::string& label, float initialValue, std::function<void(float)> onValueChange) {
+    auto createOptionSlider = [this, mainLayoutEntity](const std::string& label, float initialValue, std::function<void(float)> onValueChange, std::function<void(int, World&)> onUpdate = nullptr) {
         auto rowEntity = _world.createEntity();
         rowEntity->addComponent<GuiWidget>(WidgetType::PANEL, "", mainLayoutEntity->getId());
         rowEntity->addComponent<Scene>(3);
@@ -639,6 +623,8 @@ void Creator::createTguiOptions()
         sliderEntity->addComponent<GuiWidget>(WidgetType::SLIDER, "", rowEntity->getId());
         sliderEntity->addComponent<Scene>(3);
         sliderEntity->addComponent<Tag>("option_slider");
+        if (onUpdate)
+            sliderEntity->addComponent<Script>(onUpdate);
         auto guiSlider = sliderEntity->getComponent<GuiWidget>();
         guiSlider->setSize("40%", "20");
         guiSlider->setPosition("70%", "50%");
@@ -650,20 +636,79 @@ void Creator::createTguiOptions()
         auto rawSlider = std::dynamic_pointer_cast<tgui::Slider>(guiSlider->getRawWidget());
         if (rawSlider) {
             rawSlider->onValueChange(onValueChange);
-        }
+        }        
     };
 
-    static bool dummy = false;
-    createOptionToggle("GOD MODE", dummy);
-    createOptionToggle("EASY MODE", dummy);
-    createOptionToggle("HARD MODE", dummy);
-    createOptionToggle("ONE HIT KILL", dummy);
-    //createOptionSlider("MUSIC VOLUME", 100.f, [](float value) {
-    //    Game::setMusicVolume(value);
-    //});
-    //createOptionSlider("SFX VOLUME", 100.f, [](float value) {
-    //    Game::setSfxVolume(value);
-    //});
+    static bool godMode = false;
+    static bool easyMode = false;
+    static bool hardMode = false;
+    static bool oneHitKill = false;
+    createOptionToggle("GOD MODE", godMode);
+    createOptionToggle("EASY MODE", easyMode);
+    createOptionToggle("HARD MODE", hardMode);
+    createOptionToggle("ONE HIT KILL", oneHitKill);
+
+    auto settingUpdater = _world.createEntity();
+    settingUpdater->addComponent<Scene>(0);
+    settingUpdater->addComponent<Tag>("options_setting_updater");
+    settingUpdater->addComponent<Script>([&godMode, &easyMode, &hardMode, &oneHitKill](int id, World& w) {
+        auto entity = GameHelper::getEntityById(w, id);
+        if (!entity)
+            return;
+        //auto scene = w.getCurrentScene();
+        //if (scene != entity->getComponent<Scene>()->getScene())
+        //    entity->getComponent<Scene>()->setScene(scene);
+        auto dataEntity = GameHelper::getEntityByTag(w, "game_difficulty_settings");
+        if (!dataEntity)
+            return;
+        auto dataComp = dataEntity->getComponent<Data>(); 
+        if (dataComp) {
+            dataComp->setData("god_mode", godMode ? "true" : "false");
+            dataComp->setData("easy_mode", easyMode ? "true" : "false");
+            dataComp->setData("hard_mode", hardMode ? "true" : "false");
+            dataComp->setData("one_hit_kill", oneHitKill ? "true" : "false");
+        }
+    });
+
+    createOptionSlider("MUSIC VOLUME", 100.f, [](float value) {(void)value;}, [](int id, World& w) {
+        auto entity = GameHelper::getEntityById(w, id);
+        if (!entity)
+            return;
+        auto rawSlider = std::dynamic_pointer_cast<tgui::Slider>(entity->getComponent<GuiWidget>()->getRawWidget());
+        if (!rawSlider)
+            return;
+        float value = static_cast<float>(rawSlider->getValue());
+        auto volumeSettings = GameHelper::getEntityByTag(w, "game_volume_settings");
+        if (volumeSettings) {
+            volumeSettings->getComponent<Data>()->setData("music_volume", std::to_string(static_cast<int>(value)));
+        }
+    });
+    createOptionSlider("SFX VOLUME", 100.f, [](float value) {(void)value;}, [](int id, World& w) {
+        auto entity = GameHelper::getEntityById(w, id);
+        if (!entity)
+            return;
+        auto rawSlider = std::dynamic_pointer_cast<tgui::Slider>(entity->getComponent<GuiWidget>()->getRawWidget());
+        if (!rawSlider)
+            return;
+        float value = static_cast<float>(rawSlider->getValue());
+        auto volumeSettings = GameHelper::getEntityByTag(w, "game_volume_settings");
+        if (volumeSettings) {
+            volumeSettings->getComponent<Data>()->setData("sfx_volume", std::to_string(static_cast<int>(value)));
+        }
+    });
+    createOptionSlider("MASTER VOLUME", 100.f, [](float value) {(void)value;}, [](int id, World& w) {
+        auto entity = GameHelper::getEntityById(w, id);
+        if (!entity)
+            return;
+        auto rawSlider = std::dynamic_pointer_cast<tgui::Slider>(entity->getComponent<GuiWidget>()->getRawWidget());
+        if (!rawSlider)
+            return;
+        float value = static_cast<float>(rawSlider->getValue());
+        auto volumeSettings = GameHelper::getEntityByTag(w, "game_volume_settings");
+        if (volumeSettings) {
+            volumeSettings->getComponent<Data>()->setData("master_volume", std::to_string(static_cast<int>(value)));
+        }
+    });
 
     auto btnReturn = _world.createEntity();
     btnReturn->addComponent<GuiWidget>(WidgetType::BUTTON, "BACK", optionsRoot->getId());
@@ -702,14 +747,10 @@ void Creator::createPlayer(uint64_t id)
     player->addComponent<BoxCollider>(33.0f, 19.0f);
 
     std::map<std::string, std::string> dataMap = {
-        {"is_god_mode", "false"},
-        {"is_easy_mode", "false"},
-        {"is_color_blind", "false"},
-        {"is_hard_mode", "false"},
         {"mana", "100"}
     };
     player->addComponent<Data>(dataMap);
-    
+
     if (playerCount == 0) {
         player->addComponent<Velocity>(0.f, 0.f);
         player->addComponent<Animator>(2, 2, 3.f, 0, 0, 33, 19, 0, 0);
@@ -932,16 +973,39 @@ void Creator::createSparks(World &world, float x, float y, int amount)
         spark->addComponent<Velocity>(vx, vy);
         spark->addComponent<RectangleShape>(4.f, 4.f, 255, 255, 255, 255);
         spark->getComponent<RectangleShape>()->setColor(255, 215, 0, 255);
-        spark->addComponent<Script>([](int id, World& w) {
-            auto e = GameHelper::getEntityById(w, id);
-            if (!e) return;
-            auto r = e->getComponent<RectangleShape>();
-            if (r->getSize().x > 0.1f) {
-                r->setSize(r->getSize().x * 0.8f, r->getSize().y * 0.8f);
-                r->setColor(r->getColor().r, r->getColor().g * 0.8f, r->getColor().b, r->getColor().a);
-            }
-            else
-                w.killEntity(id);
-        });
+        spark->addComponent<Script>(sparkScript);
     }
+}
+
+
+void Creator::createGameTools()
+{
+    auto volume = _world.createEntity();
+    volume->addComponent<Scene>(0);
+    volume->addComponent<Data>(std::map<std::string, std::string>{
+        {"music_volume_old", "100"},
+        {"sfx_volume_old", "100"},
+        {"master_volume_old", "100"},
+        {"music_volume", "100"},
+        {"sfx_volume", "100"},
+        {"master_volume", "100"}
+    });
+    volume->addComponent<Tag>("game_volume_settings");
+    volume->addComponent<Script>(volumeSettingsScript);
+
+    auto difficulty = _world.createEntity();
+    difficulty->addComponent<Scene>(0);
+    difficulty->addComponent<Data>(std::map<std::string, std::string>{
+        {"is_easy_mode", "false"},
+        {"is_hard_mode", "false"},
+        {"is_god_mode", "false"},
+    });
+    difficulty->addComponent<Tag>("game_difficulty_settings");
+    
+    auto availability = _world.createEntity();
+    availability->addComponent<Scene>(0);
+    availability->addComponent<Data>(std::map<std::string, std::string>{
+        {"is_color_blind", "false"},
+    });
+    availability->addComponent<Tag>("game_availability_settings");
 }

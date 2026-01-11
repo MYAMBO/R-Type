@@ -22,6 +22,7 @@ This system acts as the bridge between the user hardware and the game logic.
 | **Is Key Pressed** | `bool isKeyPressed(KeyboardKey key) const;` | Checks if a specific key is currently held down. Returns `true` if pressed. |
 | **Get Active Key** | `KeyboardKey getKeysPressed() const;` | Returns one of the currently pressed keys (useful for single-key detection). |
 | **Clear Inputs** | `void clearInputs();` | Clears the list of pressed keys (useful when losing window focus). |
+| **Is Triggered** | `bool isTriggered(const sf::Event& event, KeyboardKey key) const;` | Returns true if the key is triggered only say true one time until the key is released. |
 
 ---
 
