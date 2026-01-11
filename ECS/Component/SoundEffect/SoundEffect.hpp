@@ -30,9 +30,11 @@ class SoundEffect : public Component {
         void setVolume(float volume);
         void setPitch(float pitch);
         void setStatus(AudioState state);
+        void setGlobal(bool global);
         
         [[nodiscard]] float getVolume() const;
         [[nodiscard]] float getPitch() const;
+        [[nodiscard]] bool isGlobal() const;
         [[nodiscard]] AudioState getStatus() const;
         [[nodiscard]] std::shared_ptr<sf::SoundBuffer> getBuffer() const;
 
@@ -40,6 +42,7 @@ class SoundEffect : public Component {
         AudioState _state;
         std::shared_ptr<sf::SoundBuffer> _buffer;
         sf::Sound _sound;
+        bool _global = false;
     };
 
 #endif

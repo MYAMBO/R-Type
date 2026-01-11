@@ -132,3 +132,31 @@ std::vector<std::shared_ptr<Entity>> GameHelper::getEntitiesByGroup(World &world
     }
     return members;
 }
+
+sf::Color GameHelper::hueToRGB(float hue)
+{
+    float s = 1.0f;
+    float v = 1.0f;
+    int i = static_cast<int>(hue / 60.0f) % 6;
+    float f = (hue / 60.0f) - i;
+    float p = v * (1 - s);
+    float q = v * (1 - f * s);
+    float t = v * (1 - (1 - f) * s);
+    float r, g, b;
+    
+    switch (i) {
+        case 0: r = v; g = t; b = p; break;
+        case 1: r = q; g = v; b = p; break;
+        case 2: r = p; g = v; b = t; break;
+        case 3: r = p; g = q; b = v; break;
+        case 4: r = t; g = p; b = v; break;
+        case 5: r = v; g = p; b = q; break;
+        default: r = g = b = 0; break;
+    }
+
+    return sf::Color(
+        static_cast<std::uint8_t>(r * 255), 
+        static_cast<std::uint8_t>(g * 255), 
+        static_cast<std::uint8_t>(b * 255)
+    );
+}

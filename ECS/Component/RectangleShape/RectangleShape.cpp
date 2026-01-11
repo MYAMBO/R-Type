@@ -77,3 +77,12 @@ sf::Vector2f RectangleShape::getSize() const
 {
     return _shape.getSize();
 }
+
+/**
+* @brief Gets the fill color of the rectangle.
+* @return The fill color as an SFML Color.
+*/
+sf::Color RectangleShape::getColor() const
+{
+    return _shape.getFillColor();
+}
