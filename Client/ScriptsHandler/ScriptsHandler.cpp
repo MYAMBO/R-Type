@@ -281,6 +281,10 @@ void dotScript(int entityId, World& world)
  */
 void myamboScript(int entityId, World& world)
 {
+    float width = static_cast<float>(world.getWindow()->getSize().x);
+    float height = static_cast<float>(world.getWindow()->getSize().y);
+    float centerX = width / 2.0f;
+    float centerY = height / 4.0f;
     auto entity = GameHelper::getEntityById(world, entityId);
     if (!entity)
         return;
@@ -295,6 +299,8 @@ void myamboScript(int entityId, World& world)
     static float growthRate = 0.05f;
     static bool musicPlayed = false;
 
+    posComp->setY(centerY);
+    posComp->setX(centerX - (text->getGlobalBounds().size.x / 2.0f));
     if (currentSize < 200.0f) {
         if (!musicPlayed) {
             musicComp->play();
@@ -303,7 +309,7 @@ void myamboScript(int entityId, World& world)
         growthRate += 0.003f; 
         currentSize += currentSize * growthRate;
         text->setSize(static_cast<unsigned int>(currentSize));
-        posComp->setX(posComp->getX() - 5.f);
+        posComp->setX(centerX - (text->getGlobalBounds().size.x / 2.0f));
     }
 }
 
@@ -316,6 +322,10 @@ void myamboScript(int entityId, World& world)
  */
 void productionScript(int entityId, World& world)
 {
+    float width = static_cast<float>(world.getWindow()->getSize().x);
+    float height = static_cast<float>(world.getWindow()->getSize().y);
+    float centerX = width / 2.0f;
+    float centerY = height / 4.0f;
     auto entity = GameHelper::getEntityById(world, entityId);
     if (!entity)
         return;
@@ -338,6 +348,8 @@ void productionScript(int entityId, World& world)
     if (!musicComp)
         return;
 
+    posComp->setY(centerY + 220.f);
+    posComp->setX(centerX - (text->getGlobalBounds().size.x / 2.0f));
     static bool colorChanged = false;
     static bool musicPlayed = false;
     static int timer = 90;
@@ -555,4 +567,95 @@ void corpGlowScript(int entityId, World& world)
         hue = 0.f;
     sf::Color color = GameHelper::hueToRGB(hue);
     text->setColor(color.r, color.g, color.b, 200);
+}
+
+/**
+ * @brief Script to handle volume settings.
+ *
+ * This function can be expanded to manage volume settings in the game.
+ * @param entityId The ID of the volume settings entity.
+ * @param world The game world containing entities and components.
+ */
+void volumeSettingsScript(int entityId, World& world)
+{
+    auto entity = GameHelper::getEntityById(world, entityId);
+    if (!entity)
+        return;
+    auto dataComp = entity->getComponent<Data>();
+    if (!dataComp)
+        return;
+    auto entityMusic = world.getAllEntitiesWithComponent<Music>();
+    for (const auto& musicEntity : entityMusic) {
+        auto musicComp = musicEntity->getComponent<Music>();
+        if (!musicComp)
+            continue;
+        int masterVolume = std::stoi(dataComp->getData("master_volume")) ;
+        int musicVolume = std::stoi(dataComp->getData("music_volume"));
+        int finalVolume = (masterVolume * musicVolume) / 100;
+        musicComp->setVolume(finalVolume);
+    }
+    auto entitySfx = world.getAllEntitiesWithComponent<SoundEffect>();
+    for (const auto& sfxEntity : entitySfx) {
+        auto sfxComp = sfxEntity->getComponent<SoundEffect>();
+        if (!sfxComp)
+            continue;
+        int masterVolume = std::stoi(dataComp->getData("master_volume")) ;
+        int sfxVolume = std::stoi(dataComp->getData("sfx_volume"));
+        int finalVolume = (masterVolume * sfxVolume) / 100;
+        sfxComp->setVolume(finalVolume);
+    }
+}
+
+/**
+ * @brief Script to handle spark entity behavior.
+ *
+ * This function reduces the size and fades out the spark entity over time.
+ * @param entityId The ID of the spark entity.
+ * @param world The game world containing entities and components.
+ */
+void sparkScript(int entityId, World& world)
+{
+    auto e = GameHelper::getEntityById(world, entityId);
+    if (!e) return;
+    auto r = e->getComponent<RectangleShape>();
+    if (r->getSize().x > 0.1f) {
+        r->setSize(r->getSize().x * 0.8f, r->getSize().y * 0.8f);
+        r->setColor(r->getColor().r, r->getColor().g * 0.8f, r->getColor().b, r->getColor().a);
+    }
+    else
+        w.killEntity(id);
+}
+
+/**
+ * @brief Script to handle the Credits screen behavior.
+ *
+ * This function centers the credits text on the screen.
+ * @param entityId The ID of the credits entity.
+ * @param world The game world containing entities and components.
+ */
+void creditsScript(int entityId, World& world)
+{
+    auto centerX = static_cast<float>(w.getWindow()->getSize().x) / 8.f;
+    auto pos = GameHelper::getEntityById(w, id);
+    if (!pos)
+        return;
+    auto positionComp = pos->getComponent<Position>();
+    positionComp->setX(centerX);
+}
+
+/**
+ * @brief Script to handle the Credits names behavior.
+ *
+ * This function centers the credits names text on the screen.
+ * @param entityId The ID of the credits names entity.
+ * @param world The game world containing entities and components.
+ */
+void creditsNameScript(int entityId, World& world)
+{
+    auto centerX2 = static_cast<float>(w.getWindow()->getSize().x) / 2.f;
+    auto pos = GameHelper::getEntityById(w, id);
+    if (!pos)
+        return;
+    auto positionComp = pos->getComponent<Position>();
+    positionComp->setX(centerX2);
 }

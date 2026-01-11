@@ -482,18 +482,10 @@ void Creator::createCredits()
             role->addComponent<Tag>("credit_role_" + std::to_string(i));
             role->addComponent<Position>(centerX, startY + (i * lineSpacing));
             role->addComponent<Velocity>(0.f, -3.f);
-            role->addComponent<Script>([](int id, World& w) {
-                auto centerX = static_cast<float>(w.getWindow()->getSize().x) / 8.f;
-                auto pos = GameHelper::getEntityById(w, id);
-                if (!pos)
-                    return;
-                auto positionComp = pos->getComponent<Position>();
-                positionComp->setX(centerX);
-            });
+            role->addComponent<Script>(creditsScript);
             role->addComponent<Text>(credits[i].first, "../assets/font/title.ttf", 20);
             auto txtRole = role->getComponent<Text>();
             txtRole->setColor(255, 255, 255, 180);
-        }
 
         if (!credits[i].second.empty()) {
             auto name = _world.createEntity();
@@ -502,15 +494,7 @@ void Creator::createCredits()
             name->addComponent<Tag>("credit_name_" + std::to_string(i));
             name->addComponent<Position>(centerX2, startY + (i * lineSpacing));
             name->addComponent<Velocity>(0.f, -3.f);
-            name->addComponent<Script>([](int id, World& w) {
-                auto centerX2 = static_cast<float>(w.getWindow()->getSize().x) / 2.f;
-                auto pos = GameHelper::getEntityById(w, id);
-                if (!pos)
-                    return;
-                auto positionComp = pos->getComponent<Position>();
-                positionComp->setX(centerX2);
-                
-            });
+            name->addComponent<Script>(creditsNameScript);
             name->addComponent<Text>(credits[i].second, "../assets/font/title.ttf", 25);
             auto txtName = name->getComponent<Text>();
             txtName->setColor(255, 255, 255, 255);
@@ -985,17 +969,7 @@ void Creator::createSparks(World &world, float x, float y, int amount)
         spark->addComponent<Velocity>(vx, vy);
         spark->addComponent<RectangleShape>(4.f, 4.f, 255, 255, 255, 255);
         spark->getComponent<RectangleShape>()->setColor(255, 215, 0, 255);
-        spark->addComponent<Script>([](int id, World& w) {
-            auto e = GameHelper::getEntityById(w, id);
-            if (!e) return;
-            auto r = e->getComponent<RectangleShape>();
-            if (r->getSize().x > 0.1f) {
-                r->setSize(r->getSize().x * 0.8f, r->getSize().y * 0.8f);
-                r->setColor(r->getColor().r, r->getColor().g * 0.8f, r->getColor().b, r->getColor().a);
-            }
-            else
-                w.killEntity(id);
-        });
+        spark->addComponent<Script>(sparkScript);
     }
 }
 
