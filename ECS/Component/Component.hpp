@@ -8,6 +8,8 @@
 #ifndef COMPONENT_HPP_
     #define COMPONENT_HPP_
 
+#include "iostream"
+
 /** 
  * @brief Base class for all components in the ECS architecture.
  *

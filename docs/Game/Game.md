@@ -1,36 +1,68 @@
 ## Game
 
-The **Game** class is the central controller of the client-side application. It is responsible for initializing the window, managing the ECS (Entity Component System) World, handling user inputs, and executing the main game loop.
+The **Game** class is the central controller of the client-side application.  
+It coordinates the main game loop, manages the ECS **World**, handles networking synchronization via **IGameNetwork**, and delegates entity creation to the **Creator**. It also handles input processing and movement interpolation.
+
+### Enums
+
+The class defines several enumerations to standardize game constants:
+*   **LayerType**: Defines rendering order (`BACKGROUND = -1`, `UI = 1000`).
+*   **PlayerColor**: Defines available player skin variants (`BLUE`, `PURPLE`, `RED`, `GREEN`).
+*   **entitiesType**: Defines identifiers for network spawning (`None`, `Player`, `Enemy`, `Bullet`).
+
+### Dependencies & Integration
+
+| Type | Name | Description |
+|:---|:---|:---|
+| **Manager** | [`World`](../ECS/World.md) | The ECS container managed by the Game. |
+| **Factory** | [`Creator`](../Creator/Creator.md) | Handles the instantiation of complex entities. |
+| **Interface** | [`IGameNetwork`](../Core/IGameNetwork.md) | Abstract interface for communicating with the server (UDP/TCP). |
+
+---
+
+### Public Methods
 
 | Method | Signature | Description |
 |:---|:---|:---|
-| **Constructor** | `Game(unsigned int width, unsigned int height, const std::string& title)` | Initializes the game window with specific dimensions and title, and sets up the ECS World. |
-| **Destructor** | `~Game()` | Closes the window, and destroys the game instance. |
-| **Run** | `void run()` | Starts the main game loop. This method handles event polling, system updates, and rendering. |
-| **Game Input** | `void gameInput(std::shared_ptr<Inputs> inputSystem)` | Processes global game inputs (e.g., pausing, quitting the game via Escape or window close event). |
-| **Player Input** | `void playerInput(std::shared_ptr<Inputs> inputSystem)` | Processes inputs specific to the player entity (movement, shooting/actions). |
-| **Create Camera** | `void createCamera()` | Initializes the main camera entity used to control the view and scrolling. |
-| **Create Player** | `void createPlayer()` | Instantiates the player entity, assigning it necessary components like Position, Sprite, and HP. |
-| **Create Bullet** | `void createBullet(int entityId)` | Creates a bullet/projectile entity starting from the position of the entity with the given `entityId`. |
-| **Create Enemy** | `void createEnemy(float x, float y, int type)` | Spawns an enemy entity at the specified coordinates (`x`, `y`) with a specific behavior defined by `type`. |
-| **Bullet Movement**| `void bulletMovement()` | Updates the position of all active bullets and handles memory management by destroying bullets that go off-screen. |
-| **Bullet Shooting**| `void bulletShooting()` | Manages the logic for automated shooting mechanics (e.g., enemy fire patterns). |
+| **Constructor** | `Game(IGameNetwork& network, uint width, uint height, string title)` | Initializes the window, ECS, and Entity Creator. Inject the network interface. |
+| **Destructor** | `~Game()` | Cleans up resources and closes the window. |
+| **Run** | `void run()` | Starts the main game loop (Poll Events -> Network Sync -> Update -> Render). |
+| **Kill Entity** | `int killEntity(int id)` | Removes an entity from the world based on its ID. Returns status. |
+| **Handle Spawn** | `void handleSpawn(int id, int type, float x, float y)` | Called by the network when an entity needs to be created on the client side. |
+| **Scene Logic** | `void menudisplay()`<br>`void gameplaydisplay()` | Specific logic loops or update calls for the Menu and Gameplay scenes. |
+
+### Private Internal Logic
+
+| Method | Signature | Description |
+|:---|:---|:---|
+| **Game Input** | `void gameInput(std::shared_ptr<Inputs> inputSystem)` | Handles global inputs (window closing, escape key). |
+| **Player Input** | `void playerInput(int entityId, World &world)` | Processes local player inputs and sends move commands to the server. |
+| **Loading** | `void updateLoadingState(float progress, string status)` | Updates the visual representation of the loading screen. |
+| **Interpolation** | `void smootherMovement(int entityId, World &world, float tX, float tY)` | Smoothly moves a networked entity towards its target position (`tX`, `tY`) to hide network latency. |
+| **Shooting** | `void bulletShooting()` | Manages logic for automated shooting or bullet patterns. |
+
+---
+
+### Internal Data
 
 ```mermaid
 classDiagram
   class Game {
-    -World _world
-    -sf::RenderWindow _window
-    -bool _isShootKeyPressed
-    +Game(width: uint, height: uint, title: string)
-    +~Game()
-    +run() void
-    -gameInput(inputSystem: shared_ptr~Inputs~) void
-    -playerInput(inputSystem: shared_ptr~Inputs~) void
-    -createCamera() void
-    -createPlayer() void
-    -createBullet(entityId: int) void
-    -createEnemy(x: float, y: float, type: int) void
-    -bulletMovement() void
-    -bulletShooting() void
+    - _window: sf::RenderWindow
+    - _world: World
+    - _network: IGameNetwork&
+    - _creator: Creator
+    - _isShootKeyPressed: bool
+    + Game(network: IGameNetwork&, width: uint, height: uint, title: string)
+    + ~Game()
+    + run() void
+    + killEntity(id: int) int
+    + handleSpawn(id: int, type: int, x: float, y: float) void
+    + menudisplay() void
+    + gameplaydisplay() void
+    - gameInput(inputSystem: shared_ptr~Inputs~) void
+    - playerInput(entityId: int, world: World) void
+    - updateLoadingState(progress: float, status: string) void
+    - smootherMovement(entityId: int, world: World, targetX: float, targetY: float) void
+    - bulletShooting() void
   }

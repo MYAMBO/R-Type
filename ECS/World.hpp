@@ -8,6 +8,7 @@
 #ifndef WORLD_HPP_
     #define WORLD_HPP_
 
+#include <iostream>
 #include <memory>
 #include <vector>
 #include <SFML/Window/Event.hpp>
@@ -27,13 +28,19 @@ class World {
         World();
         ~World();
 
-        std::shared_ptr<Entity> createEntity();
+        std::shared_ptr<Entity> createEntity(uint64_t id = 0);
 
         template<typename T>
         [[nodiscard]] std::vector<std::shared_ptr<Entity>> getAllEntitiesWithComponent() const;
 
         template<typename T>
         [[nodiscard]] std::vector<std::shared_ptr<Entity>> getAllEntitiesWithComponents() const;
+
+        template<typename... T>
+        [[nodiscard]] std::vector<std::shared_ptr<Entity>> getEntitiesWithAnyComponent() const;
+
+        template<typename... T>
+        [[nodiscard]] std::vector<std::shared_ptr<Entity>> getEntitiesWithAllComponents() const;
 
         template<typename T, typename ... Args>
         std::shared_ptr<T> addSystem(Args&&... args);
@@ -55,7 +62,7 @@ class World {
         template<typename T>
         std::shared_ptr<T> getSystem() const;
 
-        void killEntity(std::size_t id);
+        void killEntity(uint64_t id);
     private:
         sf::Event _event;
         int _currentScene = 1;
@@ -84,20 +91,41 @@ std::vector<std::shared_ptr<Entity>> World::getAllEntitiesWithComponent() const
 }
 
 /**
- * @brief Retrieves all entities that have a specific component type.
- *
- * @tparam T The type of the component to check for. Must be derived from Component.
- * @return A vector of shared pointers to entities that have the specified component.
+ * @brief Retrieves entities that have AT LEAST ONE of the specified component types.
+ * 
+ * @tparam Ts The types of the components to check for. Must be derived from Component.
+ * @return A vector of shared pointers to entities that have at least one of the specified components
  */
-template<typename T>
-std::vector<std::shared_ptr<Entity>> World::getAllEntitiesWithComponents() const
+template<typename... T>
+std::vector<std::shared_ptr<Entity>> World::getEntitiesWithAnyComponent() const
 {
-    static_assert(std::is_base_of_v<Component, T>, "T must be derived from Component");
-    std::vector<std::shared_ptr<Entity>> entitiesWithComponent;
-    for (const auto& entity : _entities)
-        if (auto component = entity->getComponent<T>())
-            entitiesWithComponent.push_back(entity);
-    return entitiesWithComponent;
+    static_assert((std::is_base_of_v<Component, T> && ...), "All types must be derived from Component");
+    std::vector<std::shared_ptr<Entity>> result;
+    for (const auto& entity : _entities) {
+        if ((entity->getComponent<T>() || ...)) {
+            result.push_back(entity);
+        }
+    }
+    return result;
+}
+
+/**
+ * @brief Retrieves entities that have ALL the specified component types.
+ *
+ * @tparam Ts The types of the components to check for. Must be derived from Component.
+ * @return A vector of shared pointers to entities that have all the specified components.
+ */
+template<typename... T>
+std::vector<std::shared_ptr<Entity>> World::getEntitiesWithAllComponents() const
+{
+    static_assert((std::is_base_of_v<Component, T> && ...), "All types must be derived from Component");
+    std::vector<std::shared_ptr<Entity>> result;
+    for (const auto& entity : _entities) {
+        if ((entity->getComponent<T>() && ...)) {
+            result.push_back(entity);
+        }
+    }
+    return result;
 }
 
 /**

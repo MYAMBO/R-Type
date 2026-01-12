@@ -10,6 +10,7 @@
 
 #include <string>
 #include "MyString.hpp"
+#include "ServerGame.hpp"
 
 /**
  * @brief PacketReader class to read and interpret received data
@@ -17,13 +18,18 @@
 class Packetreader
 {
     public:
-        explicit Packetreader(std::string data, bool isClient = false);
+        explicit Packetreader(std::string data = "", std::shared_ptr<ServerGame> game = nullptr);
         ~Packetreader() = default;
 
         void interpretPacket();
+        void addData(const std::string& data);
+        void clear();
+
+        std::string extract(int length);
     private:
         bool _isClient;
         MyString _data;
+        std::shared_ptr<ServerGame> _game;
 
         void timestamp();
         void updateEntity();
