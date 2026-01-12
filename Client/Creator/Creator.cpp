@@ -84,7 +84,7 @@ void Creator::createMyambo()
     float centerY = height / 2.0f;
 
     auto myambo = _world.createEntity();
-    myambo->addComponent<Text>("MYAMBO", "../assets/font/title.ttf", 10);
+    myambo->addComponent<Text>("MYAMBO", "../assets/font/regular.ttf", 10);
     myambo->getComponent<Text>()->setColor(255, 255, 255, 255);
     myambo->addComponent<Scene>(static_cast<int>(SceneType::MYAMBO));
     myambo->addComponent<Layer>(2);
@@ -96,13 +96,13 @@ void Creator::createMyambo()
     myamboGlow->addComponent<Scene>(static_cast<int>(SceneType::MYAMBO));
     myamboGlow->addComponent<Layer>(1);
     myamboGlow->addComponent<Position>(myambo->getComponent<Position>()->getX(), myambo->getComponent<Position>()->getY());
-    myamboGlow->addComponent<Text>("MYAMBO", "../assets/font/title.ttf", 10);
+    myamboGlow->addComponent<Text>("MYAMBO", "../assets/font/regular.ttf", 10);
     myamboGlow->addComponent<Tag>("logo_myambo_glow");
     myamboGlow->addComponent<Script>(myamboGlowScript);
     myambo->addComponent<Script>(myamboScript);
 
     auto prod = _world.createEntity();
-    prod->addComponent<Text>("PRODUCTION", "../assets/font/title.ttf", 60);
+    prod->addComponent<Text>("PRODUCTION", "../assets/font/regular.ttf", 60);
     prod->getComponent<Text>()->setColor(0, 0, 0, 255);
     prod->getComponent<Text>()->setSize(60);
     prod->addComponent<Scene>(static_cast<int>(SceneType::MYAMBO));
@@ -118,7 +118,7 @@ void Creator::createMyambo()
     prodGlow->addComponent<Scene>(static_cast<int>(SceneType::MYAMBO));
     prodGlow->addComponent<Layer>(1);
     prodGlow->addComponent<Position>(prod->getComponent<Position>()->getX(), prod->getComponent<Position>()->getY());
-    prodGlow->addComponent<Text>("PRODUCTION", "../assets/font/title.ttf", 60);
+    prodGlow->addComponent<Text>("PRODUCTION", "../assets/font/regular.ttf", 60);
     prodGlow->getComponent<Text>()->setColor(0, 0, 0, 255);
     prodGlow->addComponent<Tag>("logo_production_glow");
     prodGlow->addComponent<Script>(productionGlowScript);
@@ -142,7 +142,7 @@ void Creator::createKayu()
     kayu->addComponent<Tag>("logo_kayu");
     kayu->addComponent<Velocity>(10.f, 0.f);
     kayu->addComponent<SoundEffect>("../assets/sounds/kayu.mp3", 100.f);
-    kayu->addComponent<Text>("KAYU", "../assets/font/title.ttf", 120);
+    kayu->addComponent<Text>("KAYU", "../assets/font/regular.ttf", 120);
     kayu->addComponent<Position>(-8000.f, centerY);
     kayu->addComponent<Script>(kayuScript);
 
@@ -150,7 +150,7 @@ void Creator::createKayu()
     kayuGlow->addComponent<Scene>(static_cast<int>(SceneType::KAYU));
     kayuGlow->addComponent<Layer>(1);
     kayuGlow->addComponent<Position>(kayu->getComponent<Position>()->getX(), centerY);
-    kayuGlow->addComponent<Text>("KAYU", "../assets/font/title.ttf", 120);
+    kayuGlow->addComponent<Text>("KAYU", "../assets/font/regular.ttf", 120);
     kayuGlow->addComponent<Tag>("logo_kayu_glow");
     kayuGlow->addComponent<Script>(kayuGlowScript);
 
@@ -160,14 +160,14 @@ void Creator::createKayu()
     corp->addComponent<Tag>("logo_corp");
     corp->addComponent<Position>(10000.f, centerY);
     corp->addComponent<Velocity>(-10.f, 0.f);
-    corp->addComponent<Text>("CORP", "../assets/font/title.ttf", 120);
+    corp->addComponent<Text>("CORP", "../assets/font/regular.ttf", 120);
     corp->addComponent<Script>(corpScript);
 
     auto corpGlow = _world.createEntity();
     corpGlow->addComponent<Scene>(static_cast<int>(SceneType::KAYU));
     corpGlow->addComponent<Layer>(1);
     corpGlow->addComponent<Position>(corp->getComponent<Position>()->getX(), centerY);
-    corpGlow->addComponent<Text>("CORP", "../assets/font/title.ttf", 120);
+    corpGlow->addComponent<Text>("CORP", "../assets/font/regular.ttf", 120);
     corpGlow->addComponent<Tag>("logo_corp_glow");
     corpGlow->addComponent<Script>(corpGlowScript);
     
@@ -228,7 +228,7 @@ void Creator::createTguiMenu()
     titleEntity->addComponent<Layer>(LayerType::UI + 1);
     
     auto guiTitle = titleEntity->getComponent<GuiWidget>();
-    guiTitle->setFont("../assets/font/title.ttf");
+    guiTitle->setFont("../assets/font/regular.ttf");
     guiTitle->setTextSize(120);
     guiTitle->setTextColor(sf::Color::Cyan);
     guiTitle->setTextStyle(tgui::TextStyle::Bold);
@@ -254,7 +254,7 @@ void Creator::createTguiMenu()
     btnPlay->getComponent<SoundEffect>()->setGlobal(true);
     auto guiPlay = btnPlay->getComponent<GuiWidget>();
     styleNeonButton(guiPlay);
-    guiPlay->setFont("../assets/font/title.ttf");
+    guiPlay->setFont("../assets/font/regular.ttf");
     guiPlay->setCallback([this]() {
         auto sfx = GameHelper::getEntityByTag(_world, "menu_button_start")->getComponent<SoundEffect>();
         if (sfx)
@@ -278,7 +278,7 @@ void Creator::createTguiMenu()
     btnOptions->getComponent<SoundEffect>()->setGlobal(true);
     auto guiOpt = btnOptions->getComponent<GuiWidget>();
     styleNeonButton(guiOpt);
-    guiOpt->setFont("../assets/font/title.ttf");
+    guiOpt->setFont("../assets/font/regular.ttf");
     guiOpt->setCallback([this]() { 
         auto sfx = GameHelper::getEntityByTag(_world, "menu_button_options")->getComponent<SoundEffect>();
         if (sfx)
@@ -298,7 +298,7 @@ void Creator::createTguiMenu()
     btnQuit->getComponent<SoundEffect>()->setGlobal(true);
     auto guiQuit = btnQuit->getComponent<GuiWidget>();
     styleNeonButton(guiQuit);
-    guiQuit->setFont("../assets/font/title.ttf");
+    guiQuit->setFont("../assets/font/regular.ttf");
     guiQuit->getRawWidget()->getRenderer()->setProperty("BorderColor", tgui::Color(255, 50, 50));
     guiQuit->getRawWidget()->getRenderer()->setProperty("TextColorHover", tgui::Color::Red);
     guiQuit->setCallback([this]() {
@@ -462,7 +462,7 @@ void Creator::createCredits()
     title->addComponent<Tag>("credits_title");
     title->addComponent<Position>(centerX + centerX / 2.f, startY - lineSpacing * 2);
     title->addComponent<Velocity>(0.f, -3.f);
-    title->addComponent<Text>("CREDITS R-TYPE", "../assets/font/title.ttf", 80);
+    title->addComponent<Text>("CREDITS R-TYPE", "../assets/font/regular.ttf", 80);
     title->getComponent<Text>()->setColor(255, 255, 255, 255);
 
     auto subtitle = _world.createEntity();
@@ -471,7 +471,7 @@ void Creator::createCredits()
     subtitle->addComponent<Tag>("credits_subtitle");
     subtitle->addComponent<Position>(centerX + centerX / 2.f, startY - lineSpacing);
     subtitle->addComponent<Velocity>(0.f, -3.f);
-    subtitle->addComponent<Text>("Thank you for playing!", "../assets/font/title.ttf", 40);
+    subtitle->addComponent<Text>("Thank you for playing!", "../assets/font/regular.ttf", 40);
     subtitle->getComponent<Text>()->setColor(255, 255, 255, 255);
 
     for (size_t i = 0; i < credits.size(); ++i) {
@@ -484,7 +484,7 @@ void Creator::createCredits()
             role->addComponent<Position>(centerX, startY + (i * lineSpacing));
             role->addComponent<Velocity>(0.f, -3.f);
             role->addComponent<Script>(creditsScript);
-            role->addComponent<Text>(credits[i].first, "../assets/font/title.ttf", 20);
+            role->addComponent<Text>(credits[i].first, "../assets/font/regular.ttf", 20);
             auto txtRole = role->getComponent<Text>();
             txtRole->setColor(255, 255, 255, 180);
         }
@@ -496,7 +496,7 @@ void Creator::createCredits()
             name->addComponent<Position>(centerX2, startY + (i * lineSpacing));
             name->addComponent<Velocity>(0.f, -3.f);
             name->addComponent<Script>(creditsNameScript);
-            name->addComponent<Text>(credits[i].second, "../assets/font/title.ttf", 25);
+            name->addComponent<Text>(credits[i].second, "../assets/font/regular.ttf", 25);
             auto txtName = name->getComponent<Text>();
             txtName->setColor(255, 255, 255, 255);
         }
@@ -537,7 +537,7 @@ void Creator::createTguiOptions()
     titleEntity->addComponent<Layer>(LayerType::UI + 1);
     titleEntity->addComponent<Tag>("options_title");
     auto guiTitle = titleEntity->getComponent<GuiWidget>();
-    guiTitle->setFont("../assets/font/title.ttf");
+    guiTitle->setFont("../assets/font/regular.ttf");
     guiTitle->setTextSize(80);
     guiTitle->setTextColor(sf::Color::Green);
     guiTitle->setOrigin(0.5f, 0.5f);
@@ -584,7 +584,7 @@ void Creator::createTguiOptions()
         guiBtn->setSize("50%", "70%");
         guiBtn->setOrigin(0.5f, 0.5f);
         guiBtn->setPosition("30%", "50%");
-        guiBtn->setFont("../assets/font/title.ttf");
+        guiBtn->setFont("../assets/font/regular.ttf");
         styleNeonButton(guiBtn);
 
         auto statusEntity = _world.createEntity();
@@ -631,7 +631,7 @@ void Creator::createTguiOptions()
         guiBtn->setSize("50%", "70%");
         guiBtn->setOrigin(0.5f, 0.5f);
         guiBtn->setPosition("30%", "50%");
-        guiBtn->setFont("../assets/font/title.ttf");
+        guiBtn->setFont("../assets/font/regular.ttf");
         styleNeonButton(guiBtn);
 
         auto statusEntity = _world.createEntity();
@@ -693,30 +693,33 @@ void Creator::createTguiOptions()
     static bool godMode = false;
     static bool easyMode = false;
     static bool hardMode = false;
-    static bool oneHitKill = false;
+    static bool disclexiaMode = false;
     createColorBlindCycle("COLORBLIND");
     createOptionToggle("GOD MODE", godMode);
     createOptionToggle("EASY MODE", easyMode);
     createOptionToggle("HARD MODE", hardMode);
-    createOptionToggle("ONE HIT KILL", oneHitKill);
+    createOptionToggle("DISCLEXIA MODE", disclexiaMode);
 
     auto settingUpdater = _world.createEntity();
     settingUpdater->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
     settingUpdater->addComponent<Tag>("options_setting_updater");
-    settingUpdater->addComponent<Script>([&godMode, &easyMode, &hardMode, &oneHitKill](int id, World& w) {
+    settingUpdater->addComponent<Script>([&godMode, &easyMode, &hardMode, &disclexiaMode](int id, World& w) {
         auto entity = GameHelper::getEntityById(w, id);
         if (!entity)
             return;
         auto dataEntity = GameHelper::getEntityByTag(w, "game_difficulty_settings");
-        if (!dataEntity)
+        auto dataAvailability = GameHelper::getEntityByTag(w, "game_availability_settings");
+        if (!dataEntity || !dataAvailability)
             return;
         auto dataComp = dataEntity->getComponent<Data>(); 
         if (dataComp) {
             dataComp->setData("god_mode", godMode ? "true" : "false");
             dataComp->setData("easy_mode", easyMode ? "true" : "false");
             dataComp->setData("hard_mode", hardMode ? "true" : "false");
-            dataComp->setData("one_hit_kill", oneHitKill ? "true" : "false");
         }
+        auto dataCompAvail = dataAvailability->getComponent<Data>();
+        if (dataCompAvail)
+            dataCompAvail->setData("disclexia_mode", disclexiaMode ? "true" : "false");
     });
 
     createOptionSlider("MUSIC VOLUME", 100.f, [](float value) {(void)value;}, [](int id, World& w) {
@@ -979,7 +982,7 @@ void Creator::createLoadingScreen()
 
     auto status = _world.createEntity();
     status->addComponent<Scene>(static_cast<int>(SceneType::LOADING));
-    status->addComponent<Text>("Initializing...", "../assets/font/title.ttf", 20);
+    status->addComponent<Text>("Initializing...", "../assets/font/regular.ttf", 20);
     status->addComponent<Position>(centerX - status->getComponent<Text>()->getGlobalBounds().size.x / 2.0f, centerY + 60.f);
     status->addComponent<Layer>(LayerType::UI);
     status->getComponent<Text>()->setColor(200, 200, 200, 255);
@@ -1026,15 +1029,11 @@ void Creator::createSparks(World &world, float x, float y, int amount)
     }
 }
 
-
 void Creator::createGameTools()
 {
     auto volume = _world.createEntity();
     volume->addComponent<Scene>(static_cast<int>(SceneType::LOADING));
     volume->addComponent<Data>(std::map<std::string, std::string>{
-        {"music_volume_old", "100"},
-        {"sfx_volume_old", "100"},
-        {"master_volume_old", "100"},
         {"music_volume", "100"},
         {"sfx_volume", "100"},
         {"master_volume", "100"}
@@ -1054,7 +1053,10 @@ void Creator::createGameTools()
     auto availability = _world.createEntity();
     availability->addComponent<Scene>(static_cast<int>(SceneType::LOADING));
     availability->addComponent<Data>(std::map<std::string, std::string>{
-        {"is_color_blind", "false"},
+        {"is_color_blind", "normal"},
+        {"disclexia_mode", "false"},
+        {"lastfont_used", "regular"}
     });
     availability->addComponent<Tag>("game_availability_settings");
+    availability->addComponent<Script>(availabilitySettingsScript);
 }
