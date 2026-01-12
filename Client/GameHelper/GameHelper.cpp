@@ -161,3 +161,24 @@ sf::Color GameHelper::hueToRGB(float hue)
         static_cast<std::uint8_t>(b * 255)
     );
 }
+
+/**
+ * @brief Retrieves the color transformation matrix for a given color blindness mode.
+ *
+ * @param mode The color blindness mode.
+ * @return A 3x3 color transformation matrix.
+ */
+ColorMatrix GameHelper::getColorMatrix(ColorBlindMode mode) {
+    switch (mode) {
+        case ColorBlindMode::Protanopia:
+            return {{0.567f, 0.433f, 0.0f}, {0.558f, 0.442f, 0.0f}, {0.0f, 0.242f, 0.758f}};
+        case ColorBlindMode::Deuteranopia:
+            return {{0.625f, 0.375f, 0.0f}, {0.70f, 0.30f, 0.0f}, {0.0f, 0.30f, 0.70f}};
+        case ColorBlindMode::Tritanopia:
+            return {{0.95f, 0.05f, 0.0f}, {0.0f, 0.433f, 0.567f}, {0.0f, 0.475f, 0.525f}};
+        case ColorBlindMode::Achromatopsia:
+            return {{0.299f, 0.587f, 0.114f}, {0.299f, 0.587f, 0.114f}, {0.299f, 0.587f, 0.114f}};
+        default:
+            return {{1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}};
+    }
+}
