@@ -11,6 +11,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <mutex>
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 
@@ -70,6 +71,7 @@ class World {
         sf::RenderWindow *_window = nullptr;
         std::vector<std::shared_ptr<Entity>> _entities;
         std::vector<std::shared_ptr<System>> _systems;
+        mutable std::mutex _entitiesMutex;
 };
 
 /**
@@ -82,6 +84,7 @@ template<typename T>
 std::vector<std::shared_ptr<Entity>> World::getAllEntitiesWithComponent() const
 {
     static_assert(std::is_base_of_v<Component, T>, "T must be derived from Component");
+    std::lock_guard<std::mutex> lock(_entitiesMutex);
     std::vector<std::shared_ptr<Entity>> entitiesWithComponent;
 
     for (const auto& entity : _entities)
@@ -100,6 +103,7 @@ template<typename... T>
 std::vector<std::shared_ptr<Entity>> World::getEntitiesWithAnyComponent() const
 {
     static_assert((std::is_base_of_v<Component, T> && ...), "All types must be derived from Component");
+    std::lock_guard<std::mutex> lock(_entitiesMutex);
     std::vector<std::shared_ptr<Entity>> result;
     for (const auto& entity : _entities) {
         if ((entity->getComponent<T>() || ...)) {
@@ -119,6 +123,7 @@ template<typename... T>
 std::vector<std::shared_ptr<Entity>> World::getEntitiesWithAllComponents() const
 {
     static_assert((std::is_base_of_v<Component, T> && ...), "All types must be derived from Component");
+    std::lock_guard<std::mutex> lock(_entitiesMutex);
     std::vector<std::shared_ptr<Entity>> result;
     for (const auto& entity : _entities) {
         if ((entity->getComponent<T>() && ...)) {

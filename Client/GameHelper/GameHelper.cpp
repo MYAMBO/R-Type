@@ -9,6 +9,7 @@
 #include "Tag.hpp"
 #include "Scale.hpp"
 #include "Scene.hpp"
+#include "Game.hpp"
 #include "Group.hpp"
 #include "Camera.hpp"
 #include "Sprite.hpp"
@@ -17,6 +18,7 @@
 #include "GameHelper.hpp"
 #include "BoxCollider.hpp"
 #include "Damage.hpp"
+#include "Velocity.hpp"
 
 /**
  * @brief Retrieves the main camera from the world.
@@ -27,6 +29,8 @@
 std::shared_ptr<Camera> GameHelper::getMainCamera(World &world)
 {
     for (const auto& entity : world.getAllEntitiesWithComponent<Camera>()) {
+        if (!entity)
+            continue;
         auto tagComp = entity->getComponent<Tag>();
         if (tagComp && tagComp->getTag() == "main_camera") {
             return entity->getComponent<Camera>();
@@ -44,6 +48,8 @@ std::shared_ptr<Camera> GameHelper::getMainCamera(World &world)
 std::shared_ptr<Entity> GameHelper::getEntityByTag(World &world, const std::string &tag)
 {
     for (const auto& entity : world.getAllEntitiesWithComponent<Tag>()) {
+        if (!entity)
+            continue;
         auto tagComp = entity->getComponent<Tag>();
         if (tagComp && tagComp->getTag() == tag) {
             return entity;
@@ -62,11 +68,12 @@ std::shared_ptr<Entity> GameHelper::getEntityByTag(World &world, const std::stri
 std::shared_ptr<Entity> GameHelper::getEntityById(World &world, uint64_t id)
 {
     for (const auto& entity : world.getAllEntitiesWithComponent<Tag>()) {
+        if (!entity)
+            continue;
         if (entity->getId() == id) {
             return entity;
         }
     }
-    //std::cerr << "Entity with id " << id << " not found." << std::endl;
     return nullptr;
 }
 
@@ -77,20 +84,34 @@ std::shared_ptr<Entity> GameHelper::getEntityById(World &world, uint64_t id)
  * @param x The x-coordinate of the enemy's position.
  * @param y The y-coordinate of the enemy's position.
 */
-void GameHelper::createBasicEnemy(World &world, float x, float y)
+void GameHelper::createBasicEnemy(World &world, float x, float y, int entityId)
 {
-    auto enemy = world.createEntity();
+    auto enemy = world.createEntity(entityId);
     enemy->addComponent<HP>(50);
-    enemy->addComponent<Damage>(20);
+    enemy->addComponent<Damage>(10);
     enemy->addComponent<Position>(x, y);
-    enemy->addComponent<Sprite>(std::string("../sprites/r-typesheet42.gif"));
-    enemy->addComponent<Animator>(2, 1, 3.0f, 0, 0, 33, 19, 33, 0);
+    enemy->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet11.gif"));
+    enemy->addComponent<Animator>(2, 6, 5.0f, 0, 0, 33, 30, 33, 0);
     enemy->addComponent<Scale>(2.f);
-    enemy->addComponent<Scene>(1);
+    enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     enemy->addComponent<Tag>("enemy");
-    enemy->addComponent<BoxCollider>(33.0f, 19.0f);
+    enemy->addComponent<BoxCollider>(66.0f, 60.0f);
 }
 
+
+void GameHelper::createSinusEnemy(World &world, float x, float y, int entityId)
+{
+    auto enemy = world.createEntity(entityId);
+    enemy->addComponent<HP>(50);
+    enemy->addComponent<Damage>(10);
+    enemy->addComponent<Position>(x, y);
+    enemy->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet11.gif"));
+    enemy->addComponent<Animator>(2, 6, 5.0f, 0, 0, 33, 30, 33, 0);
+    enemy->addComponent<Scale>(2.f);
+    enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    enemy->addComponent<Tag>("enemy");
+    enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+}
 
 /**
  * @brief Retrieves all entities belonging to a specific group from the world.
@@ -104,9 +125,39 @@ std::vector<std::shared_ptr<Entity>> GameHelper::getEntitiesByGroup(World &world
     std::vector<std::shared_ptr<Entity>> members;
 
     for (const auto& entity : world.getAllEntitiesWithComponent<Group>()) {
+        if (!entity)
+            continue;
         if (entity->getComponent<Group>()->getId() == groupId) {
             members.push_back(entity);
         }
     }
     return members;
+}
+
+sf::Color GameHelper::hueToRGB(float hue)
+{
+    float s = 1.0f;
+    float v = 1.0f;
+    int i = static_cast<int>(hue / 60.0f) % 6;
+    float f = (hue / 60.0f) - i;
+    float p = v * (1 - s);
+    float q = v * (1 - f * s);
+    float t = v * (1 - (1 - f) * s);
+    float r, g, b;
+    
+    switch (i) {
+        case 0: r = v; g = t; b = p; break;
+        case 1: r = q; g = v; b = p; break;
+        case 2: r = p; g = v; b = t; break;
+        case 3: r = p; g = q; b = v; break;
+        case 4: r = t; g = p; b = v; break;
+        case 5: r = v; g = p; b = q; break;
+        default: r = g = b = 0; break;
+    }
+
+    return sf::Color(
+        static_cast<std::uint8_t>(r * 255), 
+        static_cast<std::uint8_t>(g * 255), 
+        static_cast<std::uint8_t>(b * 255)
+    );
 }
