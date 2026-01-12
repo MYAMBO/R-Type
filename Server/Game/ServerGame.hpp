@@ -29,7 +29,7 @@ class ServerGame {
         ~ServerGame() = default;
 
         void run();
-        void handleNewPlayerPosition(int id, float x, float y);
+        void serverUpdatePosition(int id, float x, float y);
         void handleShoot(int id);
         void handleNewPlayer();
 

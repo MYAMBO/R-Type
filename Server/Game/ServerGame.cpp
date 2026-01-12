@@ -69,7 +69,7 @@ void ServerGame::createPlayer(const float x, const float y)
     player->addComponent<BoxCollider>(10.f, 10.f);
     player->addComponent<Tag>("player");
     Packet packet;
-    packet.positionSpawn(player->getId(), Player, x, y);
+    packet.Spawn(player->getId(), Player, x, y);
     // send all the entity to the client
     _network.sendPacket(packet);
     packet = Packet();
@@ -85,7 +85,7 @@ void ServerGame::createPlayer(const float x, const float y)
             type = Enemy;
         else if (tag->getTag() == "bullet")
             type = Bullet;
-        packet.positionSpawn(entity->getId(), type, pos->getX(), pos->getY());
+        packet.Spawn(entity->getId(), type, pos->getX(), pos->getY());
     }
     _network.sendPacket(packet);
 }
@@ -104,7 +104,7 @@ void ServerGame::EnemyMovement(const int entityId, World &world)
     if (const auto pos = entity->getComponent<Position>(); pos->getX() > 500) {
         pos->setX(pos->getX() - 10 * world.getDeltaTime());
         Packet packet;
-        packet.positionSpawn(entityId, None, pos->getX(), pos->getY());
+        packet.Spawn(entityId, None, pos->getX(), pos->getY());
         _network.sendPacket(packet);
     }
 }
@@ -130,7 +130,7 @@ void ServerGame::createEnemy(const float x, const float y)
         }
     );
     Packet packet;
-    packet.positionSpawn(enemy->getId(), Enemy, x, y);
+    packet.Spawn(enemy->getId(), Enemy, x, y);
     _network.sendPacket(packet);
 }
 
@@ -164,7 +164,7 @@ void ServerGame::BulletMovement(const int entityId, World &world)
         packet.dead(entityId);
     } else {
         pos->setX(pos->getX() + 10 * world.getDeltaTime());
-        packet.positionSpawn(entityId, None, pos->getX(), pos->getY());
+        packet.Spawn(entityId, None, pos->getX(), pos->getY());
     }
     _network.sendPacket(packet);
 }
@@ -189,7 +189,7 @@ void ServerGame::createBullet(const float x, const float y)
         }
     );
     Packet packet;
-    packet.positionSpawn(bullet->getId(), Bullet, x, y);
+    packet.Spawn(bullet->getId(), Bullet, x, y);
 
     _network.sendPacket(packet);
 }
@@ -223,7 +223,7 @@ void ServerGame::handleNewPlayer()
  * @param x The new x position of the player.
  * @param y The new y position of the player.
  */
-void ServerGame::handleNewPlayerPosition(const int id, const float x, const float y)
+void ServerGame::serverUpdatePosition(const int id, const float x, const float y)
 {
     const auto entity = GameHelper::getEntityById(_world, id);
 
@@ -243,7 +243,7 @@ void ServerGame::handleNewPlayerPosition(const int id, const float x, const floa
     }
 
     Packet packet;
-    packet.playerPosition(id, x, y);
+    packet.updatePosition(id, x, y);
     _network.sendPacket(packet);
 }
 

@@ -111,7 +111,7 @@ void Game::run()
     packet.setAck(0);
     packet.setPacketNbr(1);
     packet.setTotalPacketNbr(1);
-    packet.positionSpawn(0, Player, 300, 300);
+    packet.Spawn(0, Player, 300, 300);
     _network.sendPacket(packet);
     createCamera();
     createBackground();
@@ -308,7 +308,7 @@ void Game::playerInput(int entityId, World &world)
     if (inputSystem->isKeyPressed(KeyboardKey::Key_Space)) {
         if (!isShootKeyPressed) {
             Packet packet;
-            packet.shoot(compPlayer->getId());
+            packet.action(compPlayer->getId(), 1); // 1 for Shoot or default action
             packet.setAck(0);
             packet.setId(compPlayer->getId());
             packet.setPacketNbr(1);
@@ -322,7 +322,7 @@ void Game::playerInput(int entityId, World &world)
     if (moved)
     {
         Packet packet = Packet();
-        packet.playerPosition(entityId, pos->getX(), pos->getY());
+        packet.updatePosition(entityId, pos->getX(), pos->getY());
         packet.setAck(0);
         packet.setId(compPlayer->getId());
         packet.setPacketNbr(1);

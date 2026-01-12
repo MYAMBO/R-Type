@@ -82,12 +82,15 @@ If a message payload exceeds the maximum payload size:
 |-----|-----|-----|
 | Command | uint8 | 1 |
 | ID | uint32 | 4 |
+| Type | uint16 | 2 |
 | x | float32 | 4 |
 | y | float32 | 4 |
 
 
 **Description:**  
 The client sends its current position to the server.
+
+Type is always `0`.
 
 ---
 
