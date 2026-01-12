@@ -70,10 +70,10 @@ Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const
     : _window(sf::VideoMode({width, height}), title), _network(network), _creator(_world)
 {
     _world.addSystem<CameraSys>();
+    _world.addSystem<Animation>();
     _world.addSystem<ScriptsSys>();
     _world.addSystem<TextSystem>();
     _world.addSystem<Movement>();
-    _world.addSystem<Animation>();
     _world.addSystem<Collision>();
     _world.addSystem<DeathSys>();
     _world.addSystem<Mouse>();
@@ -199,10 +199,10 @@ void Game::loadingRun()
     updateLoadingState(0.3f, "Generating Menu...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _creator.createTguiMenu();
-    updateLoadingState(0.6f, "Generating Background...");
+    updateLoadingState(0.6f, "Generating game...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
-    _creator.createBackground(_window); 
     _creator.createCredits();
+    _creator.createLevelSelect();
     updateLoadingState(0.8f, "Connecting to server...");
     run();
 }
@@ -235,6 +235,8 @@ void Game::run()
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     
     _world.setCurrentScene(static_cast<int>(SceneType::MENU));
+    _creator.createBackground(_window); 
+
     auto musicmenu = GameHelper::getEntityByTag(_world, "menu_music");
     if (musicmenu) {
         auto musicComp = musicmenu->getComponent<Music>();

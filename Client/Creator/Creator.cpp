@@ -261,7 +261,7 @@ void Creator::createTguiMenu()
             sfx->play();
         auto m = GameHelper::getEntityByTag(_world, "menu_music");
         if (m) m->getComponent<Music>()->stop();
-        _world.setCurrentScene(static_cast<int>(SceneType::GAMEPLAY));
+        _world.setCurrentScene(static_cast<int>(SceneType::LEVEL_SELECT));
     });
     guiLayout->addSpace(0.2f);
 
@@ -310,11 +310,6 @@ void Creator::createTguiMenu()
     });
 
     createTguiOptions();
-}
-
-void Creator::createLevelSelect()
-{
-    // Implementation for level selection menu can be added here
 }
 
 void Creator::createPauseMenu()
@@ -1057,4 +1052,86 @@ void Creator::createGameTools()
         {"is_color_blind", "false"},
     });
     availability->addComponent<Tag>("game_availability_settings");
+}
+
+/**
+ * @brief Create the Level Selection Menu (Scene 12)
+ */
+void Creator::createLevelSelect()
+{
+    auto window = _world.getWindow();
+    float width = static_cast<float>(window->getSize().x);
+    float height = static_cast<float>(window->getSize().y);
+
+    auto root = _world.createEntity();
+    root->addComponent<Scene>(static_cast<int>(SceneType::LEVEL_SELECT));
+    root->addComponent<Layer>(LayerType::UI);
+    root->addComponent<GuiWidget>(WidgetType::PANEL);
+    root->addComponent<Tag>("level_select_root");
+    auto rootGui = root->getComponent<GuiWidget>();
+    rootGui->setSize("100%", "100%");
+    rootGui->getRawWidget()->getRenderer()->setProperty("BackgroundColor", tgui::Color(10, 10, 30, 240));
+
+    auto title = _world.createEntity();
+    title->addComponent<GuiWidget>(WidgetType::LABEL, "SELECT MISSION", root->getId());
+    title->addComponent<Scene>(static_cast<int>(SceneType::LEVEL_SELECT));
+    title->addComponent<Layer>(LayerType::UI + 1);
+    title->addComponent<Tag>("level_select_title");
+    auto guiTitle = title->getComponent<GuiWidget>();
+    guiTitle->setTextSize(60);
+    guiTitle->setTextColor(sf::Color::Cyan);
+    guiTitle->setPosition("50%", "10%");
+    guiTitle->setOrigin(0.5f, 0.5f);
+    guiTitle->setFont("../assets/font/title.ttf");
+
+    auto scrollEntity = _world.createEntity();
+    scrollEntity->addComponent<GuiWidget>(WidgetType::SCROLLABLE_PANEL, "", root->getId());
+    scrollEntity->addComponent<Scene>(static_cast<int>(SceneType::LEVEL_SELECT));
+    scrollEntity->addComponent<Layer>(LayerType::UI + 1);
+    scrollEntity->addComponent<Tag>("level_select_scroll_panel");
+    auto guiScroll = scrollEntity->getComponent<GuiWidget>();
+    guiScroll->setSize("60%", "60%");
+    guiScroll->setPosition("50%", "50%");
+    guiScroll->setOrigin(0.5f, 0.5f);
+
+    auto layoutEntity = _world.createEntity();
+    layoutEntity->addComponent<GuiWidget>(WidgetType::VERTICAL_LAYOUT, "", scrollEntity->getId());
+    layoutEntity->addComponent<Scene>(static_cast<int>(SceneType::LEVEL_SELECT));
+    layoutEntity->addComponent<Tag>("level_select_main_layout");
+    auto guiLayout = layoutEntity->getComponent<GuiWidget>();
+    guiLayout->setSize("100%", "120%");
+
+    for (int i = 1; i <= 5; ++i) {
+        auto btnEnt = _world.createEntity();
+        btnEnt->addComponent<GuiWidget>(WidgetType::BUTTON, "MISSION " + std::to_string(i), layoutEntity->getId());
+        btnEnt->addComponent<Scene>(static_cast<int>(SceneType::LEVEL_SELECT));
+        btnEnt->addComponent<Tag>("level_select_button_" + std::to_string(i));
+        auto guiBtn = btnEnt->getComponent<GuiWidget>();
+        styleNeonButton(guiBtn);
+        guiBtn->setFont("../assets/font/title.ttf");
+        guiBtn->setTextSize(30);
+
+        guiBtn->setCallback([this, i]() {
+            std::cout << "Level " << i << " selected. Sending to server..." << std::endl;
+            
+            //Packet packet;
+            //packet.setId(0);
+            //packet.selectLevel(i);
+            //_game.getNetwork().sendPacket(packet);
+
+            _world.setCurrentScene(1); 
+        });
+    }
+
+    auto btnBack = _world.createEntity();
+    btnBack->addComponent<GuiWidget>(WidgetType::BUTTON, "BACK", root->getId());
+    btnBack->addComponent<Scene>(static_cast<int>(SceneType::LEVEL_SELECT));
+    btnBack->addComponent<Layer>(LayerType::UI + 2);
+    btnBack->addComponent<Tag>("level_select_back_button");
+    auto guiBack = btnBack->getComponent<GuiWidget>();
+    styleNeonButton(guiBack);
+    guiBack->setSize(200, 50);
+    guiBack->setPosition("50%", "90%");
+    guiBack->setOrigin(0.5f, 0.5f);
+    guiBack->setCallback([this]() { _world.setCurrentScene(2); });
 }

@@ -30,6 +30,7 @@ class Creator {
         void createTguiOptions();
         void createLevelSelect();
         void createLoadingScreen();
+        void createLevelSelector();
         void createPlayer(uint64_t id = 0);
         void createEnemy(float x, float y, int type, int entityId);
         void createBackground(sf::RenderWindow& window);

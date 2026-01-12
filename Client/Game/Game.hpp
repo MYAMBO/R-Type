@@ -32,6 +32,7 @@ enum class SceneType {
     OPTIONS = 3,
     MYAMBO = 10,
     KAYU = 11,
+    LEVEL_SELECT = 12,
     CREDITS = 42,
     PAUSE = 1000,
 };
