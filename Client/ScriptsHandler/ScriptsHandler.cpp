@@ -659,3 +659,40 @@ void creditsNameScript(int id, World& w)
     auto positionComp = pos->getComponent<Position>();
     positionComp->setX(centerX2);
 }
+
+void availabilitySettingsScript(int entityId, World& world)
+{
+    auto entity = GameHelper::getEntityById(world, entityId);
+    if (!entity)
+        return;
+    auto dataComp = entity->getComponent<Data>();
+    if (!dataComp)
+        return;
+    auto disclexiaMode = dataComp->getData("disclexia_mode") == "true" ? true : false;
+
+    if (disclexiaMode && dataComp->getData("lastfont_used") != "dyslexic") {
+        for (const auto& entity : world.getEntitiesWithAnyComponent<Text, GuiWidget>()) {
+            if (!entity)
+                continue;
+            auto textComp = entity->getComponent<Text>();
+            auto guiWidgetComp = entity->getComponent<GuiWidget>();
+            if (textComp)
+                textComp->setFont("../assets/font/dyslexic.otf");
+            if (guiWidgetComp)
+                guiWidgetComp->setFont("../assets/font/dyslexic.otf");
+        }
+        dataComp->setData("lastfont_used", "dyslexic");
+    } else if (!disclexiaMode && dataComp->getData("lastfont_used") != "regular") {
+        for (const auto& entity : world.getEntitiesWithAnyComponent<Text, GuiWidget>()) {
+            if (!entity)
+                continue;
+            auto textComp = entity->getComponent<Text>();
+            auto guiWidgetComp = entity->getComponent<GuiWidget>();
+            if (textComp)
+                textComp->setFont("../assets/font/regular.ttf");
+            if (guiWidgetComp)
+                guiWidgetComp->setFont("../assets/font/regular.ttf");
+        }
+        dataComp->setData("lastfont_used", "regular");
+    }
+}

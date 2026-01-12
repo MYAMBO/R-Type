@@ -85,3 +85,16 @@ unsigned int Text::getSize() const
 {
     return _text->getCharacterSize();
 }
+
+/**
+*  @brief Sets the font of the text.
+*  @param fontPath The path to the new font file
+*/
+void Text::setFont(const std::string& fontPath)
+{
+    if (!_font->openFromFile(fontPath)) {
+        std::cerr << "Error: Could not load font " << fontPath << std::endl;
+        return;
+    }
+    _text->setFont(*_font);
+}

@@ -30,5 +30,6 @@ void changeSceneScript(int entityId, World& world);
 void volumeSettingsScript(int entityId, World& world);
 void productionGlowScript(int entityId, World& world);
 void backgroundScrollScript(size_t entityId, World &world);
+void availabilitySettingsScript(int entityId, World& world);
 
 #endif /* !SCRIPTS_HPP_ */
