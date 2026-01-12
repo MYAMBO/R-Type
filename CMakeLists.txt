@@ -14,7 +14,7 @@ if (DEV_COMPILE)
         add_compile_options(-Werror)
 endif ()
 
-add_compile_options(-Wall -Wextra -g)
+add_compile_options(-Wall -Wextra)
 
 if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake")
     file(DOWNLOAD

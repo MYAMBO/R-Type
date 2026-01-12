@@ -506,6 +506,7 @@ void Creator::createCredits()
     watcher->addComponent<Scene>(static_cast<int>(SceneType::CREDITS));
     watcher->addComponent<Tag>("credits_watcher");
     watcher->addComponent<Script>([](int id, World& w) {
+        (void)id;
         if (w.getCurrentScene() != static_cast<int>(SceneType::CREDITS))
             return;
         auto inputs = w.getSystem<Inputs>();
@@ -565,6 +566,53 @@ void Creator::createTguiOptions()
     mainLayoutEntity->addComponent<Tag>("options_main_layout");
     auto guiLayout = mainLayoutEntity->getComponent<GuiWidget>();
     guiLayout->setSize("100%", "150%");
+    
+    auto createColorBlindCycle = [this, mainLayoutEntity](const std::string& label) {
+        auto rowEntity = _world.createEntity();
+        rowEntity->addComponent<GuiWidget>(WidgetType::PANEL, "", mainLayoutEntity->getId());
+        rowEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
+        rowEntity->addComponent<Tag>("color_blind_mode_row");
+        auto guiRow = rowEntity->getComponent<GuiWidget>();
+        guiRow->setSize("100%", "100");
+        styleNeonRow(guiRow);
+
+        auto btnEntity = _world.createEntity();
+        btnEntity->addComponent<GuiWidget>(WidgetType::BUTTON, label, rowEntity->getId());
+        btnEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
+        btnEntity->addComponent<Tag>("color_blind_mode_button");
+        auto guiBtn = btnEntity->getComponent<GuiWidget>();
+        guiBtn->setSize("50%", "70%");
+        guiBtn->setOrigin(0.5f, 0.5f);
+        guiBtn->setPosition("30%", "50%");
+        guiBtn->setFont("../assets/font/title.ttf");
+        styleNeonButton(guiBtn);
+
+        auto statusEntity = _world.createEntity();
+        statusEntity->addComponent<GuiWidget>(WidgetType::LABEL, "NORMAL", rowEntity->getId());
+        statusEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
+        statusEntity->addComponent<Tag>("color_blind_mode_status");
+        auto guiStatus = statusEntity->getComponent<GuiWidget>();
+        guiStatus->setTextSize(20);
+        guiStatus->setOrigin(0.5f, 0.5f);
+        guiStatus->setPosition("80%", "50%");
+        guiStatus->setTextColor(sf::Color::Cyan);
+        guiBtn->setCallback([this, guiStatus]() {
+            static std::vector<std::string> modes = {"protanopia", "deuteranopia", "tritanopia", "achromatopsia", "normal"};
+            auto settings = GameHelper::getEntityByTag(_world, "game_availability_settings");
+            if (!settings) return;
+            auto data = settings->getComponent<Data>();
+            std::string current = data->getData("color_blind_mode");
+            auto it = std::find(modes.begin(), modes.end(), current);
+            int nextIdx = 0;
+            if (it != modes.end())
+                nextIdx = (std::distance(modes.begin(), it) + 1) % modes.size();
+            std::string nextMode = modes[nextIdx];
+            data->setData("color_blind_mode", nextMode);
+            std::string display = nextMode;
+            std::transform(display.begin(), display.end(), display.begin(), ::toupper);
+            guiStatus->setText(display);
+        });
+    };
     
     auto createOptionToggle = [this, mainLayoutEntity](const std::string& label, bool& stateValue) {
         auto rowEntity = _world.createEntity();
@@ -646,6 +694,7 @@ void Creator::createTguiOptions()
     static bool easyMode = false;
     static bool hardMode = false;
     static bool oneHitKill = false;
+    createColorBlindCycle("COLORBLIND");
     createOptionToggle("GOD MODE", godMode);
     createOptionToggle("EASY MODE", easyMode);
     createOptionToggle("HARD MODE", hardMode);
