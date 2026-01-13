@@ -8,7 +8,6 @@
 #ifndef R_TYPE_PACKET_HPP
     #define R_TYPE_PACKET_HPP
 #include <SFML/Network.hpp>
-#include <string>
 #include <cstdint>
 
 inline int MAX_DATA_SIZE = 116;
@@ -34,10 +33,10 @@ class Packet
         Packet();
         ~Packet() = default;
 
-        void setId(uint32_t id);
-        void setAck(uint32_t ack);
-        void setPacketNbr(uint8_t packetNbr);
-        void setTotalPacketNbr(uint8_t totalPacketNbr);
+        Packet& setId(uint32_t id);
+        Packet& setAck(uint32_t ack);
+        Packet& setPacketNbr(uint8_t packetNbr);
+        Packet& setTotalPacketNbr(uint8_t totalPacketNbr);
 
         void timeSync(uint32_t time);
         void updatePosition(uint32_t id, float x, float y, uint16_t type = 0);
@@ -45,7 +44,7 @@ class Packet
         void collision(uint32_t entityOneId, uint32_t entityTwoId);
         void dead(uint32_t id);
         void endGame(uint8_t status);
-        void action(uint32_t id, uint8_t action);
+        void action(uint32_t id, uint8_t action, uint32_t data);
 
         [[nodiscard]] sf::Packet getPacket() const;
     private:

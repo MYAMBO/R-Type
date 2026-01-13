@@ -130,7 +130,7 @@ void ServerGame::EnemyMovement(const uint32_t entityId, World &world)
     _network.sendPacket(packet);
 }
 
-void ServerGame::EnemySinusMovement(int entityId, World& world)
+void ServerGame::EnemySinusMovement(uint32_t entityId, World& world)
 {
     static std::map<int, float> timers;
     static std::map<int, float> startYPos;
@@ -156,7 +156,7 @@ void ServerGame::EnemySinusMovement(int entityId, World& world)
     timers[entityId] += dt * sinusSpeed;
     pos->setY(startYPos[entityId] + std::sin(timers[entityId]) * amplitude);
     Packet packet;
-    packet.playerPosition(entityId, pos->getX(), pos->getY());
+    packet.updatePosition(entityId, pos->getX(), pos->getY());
     _network.sendPacket(packet);
 }
 
@@ -199,7 +199,7 @@ void ServerGame::createSinusEnemy(const float x, const float y)
         }
     );
     Packet packet;
-    packet.positionSpawn(enemy->getId(), EnemySinus, x, y);
+    packet.Spawn(enemy->getId(), EnemySinus, x, y);
     _network.sendPacket(packet);
 }
 

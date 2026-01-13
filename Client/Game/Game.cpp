@@ -9,7 +9,6 @@
 
 #include <cmath>
 #include <thread>
-#include <SFML/Graphics.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/VideoMode.hpp>
@@ -21,15 +20,11 @@
 #include "Draw.hpp"
 #include "Text.hpp"
 #include "Data.hpp"
-#include "Layer.hpp"
-#include "Scale.hpp"
 #include "Scene.hpp"
 #include "Action.hpp"
 #include "Audio.hpp"
-#include "Group.hpp"
 #include "Music.hpp"
 #include "Inputs.hpp"
-#include "Sprite.hpp"
 #include "Entity.hpp"
 #include "Script.hpp"
 #include "Camera.hpp"
@@ -37,18 +32,11 @@
 #include "Creator.hpp"
 #include "Velocity.hpp"
 #include "Position.hpp"
-#include "Animator.hpp"
-#include "Rotation.hpp"
 #include "GameHelper.hpp"
 #include "SoundEffect.hpp"
-#include "BoxCollider.hpp"
 #include "RectangleShape.hpp"
-#include "ScriptsHandler.hpp"
 
-#include "Draw.hpp"
 #include "Mouse.hpp"
-#include "Audio.hpp"
-#include "Inputs.hpp"
 #include "TextSys.hpp"
 #include "Movement.hpp"
 #include "CameraSys.hpp"
@@ -297,41 +285,22 @@ void Game::smootherMovement(int entityId, World &world, float serverX, float ser
     auto entity = GameHelper::getEntityById(world, entityId);
     if (!entity)
         return;
+    auto pos = entity->getComponent<Position>();
+    if (!pos)
+        return;
     if (!entity->getComponent<Velocity>()) {
-        auto pos = entity->getComponent<Position>();
         pos->setX(serverX);
         pos->setY(serverY);
         return;
-        static int playerCount = 0;
-        if (playerCount >= 4)
-            return;
-        auto player = _world.createEntity(id);
-        player->addComponent<HP>(100);
-        player->addComponent<Position>(75.0f, 75.0f);
-        player->addComponent<Sprite>(std::string("../sprites/r-typesheet42.gif"));
-        player->addComponent<Scale>(2.f);
-        player->addComponent<Scene>(1);
-        player->addComponent<Layer>(10);
-        player->addComponent<BoxCollider>(33.0f, 19.0f);
-
-        printf("Creating player with id: %u\n", player->getId());
-        if (playerCount == 0) {
-            // Premier joueur (joueur local)
-            player->addComponent<Animator>(2, 1, 3.f, 0, 0, 33, 19, 0, 0);
-            player->addComponent<Script>([this](const uint32_t entityId, World& world)
-            {
-                this->playerInput(entityId, _world);
-            });
-            player->addComponent<Tag>("player");
-        } else {
-            // Autres joueurs (coéquipiers)
-            player->addComponent<Animator>(2, 1, 3.f, 0, (playerCount * 17), 33, 19, 0, 0);
-            player->addComponent<Tag>("player_mate");
-        }
-        auto pos = entity->getComponent<Position>();
-
-        float dist = std::hypot(serverX - pos->getX(), serverY - pos->getY());
     }
+
+    float dist = std::hypot(serverX - pos->getX(), serverY - pos->getY());
+    if (dist > 100.0f) {
+        pos->setX(serverX);
+        pos->setY(serverY);
+    }
+    pos->setTargetX(serverX);
+    pos->setTargetY(serverY);
 }
 
 /**
@@ -347,7 +316,7 @@ void Game::createEnemy(float x, float y, uint16_t type)
     };
     switch (type) {
         case BASIC:
-            GameHelper::createBasicEnemy(_world, x, y);
+            _creator.createEnemy(x, y, 1, 0);
             break;
         case FAST:
             // Implement fast enemy creation
@@ -358,13 +327,6 @@ void Game::createEnemy(float x, float y, uint16_t type)
         default:
             std::cerr << "Unknown enemy type: " << type << std::endl;
             break;
-            if (dist > 100.0f) {
-                pos->setX(serverX);
-                pos->setY(serverY);
-            }
-            pos->setTargetX(serverX);
-            pos->setTargetY(serverY);
-
     }
 }
 
@@ -381,14 +343,7 @@ void Game::updateEntity(uint32_t id, uint16_t type, float x, float y)
     }
     switch (type) {
     case Player:
-        _creator.createPlayer(id);
-        entity = GameHelper::getEntityById(_world, id);
-        if (entity && entity->getComponent<Tag>()->getTag() == "player") {
-            entity->addComponent<Script>([this](const int entityId, World& world)
-            {
-                this->playerInput(entityId, world);
-            });
-        }
+        createPlayer(id);
         break;
     case Enemy:
         _creator.createEnemy(x, y, 1, id);
@@ -399,6 +354,18 @@ void Game::updateEntity(uint32_t id, uint16_t type, float x, float y)
     case Bullet:
         _creator.createBullet(id, x, y, type);
         break;
+    }
+}
+
+void Game::createPlayer(uint32_t id)
+{
+    _creator.createPlayer(id);
+    auto entity = GameHelper::getEntityById(_world, id);
+    if (entity && entity->getComponent<Tag>()->getTag() == "player") {
+        entity->addComponent<Script>([this](const uint32_t entityId, World& world)
+        {
+            this->playerInput(entityId, world);
+        });
     }
 }
 
@@ -463,7 +430,7 @@ void Game::playerInput(uint32_t entityId, World &world)
         auto dataComp = compPlayer->getComponent<Data>();
         if (!isShootKeyPressed && dataComp && std::stoi(dataComp->getData("mana")) >= 20) {
             Packet packet;
-            packet.action(compPlayer->getId(), 1); // 1 for Shoot or default action
+            packet.action(compPlayer->getId(), FIRE, 0);
             packet.setAck(0);
             packet.setId(compPlayer->getId());
             packet.setPacketNbr(1);
@@ -492,7 +459,6 @@ void Game::playerInput(uint32_t entityId, World &world)
         packet.setTotalPacketNbr(1);
         _network.sendPacket(packet);
     }
-    playerScript(entityId, world);
 }
 
 /**
@@ -515,13 +481,16 @@ void Game::handleAction(const uint32_t id, const uint8_t action, const uint32_t 
     switch (action) {
         case HEAL: {
             healEntity(id, data);
+            break;
         }
         case BEAM: {
-
+            break;
         }
         case SHIELD: {
-
+            break;
         }
+        default:
+            break;
     }
 }
 
