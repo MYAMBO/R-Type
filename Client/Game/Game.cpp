@@ -73,11 +73,11 @@ Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const
     _world.addSystem<ScriptsSys>();
     _world.addSystem<TextSystem>();
     _world.addSystem<Movement>();
-    _world.addSystem<Animation>();
     _world.addSystem<Collision>();
     _world.addSystem<DeathSys>();
     _world.addSystem<Mouse>();
     _world.addSystem<Inputs>();
+    _world.addSystem<Animation>();
     _world.addSystem<Draw>();
     _world.addSystem<GuiSystem>(_window);
     _world.addSystem<Audio>();
@@ -337,6 +337,12 @@ void Game::handleSpawn(int id, int type, float x, float y)
         break;
     case Bullet:
         _creator.createBullet(id, x, y, type);
+        break;
+    case EnemyBullet:
+        _creator.createEnemyBullet(id, x, y);
+        break;
+    case ShootingEnemy:
+        _creator.createEnemy(x, y, 5, id);
         break;
     }
 }

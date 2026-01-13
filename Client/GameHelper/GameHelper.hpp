@@ -60,6 +60,7 @@ class GameHelper {
 
         static void createBasicEnemy(World &world, float x, float y, int entityId);
         static void createSinusEnemy(World &world, float x, float y, int entityId);
+        static void createShootingEnemy(World &world, float x, float y, int entityId);
 };
 
 #endif /* !GAMEHELPER_HPP_ */
