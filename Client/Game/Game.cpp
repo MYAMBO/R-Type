@@ -31,7 +31,7 @@
 #include "Script.hpp"
 #include "Camera.hpp"
 #include "Button.hpp"
-#include "Creator.hpp"
+#include "Factory.hpp"
 #include "Velocity.hpp"
 #include "Position.hpp"
 #include "Animator.hpp"
@@ -67,7 +67,7 @@
  * @param title The title of the game window. Default is "Game".
  */
 Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const std::string& title)
-    : _window(sf::VideoMode({width, height}), title), _network(network), _creator(_world)
+    : _window(sf::VideoMode({width, height}), title), _network(network), _factory(_world)
 {
     _world.addSystem<CameraSys>();
     _world.addSystem<ScriptsSys>();
@@ -152,8 +152,8 @@ void Game::loadingRun()
 
     auto inputSystem = _world.getSystem<Inputs>();
 
-    _creator.createMyambo();
-    _creator.createKayu();
+    _factory.createMyambo();
+    _factory.createKayu();
     int timeout = 180;
 
     while (_world.getCurrentScene() == static_cast<int>(SceneType::MYAMBO)) {
@@ -188,21 +188,21 @@ void Game::loadingRun()
     }
     _world.setCurrentScene(static_cast<int>(SceneType::LOADING));
 
-    _creator.createLoadingScreen();
+    _factory.createLoadingScreen();
 
     updateLoadingState(0.0f, "Initializing systems...");
-    _creator.createGameTools();
+    _factory.createGameTools();
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     updateLoadingState(0.1f, "Loading assets...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
-    _creator.createCamera();
+    _factory.createCamera();
     updateLoadingState(0.3f, "Generating Menu...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
-    _creator.createTguiMenu();
+    _factory.createMenu();
     updateLoadingState(0.6f, "Generating Background...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
-    _creator.createBackground(_window); 
-    _creator.createCredits();
+    _factory.createBackground(_window); 
+    _factory.createCredits();
     updateLoadingState(0.8f, "Connecting to server...");
     run();
 }
@@ -320,7 +320,7 @@ void Game::handleSpawn(int id, int type, float x, float y)
     }
     switch (type) {
     case Player:
-        _creator.createPlayer(id);
+        _factory.createPlayer(id);
         entity = GameHelper::getEntityById(_world, id);
         if (entity && entity->getComponent<Tag>()->getTag() == "player") {
             entity->addComponent<Script>([this](const int entityId, World& world)
@@ -330,13 +330,13 @@ void Game::handleSpawn(int id, int type, float x, float y)
         }
         break;
     case Enemy:
-        _creator.createEnemy(x, y, 1, id);
+        _factory.createEnemy(x, y, 1, id);
         break;
     case EnemySinus:
-        _creator.createEnemy(x, y, 4, id);
+        _factory.createEnemy(x, y, 4, id);
         break;
     case Bullet:
-        _creator.createBullet(id, x, y, type);
+        _factory.createBullet(id, x, y, type);
         break;
     case EnemyBullet:
         _creator.createEnemyBullet(id, x, y);
@@ -366,8 +366,10 @@ void Game::playerInput(int entityId, World &world)
     auto inputSystem = world.getSystem<Inputs>();
     std::shared_ptr<Camera> compCam = GameHelper::getMainCamera(world);
     std::shared_ptr<Entity> compPlayer = GameHelper::getEntityByTag(world, "player");
+    auto settings = GameHelper::getEntityByTag(world, "game_controls_settings");
+    auto data = settings->getComponent<Data>();
 
-    if (!compCam || !compPlayer)
+    if (!compCam || !compPlayer || !inputSystem || !data)
         return;
 
     auto pos = compPlayer->getComponent<Position>();
@@ -377,25 +379,26 @@ void Game::playerInput(int entityId, World &world)
     float targetVy = 0.0f;
     bool moved = false;
 
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_D)) {
+
+    if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("RIGHT")))) {
         if (compCam->getPosition().x + compCam->getSize().x > pos->getX() + 7.0f) {
             targetVx = 7.0f;
             moved = true;
         }
     }
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_Q)) {
+    if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("LEFT")))) {
         if (compCam->getPosition().x < pos->getX() - 7.0f) {
             targetVx = -7.0f;
             moved = true;
         }
     }
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_Z)) {
+    if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("UP")))) {
         if (compCam->getPosition().y < pos->getY() - 7.0f) {
             targetVy = -7.0f;
             moved = true;
         }
     }
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_S)) {
+    if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("DOWN")))) {
         if (compCam->getPosition().y + compCam->getSize().y > pos->getY() + 7.0f) {
             targetVy = 7.0f;
             moved = true;
@@ -404,7 +407,7 @@ void Game::playerInput(int entityId, World &world)
     vel->setVelocityX(targetVx);
     vel->setVelocityY(targetVy);
 
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_Space)) {
+    if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("SHOOT")))) {
         auto dataComp = compPlayer->getComponent<Data>();
         if (!isShootKeyPressed && dataComp && std::stoi(dataComp->getData("mana")) >= 20) {
             Packet packet;

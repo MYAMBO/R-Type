@@ -73,7 +73,11 @@ void GuiSystem::update(const float& dt, World& w)
             }
         }
         auto sceneComp = entity->getComponent<Scene>();
-        if (sceneComp && sceneComp->getScene() == currentSceneId) {
+
+        bool inCorrectScene = !sceneComp || sceneComp->getScene() == currentSceneId;
+        bool userVisible = guiComp->isVisible();
+
+        if (inCorrectScene && userVisible) {
             widget->setVisible(true);
             widget->setEnabled(true);
             visibleEntities.push_back(entity);

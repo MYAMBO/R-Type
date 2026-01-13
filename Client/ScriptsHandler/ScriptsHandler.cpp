@@ -259,8 +259,8 @@ void dotScript(int entityId, World& world)
         }
     } else if (availableSpace <= 221.f) {
         if (!used) {
-            Creator::createSparks(world, centerX, centerY, 20);
-            Creator::createSparks(world, centerX, centerY + 100.f, 20);
+            EffectFactory::createSparks(world, centerX, centerY, 20);
+            EffectFactory::createSparks(world, centerX, centerY + 100.f, 20);
             used = true;
         }
         rect->setSize(9.0f, 1000.f);

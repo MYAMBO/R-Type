@@ -59,10 +59,13 @@ class Inputs : public System {
 
         [[nodiscard]] bool isKeyPressed(KeyboardKey key) const;
         [[nodiscard]] bool isTriggered(const sf::Event& event, KeyboardKey key) const;
+        [[nodiscard]] std::string keyToString(KeyboardKey key) const;
 
         void clearInputs();
-
+        
+        [[nodiscard]] KeyboardKey consumeLastKey();
         [[nodiscard]] KeyboardKey getKeysPressed() const;
+        [[nodiscard]] KeyboardKey stringToKey(const std::string);
 
     private:
         void processKeyPress(KeyboardKey key);
@@ -71,6 +74,8 @@ class Inputs : public System {
         static KeyboardKey convertSfKey(sf::Keyboard::Key key);
 
         std::vector<KeyboardKey> _pressedKeys;
+
+        KeyboardKey _lastKeyDetected = KeyboardKey::Key_Unknown;
 };
 
 #endif /* INPUTS_HPP_ */

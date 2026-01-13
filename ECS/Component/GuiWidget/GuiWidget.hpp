@@ -73,6 +73,7 @@ class GuiWidget : public Component {
         [[nodiscard]] float getTextSize() const;
         [[nodiscard]] sf::Vector2f getPosition() const;
         [[nodiscard]] WidgetType getType() const;
+        [[nodiscard]] bool isVisible() const;
 
         tgui::Widget::Ptr getRawWidget() const;
         uint64_t getParentId() const;
@@ -85,6 +86,7 @@ class GuiWidget : public Component {
         uint64_t _parentId;
         bool _isAttached = false;
         std::function<void()> _onClick;
+        bool _isVisible = true;
     };
 
 #endif
