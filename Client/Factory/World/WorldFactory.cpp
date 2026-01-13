@@ -95,7 +95,7 @@ void WorldFactory::createEnemy(float x, float y, int type, int entityId)
  * @brief Create Enemy Bullet
  * This function initializes an enemy bullet entity with necessary components.
 */
-void Creator::createEnemyBullet(size_t entityId, int x, int y)
+void WorldFactory::createEnemyBullet(size_t entityId, int x, int y)
 {
     auto entity = GameHelper::getEntityById(_world, entityId);
     if (entity)

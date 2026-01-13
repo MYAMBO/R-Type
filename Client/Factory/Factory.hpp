@@ -67,6 +67,7 @@ class Factory {
         void createBackground(sf::RenderWindow& window);
         void createEnemy(float x, float y, int type, int entityId);
         void createBullet(size_t entityId, int x, int y, int type);
+        void createEnemyBullet(size_t entityId, int x, int y);
 
         void createSparks(World &world, float x, float y, int amount);
     private:

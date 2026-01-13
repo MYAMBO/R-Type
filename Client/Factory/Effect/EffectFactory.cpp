@@ -49,7 +49,7 @@ void EffectFactory::createMyambo()
     float centerY = height / 2.0f;
 
     auto myambo = _world.createEntity();
-    myambo->addComponent<Text>("MYAMBO", "../assets/font/regular.ttf", 10);
+    myambo->addComponent<Text>("MYAMBO", "../assets/font/logo.ttf", 10);
     myambo->getComponent<Text>()->setColor(255, 255, 255, 255);
     myambo->addComponent<Scene>(static_cast<int>(SceneType::MYAMBO));
     myambo->addComponent<Layer>(2);
@@ -61,13 +61,13 @@ void EffectFactory::createMyambo()
     myamboGlow->addComponent<Scene>(static_cast<int>(SceneType::MYAMBO));
     myamboGlow->addComponent<Layer>(1);
     myamboGlow->addComponent<Position>(myambo->getComponent<Position>()->getX(), myambo->getComponent<Position>()->getY());
-    myamboGlow->addComponent<Text>("MYAMBO", "../assets/font/regular.ttf", 10);
+    myamboGlow->addComponent<Text>("MYAMBO", "../assets/font/logo.ttf", 10);
     myamboGlow->addComponent<Tag>("logo_myambo_glow");
     myamboGlow->addComponent<Script>(myamboGlowScript);
     myambo->addComponent<Script>(myamboScript);
 
     auto prod = _world.createEntity();
-    prod->addComponent<Text>("PRODUCTION", "../assets/font/regular.ttf", 60);
+    prod->addComponent<Text>("PRODUCTION", "../assets/font/logo.ttf", 60);
     prod->getComponent<Text>()->setColor(0, 0, 0, 255);
     prod->getComponent<Text>()->setSize(60);
     prod->addComponent<Scene>(static_cast<int>(SceneType::MYAMBO));
@@ -83,7 +83,7 @@ void EffectFactory::createMyambo()
     prodGlow->addComponent<Scene>(static_cast<int>(SceneType::MYAMBO));
     prodGlow->addComponent<Layer>(1);
     prodGlow->addComponent<Position>(prod->getComponent<Position>()->getX(), prod->getComponent<Position>()->getY());
-    prodGlow->addComponent<Text>("PRODUCTION", "../assets/font/regular.ttf", 60);
+    prodGlow->addComponent<Text>("PRODUCTION", "../assets/font/logo.ttf", 60);
     prodGlow->getComponent<Text>()->setColor(0, 0, 0, 255);
     prodGlow->addComponent<Tag>("logo_production_glow");
     prodGlow->addComponent<Script>(productionGlowScript);
@@ -107,7 +107,7 @@ void EffectFactory::createKayu()
     kayu->addComponent<Tag>("logo_kayu");
     kayu->addComponent<Velocity>(10.f, 0.f);
     kayu->addComponent<SoundEffect>("../assets/sounds/kayu.mp3", 100.f);
-    kayu->addComponent<Text>("KAYU", "../assets/font/regular.ttf", 120);
+    kayu->addComponent<Text>("KAYU", "../assets/font/logo.ttf", 120);
     kayu->addComponent<Position>(-8000.f, centerY);
     kayu->addComponent<Script>(kayuScript);
 
@@ -115,7 +115,7 @@ void EffectFactory::createKayu()
     kayuGlow->addComponent<Scene>(static_cast<int>(SceneType::KAYU));
     kayuGlow->addComponent<Layer>(1);
     kayuGlow->addComponent<Position>(kayu->getComponent<Position>()->getX(), centerY);
-    kayuGlow->addComponent<Text>("KAYU", "../assets/font/regular.ttf", 120);
+    kayuGlow->addComponent<Text>("KAYU", "../assets/font/logo.ttf", 120);
     kayuGlow->addComponent<Tag>("logo_kayu_glow");
     kayuGlow->addComponent<Script>(kayuGlowScript);
 
@@ -125,14 +125,14 @@ void EffectFactory::createKayu()
     corp->addComponent<Tag>("logo_corp");
     corp->addComponent<Position>(10000.f, centerY);
     corp->addComponent<Velocity>(-10.f, 0.f);
-    corp->addComponent<Text>("CORP", "../assets/font/regular.ttf", 120);
+    corp->addComponent<Text>("CORP", "../assets/font/logo.ttf", 120);
     corp->addComponent<Script>(corpScript);
 
     auto corpGlow = _world.createEntity();
     corpGlow->addComponent<Scene>(static_cast<int>(SceneType::KAYU));
     corpGlow->addComponent<Layer>(1);
     corpGlow->addComponent<Position>(corp->getComponent<Position>()->getX(), centerY);
-    corpGlow->addComponent<Text>("CORP", "../assets/font/regular.ttf", 120);
+    corpGlow->addComponent<Text>("CORP", "../assets/font/logo.ttf", 120);
     corpGlow->addComponent<Tag>("logo_corp_glow");
     corpGlow->addComponent<Script>(corpGlowScript);
     
@@ -286,7 +286,7 @@ void EffectFactory::createCredits()
     title->addComponent<Tag>("credits_title");
     title->addComponent<Position>(centerX + centerX / 2.f, startY - lineSpacing * 2);
     title->addComponent<Velocity>(0.f, -3.f);
-    title->addComponent<Text>("CREDITS R-TYPE", "../assets/font/regular.ttf", 80);
+    title->addComponent<Text>("CREDITS R-TYPE", "../assets/font/logo.ttf", 80);
     title->getComponent<Text>()->setColor(255, 255, 255, 255);
 
     auto subtitle = _world.createEntity();
@@ -295,7 +295,7 @@ void EffectFactory::createCredits()
     subtitle->addComponent<Tag>("credits_subtitle");
     subtitle->addComponent<Position>(centerX + centerX / 2.f, startY - lineSpacing);
     subtitle->addComponent<Velocity>(0.f, -3.f);
-    subtitle->addComponent<Text>("Thank you for playing!", "../assets/font/regular.ttf", 40);
+    subtitle->addComponent<Text>("Thank you for playing!", "../assets/font/logo.ttf", 40);
     subtitle->getComponent<Text>()->setColor(255, 255, 255, 255);
 
     for (size_t i = 0; i < credits.size(); ++i) {
@@ -308,7 +308,7 @@ void EffectFactory::createCredits()
             role->addComponent<Position>(centerX, startY + (i * lineSpacing));
             role->addComponent<Velocity>(0.f, -3.f);
             role->addComponent<Script>(creditsScript);
-            role->addComponent<Text>(credits[i].first, "../assets/font/regular.ttf", 20);
+            role->addComponent<Text>(credits[i].first, "../assets/font/logo.ttf", 20);
             auto txtRole = role->getComponent<Text>();
             txtRole->setColor(255, 255, 255, 180);
         }
@@ -320,7 +320,7 @@ void EffectFactory::createCredits()
             name->addComponent<Position>(centerX2, startY + (i * lineSpacing));
             name->addComponent<Velocity>(0.f, -3.f);
             name->addComponent<Script>(creditsNameScript);
-            name->addComponent<Text>(credits[i].second, "../assets/font/regular.ttf", 25);
+            name->addComponent<Text>(credits[i].second, "../assets/font/logo.ttf", 25);
             auto txtName = name->getComponent<Text>();
             txtName->setColor(255, 255, 255, 255);
         }

@@ -339,10 +339,10 @@ void Game::handleSpawn(int id, int type, float x, float y)
         _factory.createBullet(id, x, y, type);
         break;
     case EnemyBullet:
-        _creator.createEnemyBullet(id, x, y);
+        _factory.createEnemyBullet(id, x, y);
         break;
     case ShootingEnemy:
-        _creator.createEnemy(x, y, 5, id);
+        _factory.createEnemy(x, y, 5, id);
         break;
     }
 }

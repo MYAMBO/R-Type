@@ -68,6 +68,11 @@ void Factory::createEnemy(float x, float y, int type, int entityId)
     _worldFactory.createEnemy(x, y, type, entityId);
 }
 
+void Factory::createEnemyBullet(size_t entityId, int x, int y)
+{
+    _worldFactory.createEnemyBullet(entityId, x, y);
+}
+
 void Factory::createBullet(size_t entityId, int x, int y, int type)
 {
     _worldFactory.createBullet(entityId, x, y, type);
