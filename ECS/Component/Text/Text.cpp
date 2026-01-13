@@ -45,8 +45,9 @@ void Text::setSize(unsigned int size)
 *   @brief Sets the color of the text.
 *   @param color The new color 
 */
-void Text::setColor(const sf::Color& color)
+void Text::setColor(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha)
 {
+    sf::Color color(red, green, blue, alpha);
     _text->setFillColor(color);
 }
 
@@ -74,4 +75,26 @@ sf::FloatRect Text::getGlobalBounds() const
 std::string Text::getText()
 {
     return _text->getString();
+}
+
+/**
+*  @brief Gets the character size of the text.
+*  @return The character size
+*/
+unsigned int Text::getSize() const
+{
+    return _text->getCharacterSize();
+}
+
+/**
+*  @brief Sets the font of the text.
+*  @param fontPath The path to the new font file
+*/
+void Text::setFont(const std::string& fontPath)
+{
+    if (!_font->openFromFile(fontPath)) {
+        std::cerr << "Error: Could not load font " << fontPath << std::endl;
+        return;
+    }
+    _text->setFont(*_font);
 }

@@ -206,7 +206,7 @@ void Network::start()
     _readyCond.wait(lock, [this]{ return _udpPort != -1; });
     lock.unlock();
 
-    _game->run();
+    _game->loadingRun();
     tcpThread.join();
     udpThread.join();
 }

@@ -35,9 +35,9 @@ public:
     void setView(const sf::View& view);
 
 private:
-    sf::View _view;
     sf::Vector2f _size;
     sf::Vector2f _position;
+    sf::View _view;
 };
 
 #endif //R_TYPE_CAMERA_HPP

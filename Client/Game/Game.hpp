@@ -14,6 +14,7 @@
     #include "Inputs.hpp"
     #include "Creator.hpp"
     #include "IGameNetwork.hpp"
+    #include "EntitiesType.hpp"
 
 /**
  * @brief Enumeration for different rendering layers in the game.
@@ -24,6 +25,17 @@ enum LayerType {
     UI = 1000,
 };
 
+enum class SceneType {
+    LOADING = 0,
+    GAMEPLAY = 1,
+    MENU = 2,
+    OPTIONS = 3,
+    MYAMBO = 10,
+    KAYU = 11,
+    CREDITS = 42,
+    PAUSE = 1000,
+};
+
 enum PlayerColor {
     BLUE = 0,
     PURPLE,
@@ -31,13 +43,13 @@ enum PlayerColor {
     GREEN
 };
 
-enum entitiesType
-{
-    None = 0,
-    Player = 1,
-    Enemy,
-    Bullet
-};
+// enum entitiesType
+// {
+//     None = 0,
+//     Player = 1,
+//     Enemy,
+//     Bullet
+// };
 
 /**
  * @brief Main Game class to handle the game window and loop.
@@ -51,10 +63,10 @@ class Game {
         void handleSpawn(uint32_t id, uint16_t type, float x, float y);
         void handleAction(uint32_t id, uint8_t action, uint32_t data);
 
+        void loadingRun();
         int killEntity(int id);
         void menudisplay();
         void gameplaydisplay();
-
     private:
         void gameInput(std::shared_ptr<Inputs> inputSystem);
 
@@ -77,6 +89,8 @@ class Game {
         Creator _creator;
 
         bool _isShootKeyPressed = false;
+        int _musicVolume = 100;
+        int _sfxVolume = 100;
 };
 
 #endif

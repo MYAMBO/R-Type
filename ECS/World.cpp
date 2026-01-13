@@ -26,6 +26,7 @@ World::World()
  */
 World::~World()
 {
+    std::lock_guard<std::mutex> lock(_entitiesMutex);
     _entities.clear();
     _systems.clear();
 }
@@ -37,6 +38,7 @@ World::~World()
  */
 std::shared_ptr<Entity> World::createEntity(uint64_t id)
 {
+    std::lock_guard<std::mutex> lock(_entitiesMutex);
     auto entity = std::make_shared<Entity>(id);
     _entities.push_back(entity);
     return entity;
@@ -138,6 +140,7 @@ int World::getCurrentScene() const
 */
 void World::killEntity(uint64_t id)
 {
+    std::lock_guard<std::mutex> lock(_entitiesMutex);
     auto it = std::remove_if(_entities.begin(), _entities.end(),
         [id](const std::shared_ptr<Entity>& entity) {
             return entity->getId() == id;
