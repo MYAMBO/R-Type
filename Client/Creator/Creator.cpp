@@ -28,6 +28,7 @@
 #include "Position.hpp"
 #include "Velocity.hpp"
 #include "Animator.hpp"
+#include "Animation.hpp"
 #include "Rotation.hpp"
 #include "GuiWidget.hpp"
 #include "SoundEffect.hpp"

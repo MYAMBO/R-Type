@@ -13,6 +13,7 @@
 #include <utility>
 #include <cstddef>
 #include <cstdint>
+#include <mutex>
 
 #include "Component.hpp"
 #include "EcsError.hpp"
@@ -41,6 +42,7 @@ class Entity {
     private:
         uint32_t _id;
         std::vector<std::shared_ptr<Component>> _components;
+        mutable std::mutex _componentsMutex;
 };
 
 /**
@@ -53,6 +55,7 @@ class Entity {
 template<typename T, typename ... Args>
 void Entity::addComponent(Args&& ... args)
 {
+    std::lock_guard<std::mutex> lock(_componentsMutex);
     auto comp = std::make_shared<T>(std::forward<Args>(args)...);
     _components.push_back(comp);
 }
@@ -67,6 +70,7 @@ template<typename T>
 std::shared_ptr<T> Entity::getComponent() const
 {
     static_assert(std::is_base_of_v<Component, T>, "T must be a Component");
+    std::lock_guard<std::mutex> lock(_componentsMutex);
     for (const auto& comp : _components)
         if (std::shared_ptr<T> comType = std::dynamic_pointer_cast<T>(comp))
             return comType;
@@ -85,6 +89,7 @@ template<typename T>
 std::shared_ptr<T> Entity::getComponentSafe() const
 {
     static_assert(std::is_base_of_v<Component, T>, "T must be a Component");
+    std::lock_guard<std::mutex> lock(_componentsMutex);
     for (const auto& comp : _components)
         if (std::shared_ptr<T> comType = std::dynamic_pointer_cast<T>(comp))
             return comType;
