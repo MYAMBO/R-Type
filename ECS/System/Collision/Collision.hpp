@@ -30,6 +30,12 @@ class Collision : public System {
         void update(const float& dt, World &w) override;
         [[nodiscard]] static bool checkCollision(const BoxCollider &aB, const Position &aP,
                             const BoxCollider &bB, const Position &bP);
+
+    private:
+        static void handleCollisionDamage(const std::shared_ptr<Entity> &a,
+                                     const std::shared_ptr<Entity> &b);
+        static void applyDamage(const std::shared_ptr<Entity> &attacker,
+                           const std::shared_ptr<Entity> &target);
 };
 
 

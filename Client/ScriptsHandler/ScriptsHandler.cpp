@@ -8,6 +8,7 @@
 #include "Tag.hpp"
 #include "Scale.hpp"
 #include "Scene.hpp"
+#include "Group.hpp"
 #include "Inputs.hpp"
 #include "Sprite.hpp"
 #include "Rotation.hpp"
@@ -15,35 +16,11 @@
 #include "Velocity.hpp"
 #include "Animator.hpp"
 #include "GameHelper.hpp"
-#include "ScriptsHandler.hpp"
+#include "HP.hpp"
 
 #include "Network.hpp"
 #include "Packet.hpp"
 
-/**
- * @brief Creates a bullet entity.
- *
- * This function initializes a bullet entity with necessary components.
- * @param entityId The ID of the entity that fired the bullet.
- */
-void createBullet(int entityId, World &world, int x, int y, int type)
-{
-    bool isPlayer = (type == Bullet);
-    auto bullet = world.createEntity(entityId);
-    if (isPlayer) {
-        bullet->addComponent<Position>(x + 60.f, y + 15.f);
-        bullet->addComponent<Velocity>(15.f, 0.f);
-        bullet->addComponent<Animator>(2, 1, 1.5f, 200, 120, 32, 15, 32, 0);
-    } else {
-        bullet->addComponent<Position>(x - 20.f , y + 15.f);
-        bullet->addComponent<Rotation>(180.f);
-        bullet->addComponent<Velocity>(-15.f, 0.f);
-    }
-    bullet->addComponent<Sprite>(std::string("../sprites/r-typesheet1.gif"));
-    bullet->addComponent<Scale>(2.f);
-    bullet->addComponent<Scene>(1);
-    bullet->addComponent<Tag>("bullet");
-}
 
 /**
  * @brief Script to scroll the background.
@@ -51,7 +28,7 @@ void createBullet(int entityId, World &world, int x, int y, int type)
  * This function moves the background entities to create a scrolling effect.
  * @param entityId The ID of the background entity.
  */
-void backgroundScrollScript(int entityId, World &world)
+void backgroundScrollScript(size_t entityId, World &world)
 {
     auto entity = GameHelper::getEntityById(world, entityId);
     if (!entity)
@@ -61,6 +38,8 @@ void backgroundScrollScript(int entityId, World &world)
     if (!posComp || !spriteComp)
         return;
 
+    if (world.getCurrentScene() != entity->getComponent<Scene>()->getScene())
+        entity->getComponent<Scene>()->setScene(world.getCurrentScene());
     auto bounds = spriteComp->getSprite()->getGlobalBounds();
     float width = bounds.size.x; 
     if (posComp->getX() <= -width)
@@ -74,19 +53,64 @@ void backgroundScrollScript(int entityId, World &world)
  * @param entityId The ID of the fire entity.
  * @param world The game world containing entities and components.
  */
-void playerfire(int entityId, World &world)
-{
-    auto player = GameHelper::getEntityById(world, entityId);
-    if (!player)
-        return;
-    auto posPlayer = player->getComponent<Position>();
 
+void playerfire(size_t entityId, World &world)
+{
     auto fire = GameHelper::getEntityById(world, entityId);
     if (!fire)
         return;
+    auto hp = fire->getComponent<HP>();
+    if (hp && hp->getHP() <= 0)
+        return;
+
+    auto groupComp = fire->getComponent<Group>();
+    if (!groupComp)
+        return;
+
+    size_t groupId = groupComp->getId();
+    auto list = GameHelper::getEntitiesByGroup(world, groupId);
+    std::shared_ptr<Entity> player = nullptr;
+
+    for (const auto& e : list) {
+        if (!e)
+            continue;
+        if (e->getId() == entityId)
+            continue;
+
+        auto tag = e->getComponent<Tag>();
+        if (!tag)
+            continue;
+
+        if (tag->getTag() == "player" || tag->getTag() == "player_mate") {
+            auto playerHp = e->getComponent<HP>();
+            if (playerHp && playerHp->getHP() <= 0)
+                continue;
+            player = e;
+            break;
+        }
+    }
+    if (!player)
+        return;
+    auto posPlayer = player->getComponent<Position>();
     auto posFire = fire->getComponent<Position>();
     if (!posFire || !posPlayer)
         return;
     posFire->setX(posPlayer->getX() - 25.f);
     posFire->setY(posPlayer->getY() + 10.f);
+}
+
+/**
+ * @brief Changes the scene of an entity to the current world scene.
+ *
+ * This function updates the scene component of the specified entity
+ * to match the current scene of the game world.
+ * @param entityId The unique ID of the entity.
+ * @param world The game world containing entities and components.
+ */
+void changeSceneScript(int entityId, World& world)
+{
+    auto entity = GameHelper::getEntityById(world, entityId);
+    if (!entity)
+        return;
+    entity->getComponent<Scene>()->setScene(world.getCurrentScene());
 }

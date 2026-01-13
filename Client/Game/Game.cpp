@@ -7,7 +7,8 @@
 
 #include "Game.hpp"
 
-#include <iostream>
+#include <cmath>
+#include <thread>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/System/Vector2.hpp>
@@ -18,25 +19,38 @@
 #include "HP.hpp"
 #include "Tag.hpp"
 #include "Draw.hpp"
+#include "Text.hpp"
 #include "Layer.hpp"
 #include "Scale.hpp"
 #include "Scene.hpp"
 #include "Action.hpp"
+#include "Group.hpp"
 #include "Inputs.hpp"
 #include "Sprite.hpp"
 #include "Entity.hpp"
 #include "Script.hpp"
 #include "Camera.hpp"
-#include "Updater.hpp"
+#include "Button.hpp"
 #include "Velocity.hpp"
 #include "Position.hpp"
 #include "Animator.hpp"
 #include "Rotation.hpp"
 #include "GameHelper.hpp"
+#include "Creator.hpp"
 #include "BoxCollider.hpp"
-#include "Collision.hpp"
+#include "RectangleShape.hpp"
 #include "ScriptsHandler.hpp"
 
+#include "Draw.hpp"
+#include "Mouse.hpp"
+#include "Inputs.hpp"
+#include "TextSys.hpp"
+#include "Movement.hpp"
+#include "CameraSys.hpp"
+#include "Animation.hpp"
+#include "Collision.hpp"
+#include "ScriptsSys.hpp"
+#include "DeathSys.hpp"
 
 /**
  * @brief Constructs a new Game object.
@@ -48,9 +62,18 @@
  * @param title The title of the game window. Default is "Game".
  */
 Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const std::string& title)
-    : _window(sf::VideoMode({width, height}), title), _network(network)
+    : _window(sf::VideoMode({width, height}), title), _network(network), _creator(_world)
 {
-
+    _world.addSystem<CameraSys>();
+    _world.addSystem<TextSystem>();
+    _world.addSystem<ScriptsSys>();
+    _world.addSystem<Movement>();
+    _world.addSystem<Animation>();
+    _world.addSystem<Collision>();
+    _world.addSystem<DeathSys>();
+    _world.addSystem<Mouse>();
+    _world.addSystem<Inputs>();
+    _world.addSystem<Draw>();
 }
 
 /**
@@ -60,52 +83,60 @@ Game::~Game()
 {
     _window.close();
 }
-
 /**
- * @brief Create Background
- * This function initializes the background entities with necessary components.
-*/
-void Game::createBackground()
+ * @brief Updates the ECS loading screen entities and forces a frame render.
+ */
+void Game::updateLoadingState(float progress, const std::string& status)
 {
-    auto backgroundFirst = _world.createEntity();
-    backgroundFirst->addComponent<Sprite>(std::string("../sprites/background.png"));
-    
-    auto windowSize = _window.getSize();
-    auto spriteComp = backgroundFirst->getComponent<Sprite>();
-    auto boundsSize = spriteComp->getSprite()->getGlobalBounds(); 
-    float scaleX = static_cast<float>(windowSize.x) / boundsSize.size.x;
-    float scaleY = static_cast<float>(windowSize.y) / boundsSize.size.y;
-    float finalScale = std::max(scaleX, scaleY);
-    if (finalScale < 1.0f)
-        finalScale = 1.0f;
-    backgroundFirst->addComponent<Scale>(finalScale);
+    auto statusEnt = GameHelper::getEntityByTag(_world, "loading_status");
+    if (statusEnt) {
+        auto textComp = statusEnt->getComponent<Text>();
+        if (textComp) textComp->setString(status);
 
-    backgroundFirst->addComponent<Scene>(_world.getCurrentScene());
-    backgroundFirst->addComponent<Position>(0.f, 0.f);
-    backgroundFirst->addComponent<Script>(backgroundScrollScript);
-    backgroundFirst->addComponent<Layer>(LayerType::BACKGROUND);
-    backgroundFirst->addComponent<Velocity>(-4.f, 0.f);
-    backgroundFirst->addComponent<Tag>("background_first");
-    auto backgroundSecond = _world.createEntity();
-    backgroundSecond->addComponent<Sprite>(std::string("../sprites/background.png"));
-    backgroundSecond->addComponent<Scale>(1.f);
-    backgroundSecond->addComponent<Scene>(_world.getCurrentScene());
-    auto bounds = backgroundFirst->getComponent<Sprite>()->getSprite()->getGlobalBounds();
-    backgroundSecond->addComponent<Position>(bounds.size.x - 10.f, 0.f);
-    backgroundSecond->addComponent<Velocity>(-4.f, 0.f);
-    backgroundSecond->addComponent<Script>(backgroundScrollScript);
-    backgroundSecond->addComponent<Layer>(LayerType::BACKGROUND);
-    backgroundSecond->addComponent<Tag>("background_second");
+        auto posComp = statusEnt->getComponent<Position>();
+        sf::FloatRect bounds = textComp->getGlobalBounds();
+        float centerX = _window.getSize().x / 2.0f - 200.f;
+        if (posComp)
+            posComp->setX(centerX - (bounds.size.x / 2.0f));
+    }
+
+    auto barEnt = GameHelper::getEntityByTag(_world, "loading_bar");
+    if (barEnt) {
+        auto rectComp = barEnt->getComponent<RectangleShape>();
+        if (rectComp) {
+            rectComp->setSize(400.f * progress, 20.f);
+        }
+    }
+
+    _window.clear(sf::Color::Black);
+    _world.manageSystems();
+    _window.display();
 }
 
 /**
  * @brief Runs the main game loop.
  *
- * This function initializes the game world, creates entities,
- * and handles the main event loop for rendering and user input.
+ * This function initializes the game, handles loading screens,
+ * and enters the main game loop to process input and update the world.
  */
 void Game::run()
 {
+    _window.setFramerateLimit(30);
+    _world.setWindow(_window);
+    _world.setDeltaTime(1.f);
+
+    _world.setCurrentScene(0);
+    _creator.createLoadingScreen();
+
+    updateLoadingState(0.0f, "Initializing systems...");
+    updateLoadingState(0.1f, "Loading assets...");
+    _creator.createCamera();
+    updateLoadingState(0.3f, "Generating Menu...");
+    _creator.createMenu();
+    updateLoadingState(0.6f, "Generating Background...");
+    _creator.createBackground(_window);
+    updateLoadingState(0.8f, "Connecting to server...");
+
     Packet packet;
     packet.setId(0);
     packet.setAck(0);
@@ -113,17 +144,14 @@ void Game::run()
     packet.setTotalPacketNbr(1);
     packet.Spawn(0, Player, 300, 300);
     _network.sendPacket(packet);
-    createCamera();
-    createBackground();
-    _world.addSystem<Collision>();
-    _world.addSystem<Updater>();
-    _world.addSystem<Draw>();
-    _world.addSystem<Inputs>();
-    _window.setFramerateLimit(30);
-    _world.setDeltaTime(1.f);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    updateLoadingState(1.0f, "Ready!");
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+
+    _world.setCurrentScene(2);
     auto inputSystem = _world.getSystem<Inputs>();
-    _world.setWindow(_window);
-    _world.setCurrentScene(1);
+
     while (_window.isOpen()) {
         _window.clear(sf::Color::Black);
         gameInput(inputSystem);
@@ -146,6 +174,15 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
             _window.close();
         if (eventOpt->is<sf::Event::Closed>())
             _window.close();
+        if (inputSystem->isKeyPressed(KeyboardKey::Key_E)) {
+            static sf::Clock spawnClock;
+            if (spawnClock.getElapsedTime().asSeconds() > 0.5f) {
+                _creator.createEnemy(800.0f, 300.0f, 1);
+                std::cout << "[Debug] Enemy spawned at (800, 300)" << std::endl;
+                spawnClock.restart();
+            }
+        }
+
         if (eventOpt->is<sf::Event::Resized>()) {
             sf::FloatRect visibleArea({0, 0}, {static_cast<float>(_window.getSize().x), static_cast<float>( _window.getSize().y)});
             _window.setView(sf::View(visibleArea));
@@ -160,8 +197,15 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
  * This function initializes the player entity with necessary components.
  */
 void Game::createPlayer(uint32_t id)
+
+void Game::smootherMovement(int entityId, World &world, float serverX, float serverY)
 {
-    if (GameHelper::getEntityById(_world, id) != nullptr)
+    auto entity = GameHelper::getEntityById(world, entityId);
+    if (!entity) return;
+    if (!entity->getComponent<Velocity>()) {
+        auto pos = entity->getComponent<Position>();
+        pos->setX(serverX);
+        pos->setY(serverY);
         return;
     static int playerCount = 0;
     if (playerCount >= 4)
@@ -189,30 +233,9 @@ void Game::createPlayer(uint32_t id)
         player->addComponent<Animator>(2, 1, 3.f, 0, (playerCount * 17), 33, 19, 0, 0);
         player->addComponent<Tag>("player_mate");
     }
-    player->addComponent<Tag>("player");
-    player->addComponent<BoxCollider>(33.0f, 19.0f);
-    auto fire = _world.createEntity();
-    playerCount++;
-    fire->addComponent<Position>(0.f, 85.f);
-    fire->addComponent<Sprite>(std::string("../sprites/r-typesheet1.gif"));
-    fire->addComponent<Animator>(2, 1, 3.f, 285, 85, 15, 15, 0, 0);
-    fire->addComponent<Scale>(2.f);
-    fire->addComponent<Scene>(1);
-    fire->addComponent<Script>(playerfire);
-    fire->addComponent<Layer>(10);
-    fire->addComponent<Tag>("fire");
-}
+    auto pos = entity->getComponent<Position>();
 
-/**
- * @brief Create Camera
- * This function initializes a camera entity with necessary components.
-*/
-void Game::createCamera()
-{
-    auto cameraEntity = _world.createEntity();
-    cameraEntity->addComponent<Camera>(sf::Vector2f(1920.f, 1080.f), sf::Vector2f(0.f, 0.f));
-    cameraEntity->addComponent<Tag>("main_camera");
-}
+    float dist = std::hypot(serverX - pos->getX(), serverY - pos->getY());
 
 /**
  * @brief Create Enemy
@@ -238,73 +261,98 @@ void Game::createEnemy(float x, float y, uint16_t type)
         default:
             std::cerr << "Unknown enemy type: " << type << std::endl;
             break;
+    if (dist > 100.0f) {
+        pos->setX(serverX);
+        pos->setY(serverY);
     }
+    pos->setTargetX(serverX);
+    pos->setTargetY(serverY);
+
 }
 
 void Game::handleSpawn(uint32_t id, uint16_t type, float x, float y)
 {
-    auto entity = GameHelper::getEntityById(_world, id);
     switch (type) {
         case None:
-            if (entity) {
-                entity->getComponent<Position>()->setX(x);
-                entity->getComponent<Position>()->setY(y);
+            smootherMovement(id, _world, x, y);
+            break;
+        case Player : {
+            _creator.createPlayer(id);
+            auto entity = GameHelper::getEntityById(_world, id);
+            if (entity->getComponent<Tag>()->getTag() == "player") {
+                entity->addComponent<Script>([this](const int entityId, World& world)
+                {
+                    this->playerInput(entityId, world);
+                });
             }
             break;
-        case Player:
-            createPlayer(id);
-            break;
+        }
         case Enemy:
-            createEnemy(x, y, 1); // Type 1 = BASIC enemy
+            _creator.createEnemy(x, y, 1); // Type 1 = BASIC enemy
             break;
         case Bullet:
-            createBullet(id, _world, x, y, type);
+            _creator.createBullet(id, x, y, type);
             break;
     }
 }
 
 /**
- * @brief Handles player input.
+ * @brief Handles player input for movement and shooting.
  *
- * This function processes user input events and updates the game state accordingly.
- * @param inputSystem The input system to check for player actions.
+ * This function processes input events to control the player's movement
+ * and shooting actions, updating the player's velocity and sending
+ * position updates to the server.
+ * @param entityId The unique ID of the player entity.
+ * @param world The game world containing entities and components.
  */
 void Game::playerInput(uint32_t entityId, World &world)
 {
+    if (world.getCurrentScene() != 1)
+        return;
     (void)entityId;
     static bool isShootKeyPressed = false;
-    bool moved = false;
+
     auto inputSystem = world.getSystem<Inputs>();
     std::shared_ptr<Camera> compCam = GameHelper::getMainCamera(world);
-    if (!compCam)
-        return;
-
     std::shared_ptr<Entity> compPlayer = GameHelper::getEntityByTag(world, "player");
-    if (!compPlayer)
+
+    if (!compCam || !compPlayer)
         return;
 
     auto pos = compPlayer->getComponent<Position>();
+    auto vel = compPlayer->getComponent<Velocity>();
 
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_D))
+    float targetVx = 0.0f;
+    float targetVy = 0.0f;
+    bool moved = false;
+
+    if (inputSystem->isKeyPressed(KeyboardKey::Key_D)) {
         if (compCam->getPosition().x + compCam->getSize().x > pos->getX() + 7.0f) {
-            pos->setX(pos->getX() + 7.0f);
+            targetVx = 7.0f;
             moved = true;
         }
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_Q))
+    }
+    if (inputSystem->isKeyPressed(KeyboardKey::Key_Q)) {
         if (compCam->getPosition().x < pos->getX() - 7.0f) {
-            pos->setX(pos->getX() - 7.0f);
+            targetVx = -7.0f;
             moved = true;
         }
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_Z))
+    }
+    if (inputSystem->isKeyPressed(KeyboardKey::Key_Z)) {
         if (compCam->getPosition().y < pos->getY() - 7.0f) {
-            pos->setY(pos->getY() - 7.0f);
+            targetVy = -7.0f;
             moved = true;
         }
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_S))
+    }
+    if (inputSystem->isKeyPressed(KeyboardKey::Key_S)) {
         if (compCam->getPosition().y + compCam->getSize().y > pos->getY() + 7.0f) {
-            pos->setY(pos->getY() + 7.0f);
+            targetVy = 7.0f;
             moved = true;
         }
+    }
+    vel->setVelocityX(targetVx);
+    vel->setVelocityY(targetVy);
+
     if (inputSystem->isKeyPressed(KeyboardKey::Key_Space)) {
         if (!isShootKeyPressed) {
             Packet packet;
@@ -323,12 +371,27 @@ void Game::playerInput(uint32_t entityId, World &world)
     {
         Packet packet = Packet();
         packet.updatePosition(entityId, pos->getX(), pos->getY());
-        packet.setAck(0);
+        packet.setAck(1);
         packet.setId(compPlayer->getId());
         packet.setPacketNbr(1);
         packet.setTotalPacketNbr(1);
         _network.sendPacket(packet);
     }
+}
+
+/**
+ * @brief Kills an entity by its ID.
+ *
+ * This function removes the entity with the specified ID from the game world.
+ * @param id The unique ID of the entity to be killed.
+*/
+int Game::killEntity(int id)
+{
+    auto entity = GameHelper::getEntityById(_world, id);
+    if (!entity)
+        return -1;
+    _world.killEntity(id);
+    return 0;
 }
 
 void Game::handleAction(const uint32_t id, const uint8_t action, const uint32_t data)

@@ -14,7 +14,8 @@
  *
  * @param tag The name of the tag of the entity.
  */
-Tag::Tag(std::string tag) : _tag(std::move(tag))
+Tag::Tag(std::string tag)
+    : _tag(std::move(tag))
 {
 }
 

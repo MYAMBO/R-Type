@@ -1,19 +1,51 @@
-## Input
+## Inputs
 
-The Input system is one of the fundamental data structures in our ECS. It catch all key on keyboard.
+The **Inputs** system is responsible for capturing and managing the state of the keyboard.  
+It intercepts SFML window events from the World and maintains a list of currently pressed keys using a custom `KeyboardKey` enum, abstracting the underlying library.
 
+### Dependencies & Integration
+
+This system acts as the bridge between the user hardware and the game logic.
+
+| Type | Name | Description |
+|:---|:---|:---|
+| **Context** | [`World`](../World.md) | The system retrieves raw events to update its internal state. |
+| **User** | *Game Logic* | Other systems query this system to check if specific keys are pressed. |
+
+---
+
+### Public Methods
 
 | Method | Signature | Description |
-| :--- | :--- | :--- |
-| **Update** | `void update(sf::Event &event, class World &w);` | Update the Key with the event  |
-| **Is Key Pressed** | ` bool isKeyPressed(KeyboardKey key) const;` | Return true is pressed or false otherwise.  |
-| **Clear Inputs** | `void clearInputs();` | clear all the data stored in keyboard. |
-| **Get key pressed** | `KeyboardKey getKeysPressed() const` | get the enum of the key pressed |
+|:------|:----------|:------------|
+| **Update** | `void update(const float& dt, World &w) override;` | Polls events from the World. If a KeyPress or KeyRelease event is found, it updates the internal list of pressed keys. |
+| **Is Key Pressed** | `bool isKeyPressed(KeyboardKey key) const;` | Checks if a specific key is currently held down. Returns `true` if pressed. |
+| **Get Active Key** | `KeyboardKey getKeysPressed() const;` | Returns one of the currently pressed keys (useful for single-key detection). |
+| **Clear Inputs** | `void clearInputs();` | Clears the list of pressed keys (useful when losing window focus). |
 
+---
+
+### Constructor
+
+| Constructor | Signature | Description |
+|:------------|:----------|:------------|
+| **Inputs** | `Inputs();` | Initializes the input system and reserves memory for key storage. |
+
+---
+
+### Internal Data
 
 ```mermaid
 classDiagram
-  class Input {
-    _pressedKeys : std::vector<KeyboardKey>
+  class Inputs {
+    - _pressedKeys: vector~KeyboardKey~
+    + Inputs()
+    + update(dt: float, w: World) void
+    + isKeyPressed(key: KeyboardKey) bool
+    + getKeysPressed() KeyboardKey
+    + clearInputs() void
+    - processKeyPress(key: KeyboardKey) void
+    - processKeyRelease(key: KeyboardKey) void
+    - convertSfKey(key: sf::Keyboard::Key) KeyboardKey$
   }
 ```
