@@ -60,7 +60,7 @@ class Game {
         ~Game();
 
         void run();
-        void handleSpawn(uint32_t id, uint16_t type, float x, float y);
+        void updateEntity(uint32_t id, uint16_t type, float x, float y);
         void handleAction(uint32_t id, uint8_t action, uint32_t data);
 
         void loadingRun();

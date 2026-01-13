@@ -226,6 +226,7 @@ void Game::run()
     entermusic->addComponent<Scene>(static_cast<int>(SceneType::LOADING));
     entermusic->addComponent<Tag>("entering_game_music");
 
+    Packet packet;
     packet.setId(0);
     packet.setAck(0);
     packet.setPacketNbr(1);
@@ -291,8 +292,6 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
  *
  * This function initializes the player entity with necessary components.
  */
-void Game::createPlayer(uint32_t id)
-
 void Game::smootherMovement(int entityId, World &world, float serverX, float serverY)
 {
     auto entity = GameHelper::getEntityById(world, entityId);
@@ -303,35 +302,37 @@ void Game::smootherMovement(int entityId, World &world, float serverX, float ser
         pos->setX(serverX);
         pos->setY(serverY);
         return;
-    static int playerCount = 0;
-    if (playerCount >= 4)
-        return;
-    auto player = _world.createEntity(id);
-    player->addComponent<HP>(100);
-    player->addComponent<Position>(75.0f, 75.0f);
-    player->addComponent<Sprite>(std::string("../sprites/r-typesheet42.gif"));
-    player->addComponent<Scale>(2.f);
-    player->addComponent<Scene>(1);
-    player->addComponent<Layer>(10);
-    player->addComponent<BoxCollider>(33.0f, 19.0f);
+        static int playerCount = 0;
+        if (playerCount >= 4)
+            return;
+        auto player = _world.createEntity(id);
+        player->addComponent<HP>(100);
+        player->addComponent<Position>(75.0f, 75.0f);
+        player->addComponent<Sprite>(std::string("../sprites/r-typesheet42.gif"));
+        player->addComponent<Scale>(2.f);
+        player->addComponent<Scene>(1);
+        player->addComponent<Layer>(10);
+        player->addComponent<BoxCollider>(33.0f, 19.0f);
 
-    printf("Creating player with id: %u\n", player->getId());
-    if (playerCount == 0) {
-        // Premier joueur (joueur local)
-        player->addComponent<Animator>(2, 1, 3.f, 0, 0, 33, 19, 0, 0);
-        player->addComponent<Script>([this](const uint32_t entityId, World& world)
-        {
-            this->playerInput(entityId, _world);
-        });
-        player->addComponent<Tag>("player");
-    } else {
-        // Autres joueurs (coéquipiers)
-        player->addComponent<Animator>(2, 1, 3.f, 0, (playerCount * 17), 33, 19, 0, 0);
-        player->addComponent<Tag>("player_mate");
+        printf("Creating player with id: %u\n", player->getId());
+        if (playerCount == 0) {
+            // Premier joueur (joueur local)
+            player->addComponent<Animator>(2, 1, 3.f, 0, 0, 33, 19, 0, 0);
+            player->addComponent<Script>([this](const uint32_t entityId, World& world)
+            {
+                this->playerInput(entityId, _world);
+            });
+            player->addComponent<Tag>("player");
+        } else {
+            // Autres joueurs (coéquipiers)
+            player->addComponent<Animator>(2, 1, 3.f, 0, (playerCount * 17), 33, 19, 0, 0);
+            player->addComponent<Tag>("player_mate");
+        }
+        auto pos = entity->getComponent<Position>();
+
+        float dist = std::hypot(serverX - pos->getX(), serverY - pos->getY());
     }
-    auto pos = entity->getComponent<Position>();
-
-    float dist = std::hypot(serverX - pos->getX(), serverY - pos->getY());
+}
 
 /**
  * @brief Create Enemy
@@ -357,16 +358,17 @@ void Game::createEnemy(float x, float y, uint16_t type)
         default:
             std::cerr << "Unknown enemy type: " << type << std::endl;
             break;
-    if (dist > 100.0f) {
-        pos->setX(serverX);
-        pos->setY(serverY);
-    }
-    pos->setTargetX(serverX);
-    pos->setTargetY(serverY);
+            if (dist > 100.0f) {
+                pos->setX(serverX);
+                pos->setY(serverY);
+            }
+            pos->setTargetX(serverX);
+            pos->setTargetY(serverY);
 
+    }
 }
 
-void Game::handleSpawn(uint32_t id, uint16_t type, float x, float y)
+void Game::updateEntity(uint32_t id, uint16_t type, float x, float y)
 {
     auto entity = GameHelper::getEntityById(_world, id);
 

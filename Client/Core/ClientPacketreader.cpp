@@ -57,7 +57,7 @@ void ClientPacketreader::interpretPacket()
                 float x, y;
                 if (payload >> id >> type >> x >> y) {
                     printf("Update entity received: id=%u, type=%d, x=%f, y=%f\n", id, type, x, y);
-                    if (_game) _game->handleSpawn(id, type, x, y);
+                    if (_game) _game->updateEntity(id, type, x, y);
                 }
                 break;
             }
