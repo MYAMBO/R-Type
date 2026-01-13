@@ -34,6 +34,7 @@ class Creator {
         void createEnemy(float x, float y, int type, int entityId);
         void createBackground(sf::RenderWindow& window);
         void createBullet(size_t entityId, int x, int y, int type);
+        void createEnemyBullet(size_t entityId, int x, int y);
         void createMenuButton(const std::string& label, int sceneId, float x, float y, const std::function<void()>& onClick);
 
         std::shared_ptr<Entity> createStatusText(float y, bool initialState);

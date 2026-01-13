@@ -773,6 +773,9 @@ void Creator::createPlayer(uint64_t id)
     fire->addComponent<Layer>(10);
     fire->addComponent<Tag>("fire");
 
+    if (player->getComponent<Tag>()->getTag() == "player_mate")
+        return;
+
     auto hpBarRed = _world.createEntity();
     hpBarRed->addComponent<RectangleShape>(400.f, 20.f, 150, 0, 0, 200);
     hpBarRed->addComponent<Position>(20.f, 20.f + (playerCount - 1) * 30.f);
@@ -855,7 +858,8 @@ void Creator::createEnemy(float x, float y, int type, int entityId)
         BASIC = 1,
         FAST,
         TANK,
-        SINUS = 4
+        SINUS = 4,
+        SHOOTING = 5
     };
     switch (type) {
         case BASIC:
@@ -869,6 +873,9 @@ void Creator::createEnemy(float x, float y, int type, int entityId)
             break;
         case SINUS:
             GameHelper::createSinusEnemy(_world, x, y, entityId);
+            break;
+        case SHOOTING:
+            GameHelper::createShootingEnemy(_world, x, y, entityId);
             break;
         default:
             std::cerr << "Unknown enemy type: " << type << std::endl;
@@ -917,6 +924,30 @@ void Creator::createBullet(size_t entityId, int x, int y, int type)
     bullet->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     bullet->addComponent<Tag>("player_bullet");
 }
+
+void Creator::createEnemyBullet(size_t entityId, int x, int y)
+{
+    auto entity = GameHelper::getEntityById(_world, entityId);
+    if (entity)
+        return;
+    auto bullet = _world.createEntity(entityId);
+    bullet->addComponent<Position>(x, y);
+    bullet->addComponent<Rotation>(180.f);
+   // bullet->addComponent<Velocity>(-10.f, 0.f);
+    bullet->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet1.gif"));
+    bullet->addComponent<Animator>(2, 2, 3.0f, 200, 120, 32, 15, 0, 0);
+    bullet->addComponent<Scale>(2.f);
+    bullet->addComponent<Scene>(1);
+    bullet->addComponent<HP>(10);
+    bullet->addComponent<Damage>(10);
+    bullet->addComponent<BoxCollider>(32.0f, 15.0f);
+    bullet->addComponent<Tag>("enemy_bullet");
+
+    auto sprite = bullet->getComponent<Sprite>();
+    if (sprite && sprite->getSprite())
+        sprite->getSprite()->setColor(sf::Color(255, 150, 50));
+}
+
 /**
  * @brief Creates the loading screen entities.
  *
