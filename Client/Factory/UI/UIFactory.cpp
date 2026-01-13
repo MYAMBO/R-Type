@@ -105,6 +105,7 @@ void UIFactory::_addOptionToggle(const std::string& label, bool& stateValue, uin
     guiBtn->setSize("50%", "70%");
     guiBtn->setOrigin(0.5f, 0.5f);
     guiBtn->setPosition("30%", "50%");
+    guiBtn->setFont("../assets/font/regular.ttf");
     styleNeonButton(guiBtn);
 
     auto status = _world.createEntity();
@@ -115,6 +116,7 @@ void UIFactory::_addOptionToggle(const std::string& label, bool& stateValue, uin
     guiStatus->setTextSize(30);
     guiStatus->setOrigin(0.5f, 0.5f);
     guiStatus->setPosition("80%", "50%");
+    guiStatus->setFont("../assets/font/regular.ttf");
     guiStatus->setTextColor(stateValue ? sf::Color::Green : sf::Color::Red);
 
     guiBtn->setCallback([&stateValue, guiStatus]() {
@@ -143,6 +145,7 @@ void UIFactory::_addColorBlindCycle(const std::string& label, uint64_t parentId)
     guiBtn->setSize("50%", "70%");
     guiBtn->setOrigin(0.5f, 0.5f);
     guiBtn->setPosition("30%", "50%");
+    guiBtn->setFont("../assets/font/regular.ttf");
     styleNeonButton(guiBtn);
 
     std::string currentMode = "normal";
@@ -164,6 +167,7 @@ void UIFactory::_addColorBlindCycle(const std::string& label, uint64_t parentId)
     guiStatus->setTextSize(20);
     guiStatus->setOrigin(0.5f, 0.5f);
     guiStatus->setPosition("80%", "50%");
+    guiStatus->setFont("../assets/font/regular.ttf");
     guiStatus->setTextColor(sf::Color::Cyan);
 
     guiBtn->setCallback([this, guiStatus]() {
@@ -204,6 +208,7 @@ void UIFactory::_addOptionSlider(const std::string& label, float initialValue, u
     gl->setTextSize(25);
     gl->setPosition("10%", "50%");
     gl->setOrigin(0.f, 0.5f);
+    gl->setFont("../assets/font/regular.ttf");
     gl->setTextColor(sf::Color::White);
 
     auto slider = _world.createEntity();
@@ -350,6 +355,7 @@ void UIFactory::createOptionsMenu() const
         btn->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
         btn->addComponent<Tag>("options_tab_button_" + label);
         auto gui = btn->getComponent<GuiWidget>();
+        gui->setFont("../assets/font/regular.ttf");
         styleNeonButton(gui);
         gui->setCallback([this, targetId, layoutGeneralId, layoutAudioId, layoutGameplayId]() {
             GameHelper::getEntityById(_world, layoutGeneralId)->getComponent<GuiWidget>()->setVisible(false);
@@ -445,6 +451,7 @@ void UIFactory::createOptionsMenu() const
     btnReturn->addComponent<Tag>("options_button_return");
     btnReturn->addComponent<Layer>(LayerType::UI + 2);
     auto guiReturn = btnReturn->getComponent<GuiWidget>();
+    guiReturn->setFont("../assets/font/regular.ttf");
     styleNeonButton(guiReturn);
     guiReturn->setSize(200, 60);
     guiReturn->setOrigin(0.5f, 0.5f);
