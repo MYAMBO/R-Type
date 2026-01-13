@@ -381,6 +381,28 @@ void UIFactory::createOptionsMenu() const
     _addKeyBindingRow("RIGHT", layoutGameplayId);
     _addKeyBindingRow("SHOOT", layoutGameplayId);
 
+    auto settingUpdater = _world.createEntity();
+    settingUpdater->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
+    settingUpdater->addComponent<Tag>("options_setting_updater");
+    settingUpdater->addComponent<Script>([&godMode, &easyMode, &hardMode, &dyslexiaMode](int id, World& w) {
+        auto entity = GameHelper::getEntityById(w, id);
+        if (!entity)
+            return;
+        auto dataEntity = GameHelper::getEntityByTag(w, "game_difficulty_settings");
+        auto dataAvailability = GameHelper::getEntityByTag(w, "game_availability_settings");
+        if (!dataEntity || !dataAvailability)
+            return;
+        auto dataComp = dataEntity->getComponent<Data>(); 
+        if (dataComp) {
+            dataComp->setData("is_god_mode", godMode ? "true" : "false");
+            dataComp->setData("is_easy_mode", easyMode ? "true" : "false");
+            dataComp->setData("is_hard_mode", hardMode ? "true" : "false");
+        }
+        auto dataCompAvail = dataAvailability->getComponent<Data>();
+        if (dataCompAvail)
+            dataCompAvail->setData("disclexia_mode", dyslexiaMode ? "true" : "false");
+    });
+
     auto btnReturn = _world.createEntity();
     btnReturn->addComponent<Data>(std::map<std::string, std::string>{{"text", "BACK"}});
     btnReturn->addComponent<GuiWidget>(WidgetType::BUTTON, _languageHandler->getTranslation(btnReturn->getComponent<Data>()->getData("text")), optionsRoot->getId());
