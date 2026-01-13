@@ -83,8 +83,12 @@ include_directories(ECS/Entity)
 include_directories(Client)
 include_directories(Client/Core)
 include_directories(Client/Game)
-include_directories(Client/Creator)
 include_directories(Client/GameHelper)
+include_directories(Client/Factory)
+include_directories(Client/Factory/UI)
+include_directories(Client/Factory/World)
+include_directories(Client/Factory/Tools)
+include_directories(Client/Factory/Effect)
 include_directories(Client/ScriptsHandler)
 include_directories(Server/LevelLoader)
 include_directories(./Server)
@@ -137,7 +141,11 @@ add_executable(r-type_server
 add_executable(r-type_client
         Client/main.cpp
         Client/Game/Game.cpp
-        Client/Creator/Creator.cpp
+        Client/Factory/Factory.cpp
+        Client/Factory/UI/UIFactory.cpp
+        Client/Factory/Tools/ToolsFactory.cpp
+        Client/Factory/World/WorldFactory.cpp
+        Client/Factory/Effect/EffectFactory.cpp
         Client/GameHelper/GameHelper.cpp
         Client/ScriptsHandler/ScriptsHandler.cpp
         ECS/Entity/Entity.cpp
@@ -183,4 +191,4 @@ add_executable(r-type_client
 
 target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network sfml-audio tgui)
 
-target_link_libraries(r-type_server  sfml-graphics sfml-system sfml-network)
+target_link_libraries(r-type_server  sfml-graphics sfml-system sfml-network tgui)
