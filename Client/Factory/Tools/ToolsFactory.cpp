@@ -43,4 +43,15 @@ void ToolsFactory::createGameTools()
     });
     availability->addComponent<Tag>("game_availability_settings");
     availability->addComponent<Script>(availabilitySettingsScript);
+
+    auto controls = _world.createEntity();
+    controls->addComponent<Scene>(0);
+    controls->addComponent<Tag>("game_controls_settings");
+    controls->addComponent<Data>(std::map<std::string, std::string>{
+        {"UP", "Z"},
+        {"DOWN", "S"},
+        {"LEFT", "Q"},
+        {"RIGHT", "D"},
+        {"SHOOT", "Space"}
+    });
 }

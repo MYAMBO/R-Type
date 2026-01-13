@@ -84,7 +84,7 @@ void GuiWidget::setScale(float x, float y)
  */
 void GuiWidget::setVisible(bool visible)
 {
-    _widget->setVisible(visible);
+    _isVisible = visible;
 }
 
 /**
@@ -409,4 +409,13 @@ void GuiWidget::addSpace(float ratio)
 {
     if (auto layout = std::dynamic_pointer_cast<tgui::VerticalLayout>(_widget))
         layout->addSpace(ratio);
+}
+
+/**
+ * @brief Check if the widget is visible.
+ * @return True if visible, false otherwise
+ */
+bool GuiWidget::isVisible() const
+{
+    return _isVisible;
 }

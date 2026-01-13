@@ -360,8 +360,10 @@ void Game::playerInput(int entityId, World &world)
     auto inputSystem = world.getSystem<Inputs>();
     std::shared_ptr<Camera> compCam = GameHelper::getMainCamera(world);
     std::shared_ptr<Entity> compPlayer = GameHelper::getEntityByTag(world, "player");
+    auto settings = GameHelper::getEntityByTag(world, "game_controls_settings");
+    auto data = settings->getComponent<Data>();
 
-    if (!compCam || !compPlayer)
+    if (!compCam || !compPlayer || !inputSystem || !data)
         return;
 
     auto pos = compPlayer->getComponent<Position>();
@@ -371,25 +373,26 @@ void Game::playerInput(int entityId, World &world)
     float targetVy = 0.0f;
     bool moved = false;
 
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_D)) {
+
+    if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("RIGHT")))) {
         if (compCam->getPosition().x + compCam->getSize().x > pos->getX() + 7.0f) {
             targetVx = 7.0f;
             moved = true;
         }
     }
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_Q)) {
+    if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("LEFT")))) {
         if (compCam->getPosition().x < pos->getX() - 7.0f) {
             targetVx = -7.0f;
             moved = true;
         }
     }
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_Z)) {
+    if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("UP")))) {
         if (compCam->getPosition().y < pos->getY() - 7.0f) {
             targetVy = -7.0f;
             moved = true;
         }
     }
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_S)) {
+    if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("DOWN")))) {
         if (compCam->getPosition().y + compCam->getSize().y > pos->getY() + 7.0f) {
             targetVy = 7.0f;
             moved = true;
@@ -398,7 +401,7 @@ void Game::playerInput(int entityId, World &world)
     vel->setVelocityX(targetVx);
     vel->setVelocityY(targetVy);
 
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_Space)) {
+    if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("SHOOT")))) {
         auto dataComp = compPlayer->getComponent<Data>();
         if (!isShootKeyPressed && dataComp && std::stoi(dataComp->getData("mana")) >= 20) {
             Packet packet;

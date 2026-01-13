@@ -9,6 +9,8 @@
 #include "Factory.hpp"
 #include "UIFactory.hpp"
 
+#include <thread>
+
 UIFactory::UIFactory(World& world) : _world(world)
 {
 }
@@ -84,8 +86,176 @@ void UIFactory::createLoadingScreen()
     fillBar->addComponent<Scale>(1.f);
 }
 
+void UIFactory::_addOptionToggle(const std::string& label, bool& stateValue, uint64_t parentId) {
+    auto row = _world.createEntity();
+    row->addComponent<GuiWidget>(WidgetType::PANEL, "", parentId);
+    row->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
+    row->addComponent<Tag>("option_row");
+    auto guiRow = row->getComponent<GuiWidget>();
+    guiRow->setSize("100%", "100");
+    styleNeonRow(guiRow);
+
+    auto btn = _world.createEntity();
+    btn->addComponent<GuiWidget>(WidgetType::BUTTON, label, row->getId());
+    btn->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
+    btn->addComponent<Tag>("option_button");
+    auto guiBtn = btn->getComponent<GuiWidget>();
+    guiBtn->setSize("50%", "70%");
+    guiBtn->setOrigin(0.5f, 0.5f);
+    guiBtn->setPosition("30%", "50%");
+    styleNeonButton(guiBtn);
+
+    auto status = _world.createEntity();
+    status->addComponent<GuiWidget>(WidgetType::LABEL, stateValue ? "ON" : "OFF", row->getId());
+    status->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
+    status->addComponent<Tag>("option_status");
+    auto guiStatus = status->getComponent<GuiWidget>();
+    guiStatus->setTextSize(30);
+    guiStatus->setOrigin(0.5f, 0.5f);
+    guiStatus->setPosition("80%", "50%");
+    guiStatus->setTextColor(stateValue ? sf::Color::Green : sf::Color::Red);
+
+    guiBtn->setCallback([&stateValue, guiStatus]() {
+        stateValue = !stateValue;
+        guiStatus->setText(stateValue ? "ON" : "OFF");
+        guiStatus->setTextColor(stateValue ? sf::Color::Green : sf::Color::Red);
+    });
+}
+
+void UIFactory::_addColorBlindCycle(const std::string& label, uint64_t parentId) {
+    auto row = _world.createEntity();
+    row->addComponent<GuiWidget>(WidgetType::PANEL, "", parentId);
+    row->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
+    row->addComponent<Tag>("option_row");
+    auto guiRow = row->getComponent<GuiWidget>();
+    guiRow->setSize("100%", "100");
+    styleNeonRow(guiRow);
+
+    auto btn = _world.createEntity();
+    btn->addComponent<GuiWidget>(WidgetType::BUTTON, label, row->getId());
+    btn->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
+    btn->addComponent<Tag>("option_button");
+    auto guiBtn = btn->getComponent<GuiWidget>();
+    guiBtn->setSize("50%", "70%");
+    guiBtn->setOrigin(0.5f, 0.5f);
+    guiBtn->setPosition("30%", "50%");
+    styleNeonButton(guiBtn);
+
+    auto status = _world.createEntity();
+    status->addComponent<GuiWidget>(WidgetType::LABEL, "NORMAL", row->getId());
+    status->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
+    status->addComponent<Tag>("option_status");
+    auto guiStatus = status->getComponent<GuiWidget>();
+    guiStatus->setTextSize(20);
+    guiStatus->setOrigin(0.5f, 0.5f);
+    guiStatus->setPosition("80%", "50%");
+    guiStatus->setTextColor(sf::Color::Cyan);
+
+    guiBtn->setCallback([this, guiStatus]() {
+        static std::vector<std::string> modes = {"protanopia", "deuteranopia", "tritanopia", "achromatopsia", "normal"};
+        auto settings = GameHelper::getEntityByTag(_world, "game_availability_settings");
+        if (!settings) return;
+        auto data = settings->getComponent<Data>();
+        std::string current = data->getData("color_blind_mode");
+        auto it = std::find(modes.begin(), modes.end(), current);
+        int nextIdx = (it != modes.end()) ? (std::distance(modes.begin(), it) + 1) % modes.size() : 0;
+        data->setData("color_blind_mode", modes[nextIdx]);
+        std::string display = modes[nextIdx];
+        std::transform(display.begin(), display.end(), display.begin(), ::toupper);
+        guiStatus->setText(display);
+    });
+}
+
+void UIFactory::_addOptionSlider(const std::string& label, float initialValue, uint64_t parentId, std::function<void(float)> onValueChange, std::function<void(int, World&)> onUpdate) {
+    auto row = _world.createEntity();
+    row->addComponent<GuiWidget>(WidgetType::PANEL, "", parentId);
+    row->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
+    row->addComponent<Tag>("option_row");
+    auto guiRow = row->getComponent<GuiWidget>();
+    guiRow->setSize("100%", "100");
+    styleNeonRow(guiRow);
+
+    auto guiLabel = _world.createEntity();
+    guiLabel->addComponent<GuiWidget>(WidgetType::LABEL, label, row->getId());
+    guiLabel->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
+    guiLabel->addComponent<Tag>("option_label");
+    auto gl = guiLabel->getComponent<GuiWidget>();
+    gl->setTextSize(25);
+    gl->setPosition("10%", "50%");
+    gl->setOrigin(0.f, 0.5f);
+    gl->setTextColor(sf::Color::White);
+
+    auto slider = _world.createEntity();
+    slider->addComponent<GuiWidget>(WidgetType::SLIDER, "", row->getId());
+    slider->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
+    slider->addComponent<Tag>("option_slider");
+    if (onUpdate) slider->addComponent<Script>(onUpdate);
+    auto gs = slider->getComponent<GuiWidget>();
+    gs->setSize("40%", "20");
+    gs->setPosition("70%", "50%");
+    gs->setOrigin(0.5f, 0.5f);
+    gs->setRange(0, 100);
+    gs->setValue(initialValue);
+    styleNeonSlider(gs);
+
+    auto raw = std::dynamic_pointer_cast<tgui::Slider>(gs->getRawWidget());
+    if (raw) raw->onValueChange(onValueChange);
+}
+
+void UIFactory::_addKeyBindingRow(const std::string& actionName, uint64_t parentId) {
+    auto row = _world.createEntity();
+    row->addComponent<GuiWidget>(WidgetType::PANEL, "", parentId);
+    row->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
+    row->addComponent<Tag>("keybinding_row");
+    auto guiRow = row->getComponent<GuiWidget>();
+    guiRow->setSize("100%", "100");
+    styleNeonRow(guiRow);
+
+    auto lbl = _world.createEntity();
+    lbl->addComponent<GuiWidget>(WidgetType::LABEL, actionName, row->getId());
+    lbl->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
+    lbl->addComponent<Tag>("keybinding_label");
+    auto gl = lbl->getComponent<GuiWidget>();
+    gl->setTextSize(25);
+    gl->setPosition("10%", "50%");
+    gl->setOrigin(0.f, 0.5f);
+    gl->setTextColor(sf::Color::White);
+
+    auto btn = _world.createEntity();
+    btn->addComponent<GuiWidget>(WidgetType::BUTTON, "", row->getId());
+    btn->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
+    btn->addComponent<Tag>("keybinding_button");
+    auto guiBtn = btn->getComponent<GuiWidget>();
+    styleNeonButton(guiBtn);
+    guiBtn->setSize("40%", "70%");
+    guiBtn->setPosition("70%", "50%");
+    guiBtn->setOrigin(0.5f, 0.5f);
+
+    auto settings = GameHelper::getEntityByTag(_world, "game_controls_settings");
+    if (settings) guiBtn->setText(settings->getComponent<Data>()->getData(actionName));
+
+    guiBtn->setCallback([this, guiBtn, actionName]() {
+        guiBtn->setText("...");
+        auto listener = _world.createEntity();
+        listener->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
+        listener->addComponent<Tag>("keybinding_listener");
+        listener->addComponent<Script>([guiBtn, actionName](int id, World& w) {
+            auto input = w.getSystem<Inputs>();
+            if (!input) return;
+            KeyboardKey key = input->consumeLastKey();
+            if (key != KeyboardKey::Key_Unknown) {
+                std::string name = input->keyToString(key);
+                auto s = GameHelper::getEntityByTag(w, "game_controls_settings");
+                if (s) s->getComponent<Data>()->setData(actionName, name);
+                guiBtn->setText(name);
+                w.killEntity(id);
+            }
+        });
+    });
+}
+
 /**
- * @brief Create an Options Menu with a Scrollable area
+ * @brief Create an Options Menu with Tabs (Scene 3)
  */
 void UIFactory::createOptionsMenu()
 {
@@ -95,6 +265,7 @@ void UIFactory::createOptionsMenu()
     optionsRoot->addComponent<Position>(0.f, 0.f);
     optionsRoot->addComponent<GuiWidget>(WidgetType::PANEL);
     optionsRoot->addComponent<Tag>("options_root");
+    
     auto rootGui = optionsRoot->getComponent<GuiWidget>();
     rootGui->setSize("100%", "100%");
     rootGui->getRawWidget()->getRenderer()->setProperty("BackgroundColor", tgui::Color(10, 10, 30, 240));
@@ -102,244 +273,117 @@ void UIFactory::createOptionsMenu()
     auto titleEntity = _world.createEntity();
     titleEntity->addComponent<GuiWidget>(WidgetType::LABEL, "OPTIONS", optionsRoot->getId());
     titleEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
-    titleEntity->addComponent<Layer>(LayerType::UI + 1);
     titleEntity->addComponent<Tag>("options_title");
     auto guiTitle = titleEntity->getComponent<GuiWidget>();
     guiTitle->setFont("../assets/font/regular.ttf");
-    guiTitle->setTextSize(80);
+    guiTitle->setTextSize(60);
     guiTitle->setTextColor(sf::Color::Green);
     guiTitle->setOrigin(0.5f, 0.5f);
-    guiTitle->setPosition("50%", "10%");
+    guiTitle->setPosition("50%", "8%");
+
+    auto tabHeaderEntity = _world.createEntity();
+    tabHeaderEntity->addComponent<GuiWidget>(WidgetType::HORIZONTAL_LAYOUT, "", optionsRoot->getId());
+    tabHeaderEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
+    tabHeaderEntity->addComponent<Tag>("options_tab_header");
+    auto guiTabHeader = tabHeaderEntity->getComponent<GuiWidget>();
+    guiTabHeader->setSize("60%", "50");
+    guiTabHeader->setPosition("50%", "18%");
+    guiTabHeader->setOrigin(0.5f, 0.5f);
 
     auto scrollPanelEntity = _world.createEntity();
     scrollPanelEntity->addComponent<GuiWidget>(WidgetType::SCROLLABLE_PANEL, "", optionsRoot->getId());
     scrollPanelEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
-    scrollPanelEntity->addComponent<Layer>(LayerType::UI + 1);
     scrollPanelEntity->addComponent<Tag>("options_scroll_panel");
     auto guiScroll = scrollPanelEntity->getComponent<GuiWidget>();
-    guiScroll->setSize("70%", "60%");
-    guiScroll->setPosition("50%", "50%");
+    guiScroll->setSize("70%", "55%");
+    guiScroll->setPosition("50%", "55%");
     guiScroll->setOrigin(0.5f, 0.5f);
-    
     auto scrollRender = guiScroll->getRawWidget()->getRenderer();
     scrollRender->setProperty("ScrollbarWidth", 10);
-    scrollRender->setProperty("BackgroundColor", tgui::Color(20, 20, 40, 200));
+    scrollRender->setProperty("BackgroundColor", tgui::Color(20, 20, 40, 255));
     scrollRender->setProperty("BorderColor", tgui::Color::Cyan);
     scrollRender->setProperty("Borders", tgui::Borders(2));
     scrollRender->setProperty("RoundedBorderRadius", 10);
 
-    auto mainLayoutEntity = _world.createEntity();
-    mainLayoutEntity->addComponent<GuiWidget>(WidgetType::VERTICAL_LAYOUT, "", scrollPanelEntity->getId());
-    mainLayoutEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
-    mainLayoutEntity->addComponent<Tag>("options_main_layout");
-    auto guiLayout = mainLayoutEntity->getComponent<GuiWidget>();
-    guiLayout->setSize("100%", "150%");
-    
-    auto createColorBlindCycle = [this, mainLayoutEntity](const std::string& label) {
-        auto rowEntity = _world.createEntity();
-        rowEntity->addComponent<GuiWidget>(WidgetType::PANEL, "", mainLayoutEntity->getId());
-        rowEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
-        rowEntity->addComponent<Tag>("color_blind_mode_row");
-        auto guiRow = rowEntity->getComponent<GuiWidget>();
-        guiRow->setSize("100%", "100");
-        styleNeonRow(guiRow);
-
-        auto btnEntity = _world.createEntity();
-        btnEntity->addComponent<GuiWidget>(WidgetType::BUTTON, label, rowEntity->getId());
-        btnEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
-        btnEntity->addComponent<Tag>("color_blind_mode_button");
-        auto guiBtn = btnEntity->getComponent<GuiWidget>();
-        guiBtn->setSize("50%", "70%");
-        guiBtn->setOrigin(0.5f, 0.5f);
-        guiBtn->setPosition("30%", "50%");
-        guiBtn->setFont("../assets/font/regular.ttf");
-        styleNeonButton(guiBtn);
-
-        auto statusEntity = _world.createEntity();
-        statusEntity->addComponent<GuiWidget>(WidgetType::LABEL, "NORMAL", rowEntity->getId());
-        statusEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
-        statusEntity->addComponent<Tag>("color_blind_mode_status");
-        auto guiStatus = statusEntity->getComponent<GuiWidget>();
-        guiStatus->setTextSize(20);
-        guiStatus->setOrigin(0.5f, 0.5f);
-        guiStatus->setPosition("80%", "50%");
-        guiStatus->setTextColor(sf::Color::Cyan);
-        guiBtn->setCallback([this, guiStatus]() {
-            static std::vector<std::string> modes = {"protanopia", "deuteranopia", "tritanopia", "achromatopsia", "normal"};
-            auto settings = GameHelper::getEntityByTag(_world, "game_availability_settings");
-            if (!settings) return;
-            auto data = settings->getComponent<Data>();
-            std::string current = data->getData("color_blind_mode");
-            auto it = std::find(modes.begin(), modes.end(), current);
-            int nextIdx = 0;
-            if (it != modes.end())
-                nextIdx = (std::distance(modes.begin(), it) + 1) % modes.size();
-            std::string nextMode = modes[nextIdx];
-            data->setData("color_blind_mode", nextMode);
-            std::string display = nextMode;
-            std::transform(display.begin(), display.end(), display.begin(), ::toupper);
-            guiStatus->setText(display);
-        });
+    auto createCategory = [this, scrollPanelEntity](const std::string& tag, bool visible) {
+        auto cat = _world.createEntity();
+        cat->addComponent<GuiWidget>(WidgetType::VERTICAL_LAYOUT, "", scrollPanelEntity->getId());
+        cat->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
+        cat->addComponent<Tag>(tag);
+        auto gui = cat->getComponent<GuiWidget>();
+        gui->setSize("100%", "200%");
+        gui->setVisible(visible);
+        return cat->getId();
     };
-    
-    auto createOptionToggle = [this, mainLayoutEntity](const std::string& label, bool& stateValue) {
-        auto rowEntity = _world.createEntity();
-        rowEntity->addComponent<GuiWidget>(WidgetType::PANEL, "", mainLayoutEntity->getId());
-        rowEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
-        rowEntity->addComponent<Tag>("option_toggle_row");
-        auto guiRow = rowEntity->getComponent<GuiWidget>();
-        guiRow->setSize("100%", "5%");
-        styleNeonRow(guiRow);
 
-        auto btnEntity = _world.createEntity();
-        btnEntity->addComponent<GuiWidget>(WidgetType::BUTTON, label, rowEntity->getId());
-        btnEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
-        btnEntity->addComponent<Tag>("option_toggle_button");
-        auto guiBtn = btnEntity->getComponent<GuiWidget>();
-        guiBtn->setSize("50%", "70%");
-        guiBtn->setOrigin(0.5f, 0.5f);
-        guiBtn->setPosition("30%", "50%");
-        guiBtn->setFont("../assets/font/regular.ttf");
-        styleNeonButton(guiBtn);
+    uint64_t layoutGeneralId = createCategory("options_layout_general", true);
+    uint64_t layoutAudioId = createCategory("options_layout_audio", false);
+    uint64_t layoutGameplayId = createCategory("options_layout_gameplay", false);
 
-        auto statusEntity = _world.createEntity();
-        statusEntity->addComponent<GuiWidget>(WidgetType::LABEL, stateValue ? "ON" : "OFF", rowEntity->getId());
-        statusEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
-        statusEntity->addComponent<Tag>("option_toggle_status");
-        auto guiStatus = statusEntity->getComponent<GuiWidget>();
-        guiStatus->setTextSize(30);
-        guiStatus->setOrigin(0.5f, 0.5f);
-        guiStatus->setPosition("80%", "50%");
-        guiStatus->setTextColor(stateValue ? sf::Color::Green : sf::Color::Red);
-
-        guiBtn->setCallback([&stateValue, guiStatus]() {
-            stateValue = !stateValue;
-            guiStatus->setText(stateValue ? "ON" : "OFF");
-            guiStatus->setTextColor(stateValue ? sf::Color::Green : sf::Color::Red);
+    auto addTabButton = [this, tabHeaderEntity, layoutGeneralId, layoutAudioId, layoutGameplayId]
+                        (const std::string& label, uint64_t targetId) {
+        auto btn = _world.createEntity();
+        btn->addComponent<GuiWidget>(WidgetType::BUTTON, label, tabHeaderEntity->getId());
+        btn->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
+        btn->addComponent<Tag>("options_tab_button_" + label);
+        auto gui = btn->getComponent<GuiWidget>();
+        styleNeonButton(gui);
+        gui->setCallback([this, targetId, layoutGeneralId, layoutAudioId, layoutGameplayId]() {
+            GameHelper::getEntityById(_world, layoutGeneralId)->getComponent<GuiWidget>()->setVisible(false);
+            GameHelper::getEntityById(_world, layoutAudioId)->getComponent<GuiWidget>()->setVisible(false);
+            GameHelper::getEntityById(_world, layoutGameplayId)->getComponent<GuiWidget>()->setVisible(false);
+            GameHelper::getEntityById(_world, targetId)->getComponent<GuiWidget>()->setVisible(true);
         });
     };
 
-    auto createOptionSlider = [this, mainLayoutEntity](const std::string& label, float initialValue, std::function<void(float)> onValueChange, std::function<void(int, World&)> onUpdate = nullptr) {
-        auto rowEntity = _world.createEntity();
-        rowEntity->addComponent<GuiWidget>(WidgetType::PANEL, "", mainLayoutEntity->getId());
-        rowEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
-        rowEntity->addComponent<Tag>("option_slider_row");
-        auto guiRow = rowEntity->getComponent<GuiWidget>();
-        guiRow->setSize("100%", "100");
-        styleNeonRow(guiRow);
-
-        auto labelEntity = _world.createEntity();
-        labelEntity->addComponent<GuiWidget>(WidgetType::LABEL, label, rowEntity->getId());
-        labelEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
-        labelEntity->addComponent<Tag>("option_slider_label");
-        auto guiLabel = labelEntity->getComponent<GuiWidget>();
-        guiLabel->setTextSize(25);
-        guiLabel->setPosition("10%", "50%");
-        guiLabel->setOrigin(0.f, 0.5f);
-        guiLabel->setTextColor(sf::Color::White);
-
-        auto sliderEntity = _world.createEntity();
-        sliderEntity->addComponent<GuiWidget>(WidgetType::SLIDER, "", rowEntity->getId());
-        sliderEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
-        sliderEntity->addComponent<Tag>("option_slider");
-        if (onUpdate)
-            sliderEntity->addComponent<Script>(onUpdate);
-        auto guiSlider = sliderEntity->getComponent<GuiWidget>();
-        guiSlider->setSize("40%", "20");
-        guiSlider->setPosition("70%", "50%");
-        guiSlider->setOrigin(0.5f, 0.5f);
-        guiSlider->setRange(0, 100);
-        guiSlider->setValue(initialValue);
-        styleNeonSlider(guiSlider);
-
-        auto rawSlider = std::dynamic_pointer_cast<tgui::Slider>(guiSlider->getRawWidget());
-        if (rawSlider) {
-            rawSlider->onValueChange(onValueChange);
-        }        
-    };
+    addTabButton("GENERAL", layoutGeneralId);
+    addTabButton("AUDIO", layoutAudioId);
+    addTabButton("CONTROLS", layoutGameplayId);
 
     static bool godMode = false;
     static bool easyMode = false;
     static bool hardMode = false;
-    static bool disclexiaMode = false;
-    createColorBlindCycle("COLORBLIND");
-    createOptionToggle("GOD MODE", godMode);
-    createOptionToggle("EASY MODE", easyMode);
-    createOptionToggle("HARD MODE", hardMode);
-    createOptionToggle("DISCLEXIA MODE", disclexiaMode);
+    static bool dyslexiaMode = false;
 
-    auto settingUpdater = _world.createEntity();
-    settingUpdater->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
-    settingUpdater->addComponent<Tag>("options_setting_updater");
-    settingUpdater->addComponent<Script>([&godMode, &easyMode, &hardMode, &disclexiaMode](int id, World& w) {
-        auto entity = GameHelper::getEntityById(w, id);
-        if (!entity)
-            return;
-        auto dataEntity = GameHelper::getEntityByTag(w, "game_difficulty_settings");
-        auto dataAvailability = GameHelper::getEntityByTag(w, "game_availability_settings");
-        if (!dataEntity || !dataAvailability)
-            return;
-        auto dataComp = dataEntity->getComponent<Data>(); 
-        if (dataComp) {
-            dataComp->setData("god_mode", godMode ? "true" : "false");
-            dataComp->setData("easy_mode", easyMode ? "true" : "false");
-            dataComp->setData("hard_mode", hardMode ? "true" : "false");
-        }
-        auto dataCompAvail = dataAvailability->getComponent<Data>();
-        if (dataCompAvail)
-            dataCompAvail->setData("disclexia_mode", disclexiaMode ? "true" : "false");
+    _addColorBlindCycle("COLORBLIND", layoutGeneralId);
+    _addOptionToggle("GOD MODE", godMode, layoutGeneralId);
+    _addOptionToggle("EASY MODE", easyMode, layoutGeneralId);
+    _addOptionToggle("HARD MODE", hardMode, layoutGeneralId);
+    _addOptionToggle("DYSLEXIA", dyslexiaMode, layoutGeneralId);
+
+    _addOptionSlider("MUSIC", 100.f, layoutAudioId, [](float){}, [](int id, World& w) {
+        auto raw = std::dynamic_pointer_cast<tgui::Slider>(GameHelper::getEntityById(w, id)->getComponent<GuiWidget>()->getRawWidget());
+        auto settings = GameHelper::getEntityByTag(w, "game_volume_settings");
+        if (settings) settings->getComponent<Data>()->setData("music_volume", std::to_string((int)raw->getValue()));
+    });
+    _addOptionSlider("SFX", 100.f, layoutAudioId, [](float){}, [](int id, World& w) {
+        auto raw = std::dynamic_pointer_cast<tgui::Slider>(GameHelper::getEntityById(w, id)->getComponent<GuiWidget>()->getRawWidget());
+        auto settings = GameHelper::getEntityByTag(w, "game_volume_settings");
+        if (settings) settings->getComponent<Data>()->setData("sfx_volume", std::to_string((int)raw->getValue()));
+    });
+    _addOptionSlider("GENERAL", 100.f, layoutAudioId, [](float){}, [](int id, World& w) {
+        auto raw = std::dynamic_pointer_cast<tgui::Slider>(GameHelper::getEntityById(w, id)->getComponent<GuiWidget>()->getRawWidget());
+        auto settings = GameHelper::getEntityByTag(w, "game_volume_settings");
+        if (settings) settings->getComponent<Data>()->setData("master_volume", std::to_string((int)raw->getValue()));
     });
 
-    createOptionSlider("MUSIC VOLUME", 100.f, [](float value) {(void)value;}, [](int id, World& w) {
-        auto entity = GameHelper::getEntityById(w, id);
-        if (!entity)
-            return;
-        auto rawSlider = std::dynamic_pointer_cast<tgui::Slider>(entity->getComponent<GuiWidget>()->getRawWidget());
-        if (!rawSlider)
-            return;
-        float value = static_cast<float>(rawSlider->getValue());
-        auto volumeSettings = GameHelper::getEntityByTag(w, "game_volume_settings");
-        if (volumeSettings) {
-            volumeSettings->getComponent<Data>()->setData("music_volume", std::to_string(static_cast<int>(value)));
-        }
-    });
-    createOptionSlider("SFX VOLUME", 100.f, [](float value) {(void)value;}, [](int id, World& w) {
-        auto entity = GameHelper::getEntityById(w, id);
-        if (!entity)
-            return;
-        auto rawSlider = std::dynamic_pointer_cast<tgui::Slider>(entity->getComponent<GuiWidget>()->getRawWidget());
-        if (!rawSlider)
-            return;
-        float value = static_cast<float>(rawSlider->getValue());
-        auto volumeSettings = GameHelper::getEntityByTag(w, "game_volume_settings");
-        if (volumeSettings) {
-            volumeSettings->getComponent<Data>()->setData("sfx_volume", std::to_string(static_cast<int>(value)));
-        }
-    });
-    createOptionSlider("MASTER VOLUME", 100.f, [](float value) {(void)value;}, [](int id, World& w) {
-        auto entity = GameHelper::getEntityById(w, id);
-        if (!entity)
-            return;
-        auto rawSlider = std::dynamic_pointer_cast<tgui::Slider>(entity->getComponent<GuiWidget>()->getRawWidget());
-        if (!rawSlider)
-            return;
-        float value = static_cast<float>(rawSlider->getValue());
-        auto volumeSettings = GameHelper::getEntityByTag(w, "game_volume_settings");
-        if (volumeSettings) {
-            volumeSettings->getComponent<Data>()->setData("master_volume", std::to_string(static_cast<int>(value)));
-        }
-    });
+    _addKeyBindingRow("UP", layoutGameplayId);
+    _addKeyBindingRow("DOWN", layoutGameplayId);
+    _addKeyBindingRow("LEFT", layoutGameplayId);
+    _addKeyBindingRow("RIGHT", layoutGameplayId);
+    _addKeyBindingRow("SHOOT", layoutGameplayId);
 
     auto btnReturn = _world.createEntity();
     btnReturn->addComponent<GuiWidget>(WidgetType::BUTTON, "BACK", optionsRoot->getId());
     btnReturn->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
+    btnReturn->addComponent<Tag>("options_button_return");
     btnReturn->addComponent<Layer>(LayerType::UI + 2);
     auto guiReturn = btnReturn->getComponent<GuiWidget>();
+    styleNeonButton(guiReturn);
     guiReturn->setSize(200, 60);
     guiReturn->setOrigin(0.5f, 0.5f);
-    guiReturn->setPosition("50%", "85%");
+    guiReturn->setPosition("50%", "90%");
     guiReturn->setCallback([this]() { _world.setCurrentScene(static_cast<int>(SceneType::MENU)); });
-    styleNeonButton(guiReturn);
 }
 
 /**
