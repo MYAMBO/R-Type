@@ -71,7 +71,7 @@ static void styleNeonSlider(std::shared_ptr<GuiWidget> gui)
 
 
 Creator::Creator(World& world)
-: _world(world)
+: _world(world), _languageHandler(std::make_shared<LanguageHandler>("en"))
 {
 }
 
@@ -84,7 +84,7 @@ void Creator::createMyambo()
     float centerY = height / 2.0f;
 
     auto myambo = _world.createEntity();
-    myambo->addComponent<Text>("MYAMBO", "../assets/font/regular.ttf", 10);
+    myambo->addComponent<Text>("MYAMBO", "../assets/font/logo.ttf", 10);
     myambo->getComponent<Text>()->setColor(255, 255, 255, 255);
     myambo->addComponent<Scene>(static_cast<int>(SceneType::MYAMBO));
     myambo->addComponent<Layer>(2);
@@ -96,13 +96,13 @@ void Creator::createMyambo()
     myamboGlow->addComponent<Scene>(static_cast<int>(SceneType::MYAMBO));
     myamboGlow->addComponent<Layer>(1);
     myamboGlow->addComponent<Position>(myambo->getComponent<Position>()->getX(), myambo->getComponent<Position>()->getY());
-    myamboGlow->addComponent<Text>("MYAMBO", "../assets/font/regular.ttf", 10);
+    myamboGlow->addComponent<Text>("MYAMBO", "../assets/font/logo.ttf", 10);
     myamboGlow->addComponent<Tag>("logo_myambo_glow");
     myamboGlow->addComponent<Script>(myamboGlowScript);
     myambo->addComponent<Script>(myamboScript);
 
     auto prod = _world.createEntity();
-    prod->addComponent<Text>("PRODUCTION", "../assets/font/regular.ttf", 60);
+    prod->addComponent<Text>("PRODUCTION", "../assets/font/logo.ttf", 60);
     prod->getComponent<Text>()->setColor(0, 0, 0, 255);
     prod->getComponent<Text>()->setSize(60);
     prod->addComponent<Scene>(static_cast<int>(SceneType::MYAMBO));
@@ -118,7 +118,7 @@ void Creator::createMyambo()
     prodGlow->addComponent<Scene>(static_cast<int>(SceneType::MYAMBO));
     prodGlow->addComponent<Layer>(1);
     prodGlow->addComponent<Position>(prod->getComponent<Position>()->getX(), prod->getComponent<Position>()->getY());
-    prodGlow->addComponent<Text>("PRODUCTION", "../assets/font/regular.ttf", 60);
+    prodGlow->addComponent<Text>("PRODUCTION", "../assets/font/logo.ttf", 60);
     prodGlow->getComponent<Text>()->setColor(0, 0, 0, 255);
     prodGlow->addComponent<Tag>("logo_production_glow");
     prodGlow->addComponent<Script>(productionGlowScript);
@@ -142,7 +142,7 @@ void Creator::createKayu()
     kayu->addComponent<Tag>("logo_kayu");
     kayu->addComponent<Velocity>(10.f, 0.f);
     kayu->addComponent<SoundEffect>("../assets/sounds/kayu.mp3", 100.f);
-    kayu->addComponent<Text>("KAYU", "../assets/font/regular.ttf", 120);
+    kayu->addComponent<Text>("KAYU", "../assets/font/logo.ttf", 120);
     kayu->addComponent<Position>(-8000.f, centerY);
     kayu->addComponent<Script>(kayuScript);
 
@@ -150,7 +150,7 @@ void Creator::createKayu()
     kayuGlow->addComponent<Scene>(static_cast<int>(SceneType::KAYU));
     kayuGlow->addComponent<Layer>(1);
     kayuGlow->addComponent<Position>(kayu->getComponent<Position>()->getX(), centerY);
-    kayuGlow->addComponent<Text>("KAYU", "../assets/font/regular.ttf", 120);
+    kayuGlow->addComponent<Text>("KAYU", "../assets/font/logo.ttf", 120);
     kayuGlow->addComponent<Tag>("logo_kayu_glow");
     kayuGlow->addComponent<Script>(kayuGlowScript);
 
@@ -160,14 +160,14 @@ void Creator::createKayu()
     corp->addComponent<Tag>("logo_corp");
     corp->addComponent<Position>(10000.f, centerY);
     corp->addComponent<Velocity>(-10.f, 0.f);
-    corp->addComponent<Text>("CORP", "../assets/font/regular.ttf", 120);
+    corp->addComponent<Text>("CORP", "../assets/font/logo.ttf", 120);
     corp->addComponent<Script>(corpScript);
 
     auto corpGlow = _world.createEntity();
     corpGlow->addComponent<Scene>(static_cast<int>(SceneType::KAYU));
     corpGlow->addComponent<Layer>(1);
     corpGlow->addComponent<Position>(corp->getComponent<Position>()->getX(), centerY);
-    corpGlow->addComponent<Text>("CORP", "../assets/font/regular.ttf", 120);
+    corpGlow->addComponent<Text>("CORP", "../assets/font/logo.ttf", 120);
     corpGlow->addComponent<Tag>("logo_corp_glow");
     corpGlow->addComponent<Script>(corpGlowScript);
     
@@ -247,7 +247,8 @@ void Creator::createTguiMenu()
     guiLayout->setOrigin(0.5f, 0.5f);
 
     auto btnPlay = _world.createEntity();
-    btnPlay->addComponent<GuiWidget>(WidgetType::BUTTON, "START MISSION", layoutEntity->getId());
+    btnPlay->addComponent<Data>(std::map<std::string, std::string>{{"text", "START_GAME"}});
+    btnPlay->addComponent<GuiWidget>(WidgetType::BUTTON, _languageHandler->getTranslation(btnPlay->getComponent<Data>()->getData("text")), layoutEntity->getId());
     btnPlay->addComponent<Scene>(static_cast<int>(SceneType::MENU));
     btnPlay->addComponent<Tag>("menu_button_start");
     btnPlay->addComponent<SoundEffect>("../assets/sounds/clics.mp3", 100.f);
@@ -271,7 +272,8 @@ void Creator::createTguiMenu()
     spaceEntity->addComponent<Tag>("menu_button_space");
 
     auto btnOptions = _world.createEntity();
-    btnOptions->addComponent<GuiWidget>(WidgetType::BUTTON, "SETTINGS", layoutEntity->getId());
+    btnOptions->addComponent<Data>(std::map<std::string, std::string>{{"text", "SETTINGS"}});
+    btnOptions->addComponent<GuiWidget>(WidgetType::BUTTON, _languageHandler->getTranslation(btnOptions->getComponent<Data>()->getData("text")), layoutEntity->getId());
     btnOptions->addComponent<Scene>(static_cast<int>(SceneType::MENU));
     btnOptions->addComponent<Tag>("menu_button_options");
     btnOptions->addComponent<SoundEffect>("../assets/sounds/clics.mp3", 100.f);
@@ -310,7 +312,8 @@ void Creator::createTguiMenu()
     spaceEntity2->addComponent<Tag>("menu_button_space2");
 
     auto btnQuit = _world.createEntity();
-    btnQuit->addComponent<GuiWidget>(WidgetType::BUTTON, "ABORT", layoutEntity->getId());
+    btnQuit->addComponent<Data>(std::map<std::string, std::string>{{"text", "QUIT_GAME"}});
+    btnQuit->addComponent<GuiWidget>(WidgetType::BUTTON, _languageHandler->getTranslation(btnQuit->getComponent<Data>()->getData("text")), layoutEntity->getId());
     btnQuit->addComponent<Scene>(static_cast<int>(SceneType::MENU));
     btnQuit->addComponent<Tag>("menu_button_quit");
     btnQuit->addComponent<SoundEffect>("../assets/sounds/clics.mp3", 100.f);
@@ -346,7 +349,8 @@ void Creator::createLangSelector() const
     rootGui->setSize("100%", "100%");
     rootGui->getRawWidget()->getRenderer()->setProperty("BackgroundColor", tgui::Color(10, 10, 30, 240));
     const auto titleEntity = _world.createEntity();
-    titleEntity->addComponent<GuiWidget>(WidgetType::LABEL, "LANGUAGES", langRoot->getId());
+    titleEntity->addComponent<Data>(std::map<std::string, std::string>{{"text", "SETTINGS_LANGUAGE"}});
+    titleEntity->addComponent<GuiWidget>(WidgetType::LABEL, _languageHandler->getTranslation(titleEntity->getComponent<Data>()->getData("text")), langRoot->getId());
     titleEntity->addComponent<Scene>(static_cast<int>(SceneType::LANGUAGES));
     titleEntity->addComponent<Layer>(LayerType::UI + 1);
     titleEntity->addComponent<Tag>("lang_title");
@@ -409,10 +413,19 @@ void Creator::createLangSelector() const
             if (const auto settings = GameHelper::getEntityByTag(_world, "game_availability_settings"))
                 if (const auto data = settings->getComponent<Data>())
                     data->setData("language", code);
+            _languageHandler->loadLanguageFile(code);
+            auto entities = _world.getAllEntitiesWithComponent<Data>();
+            for (const auto& entity : entities)
+                if (const auto dataComp = entity->getComponent<Data>())
+                    if (const auto textKey = dataComp->getData("text"); !textKey.empty())
+                        if (const auto guiComp = entity->getComponent<GuiWidget>())
+                            guiComp->setText(_languageHandler->getTranslation(textKey));
+            _world.setCurrentScene(static_cast<int>(SceneType::MENU));
         });
     }
     const auto backBtn = _world.createEntity();
-    backBtn->addComponent<GuiWidget>(WidgetType::BUTTON, "BACK", langRoot->getId());
+    backBtn->addComponent<Data>(std::map<std::string, std::string>{{"text", "BACK"}});
+    backBtn->addComponent<GuiWidget>(WidgetType::BUTTON, _languageHandler->getTranslation(backBtn->getComponent<Data>()->getData("text")), langRoot->getId());
     backBtn->addComponent<Scene>(static_cast<int>(SceneType::LANGUAGES));
     backBtn->addComponent<Layer>(LayerType::UI + 2);
     backBtn->addComponent<Tag>("lang_back_btn");
@@ -651,7 +664,8 @@ void Creator::createTguiOptions()
     rootGui->getRawWidget()->getRenderer()->setProperty("BackgroundColor", tgui::Color(10, 10, 30, 240));
 
     auto titleEntity = _world.createEntity();
-    titleEntity->addComponent<GuiWidget>(WidgetType::LABEL, "OPTIONS", optionsRoot->getId());
+    titleEntity->addComponent<Data>(std::map<std::string, std::string>{{"text", "SETTINGS"}});
+    titleEntity->addComponent<GuiWidget>(WidgetType::LABEL, _languageHandler->getTranslation(titleEntity->getComponent<Data>()->getData("text")), optionsRoot->getId());
     titleEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
     titleEntity->addComponent<Layer>(LayerType::UI + 1);
     titleEntity->addComponent<Tag>("options_title");
@@ -686,7 +700,7 @@ void Creator::createTguiOptions()
     auto guiLayout = mainLayoutEntity->getComponent<GuiWidget>();
     guiLayout->setSize("100%", "150%");
     
-    auto createColorBlindCycle = [this, mainLayoutEntity](const std::string& label) {
+    auto createColorBlindCycle = [this, mainLayoutEntity](const std::string& labelKey) {
         auto rowEntity = _world.createEntity();
         rowEntity->addComponent<GuiWidget>(WidgetType::PANEL, "", mainLayoutEntity->getId());
         rowEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
@@ -696,7 +710,8 @@ void Creator::createTguiOptions()
         styleNeonRow(guiRow);
 
         auto btnEntity = _world.createEntity();
-        btnEntity->addComponent<GuiWidget>(WidgetType::BUTTON, label, rowEntity->getId());
+        btnEntity->addComponent<Data>(std::map<std::string, std::string>{{"text", labelKey}});
+        btnEntity->addComponent<GuiWidget>(WidgetType::BUTTON, _languageHandler->getTranslation(labelKey), rowEntity->getId());
         btnEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
         btnEntity->addComponent<Tag>("color_blind_mode_button");
         auto guiBtn = btnEntity->getComponent<GuiWidget>();
@@ -733,7 +748,7 @@ void Creator::createTguiOptions()
         });
     };
     
-    auto createOptionToggle = [this, mainLayoutEntity](const std::string& label, bool& stateValue) {
+    auto createOptionToggle = [this, mainLayoutEntity](const std::string& labelKey, bool& stateValue) {
         auto rowEntity = _world.createEntity();
         rowEntity->addComponent<GuiWidget>(WidgetType::PANEL, "", mainLayoutEntity->getId());
         rowEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
@@ -743,7 +758,8 @@ void Creator::createTguiOptions()
         styleNeonRow(guiRow);
 
         auto btnEntity = _world.createEntity();
-        btnEntity->addComponent<GuiWidget>(WidgetType::BUTTON, label, rowEntity->getId());
+        btnEntity->addComponent<Data>(std::map<std::string, std::string>{{"text", labelKey}});
+        btnEntity->addComponent<GuiWidget>(WidgetType::BUTTON, _languageHandler->getTranslation(labelKey), rowEntity->getId());
         btnEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
         btnEntity->addComponent<Tag>("option_toggle_button");
         auto guiBtn = btnEntity->getComponent<GuiWidget>();
@@ -770,7 +786,7 @@ void Creator::createTguiOptions()
         });
     };
 
-    auto createOptionSlider = [this, mainLayoutEntity](const std::string& label, float initialValue, std::function<void(float)> onValueChange, std::function<void(int, World&)> onUpdate = nullptr) {
+    auto createOptionSlider = [this, mainLayoutEntity](const std::string& labelKey, float initialValue, std::function<void(float)> onValueChange, std::function<void(int, World&)> onUpdate = nullptr) {
         auto rowEntity = _world.createEntity();
         rowEntity->addComponent<GuiWidget>(WidgetType::PANEL, "", mainLayoutEntity->getId());
         rowEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
@@ -780,7 +796,8 @@ void Creator::createTguiOptions()
         styleNeonRow(guiRow);
 
         auto labelEntity = _world.createEntity();
-        labelEntity->addComponent<GuiWidget>(WidgetType::LABEL, label, rowEntity->getId());
+        labelEntity->addComponent<Data>(std::map<std::string, std::string>{{"text", labelKey}});
+        labelEntity->addComponent<GuiWidget>(WidgetType::LABEL, _languageHandler->getTranslation(labelKey), rowEntity->getId());
         labelEntity->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
         labelEntity->addComponent<Tag>("option_slider_label");
         auto guiLabel = labelEntity->getComponent<GuiWidget>();
@@ -813,11 +830,11 @@ void Creator::createTguiOptions()
     static bool easyMode = false;
     static bool hardMode = false;
     static bool disclexiaMode = false;
-    createColorBlindCycle("COLORBLIND");
-    createOptionToggle("GOD MODE", godMode);
-    createOptionToggle("EASY MODE", easyMode);
-    createOptionToggle("HARD MODE", hardMode);
-    createOptionToggle("DISCLEXIA MODE", disclexiaMode);
+    createColorBlindCycle("SETTINGS_COLOR_BLIND_MODE");
+    createOptionToggle("SETTINGS_GOD_MODE", godMode);
+    createOptionToggle("SETTINGS_EASY_MODE", easyMode);
+    createOptionToggle("SETTINGS_HARD_MODE", hardMode);
+    createOptionToggle("SETTINGS_DISLEXIA_MODE", disclexiaMode);
 
     auto settingUpdater = _world.createEntity();
     settingUpdater->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
@@ -841,7 +858,7 @@ void Creator::createTguiOptions()
             dataCompAvail->setData("disclexia_mode", disclexiaMode ? "true" : "false");
     });
 
-    createOptionSlider("MUSIC VOLUME", 100.f, [](float value) {(void)value;}, [](int id, World& w) {
+    createOptionSlider("SETTINGS_MUSIC_VOLUME", 100.f, [](float value) {(void)value;}, [](int id, World& w) {
         auto entity = GameHelper::getEntityById(w, id);
         if (!entity)
             return;
@@ -854,7 +871,7 @@ void Creator::createTguiOptions()
             volumeSettings->getComponent<Data>()->setData("music_volume", std::to_string(static_cast<int>(value)));
         }
     });
-    createOptionSlider("SFX VOLUME", 100.f, [](float value) {(void)value;}, [](int id, World& w) {
+    createOptionSlider("SETTINGS_SFX_VOLUME", 100.f, [](float value) {(void)value;}, [](int id, World& w) {
         auto entity = GameHelper::getEntityById(w, id);
         if (!entity)
             return;
@@ -867,7 +884,7 @@ void Creator::createTguiOptions()
             volumeSettings->getComponent<Data>()->setData("sfx_volume", std::to_string(static_cast<int>(value)));
         }
     });
-    createOptionSlider("MASTER VOLUME", 100.f, [](float value) {(void)value;}, [](int id, World& w) {
+    createOptionSlider("SETTINGS_MASTER_VOLUME", 100.f, [](float value) {(void)value;}, [](int id, World& w) {
         auto entity = GameHelper::getEntityById(w, id);
         if (!entity)
             return;
@@ -882,7 +899,8 @@ void Creator::createTguiOptions()
     });
 
     auto btnReturn = _world.createEntity();
-    btnReturn->addComponent<GuiWidget>(WidgetType::BUTTON, "BACK", optionsRoot->getId());
+    btnReturn->addComponent<Data>(std::map<std::string, std::string>{{"text", "BACK"}});
+    btnReturn->addComponent<GuiWidget>(WidgetType::BUTTON, _languageHandler->getTranslation(btnReturn->getComponent<Data>()->getData("text")), optionsRoot->getId());
     btnReturn->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
     btnReturn->addComponent<Layer>(LayerType::UI + 2);
     auto guiReturn = btnReturn->getComponent<GuiWidget>();

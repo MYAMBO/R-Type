@@ -9,6 +9,8 @@
     #define CREATOR_HPP_
 
     #include "World.hpp"
+    #include "LanguageHandler.hpp"
+
     #include <cstdint>
     #include <memory>
     #include <functional>
@@ -42,6 +44,7 @@ class Creator {
         static void createSparks(World &world, float x, float y, int amount);
     private:
         World& _world;
+        std::shared_ptr<LanguageHandler> _languageHandler;
 };
 
 #endif
