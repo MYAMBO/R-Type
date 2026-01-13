@@ -47,17 +47,20 @@ class Game {
         ~Game();
 
         void run();
-        void handleSpawn(int id, int type, float x, float y);
+        void handleSpawn(uint32_t id, uint16_t type, float x, float y);
+        void handleAction(uint32_t id, uint8_t action, uint32_t data);
+
     private:
         void gameInput(std::shared_ptr<Inputs> inputSystem);
 
         void createCamera();
         void createBackground();
-        void createPlayer(uint64_t id = 0);
-        void createEnemy(float x, float y, int type);
-        void playerInput(int entityId, World &world);
+        void createPlayer(uint32_t id = 0);
+        void createEnemy(float x, float y, uint16_t type);
+        void playerInput(uint32_t entityId, World &world);
 
-        void bulletShooting();
+        void bulletShooting(); // Need to remove it, maybe
+        void healEntity(uint32_t entityId, uint32_t amount);
 
         World _world;
         sf::RenderWindow _window;

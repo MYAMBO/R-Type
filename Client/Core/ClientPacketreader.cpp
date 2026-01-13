@@ -78,15 +78,16 @@ void ClientPacketreader::interpretPacket()
             case 0x0A: {
                 uint8_t status;
                 if (payload >> status) {
-                    std::cout << "EndGame: " << (int)status << std::endl;
+                    std::cout << "EndGame: " << static_cast<int>(status) << std::endl;
                 }
                 break;
             }
             case 0x0B: {
                 uint32_t id;
                 uint8_t actionId;
-                if (payload >> id >> actionId) {
-                    std::cout << "Action " << (int)actionId << " from " << id << std::endl;
+                uint32_t data;
+                if (payload >> id >> actionId >> data) {
+                    _game->handleAction(id, actionId, data);
                 }
                 break;
             }

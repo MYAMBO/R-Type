@@ -15,13 +15,13 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include "iostream"
 
-
 #include "HP.hpp"
-#include "Tag.hpp" 
+#include "Tag.hpp"
 #include "Draw.hpp"
 #include "Layer.hpp"
 #include "Scale.hpp"
 #include "Scene.hpp"
+#include "Action.hpp"
 #include "Inputs.hpp"
 #include "Sprite.hpp"
 #include "Entity.hpp"
@@ -159,7 +159,7 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
  * 
  * This function initializes the player entity with necessary components.
  */
-void Game::createPlayer(uint64_t id)
+void Game::createPlayer(uint32_t id)
 {
     if (GameHelper::getEntityById(_world, id) != nullptr)
         return;
@@ -175,11 +175,11 @@ void Game::createPlayer(uint64_t id)
     player->addComponent<Layer>(10);
     player->addComponent<BoxCollider>(33.0f, 19.0f);
     
-    printf("Creating player with id: %ld\n", player->getId());
+    printf("Creating player with id: %u\n", player->getId());
     if (playerCount == 0) {
         // Premier joueur (joueur local)
         player->addComponent<Animator>(2, 1, 3.f, 0, 0, 33, 19, 0, 0);
-        player->addComponent<Script>([this](const int entityId, World& world)
+        player->addComponent<Script>([this](const uint32_t entityId, World& world)
         {
             this->playerInput(entityId, _world);
         });
@@ -218,7 +218,7 @@ void Game::createCamera()
  * @brief Create Enemy
  * This function initializes an enemy entity with necessary components.
 */
-void Game::createEnemy(float x, float y, int type)
+void Game::createEnemy(float x, float y, uint16_t type)
 {
     enum EnemyType {
         BASIC = 1,
@@ -241,7 +241,7 @@ void Game::createEnemy(float x, float y, int type)
     }
 }
 
-void Game::handleSpawn(int id, int type, float x, float y)
+void Game::handleSpawn(uint32_t id, uint16_t type, float x, float y)
 {
     auto entity = GameHelper::getEntityById(_world, id);
     switch (type) {
@@ -269,7 +269,7 @@ void Game::handleSpawn(int id, int type, float x, float y)
  * This function processes user input events and updates the game state accordingly.
  * @param inputSystem The input system to check for player actions.
  */
-void Game::playerInput(int entityId, World &world)
+void Game::playerInput(uint32_t entityId, World &world)
 {
     (void)entityId;
     static bool isShootKeyPressed = false;
@@ -328,5 +328,34 @@ void Game::playerInput(int entityId, World &world)
         packet.setPacketNbr(1);
         packet.setTotalPacketNbr(1);
         _network.sendPacket(packet);
+    }
+}
+
+void Game::handleAction(const uint32_t id, const uint8_t action, const uint32_t data)
+{
+    switch (action) {
+        case HEAL: {
+            healEntity(id, data);
+        }
+        case BEAM: {
+
+        }
+        case SHIELD: {
+
+        }
+    }
+}
+
+void Game::healEntity(const uint32_t entityId, const uint32_t amount)
+{
+    const auto entity = GameHelper::getEntityById(_world, entityId);
+
+    const unsigned int hpMax = entity->getComponent<HP>()->getMaxHP();
+    const unsigned int actualHp = entity->getComponent<HP>()->getHP();
+
+    if (actualHp + amount > hpMax) {
+        entity->getComponent<HP>()->setHP(hpMax);
+    } else {
+        entity->getComponent<HP>()->setHP(actualHp + amount);
     }
 }

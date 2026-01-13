@@ -17,6 +17,7 @@
 #include "ServerGame.hpp"
 #include "GameHelper.hpp"
 #include "BoxCollider.hpp"
+#include "Action.hpp"
 
 /**
  * @brief Constructs a new Game object.
@@ -97,7 +98,7 @@ void ServerGame::createPlayer(const float x, const float y)
  * @param world the world where all entity are contains.
  * @param network network interface
  */
-void ServerGame::EnemyMovement(const int entityId, World &world)
+void ServerGame::EnemyMovement(const uint32_t entityId, World &world)
 {
     const auto entity = GameHelper::getEntityById(world, entityId);
 
@@ -150,7 +151,7 @@ void ServerGame::createWave()
  * @param entityId the ID if the entity.
  * @param world the world where all entity are contains.
  */
-void ServerGame::BulletMovement(const int entityId, World &world)
+void ServerGame::BulletMovement(const uint32_t entityId, World &world)
 {
     const auto entity = GameHelper::getEntityById(world, entityId);
     const auto pos = entity->getComponent<Position>();
@@ -183,7 +184,7 @@ void ServerGame::createBullet(const float x, const float y)
     bullet->addComponent<BoxCollider>(5.f, 5.f);
     bullet->addComponent<Tag>("bullet");
     bullet->addComponent<Script>(
-        [this](const int entityId, World& world)
+        [this](const uint32_t entityId, World& world)
         {
             this->BulletMovement(entityId, world);
         }
@@ -203,12 +204,12 @@ void ServerGame::handleNewPlayer()
         std::cout << "Maximum number of players reached (" << MAX_PLAYER << ")" << std::endl;
         return;
     }
-    
+
     createPlayer(200, 200);
     _playerCount++;
-    
+
     std::cout << "Player " << _playerCount << " connected" << std::endl;
-    
+
     if (_playerCount == NB_PLAYER_TO_START && !_gameStarted) {
         _gameStarted = true;
         _waveTimer.restart();
@@ -223,13 +224,13 @@ void ServerGame::handleNewPlayer()
  * @param x The new x position of the player.
  * @param y The new y position of the player.
  */
-void ServerGame::serverUpdatePosition(const int id, const float x, const float y)
+void ServerGame::serverUpdatePosition(const uint32_t id, const float x, const float y)
 {
     const auto entity = GameHelper::getEntityById(_world, id);
 
     if (entity == nullptr) {
         std::cerr << "[Warning] Ignore position update for unknown entity ID: " << id << std::endl;
-        return; 
+        return;
     }
 
     const auto pos = entity->getComponent<Position>();
@@ -252,9 +253,35 @@ void ServerGame::serverUpdatePosition(const int id, const float x, const float y
  *
  * @param id The id of the player who is shooting.
  */
-void ServerGame::handleShoot(const int id)
+void ServerGame::handleShoot(const uint32_t id)
 {
     const auto entity = GameHelper::getEntityById(_world, id);
     const auto pos = entity->getComponent<Position>();
     createBullet(pos->getX(), pos->getY());
+}
+
+/**
+ * @brief Receive action with id and data and call corresponding function
+ *
+ * @param id
+ * @param action
+ * @param data
+ */
+void ServerGame::handleAction(const uint32_t id, const uint8_t action, const uint32_t data)
+{
+    switch (action)
+    {
+        case FIRE : {
+            handleShoot(id);
+        }
+        case HEAL : {
+
+        }
+        case SHIELD : {
+
+        }
+        case BEAM : {
+
+        }
+    }
 }

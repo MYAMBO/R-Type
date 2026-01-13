@@ -92,9 +92,10 @@ void Packetreader::interpretPacket()
             case 0x0B: {
                 uint32_t id;
                 uint8_t actionId;
-                if (payload >> id >> actionId) {
+                uint32_t data;
+                if (payload >> id >> actionId >> data) {
                     std::cout << "Action " << static_cast<int>(actionId) << " from " << id << std::endl;
-                    if (_game) _game->handleShoot(id);
+                    if (_game) _game->handleAction(id, actionId, data);
                 }
                 break;
             }
