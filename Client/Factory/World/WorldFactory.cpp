@@ -66,7 +66,8 @@ void WorldFactory::createEnemy(float x, float y, int type, int entityId)
         BASIC = 1,
         FAST,
         TANK,
-        SINUS = 4
+        SINUS, 
+        SHOOTING
     };
     switch (type) {
         case BASIC:
@@ -81,10 +82,40 @@ void WorldFactory::createEnemy(float x, float y, int type, int entityId)
         case SINUS:
             GameHelper::createSinusEnemy(_world, x, y, entityId);
             break;
+        case SHOOTING:
+            GameHelper::createShootingEnemy(_world, x, y, entityId);
+            break;
         default:
             std::cerr << "Unknown enemy type: " << type << std::endl;
             break;
     }
+}
+
+/**
+ * @brief Create Enemy Bullet
+ * This function initializes an enemy bullet entity with necessary components.
+*/
+void Creator::createEnemyBullet(size_t entityId, int x, int y)
+{
+    auto entity = GameHelper::getEntityById(_world, entityId);
+    if (entity)
+        return;
+    auto bullet = _world.createEntity(entityId);
+    bullet->addComponent<Position>(x, y);
+    bullet->addComponent<Rotation>(180.f);
+   // bullet->addComponent<Velocity>(-10.f, 0.f);
+    bullet->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet1.gif"));
+    bullet->addComponent<Animator>(2, 2, 3.0f, 200, 120, 32, 15, 0, 0);
+    bullet->addComponent<Scale>(2.f);
+    bullet->addComponent<Scene>(1);
+    bullet->addComponent<HP>(10);
+    bullet->addComponent<Damage>(10);
+    bullet->addComponent<BoxCollider>(32.0f, 15.0f);
+    bullet->addComponent<Tag>("enemy_bullet");
+
+    auto sprite = bullet->getComponent<Sprite>();
+    if (sprite && sprite->getSprite())
+        sprite->getSprite()->setColor(sf::Color(255, 150, 50));
 }
 
 /**
@@ -161,6 +192,8 @@ void WorldFactory::createPlayer(uint64_t id)
         player->addComponent<Animator>(2, 2, 3.f, 0, (playerCount * 17), 33, 19, 0, 0);
         player->addComponent<Tag>("player_mate");
     }
+    if (player->getComponent<Tag>()->getTag() == "player_mate")
+        return;
 
     playerCount++;
     auto fire = _world.createEntity();
