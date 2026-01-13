@@ -9,6 +9,8 @@
 
 #include <cmath>
 #include <thread>
+#include <fstream>
+#include <json.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/System/Vector2.hpp>
@@ -147,9 +149,11 @@ void Game::loadingRun()
     _window.setFramerateLimit(30);
     _world.setWindow(_window);
     _world.setDeltaTime(1.f);
+    _factory.createGameTools();
 
     _world.setCurrentScene(static_cast<int>(SceneType::MYAMBO));
 
+    loadfile();
     auto inputSystem = _world.getSystem<Inputs>();
 
     _factory.createMyambo();
@@ -191,7 +195,6 @@ void Game::loadingRun()
     _factory.createLoadingScreen();
 
     updateLoadingState(0.0f, "Initializing systems...");
-    _factory.createGameTools();
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     updateLoadingState(0.1f, "Loading assets...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
@@ -247,6 +250,7 @@ void Game::run()
         _world.manageSystems();
         _window.display();
     }
+    savefile();
 }
 
 /**
@@ -456,4 +460,58 @@ int Game::killEntity(int id)
         return -1;
     _world.killEntity(id);
     return 0;
+}
+
+void Game::savefile()
+{
+    nlohmann::json save;
+    std::vector<std::string> tagsToSave = {
+        "game_volume_settings",
+        "game_controls_settings",
+        "game_availability_settings"
+    };
+    for (const auto& tag : tagsToSave) {
+        auto entity = GameHelper::getEntityByTag(_world, tag);
+        if (entity) {
+            auto dataComp = entity->getComponent<Data>();
+            if (dataComp) {
+                save[tag] = dataComp->getDataSet();
+            }
+        }
+    }
+    std::ofstream file("settings.json");
+    if (file.is_open()) {
+        file << save.dump(4);
+        file.close();
+        std::cout << "[Config] Settings saved to settings.json" << std::endl;
+    } else {
+        std::cerr << "[Config] ERROR: Could not open settings.json for writing" << std::endl;
+    }
+}
+
+void Game::loadfile()
+{
+    std::ifstream file("settings.json");
+    if (!file.is_open()) {
+        std::cout << "[Config] No settings file found, using default values." << std::endl;
+        return;
+    }
+    try {
+        nlohmann::json save;
+        file >> save;
+        file.close();
+        for (auto& [tag, settings] : save.items()) {
+            auto entity = GameHelper::getEntityByTag(_world, tag);
+            if (entity) {
+                auto dataComp = entity->getComponent<Data>();
+                if (dataComp) {
+                    for (auto& [key, value] : settings.items()) {
+                        dataComp->setData(key, value.get<std::string>());
+                    }
+                }
+            }
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "[Config] ERROR while loading settings: " << e.what() << std::endl;
+    }
 }

@@ -70,10 +70,11 @@ class Game {
     private:
         void gameInput(std::shared_ptr<Inputs> inputSystem);
 
+        void savefile();
+        void loadfile();
         void playerInput(int entityId, World &world);
         void updateLoadingState(float progress, const std::string& status);
         void smootherMovement(int entityId, World &world, float targetX, float targetY); 
-        
 
         void bulletShooting();
 
