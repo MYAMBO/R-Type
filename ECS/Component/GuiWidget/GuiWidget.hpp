@@ -74,6 +74,7 @@ class GuiWidget : public Component {
         [[nodiscard]] sf::Vector2f getPosition() const;
         [[nodiscard]] WidgetType getType() const;
         [[nodiscard]] bool isVisible() const;
+        [[nodiscard]] std::string getFontPath() const;
 
         tgui::Widget::Ptr getRawWidget() const;
         uint64_t getParentId() const;
@@ -87,6 +88,7 @@ class GuiWidget : public Component {
         bool _isAttached = false;
         std::function<void()> _onClick;
         bool _isVisible = true;
+        std::string _fontPath;
     };
 
 #endif

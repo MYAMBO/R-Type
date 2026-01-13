@@ -207,6 +207,7 @@ void GuiWidget::setTextStyle(tgui::TextStyle style)
  */
 void GuiWidget::setFont(const std::string& fontPath)
 {
+    _fontPath = fontPath;
     _widget->getRenderer()->setFont(tgui::Font(fontPath));
 }
 
@@ -418,4 +419,13 @@ void GuiWidget::addSpace(float ratio)
 bool GuiWidget::isVisible() const
 {
     return _isVisible;
+}
+
+/**
+ * @brief Get the font path of the widget.
+ * @return The font path
+ */
+std::string GuiWidget::getFontPath() const
+{
+    return _fontPath;
 }

@@ -14,6 +14,7 @@
 * @param size The character size of the text
 */
 Text::Text(const std::string& content, const std::string& fontPath, unsigned int size)
+    : _fontPath(fontPath)
 {
     _font = std::make_shared<sf::Font>();
     if (!_font->openFromFile(fontPath)) {
@@ -96,5 +97,11 @@ void Text::setFont(const std::string& fontPath)
         std::cerr << "Error: Could not load font " << fontPath << std::endl;
         return;
     }
+    _fontPath = fontPath;
     _text->setFont(*_font);
+}
+
+std::string Text::getFontPath() const
+{
+    return _fontPath;
 }
