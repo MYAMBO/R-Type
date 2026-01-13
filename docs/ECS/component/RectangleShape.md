@@ -23,6 +23,7 @@ This component is a visual element and requires the rendering pipeline to be vis
 | **Get Size** | `sf::Vector2f getSize() const;` | Returns the current width and height of the rectangle. |
 | **Set Size** | `void setSize(float width, float height);` | Updates the dimensions of the rectangle. |
 | **Set Color** | `void setColor(int red, int green, int blue, int alpha);` | Updates the fill color using RGBA values (0-255). |
+| **Get Color** | `sf::Color getColor() const;` | Returns the Color of the RectangleShape. |
 
 ---
 
@@ -45,5 +46,6 @@ classDiagram
     +setColor(r: int, g: int, b: int, a: int) void
     +getShape() sf::RectangleShape&
     +getSize() sf::Vector2f
+    +getColor() sf::Color
   }
 ```

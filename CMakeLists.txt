@@ -32,6 +32,14 @@ CPMAddPackage(
     EXCLUDE_FROM_ALL YES
 )
 
+set(TGUI_BACKEND SFML_GRAPHICS CACHE STRING "" FORCE)
+
+CPMAddPackage(
+    NAME tgui
+    URL "https://github.com/texus/TGUI/archive/refs/heads/1.x.zip"
+    DOWNLOAD_ONLY NO
+)
+
 include_directories(.)
 include_directories(ECS)
 include_directories(ECS/Component)
@@ -42,8 +50,9 @@ include_directories(ECS/Component/Data)
 include_directories(ECS/Component/Scene)
 include_directories(ECS/Component/Layer)
 include_directories(ECS/Component/Scale)
-include_directories(ECS/Component/Button)
+include_directories(ECS/Component/Music)
 include_directories(ECS/Component/Group)
+include_directories(ECS/Component/Button)
 include_directories(ECS/Component/Camera)
 include_directories(ECS/Component/Sprite)
 include_directories(ECS/Component/Camera)
@@ -53,17 +62,21 @@ include_directories(ECS/Component/Animator)
 include_directories(ECS/Component/Position)
 include_directories(ECS/Component/Velocity)
 include_directories(ECS/Component/Rotation)
+include_directories(ECS/Component/GuiWidget)
 include_directories(ECS/Component/BoxCollider)
+include_directories(ECS/Component/SoundEffect)
 include_directories(ECS/Component/RectangleShape)
 include_directories(ECS/System)
 include_directories(ECS/System/Draw)
 include_directories(ECS/System/Mouse)
+include_directories(ECS/System/Audio)
 include_directories(ECS/System/Inputs)
 include_directories(ECS/System/TextSys)
 include_directories(ECS/System/Movement)
 include_directories(ECS/System/Animation)
 include_directories(ECS/System/CameraSys)
 include_directories(ECS/System/Collision)
+include_directories(ECS/System/GuiSystem)
 include_directories(ECS/System/ScriptsSys)
 include_directories(ECS/System/DeathSys)
 include_directories(ECS/Entity)
@@ -73,10 +86,12 @@ include_directories(Client/Game)
 include_directories(Client/Creator)
 include_directories(Client/GameHelper)
 include_directories(Client/ScriptsHandler)
+include_directories(Server/LevelLoader)
 include_directories(./Server)
 include_directories(./Server/Core)
 include_directories(./Packet)
 include_directories(Server/Game)
+include_directories(Common)
 
 add_executable(r-type_server
         Server/main.cpp
@@ -96,10 +111,13 @@ add_executable(r-type_server
         ECS/System/CameraSys/CameraSys.cpp
         ECS/System/Movement/Movement.cpp
         ECS/System/ScriptsSys/ScriptsSys.cpp
+        ECS/System/DeathSys/DeathSys.cpp
+        ECS/System/Collision/Collision.cpp
         ECS/World.cpp
         ECS/Component/HP/HP.cpp
         ECS/Component/Damage/Damage.cpp
         Client/GameHelper/GameHelper.cpp
+        Server/LevelLoader/LevelLoader.cpp
         ECS/Component/Tag/Tag.cpp
         ECS/Component/Scale/Scale.cpp
         ECS/Component/Layer/Layer.cpp
@@ -107,6 +125,7 @@ add_executable(r-type_server
         ECS/Component/Group/Group.cpp
         ECS/Component/Script/Script.cpp
         ECS/Component/Sprite/Sprite.cpp
+        ECS/Component/Damage/Damage.cpp
         ECS/Component/Camera/Camera.cpp
         ECS/Component/Position/Position.cpp
         ECS/Component/Velocity/Velocity.cpp
@@ -124,11 +143,13 @@ add_executable(r-type_client
         ECS/Entity/Entity.cpp
         ECS/System/Draw/Draw.cpp
         ECS/System/Mouse/Mouse.cpp
+        ECS/System/Audio/Audio.cpp
         ECS/System/Inputs/Inputs.cpp
         ECS/System/TextSys/TextSys.cpp
         ECS/System/Movement/Movement.cpp
         ECS/System/Animation/Animation.cpp
         ECS/System/CameraSys/CameraSys.cpp
+        ECS/System/GuiSystem/GuiSystem.cpp
         ECS/System/Collision/Collision.cpp
         ECS/System/ScriptsSys/ScriptsSys.cpp
         ECS/World.cpp
@@ -140,6 +161,7 @@ add_executable(r-type_client
         ECS/Component/Layer/Layer.cpp
         ECS/Component/Group/Group.cpp
         ECS/Component/Scene/Scene.cpp
+        ECS/Component/Music/Music.cpp
         ECS/Component/Button/Button.cpp
         ECS/Component/Script/Script.cpp
         ECS/Component/Sprite/Sprite.cpp
@@ -149,14 +171,16 @@ add_executable(r-type_client
         ECS/Component/Velocity/Velocity.cpp
         ECS/Component/Rotation/Rotation.cpp
         ECS/Component/Animator/Animator.cpp
+        ECS/Component/GuiWidget/GuiWidget.cpp
         ECS/Component/BoxCollider/BoxCollider.cpp
+        ECS/Component/SoundEffect/SoundEffect.cpp
         ECS/Component/RectangleShape/RectangleShape.cpp
+        ECS/System/DeathSys/DeathSys.cpp
         Packet/Packet.cpp
         Packet/MyString.cpp
         Client/Core/Network.cpp
-        Client/Core/ClientPacketreader.cpp
-        ECS/System/DeathSys/DeathSys.cpp)
+        Client/Core/ClientPacketreader.cpp)
 
-target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network)
+target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network sfml-audio tgui)
 
 target_link_libraries(r-type_server  sfml-graphics sfml-system sfml-network)

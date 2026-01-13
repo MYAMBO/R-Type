@@ -19,17 +19,26 @@ class Creator {
         Creator(World& world);
         ~Creator() = default;
 
-        void createMenu();
+        void createKayu();
+        void createMyambo();
         void createCamera();
         void createOptions();
+        void createCredits();
+        void createTguiMenu();
+        void createGameTools();
+        void createPauseMenu();
+        void createTguiOptions();
+        void createLevelSelect();
         void createLoadingScreen();
         void createPlayer(uint64_t id = 0);
-        void createEnemy(float x, float y, int type);
+        void createEnemy(float x, float y, int type, int entityId);
         void createBackground(sf::RenderWindow& window);
         void createBullet(size_t entityId, int x, int y, int type);
         void createMenuButton(const std::string& label, int sceneId, float x, float y, const std::function<void()>& onClick);
 
         std::shared_ptr<Entity> createStatusText(float y, bool initialState);
+
+        static void createSparks(World &world, float x, float y, int amount);
     private:
         World& _world;
 };
