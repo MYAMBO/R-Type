@@ -12,7 +12,7 @@
 
     #include "World.hpp"
     #include "Inputs.hpp"
-    #include "Creator.hpp"
+    #include "Factory.hpp"
     #include "IGameNetwork.hpp"
     #include "EntitiesType.hpp"
 
@@ -80,7 +80,7 @@ class Game {
         sf::RenderWindow _window;
         World _world;
         IGameNetwork& _network;
-        Creator _creator;
+        Factory _factory;
 
         bool _isShootKeyPressed = false;
         int _musicVolume = 100;

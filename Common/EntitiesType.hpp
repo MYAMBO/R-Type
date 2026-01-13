@@ -15,7 +15,9 @@ enum entitiesType
     Player = 1,
     Enemy = 2,
     EnemySinus = 3,
-    Bullet = 4
+    Bullet = 4,
+    ShootingEnemy = 5,
+    EnemyBullet = 6
 };
 
 #endif //R_TYPE_ENTITIESTYPE_HPP
