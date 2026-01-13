@@ -285,6 +285,25 @@ void Creator::createTguiMenu()
             sfx->play();
         _world.setCurrentScene(static_cast<int>(SceneType::OPTIONS));
     });
+    const auto btnLangOptions = _world.createEntity();
+    btnLangOptions->addComponent<GuiWidget>(WidgetType::BUTTON, "🌐", menuRoot->getId());
+    btnLangOptions->addComponent<Scene>(static_cast<int>(SceneType::MENU));
+    btnLangOptions->addComponent<Tag>("menu_button_languages");
+    btnLangOptions->addComponent<SoundEffect>("../assets/sounds/clics.mp3", 100.f);
+    btnLangOptions->getComponent<SoundEffect>()->setGlobal(true);
+    const auto guiLangOpt = btnLangOptions->getComponent<GuiWidget>();
+    guiLangOpt->setSize("100", "100");
+    guiLangOpt->setPosition("2%", "95%");
+    guiLangOpt->setOrigin(0.f, 1.f);
+    styleNeonButton(guiLangOpt);
+    guiLangOpt->setFont("../assets/font/NotoEmoji.ttf");
+    guiLangOpt->setTextSize(50);
+    guiLangOpt->setCallback([this]() {
+        if (const auto sfx = GameHelper::getEntityByTag(_world, "menu_button_languages")->getComponent<SoundEffect>())
+            sfx->play();
+        _world.setCurrentScene(static_cast<int>(SceneType::LANGUAGES));
+    });
+    createLangSelector();
     auto spaceEntity2 = _world.createEntity();
     spaceEntity2->addComponent<GuiWidget>(WidgetType::LABEL, "", layoutEntity->getId());
     spaceEntity2->addComponent<Scene>(static_cast<int>(SceneType::MENU));
@@ -310,6 +329,106 @@ void Creator::createTguiMenu()
     });
 
     createTguiOptions();
+}
+
+/**
+ * @brief Create a beautiful and clean language selection menu
+ */
+void Creator::createLangSelector() const
+{
+    const auto langRoot = _world.createEntity();
+    langRoot->addComponent<Scene>(static_cast<int>(SceneType::LANGUAGES));
+    langRoot->addComponent<Layer>(LayerType::UI);
+    langRoot->addComponent<Position>(0.f, 0.f);
+    langRoot->addComponent<GuiWidget>(WidgetType::PANEL);
+    langRoot->addComponent<Tag>("lang_root");
+    const auto rootGui = langRoot->getComponent<GuiWidget>();
+    rootGui->setSize("100%", "100%");
+    rootGui->getRawWidget()->getRenderer()->setProperty("BackgroundColor", tgui::Color(10, 10, 30, 240));
+    const auto titleEntity = _world.createEntity();
+    titleEntity->addComponent<GuiWidget>(WidgetType::LABEL, "LANGUAGES", langRoot->getId());
+    titleEntity->addComponent<Scene>(static_cast<int>(SceneType::LANGUAGES));
+    titleEntity->addComponent<Layer>(LayerType::UI + 1);
+    titleEntity->addComponent<Tag>("lang_title");
+    const auto guiTitle = titleEntity->getComponent<GuiWidget>();
+    guiTitle->setFont("../assets/font/regular.ttf");
+    guiTitle->setTextSize(80);
+    guiTitle->setTextColor(sf::Color::Cyan);
+    guiTitle->setOrigin(0.5f, 0.5f);
+    guiTitle->setPosition("50%", "15%");
+    const auto scrollEntity = _world.createEntity();
+    scrollEntity->addComponent<GuiWidget>(WidgetType::SCROLLABLE_PANEL, "", langRoot->getId());
+    scrollEntity->addComponent<Scene>(static_cast<int>(SceneType::LANGUAGES));
+    scrollEntity->addComponent<Layer>(LayerType::UI + 1);
+    scrollEntity->addComponent<Tag>("lang_scroll");
+    const auto guiScroll = scrollEntity->getComponent<GuiWidget>();
+    guiScroll->setSize("70%", "60%");
+    guiScroll->setPosition("50%", "50%");
+    guiScroll->setOrigin(0.5f, 0.5f);
+    const auto scrollRender = guiScroll->getRawWidget()->getRenderer();
+    scrollRender->setProperty("ScrollbarWidth", 10);
+    scrollRender->setProperty("BackgroundColor", tgui::Color(20, 20, 40, 200));
+    scrollRender->setProperty("BorderColor", tgui::Color::Cyan);
+    scrollRender->setProperty("Borders", tgui::Borders(2));
+    scrollRender->setProperty("RoundedBorderRadius", 10);
+    const auto layoutEntity = _world.createEntity();
+    layoutEntity->addComponent<GuiWidget>(WidgetType::VERTICAL_LAYOUT, "", scrollEntity->getId());
+    layoutEntity->addComponent<Scene>(static_cast<int>(SceneType::LANGUAGES));
+    layoutEntity->addComponent<Tag>("lang_layout");
+    const auto guiLayout = layoutEntity->getComponent<GuiWidget>();
+    guiLayout->setSize("100%", "150%");
+    std::vector<std::pair<std::string, std::string>> languages = {
+        {"ENGLISH", "en"},
+        {"FRANCAIS", "fr"},
+        {"ESPANOL", "es"},
+        {"DEUTSCH", "de"}
+    };
+    for (const auto&[language, id] : languages) {
+        const auto rowEntity = _world.createEntity();
+        rowEntity->addComponent<GuiWidget>(WidgetType::PANEL, "", layoutEntity->getId());
+        rowEntity->addComponent<Scene>(static_cast<int>(SceneType::LANGUAGES));
+        rowEntity->addComponent<Tag>("lang_row_" + id);
+        const auto guiRow = rowEntity->getComponent<GuiWidget>();
+        guiRow->setSize("95%", "60");
+        styleNeonRow(guiRow);
+        const auto btnEntity = _world.createEntity();
+        btnEntity->addComponent<GuiWidget>(WidgetType::BUTTON, language, rowEntity->getId());
+        btnEntity->addComponent<Scene>(static_cast<int>(SceneType::LANGUAGES));
+        btnEntity->addComponent<Tag>("lang_btn_" + id);
+        btnEntity->addComponent<SoundEffect>("../assets/sounds/clics.mp3", 100.f);
+        btnEntity->getComponent<SoundEffect>()->setGlobal(true);
+        const auto guiBtn = btnEntity->getComponent<GuiWidget>();
+        guiBtn->setFont("../assets/font/regular.ttf");
+        guiBtn->setSize("90%", "70%");
+        guiBtn->setOrigin(0.5f, 0.5f);
+        guiBtn->setPosition("50%", "50%");
+        styleNeonButton(guiBtn);
+        guiBtn->setCallback([this, code = id]() {
+            if (const auto sfx = GameHelper::getEntityByTag(_world, "lang_btn_" + code)->getComponent<SoundEffect>())
+                sfx->play();
+            if (const auto settings = GameHelper::getEntityByTag(_world, "game_availability_settings"))
+                if (const auto data = settings->getComponent<Data>())
+                    data->setData("language", code);
+        });
+    }
+    const auto backBtn = _world.createEntity();
+    backBtn->addComponent<GuiWidget>(WidgetType::BUTTON, "BACK", langRoot->getId());
+    backBtn->addComponent<Scene>(static_cast<int>(SceneType::LANGUAGES));
+    backBtn->addComponent<Layer>(LayerType::UI + 2);
+    backBtn->addComponent<Tag>("lang_back_btn");
+    backBtn->addComponent<SoundEffect>("../assets/sounds/clics.mp3", 100.f);
+    backBtn->getComponent<SoundEffect>()->setGlobal(true);
+    const auto guiBack = backBtn->getComponent<GuiWidget>();
+    guiBack->setSize(200, 60);
+    guiBack->setOrigin(0.5f, 0.5f);
+    guiBack->setPosition("50%", "85%");
+    guiBack->setFont("../assets/font/regular.ttf");
+    styleNeonButton(guiBack);
+    guiBack->setCallback([this]() {
+        if (const auto sfx = GameHelper::getEntityByTag(_world, "lang_back_btn")->getComponent<SoundEffect>())
+            sfx->play();
+        _world.setCurrentScene(static_cast<int>(SceneType::MENU));
+    });
 }
 
 void Creator::createLevelSelect()

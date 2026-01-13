@@ -29,6 +29,7 @@ class Creator {
         void createPauseMenu();
         void createTguiOptions();
         void createLevelSelect();
+        void createLangSelector() const;
         void createLoadingScreen();
         void createPlayer(uint64_t id = 0);
         void createEnemy(float x, float y, int type, int entityId);
