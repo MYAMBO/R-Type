@@ -30,6 +30,7 @@ enum class SceneType {
     GAMEPLAY = 1,
     MENU = 2,
     OPTIONS = 3,
+    LANGUAGES = 4,
     MYAMBO = 10,
     KAYU = 11,
     CREDITS = 42,

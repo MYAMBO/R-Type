@@ -8,25 +8,27 @@
 #ifndef UIFACTORY_HPP_
     #define UIFACTORY_HPP_
 
+#include "LanguageHandler.hpp"
+
 class Game;
 
 class UIFactory {
     public:
-        UIFactory(World& world);
+        explicit UIFactory(World& world);
         ~UIFactory() = default;
 
-        void createMenu();
-        void createOptionsMenu();
-        void createLoadingScreen();
+        void createMenu() const;
+        void createOptionsMenu() const;
+        void createLangSelector() const;
+        void createLoadingScreen() const;
 
     private:
         World& _world;
-        void _addOptionToggle(const std::string& label, bool& stateValue, uint64_t parentId);
-        void _addOptionSlider(const std::string& label, float initialValue, uint64_t parentId, std::function<void(float)> onValueChange,  std::function<void(int, World&)> onUpdate = nullptr);
-        void _addColorBlindCycle(const std::string& label, uint64_t parentId);
-        void _addKeyBindingRow(const std::string& actionName, uint64_t parentId);
-        
-        void _addLayoutSpacer(uint64_t parentId, float height);
+        std::shared_ptr<LanguageHandler> _languageHandler;
+        void _addOptionToggle(const std::string& label, bool& stateValue, uint64_t parentId) const;
+        void _addOptionSlider(const std::string& label, float initialValue, uint64_t parentId, std::function<void(float)> onValueChange,  std::function<void(int, World&)> onUpdate = nullptr) const;
+        void _addColorBlindCycle(const std::string& label, uint64_t parentId) const;
+        void _addKeyBindingRow(const std::string& actionName, uint64_t parentId) const;
 };
 
 #endif /* !UIFACTORY_HPP_ */

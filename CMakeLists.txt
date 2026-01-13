@@ -90,6 +90,7 @@ include_directories(Client/Factory/World)
 include_directories(Client/Factory/Tools)
 include_directories(Client/Factory/Effect)
 include_directories(Client/ScriptsHandler)
+include_directories(Client/LanguageHandler)
 include_directories(Server/LevelLoader)
 include_directories(./Server)
 include_directories(./Server/Core)
@@ -187,7 +188,8 @@ add_executable(r-type_client
         Packet/Packet.cpp
         Packet/MyString.cpp
         Client/Core/Network.cpp
-        Client/Core/ClientPacketreader.cpp)
+        Client/Core/ClientPacketreader.cpp
+        Client/LanguageHandler/LanguageHandler.cpp)
 
 target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network sfml-audio tgui)
 
