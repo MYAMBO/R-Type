@@ -28,7 +28,6 @@ void WorldFactory::createBullet(size_t entityId, int x, int y, int type)
     auto bullet = _world.createEntity(entityId);
     if (isPlayer) {
         bullet->addComponent<Position>(x, y);
-        bullet->addComponent<Velocity>(10.f, 0.f);
         bullet->addComponent<Animator>(2, 2, 3.0f, 200, 120, 32, 15, 0, 0);
         bullet->addComponent<HP>(10);
         bullet->addComponent<Damage>(10);
