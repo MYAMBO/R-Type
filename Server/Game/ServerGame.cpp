@@ -177,7 +177,7 @@ void ServerGame::ShootingAction(int entityId, World& world)
     if (timers[entityId] >= 60.0f)
     {
         timers[entityId] = 0.0f;
-        createEnemyBullet(pos->getX(), pos->getY());
+        createEnemyBullet(pos->getX() + 30, pos->getY() + 30);
     }
 }
 
@@ -232,7 +232,7 @@ void ServerGame::createShootingEnemy(const float x, const float y)
     enemy->addComponent<HP>(150);
     enemy->addComponent<Damage>(10);
     enemy->addComponent<Position>(x, y);
-    enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+    enemy->addComponent<BoxCollider>(66.0f, 52.0f);
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<Script>(
         [this](const int entityId, World& world)
@@ -311,7 +311,7 @@ void ServerGame::createBullet(const float x, const float y)
     const auto bullet = _world.createEntity();
 
     bullet->addComponent<Position>(x + 60.f, y + 15.f);
-    bullet->addComponent<BoxCollider>(32.0f, 15.0f);
+    bullet->addComponent<BoxCollider>(64.0f, 30.0f);
     bullet->addComponent<Velocity>(10.f, 0.f);
     bullet->addComponent<Tag>("player_bullet");
     bullet->addComponent<HP>(10);
@@ -333,7 +333,7 @@ void ServerGame::createEnemyBullet(const float x, const float y)
     const auto bullet = _world.createEntity();
 
     bullet->addComponent<Position>(x - 60.f, y + 15.f);
-    bullet->addComponent<BoxCollider>(32.0f, 15.0f);
+    bullet->addComponent<BoxCollider>(64.0f, 30.0f);
     bullet->addComponent<Velocity>(-10.f, 0.f);
     bullet->addComponent<Tag>("enemy_bullet");
     bullet->addComponent<Damage>(10);
@@ -451,4 +451,23 @@ void ServerGame::checkDeaths()
             _world.killEntity(entity->getId());
         }
     }
+}
+
+void ServerGame::createPortalBoss(const float x, const float y)
+{
+    const auto enemy = _world.createEntity();
+    enemy->addComponent<HP>(5000);
+    enemy->addComponent<Damage>(10);
+    enemy->addComponent<Position>(x, y);
+    enemy->addComponent<BoxCollider>(50.0f, 5000.0f);
+    enemy->addComponent<Tag>("enemy");
+    enemy->addComponent<Script>(
+        [this](const int entityId, World& world)
+        {
+           // this->EnemySinusMovement(entityId, world);
+        }
+    );
+    Packet packet;
+    packet.positionSpawn(enemy->getId(), PortalBoss, x, y);
+    _network.sendPacket(packet);
 }

@@ -55,6 +55,9 @@ void LevelLoader::loadFromFile(const std::string &path, ServerGame *server)
                 else if (type == "shooting_enemy") {
                     server->createShootingEnemy(x, y);
                 }
+                else if (type == "portal_boss") {
+                    server->createPortalBoss(x, y);
+                }
             }
         }
     } catch (const json::parse_error& e) {

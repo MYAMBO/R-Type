@@ -38,6 +38,7 @@ class ServerGame {
         void createSinusEnemy(float x, float y);
         void createShootingEnemy(float x, float y);
         void createSinusShootingEnemy(const float x, const float y);
+        void createPortalBoss(const float x, const float y);
 
     private:
         void createPlayer(float x, float y);
