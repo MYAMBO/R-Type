@@ -105,6 +105,7 @@ void UIFactory::_addOptionToggle(const std::string& label, bool& stateValue, uin
     guiBtn->setSize("50%", "70%");
     guiBtn->setOrigin(0.5f, 0.5f);
     guiBtn->setPosition("30%", "50%");
+    guiBtn->setFont("../assets/font/regular.ttf");
     styleNeonButton(guiBtn);
 
     auto status = _world.createEntity();
@@ -115,6 +116,7 @@ void UIFactory::_addOptionToggle(const std::string& label, bool& stateValue, uin
     guiStatus->setTextSize(30);
     guiStatus->setOrigin(0.5f, 0.5f);
     guiStatus->setPosition("80%", "50%");
+    guiStatus->setFont("../assets/font/regular.ttf");
     guiStatus->setTextColor(stateValue ? sf::Color::Green : sf::Color::Red);
 
     guiBtn->setCallback([&stateValue, guiStatus]() {
@@ -143,16 +145,29 @@ void UIFactory::_addColorBlindCycle(const std::string& label, uint64_t parentId)
     guiBtn->setSize("50%", "70%");
     guiBtn->setOrigin(0.5f, 0.5f);
     guiBtn->setPosition("30%", "50%");
+    guiBtn->setFont("../assets/font/regular.ttf");
     styleNeonButton(guiBtn);
 
+    std::string currentMode = "normal";
+    auto settings = GameHelper::getEntityByTag(_world, "game_availability_settings");
+    if (settings) {
+        auto data = settings->getComponent<Data>();
+        if (data && data->hasData("color_blind_mode")) {
+            currentMode = data->getData("color_blind_mode");
+        }
+    }
+    std::string displayInit = currentMode;
+    std::transform(displayInit.begin(), displayInit.end(), displayInit.begin(), ::toupper);
+
     auto status = _world.createEntity();
-    status->addComponent<GuiWidget>(WidgetType::LABEL, "NORMAL", row->getId());
+    status->addComponent<GuiWidget>(WidgetType::LABEL, displayInit, row->getId());
     status->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
     status->addComponent<Tag>("option_status");
     auto guiStatus = status->getComponent<GuiWidget>();
     guiStatus->setTextSize(20);
     guiStatus->setOrigin(0.5f, 0.5f);
     guiStatus->setPosition("80%", "50%");
+    guiStatus->setFont("../assets/font/regular.ttf");
     guiStatus->setTextColor(sf::Color::Cyan);
 
     guiBtn->setCallback([this, guiStatus]() {
@@ -160,11 +175,15 @@ void UIFactory::_addColorBlindCycle(const std::string& label, uint64_t parentId)
         auto settings = GameHelper::getEntityByTag(_world, "game_availability_settings");
         if (!settings) return;
         auto data = settings->getComponent<Data>();
+
         std::string current = data->getData("color_blind_mode");
         auto it = std::find(modes.begin(), modes.end(), current);
         int nextIdx = (it != modes.end()) ? (std::distance(modes.begin(), it) + 1) % modes.size() : 0;
-        data->setData("color_blind_mode", modes[nextIdx]);
-        std::string display = modes[nextIdx];
+
+        std::string nextMode = modes[nextIdx];
+        data->setData("color_blind_mode", nextMode);
+
+        std::string display = nextMode;
         std::transform(display.begin(), display.end(), display.begin(), ::toupper);
         guiStatus->setText(display);
     });
@@ -189,6 +208,7 @@ void UIFactory::_addOptionSlider(const std::string& label, float initialValue, u
     gl->setTextSize(25);
     gl->setPosition("10%", "50%");
     gl->setOrigin(0.f, 0.5f);
+    gl->setFont("../assets/font/regular.ttf");
     gl->setTextColor(sf::Color::White);
 
     auto slider = _world.createEntity();
@@ -219,13 +239,15 @@ void UIFactory::_addKeyBindingRow(const std::string& actionName, uint64_t parent
     styleNeonRow(guiRow);
 
     auto lbl = _world.createEntity();
-    lbl->addComponent<GuiWidget>(WidgetType::LABEL, actionName, row->getId());
+    lbl->addComponent<Data>(std::map<std::string, std::string>{{"text", "SETTINGS_" + actionName}});
+    lbl->addComponent<GuiWidget>(WidgetType::LABEL, _languageHandler->getTranslation(lbl->getComponent<Data>()->getData("text")), row->getId());
     lbl->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
     lbl->addComponent<Tag>("keybinding_label");
     auto gl = lbl->getComponent<GuiWidget>();
     gl->setTextSize(25);
     gl->setPosition("10%", "50%");
     gl->setOrigin(0.f, 0.5f);
+    gl->setFont("../assets/font/regular.ttf");
     gl->setTextColor(sf::Color::White);
 
     auto btn = _world.createEntity();
@@ -237,6 +259,7 @@ void UIFactory::_addKeyBindingRow(const std::string& actionName, uint64_t parent
     guiBtn->setSize("40%", "70%");
     guiBtn->setPosition("70%", "50%");
     guiBtn->setOrigin(0.5f, 0.5f);
+    guiBtn->setFont("../assets/font/regular.ttf");
 
     auto settings = GameHelper::getEntityByTag(_world, "game_controls_settings");
     if (settings) guiBtn->setText(settings->getComponent<Data>()->getData(actionName));
@@ -331,10 +354,12 @@ void UIFactory::createOptionsMenu() const
     auto addTabButton = [this, tabHeaderEntity, layoutGeneralId, layoutAudioId, layoutGameplayId]
                         (const std::string& label, uint64_t targetId) {
         auto btn = _world.createEntity();
-        btn->addComponent<GuiWidget>(WidgetType::BUTTON, label, tabHeaderEntity->getId());
+        btn->addComponent<Data>(std::map<std::string, std::string>{{"text", label}});
+        btn->addComponent<GuiWidget>(WidgetType::BUTTON, _languageHandler->getTranslation(btn->getComponent<Data>()->getData("text")), tabHeaderEntity->getId());
         btn->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
         btn->addComponent<Tag>("options_tab_button_" + label);
         auto gui = btn->getComponent<GuiWidget>();
+        gui->setFont("../assets/font/regular.ttf");
         styleNeonButton(gui);
         gui->setCallback([this, targetId, layoutGeneralId, layoutAudioId, layoutGameplayId]() {
             GameHelper::getEntityById(_world, layoutGeneralId)->getComponent<GuiWidget>()->setVisible(false);
@@ -344,32 +369,54 @@ void UIFactory::createOptionsMenu() const
         });
     };
 
-    addTabButton("GENERAL", layoutGeneralId);
-    addTabButton("AUDIO", layoutAudioId);
-    addTabButton("CONTROLS", layoutGameplayId);
+    addTabButton("SETTINGS_GENERAL", layoutGeneralId);
+    addTabButton("SETTINGS_AUDIO", layoutAudioId);
+    addTabButton("SETTINGS_CONTROLS", layoutGameplayId);
 
     static bool godMode = false;
     static bool easyMode = false;
     static bool hardMode = false;
+
+    auto entity = GameHelper::getEntityByTag(_world, "game_availability_settings");
     static bool dyslexiaMode = false;
+    if (entity) {
+        auto data = entity->getComponent<Data>();
+        std::string dyslexiaStr = data->getData("disclexia_mode");
+        if (dyslexiaStr == "true") {
+            data->setData("lastfont_used", "regular");
+            dyslexiaMode = true;
+        }
+    }
 
     _addColorBlindCycle("SETTINGS_COLOR_BLIND_MODE", layoutGeneralId);
+
     _addOptionToggle("SETTINGS_GOD_MODE", godMode, layoutGeneralId);
     _addOptionToggle("SETTINGS_EASY_MODE", easyMode, layoutGeneralId);
     _addOptionToggle("SETTINGS_HARD_MODE", hardMode, layoutGeneralId);
     _addOptionToggle("SETTINGS_DISLEXIA_MODE", dyslexiaMode, layoutGeneralId);
 
-    _addOptionSlider("SETTINGS_MUSIC_VOLUME", 100.f, layoutAudioId, [](float){}, [](int id, World& w) {
+    auto entityVolume = GameHelper::getEntityByTag(_world, "game_volume_settings");
+    float musicVolume = 100.f;
+    float sfxVolume = 100.f;
+    float masterVolume = 100.f;
+    if (entityVolume) {
+        auto data = entityVolume->getComponent<Data>();
+        musicVolume = std::stof(data->getData("music_volume"));
+        sfxVolume = std::stof(data->getData("sfx_volume"));
+        masterVolume = std::stof(data->getData("master_volume"));
+    }
+
+    _addOptionSlider("SETTINGS_MUSIC_VOLUME", musicVolume, layoutAudioId, [](float){}, [](int id, World& w) {
         auto raw = std::dynamic_pointer_cast<tgui::Slider>(GameHelper::getEntityById(w, id)->getComponent<GuiWidget>()->getRawWidget());
         auto settings = GameHelper::getEntityByTag(w, "game_volume_settings");
         if (settings) settings->getComponent<Data>()->setData("music_volume", std::to_string((int)raw->getValue()));
     });
-    _addOptionSlider("SETTINGS_SFX_VOLUME", 100.f, layoutAudioId, [](float){}, [](int id, World& w) {
+    _addOptionSlider("SETTINGS_SFX_VOLUME", sfxVolume, layoutAudioId, [](float){}, [](int id, World& w) {
         auto raw = std::dynamic_pointer_cast<tgui::Slider>(GameHelper::getEntityById(w, id)->getComponent<GuiWidget>()->getRawWidget());
         auto settings = GameHelper::getEntityByTag(w, "game_volume_settings");
         if (settings) settings->getComponent<Data>()->setData("sfx_volume", std::to_string((int)raw->getValue()));
     });
-    _addOptionSlider("SETTINGS_MASTER_VOLUME", 100.f, layoutAudioId, [](float){}, [](int id, World& w) {
+    _addOptionSlider("SETTINGS_MASTER_VOLUME", masterVolume, layoutAudioId, [](float){}, [](int id, World& w) {
         auto raw = std::dynamic_pointer_cast<tgui::Slider>(GameHelper::getEntityById(w, id)->getComponent<GuiWidget>()->getRawWidget());
         auto settings = GameHelper::getEntityByTag(w, "game_volume_settings");
         if (settings) settings->getComponent<Data>()->setData("master_volume", std::to_string((int)raw->getValue()));
@@ -381,6 +428,28 @@ void UIFactory::createOptionsMenu() const
     _addKeyBindingRow("RIGHT", layoutGameplayId);
     _addKeyBindingRow("SHOOT", layoutGameplayId);
 
+    auto settingUpdater = _world.createEntity();
+    settingUpdater->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
+    settingUpdater->addComponent<Tag>("options_setting_updater");
+    settingUpdater->addComponent<Script>([](int id, World& w) {
+        auto entity = GameHelper::getEntityById(w, id);
+        if (!entity)
+            return;
+        auto dataEntity = GameHelper::getEntityByTag(w, "game_difficulty_settings");
+        auto dataAvailability = GameHelper::getEntityByTag(w, "game_availability_settings");
+        if (!dataEntity || !dataAvailability)
+            return;
+        auto dataComp = dataEntity->getComponent<Data>();
+        if (dataComp) {
+            dataComp->setData("is_god_mode", godMode ? "true" : "false");
+            dataComp->setData("is_easy_mode", easyMode ? "true" : "false");
+            dataComp->setData("is_hard_mode", hardMode ? "true" : "false");
+        }
+        auto dataCompAvail = dataAvailability->getComponent<Data>();
+        if (dataCompAvail)
+            dataCompAvail->setData("disclexia_mode", dyslexiaMode ? "true" : "false");
+    });
+
     auto btnReturn = _world.createEntity();
     btnReturn->addComponent<Data>(std::map<std::string, std::string>{{"text", "BACK"}});
     btnReturn->addComponent<GuiWidget>(WidgetType::BUTTON, _languageHandler->getTranslation(btnReturn->getComponent<Data>()->getData("text")), optionsRoot->getId());
@@ -388,11 +457,15 @@ void UIFactory::createOptionsMenu() const
     btnReturn->addComponent<Tag>("options_button_return");
     btnReturn->addComponent<Layer>(LayerType::UI + 2);
     auto guiReturn = btnReturn->getComponent<GuiWidget>();
+    guiReturn->setFont("../assets/font/regular.ttf");
     styleNeonButton(guiReturn);
     guiReturn->setSize(200, 60);
     guiReturn->setOrigin(0.5f, 0.5f);
     guiReturn->setPosition("50%", "90%");
     guiReturn->setCallback([this]() { _world.setCurrentScene(static_cast<int>(SceneType::MENU)); });
+
+    if (dyslexiaMode == true)
+        availabilitySettingsScript(entity->getId(), _world);
 }
 
 /**
@@ -410,7 +483,7 @@ void UIFactory::createMenu() const
         auto scene = world.getCurrentScene();
         if (!entity)
             return;
-        if (scene == 2 || scene == 3) {
+        if (scene == 2 || scene == 3 || scene == 4) {
             auto musicComp = entity->getComponent<Music>();
             if (musicComp && musicComp->getState() != MusicState::PLAYING) {
                 musicComp->play();
@@ -501,6 +574,7 @@ void UIFactory::createMenu() const
             sfx->play();
         _world.setCurrentScene(static_cast<int>(SceneType::OPTIONS));
     });
+
     const auto btnLangOptions = _world.createEntity();
     btnLangOptions->addComponent<GuiWidget>(WidgetType::BUTTON, "🌐", menuRoot->getId());
     btnLangOptions->addComponent<Scene>(static_cast<int>(SceneType::MENU));
@@ -520,6 +594,25 @@ void UIFactory::createMenu() const
         _world.setCurrentScene(static_cast<int>(SceneType::LANGUAGES));
     });
     createLangSelector();
+    const auto btnCredit = _world.createEntity();
+    btnCredit->addComponent<Data>(std::map<std::string, std::string>{{"text", "CREDITS"}});
+    btnCredit->addComponent<GuiWidget>(WidgetType::BUTTON, _languageHandler->getTranslation(btnCredit->getComponent<Data>()->getData("text")), menuRoot->getId());
+    btnCredit->addComponent<Scene>(static_cast<int>(SceneType::MENU));
+    btnCredit->addComponent<Tag>("menu_credits");
+    btnCredit->addComponent<SoundEffect>("../assets/sounds/clics.mp3", 100.f);
+    btnCredit->getComponent<SoundEffect>()->setGlobal(true);
+    const auto guiCreditOpt = btnCredit->getComponent<GuiWidget>();
+    guiCreditOpt->setSize("300", "100");
+    guiCreditOpt->setPosition("87%", "95%");
+    guiCreditOpt->setOrigin(0.f, 1.f);
+    styleNeonButton(guiCreditOpt);
+    guiCreditOpt->setFont("../assets/font/regular.ttf");
+    guiCreditOpt->setTextSize(50);
+    guiCreditOpt->setCallback([this]() {
+        if (const auto sfx = GameHelper::getEntityByTag(_world, "menu_credits")->getComponent<SoundEffect>())
+            sfx->play();
+        _world.setCurrentScene(static_cast<int>(SceneType::CREDITS));
+    });
     auto spaceEntity2 = _world.createEntity();
     spaceEntity2->addComponent<GuiWidget>(WidgetType::LABEL, "", layoutEntity->getId());
     spaceEntity2->addComponent<Scene>(static_cast<int>(SceneType::MENU));
@@ -562,6 +655,7 @@ void UIFactory::createLangSelector() const
     const auto rootGui = langRoot->getComponent<GuiWidget>();
     rootGui->setSize("100%", "100%");
     rootGui->getRawWidget()->getRenderer()->setProperty("BackgroundColor", tgui::Color(10, 10, 30, 240));
+
     const auto titleEntity = _world.createEntity();
     titleEntity->addComponent<Data>(std::map<std::string, std::string>{{"text", "SETTINGS_LANGUAGE"}});
     titleEntity->addComponent<GuiWidget>(WidgetType::LABEL, _languageHandler->getTranslation(titleEntity->getComponent<Data>()->getData("text")), langRoot->getId());
@@ -574,6 +668,7 @@ void UIFactory::createLangSelector() const
     guiTitle->setTextColor(sf::Color::Cyan);
     guiTitle->setOrigin(0.5f, 0.5f);
     guiTitle->setPosition("50%", "15%");
+
     const auto scrollEntity = _world.createEntity();
     scrollEntity->addComponent<GuiWidget>(WidgetType::SCROLLABLE_PANEL, "", langRoot->getId());
     scrollEntity->addComponent<Scene>(static_cast<int>(SceneType::LANGUAGES));
@@ -589,6 +684,7 @@ void UIFactory::createLangSelector() const
     scrollRender->setProperty("BorderColor", tgui::Color::Cyan);
     scrollRender->setProperty("Borders", tgui::Borders(2));
     scrollRender->setProperty("RoundedBorderRadius", 10);
+
     const auto layoutEntity = _world.createEntity();
     layoutEntity->addComponent<GuiWidget>(WidgetType::VERTICAL_LAYOUT, "", scrollEntity->getId());
     layoutEntity->addComponent<Scene>(static_cast<int>(SceneType::LANGUAGES));
@@ -599,7 +695,11 @@ void UIFactory::createLangSelector() const
         {"ENGLISH", "en"},
         {"FRANCAIS", "fr"},
         {"ESPANOL", "es"},
-        {"DEUTSCH", "de"}
+        {"DEUTSCH", "de"},
+        {"LINGÁLA", "li"},
+        {"РУССКИЙ", "ru"},
+        {"PORTUGUÊS", "pt"},
+        {"ITALIANO", "it"}
     };
     for (const auto&[language, id] : languages) {
         const auto rowEntity = _world.createEntity();
@@ -609,6 +709,7 @@ void UIFactory::createLangSelector() const
         const auto guiRow = rowEntity->getComponent<GuiWidget>();
         guiRow->setSize("95%", "60");
         styleNeonRow(guiRow);
+
         const auto btnEntity = _world.createEntity();
         btnEntity->addComponent<GuiWidget>(WidgetType::BUTTON, language, rowEntity->getId());
         btnEntity->addComponent<Scene>(static_cast<int>(SceneType::LANGUAGES));
@@ -637,6 +738,7 @@ void UIFactory::createLangSelector() const
             _world.setCurrentScene(static_cast<int>(SceneType::MENU));
         });
     }
+
     const auto backBtn = _world.createEntity();
     backBtn->addComponent<Data>(std::map<std::string, std::string>{{"text", "BACK"}});
     backBtn->addComponent<GuiWidget>(WidgetType::BUTTON, _languageHandler->getTranslation(backBtn->getComponent<Data>()->getData("text")), langRoot->getId());

@@ -39,7 +39,8 @@ void ToolsFactory::createGameTools()
     availability->addComponent<Data>(std::map<std::string, std::string>{
         {"is_color_blind", "normal"},
         {"disclexia_mode", "false"},
-        {"lastfont_used", "regular"}
+        {"lastfont_used", "regular"},
+        {"language", "en"}
     });
     availability->addComponent<Tag>("game_availability_settings");
     availability->addComponent<Script>(availabilitySettingsScript);

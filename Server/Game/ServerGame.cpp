@@ -24,6 +24,7 @@
 #include "DeathSys.hpp"
 #include "Damage.hpp"
 #include "Collision.hpp"
+#include "Action.hpp"
 
 /**
  * @brief Constructs a new Game object.
@@ -85,7 +86,7 @@ void ServerGame::createPlayer(const float x, const float y)
     player->addComponent<Tag>("player");
     player->addComponent<Damage>(10);
     Packet packet;
-    packet.positionSpawn(player->getId(), Player, x, y);
+    packet.Spawn(player->getId(), Player, x, y);
     // send all the entity to the client
     _network.sendPacket(packet);
     packet = Packet();
@@ -101,7 +102,7 @@ void ServerGame::createPlayer(const float x, const float y)
             type = Enemy;
         else if (tag->getTag() == "bullet")
             type = Bullet;
-        packet.positionSpawn(entity->getId(), type, pos->getX(), pos->getY());
+        packet.Spawn(entity->getId(), type, pos->getX(), pos->getY());
     }
     _network.sendPacket(packet);
 }
@@ -113,7 +114,7 @@ void ServerGame::createPlayer(const float x, const float y)
  * @param world the world where all entity are contains.
  * @param network network interface
  */
-void ServerGame::EnemyMovement(const int entityId, World &world)
+void ServerGame::EnemyMovement(const uint32_t entityId, World &world)
 {
     const auto entity = GameHelper::getEntityById(world, entityId);
 
@@ -126,11 +127,11 @@ void ServerGame::EnemyMovement(const int entityId, World &world)
     pos->setX(pos->getX() - 1 * world.getDeltaTime());
 
     Packet packet;
-    packet.playerPosition(entityId, pos->getX(), pos->getY());
+    packet.Spawn(entityId, None, pos->getX(), pos->getY());
     _network.sendPacket(packet);
 }
 
-void ServerGame::EnemySinusMovement(int entityId, World& world)
+void ServerGame::EnemySinusMovement(uint32_t entityId, World& world)
 {
     static std::map<int, float> timers;
     static std::map<int, float> startYPos;
@@ -156,7 +157,7 @@ void ServerGame::EnemySinusMovement(int entityId, World& world)
     timers[entityId] += dt * sinusSpeed;
     pos->setY(startYPos[entityId] + std::sin(timers[entityId]) * amplitude);
     Packet packet;
-    packet.playerPosition(entityId, pos->getX(), pos->getY());
+    packet.updatePosition(entityId, pos->getX(), pos->getY());
     _network.sendPacket(packet);
 }
 
@@ -203,7 +204,7 @@ void ServerGame::createEnemy(const float x, const float y)
         }
     );
     Packet packet;
-    packet.positionSpawn(enemy->getId(), Enemy, x, y);
+    packet.Spawn(enemy->getId(), Enemy, x, y);
     _network.sendPacket(packet);
 }
 
@@ -222,7 +223,7 @@ void ServerGame::createSinusEnemy(const float x, const float y)
         }
     );
     Packet packet;
-    packet.positionSpawn(enemy->getId(), EnemySinus, x, y);
+    packet.Spawn(enemy->getId(), EnemySinus, x, y);
     _network.sendPacket(packet);
 }
 
@@ -282,7 +283,7 @@ void ServerGame::createWave()
  * @param entityId the ID if the entity.
  * @param world the world where all entity are contains.
  */
-void ServerGame::BulletMovement(const int entityId, World &world)
+void ServerGame::BulletMovement(const uint32_t entityId, World &world)
 {
     const auto entity = GameHelper::getEntityById(world, entityId);
     const auto pos = entity->getComponent<Position>();
@@ -295,7 +296,8 @@ void ServerGame::BulletMovement(const int entityId, World &world)
         world.killEntity(entityId);
         packet.dead(entityId);
     } else {
-        packet.positionSpawn(entityId, None, pos->getX(), pos->getY());
+        pos->setX(pos->getX() + 10 * world.getDeltaTime());
+        packet.Spawn(entityId, None, pos->getX(), pos->getY());
     }
     _network.sendPacket(packet);
 }
@@ -317,13 +319,13 @@ void ServerGame::createBullet(const float x, const float y)
     bullet->addComponent<HP>(10);
     bullet->addComponent<Damage>(50);
     bullet->addComponent<Script>(
-        [this](const int entityId, World& world)
+        [this](const uint32_t entityId, World& world)
         {
             this->BulletMovement(entityId, world);
         }
     );
     Packet packet;
-    packet.positionSpawn(bullet->getId(), Bullet, x + 60.f, y + 15.f);
+    packet.Spawn(bullet->getId(), Bullet, x + 60.f, y + 15.f);
 
     _network.sendPacket(packet);
 }
@@ -358,9 +360,11 @@ void ServerGame::handleNewPlayer()
         std::cout << "Maximum number of players reached (" << MAX_PLAYER << ")" << std::endl;
         return;
     }
-    
+
     createPlayer(200, 200);
     _playerCount++;
+
+    std::cout << "Player " << _playerCount << " connected" << std::endl;
 
     if (_playerCount == NB_PLAYER_TO_START && !_gameStarted) {
         _gameStarted = true;
@@ -376,13 +380,13 @@ void ServerGame::handleNewPlayer()
  * @param x The new x position of the player.
  * @param y The new y position of the player.
  */
-void ServerGame::handleNewPlayerPosition(const int id, const float x, const float y)
+void ServerGame::serverUpdatePosition(const uint32_t id, const float x, const float y)
 {
     const auto entity = GameHelper::getEntityById(_world, id);
 
     if (entity == nullptr) {
         std::cerr << "[Warning] Ignore position update for unknown entity ID: " << id << std::endl;
-        return; 
+        return;
     }
 
     const auto pos = entity->getComponent<Position>();
@@ -399,7 +403,7 @@ void ServerGame::handleNewPlayerPosition(const int id, const float x, const floa
     pos->setY(y);
 
     Packet packet;
-    packet.playerPosition(id, x, y);
+    packet.updatePosition(id, x, y);
     _network.sendPacket(packet);
 }
 
@@ -408,7 +412,7 @@ void ServerGame::handleNewPlayerPosition(const int id, const float x, const floa
  *
  * @param id The id of the player who is shooting.
  */
-void ServerGame::handleShoot(const int id)
+void ServerGame::handleShoot(const uint32_t id)
 {
     const auto entity = GameHelper::getEntityById(_world, id);
     if (!entity) {
@@ -453,6 +457,7 @@ void ServerGame::checkDeaths()
     }
 }
 
+
 void ServerGame::createPortalBoss(const float x, const float y)
 {
     const auto enemy = _world.createEntity();
@@ -470,4 +475,30 @@ void ServerGame::createPortalBoss(const float x, const float y)
     Packet packet;
     packet.positionSpawn(enemy->getId(), PortalBoss, x, y);
     _network.sendPacket(packet);
+}
+
+/**
+ * @brief Receive action with id and data and call corresponding function
+ *
+ * @param id
+ * @param action
+ * @param data
+ */
+void ServerGame::handleAction(const uint32_t id, const uint8_t action, const uint32_t data)
+{
+    switch (action)
+    {
+        case FIRE : {
+            handleShoot(id);
+        }
+        case HEAL : {
+
+        }
+        case SHIELD : {
+
+        }
+        case BEAM : {
+
+        }
+    }
 }
