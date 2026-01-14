@@ -7,6 +7,7 @@
 
 #include "Server.hpp"
 
+#include <algorithm>
 #include <netinet/in.h>
 
 /**
@@ -186,7 +187,7 @@ void Server::udpThread()
                 found = true;
         if (found == false)
             _udpUsers.push_back(std::make_pair<>(sender.value().toString(), rport));
-        log("UDP | Received " + std::to_string(p.getDataSize()) + " bytes from " + sender.value().toString() + " on port " + std::to_string(rport));
+        // log("UDP | Received " + std::to_string(p.getDataSize()) + " bytes from " + sender.value().toString() + " on port " + std::to_string(rport));
     }
 }
 
@@ -215,7 +216,16 @@ void Server::tcpThread()
             std::size_t received;
 
             data.fill(0);
-            if (tmp.getSocket()->receive(data.data(), data.size(), received) != sf::Socket::Status::Done)
+            sf::Socket::Status status = tmp.getSocket()->receive(data.data(), data.size(), received);
+
+            if (status == sf::Socket::Status::Disconnected)
+            {
+                log("TCP | Client " + std::to_string(tmp.getId()) + " disconnected");
+                _users.erase(std::remove_if(_users.begin(), _users.end(), [&](const auto& user) { return user.getId() == tmp.getId(); }), _users.end());
+                continue;
+            }
+
+            if (status != sf::Socket::Status::Done)
                 continue;
 
             dataReceived = true;
@@ -306,9 +316,9 @@ void Server::sendPacket(Packet& packet)
         if (!optIp.has_value() || _udpSocket.send(p.getData(), p.getDataSize(), optIp.value(), snd) != sf::Socket::Status::Done) {
             log("UDP | Failed to send packet to client at port " + std::to_string(snd));
         }
-        log("port : " + std::to_string(snd) + " ip : " + optIp.value().toString());
+        // log("port : " + std::to_string(snd) + " ip : " + optIp.value().toString());
     }
-    log("Packet queued");
+    // log("Packet queued");
 }
 
 /**
