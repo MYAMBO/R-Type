@@ -35,7 +35,7 @@ ServerGame::ServerGame(IGameNetwork& network) : _network(network)
 {
     _world.addSystem<ScriptsSys>();
     _world.addSystem<Movement>();
-    // _world.addSystem<Collision>();
+    _world.addSystem<Collision>();
     _world.addSystem<DeathSys>();
     _world.setDeltaTime(1.f);
 }
@@ -126,7 +126,7 @@ void ServerGame::EnemyMovement(const uint32_t entityId, World &world)
     pos->setX(pos->getX() - 1 * world.getDeltaTime());
 
     Packet packet;
-    packet.Spawn(entityId, None, pos->getX(), pos->getY());
+    packet.updatePosition(entityId, pos->getX(), pos->getY());
     _network.sendPacket(packet);
 }
 
@@ -192,6 +192,7 @@ void ServerGame::createEnemy(const float x, const float y)
 {
     const auto enemy = _world.createEntity();
     enemy->addComponent<HP>(100);
+    enemy->addComponent<Damage>(10);
     enemy->addComponent<Position>(x, y);
     enemy->addComponent<BoxCollider>(10.f, 10.f);
     enemy->addComponent<Tag>("enemy");
@@ -210,6 +211,7 @@ void ServerGame::createSinusEnemy(const float x, const float y)
 {
     const auto enemy = _world.createEntity();
     enemy->addComponent<HP>(150);
+    enemy->addComponent<Damage>(10);
     enemy->addComponent<Position>(x, y);
     enemy->addComponent<BoxCollider>(10.f, 10.f);
     enemy->addComponent<Tag>("enemy");
@@ -228,6 +230,7 @@ void ServerGame::createShootingEnemy(const float x, const float y)
 {
     const auto enemy = _world.createEntity();
     enemy->addComponent<HP>(150);
+    enemy->addComponent<Damage>(10);
     enemy->addComponent<Position>(x, y);
     enemy->addComponent<BoxCollider>(10.f, 10.f);
     enemy->addComponent<Tag>("enemy");
@@ -239,7 +242,7 @@ void ServerGame::createShootingEnemy(const float x, const float y)
         }
     );
     Packet packet;
-    packet.positionSpawn(enemy->getId(), ShootingEnemy, x, y);
+    packet.Spawn(enemy->getId(), ShootingEnemy, x, y);
     _network.sendPacket(packet);
 }
 
@@ -262,18 +265,23 @@ void ServerGame::createWave()
 void ServerGame::BulletMovement(const uint32_t entityId, World &world)
 {
     const auto entity = GameHelper::getEntityById(world, entityId);
+    const auto vel = entity->getComponent<Velocity>();
     const auto pos = entity->getComponent<Position>();
     Packet packet;
 
     if (entity->getComponent<BoxCollider>()->isTrigger()) {
         // check collisions with enemies
     }
+    if (vel) {
+        pos->setX(pos->getX() + vel->getVelocityX() * world.getDeltaTime());
+        pos->setY(pos->getY() + vel->getVelocityY() * world.getDeltaTime());
+    }
     if (pos->getX() > 3000 || pos->getX() < -100) {
         world.killEntity(entityId);
         packet.dead(entityId);
     } else {
         pos->setX(pos->getX() + 10 * world.getDeltaTime());
-        packet.Spawn(entityId, None, pos->getX(), pos->getY());
+        packet.updatePosition(entityId, pos->getX(), pos->getY(), Bullet);
     }
     _network.sendPacket(packet);
 }
@@ -292,7 +300,8 @@ void ServerGame::createBullet(const float x, const float y)
     bullet->addComponent<BoxCollider>(5.f, 5.f);
     bullet->addComponent<Velocity>(10.f, 0.f);
     bullet->addComponent<Tag>("player_bullet");
-    bullet->addComponent<Damage>(10);
+    bullet->addComponent<Damage>(50);
+    bullet->addComponent<HP>(10);
     bullet->addComponent<Script>(
         [this](const uint32_t entityId, World& world)
         {
@@ -314,6 +323,7 @@ void ServerGame::createEnemyBullet(const float x, const float y)
     bullet->addComponent<Velocity>(-10.f, 0.f);
     bullet->addComponent<Tag>("enemy_bullet");
     bullet->addComponent<Damage>(10);
+    bullet->addComponent<HP>(50);
     bullet->addComponent<Script>(
         [this](const int entityId, World& world)
         {
@@ -321,7 +331,7 @@ void ServerGame::createEnemyBullet(const float x, const float y)
         }
     );
     Packet packet;
-    packet.positionSpawn(bullet->getId(), EnemyBullet, x + 60.f, y + 15.f);
+    packet.Spawn(bullet->getId(), EnemyBullet, x + 60.f, y + 15.f);
     _network.sendPacket(packet);
 }
 
