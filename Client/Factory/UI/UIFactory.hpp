@@ -21,7 +21,8 @@ class UIFactory {
         void createOptionsMenu() const;
         void createLangSelector() const;
         void createLoadingScreen() const;
-
+        void createBackGameUI() const;
+        void createScrapUIEmpty(int index) const;
     private:
         World& _world;
         std::shared_ptr<LanguageHandler> _languageHandler;

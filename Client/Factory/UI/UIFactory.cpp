@@ -740,3 +740,37 @@ void UIFactory::createLangSelector() const
         _world.setCurrentScene(static_cast<int>(SceneType::MENU));
     });
 }
+
+/**
+ * @brief Create the in-game UI background
+ */
+void UIFactory::createBackGameUI() const
+{
+    auto uiBackground = _world.createEntity();
+    uiBackground->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    uiBackground->addComponent<Layer>(LayerType::UI);
+    uiBackground->addComponent<Position>(0.f, 0.f);
+    uiBackground->addComponent<RectangleShape>(450.f, 100.f, 100, 100, 100, 255);
+    uiBackground->addComponent<Tag>("ui_background");
+}
+
+/**
+ * @brief Create an empty scrap UI icon at the given index
+ * 
+ * @param index The index of the scrap icon (1-based)
+ */
+void UIFactory::createScrapUIEmpty(int index) const
+{
+    float posX = 20.f + (index - 1) * 30.f;
+    float posY = 65.f; 
+
+    auto uiScrap = _world.createEntity();
+    uiScrap->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    uiScrap->addComponent<Layer>(LayerType::UI + 2);
+    uiScrap->addComponent<Position>(posX, posY);
+    uiScrap->addComponent<Sprite>("../assets/sprites/r-typesheet3.gif");
+    uiScrap->addComponent<Animator>(1, 1, 1.f, 0, 0, 16, 16, 0, 0);
+    uiScrap->addComponent<Scale>(1.5f);
+    uiScrap->addComponent<Tag>("ui_scrap_icon_" + std::to_string(index));
+    uiScrap->getComponent<Sprite>()->getSprite()->setColor(sf::Color(100, 100, 100, 255));
+}

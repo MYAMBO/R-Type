@@ -82,3 +82,28 @@ void Factory::createSparks(World &world, float x, float y, int amount)
 {
     _effectFactory.createSparks(world, x, y, amount);
 }
+
+void Factory::createCompanion(uint64_t playerId)
+{
+    _worldFactory.createCompanion(playerId);
+}
+
+void Factory::createScraps(World &world, float x, float y, int amount)
+{
+    _worldFactory.createScraps(world, x, y, amount);
+}
+
+void Factory::createScrapUI(World &world, int index)
+{
+    _worldFactory.createScrapUI(world, index);
+}
+
+void Factory::createScrapUIEmpty(int index) const
+{
+    _uiFactory.createScrapUIEmpty(index);
+}
+
+void Factory::createBackGameUI()
+{
+    _uiFactory.createBackGameUI();
+}

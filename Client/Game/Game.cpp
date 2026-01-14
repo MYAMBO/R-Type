@@ -206,6 +206,10 @@ void Game::loadingRun()
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _factory.createBackground(_window); 
     _factory.createCredits();
+    _factory.createScrapUIEmpty(1);
+    _factory.createScrapUIEmpty(2);
+    _factory.createScrapUIEmpty(3);
+    _factory.createBackGameUI();
     updateLoadingState(0.8f, "Connecting to server...");
     run();
 }
@@ -282,6 +286,8 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
             sf::FloatRect visibleArea({0, 0}, {static_cast<float>(_window.getSize().x), static_cast<float>( _window.getSize().y)});
             _window.setView(sf::View(visibleArea));
         }
+        if (inputSystem->isTriggered(*eventOpt, KeyboardKey::Key_M))
+            _factory.createScraps(_world, 500.f, 0.f, 1);
         inputSystem->update(0.0f, _world);
     }
 }
@@ -364,7 +370,6 @@ void Game::playerInput(int entityId, World &world)
 {
     if (world.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
         return;
-    (void)entityId;
     static bool isShootKeyPressed = false;
 
     auto inputSystem = world.getSystem<Inputs>();

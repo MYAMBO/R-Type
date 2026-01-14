@@ -21,6 +21,9 @@ class WorldFactory {
         void createPlayer(uint64_t playerId);
         void createEnemyBullet(size_t entityId, int x, int y);
         void createBullet(size_t entityId, int x, int y, int type);
+        void createCompanion(uint64_t playerId);
+        void createScraps(World &world, float x, float y, int amount);
+        void createScrapUI(World &world, int index);
     private:
         World& _world;
 };
