@@ -88,11 +88,6 @@ void ClientPacketreader::hit()
 void ClientPacketreader::dead()
 {
     int id = std::stoi( _data.mySubStr(0, 16), nullptr, 16);
-
-    std::cout << "========================================" << std::endl;
-    std::cout << "[CLIENT PACKET] Received DEAD for entity " << id << std::endl;
-    std::cout << "========================================" << std::endl;
-
     _game->killEntity(id);
 }
 

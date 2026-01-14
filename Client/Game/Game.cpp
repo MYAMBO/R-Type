@@ -73,8 +73,6 @@ Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const
     _world.addSystem<ScriptsSys>();
     _world.addSystem<TextSystem>();
     _world.addSystem<Movement>();
-   // _world.addSystem<Collision>();
-    //_world.addSystem<DeathSys>();
     _world.addSystem<Mouse>();
     _world.addSystem<Inputs>();
     _world.addSystem<Animation>();
@@ -306,46 +304,6 @@ void Game::smootherMovement(int entityId, World &world, float serverX, float ser
     pos->setTargetY(serverY);
 
 }
-
-// void Game::handleSpawn(int id, int type, float x, float y)
-// {
-//     auto entity = GameHelper::getEntityById(_world, id);
-//
-//     if (entity) {
-//         auto hpComp = entity->getComponent<HP>();
-//         if (hpComp && !hpComp->isAlive())
-//             return;
-//         smootherMovement(id, _world, x, y);
-//         return;
-//     }
-//     switch (type) {
-//     case Player:
-//         _factory.createPlayer(id);
-//         entity = GameHelper::getEntityById(_world, id);
-//         if (entity && entity->getComponent<Tag>()->getTag() == "player") {
-//             entity->addComponent<Script>([this](const int entityId, World& world)
-//             {
-//                 this->playerInput(entityId, world);
-//             });
-//         }
-//         break;
-//     case Enemy:
-//         _factory.createEnemy(x, y, 1, id);
-//         break;
-//     case EnemySinus:
-//         _factory.createEnemy(x, y, 4, id);
-//         break;
-//     case Bullet:
-//         _factory.createBullet(id, x, y, type);
-//         break;
-//     case EnemyBullet:
-//         _factory.createEnemyBullet(id, x, y);
-//         break;
-//     case ShootingEnemy:
-//         _factory.createEnemy(x, y, 5, id);
-//         break;
-//     }
-// }
 
 void Game::handleSpawn(int id, int type, float x, float y)
 {
