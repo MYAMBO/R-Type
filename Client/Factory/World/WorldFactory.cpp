@@ -66,7 +66,8 @@ void WorldFactory::createEnemy(float x, float y, int type, int entityId)
         FAST,
         TANK,
         SINUS, 
-        SHOOTING
+        SHOOTING,
+        PORTALBOSS
     };
     switch (type) {
         case BASIC:
@@ -83,6 +84,9 @@ void WorldFactory::createEnemy(float x, float y, int type, int entityId)
             break;
         case SHOOTING:
             GameHelper::createShootingEnemy(_world, x, y, entityId);
+            break;
+        case PORTALBOSS:
+            GameHelper::createPortalBoss(_world, x, y, entityId);
             break;
         default:
             std::cerr << "Unknown enemy type: " << type << std::endl;
@@ -102,7 +106,6 @@ void WorldFactory::createEnemyBullet(size_t entityId, int x, int y)
     auto bullet = _world.createEntity(entityId);
     bullet->addComponent<Position>(x, y);
     bullet->addComponent<Rotation>(180.f);
-   // bullet->addComponent<Velocity>(-10.f, 0.f);
     bullet->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet1.gif"));
     bullet->addComponent<Animator>(2, 2, 3.0f, 200, 120, 32, 15, 0, 0);
     bullet->addComponent<Scale>(2.f);
