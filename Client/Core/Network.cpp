@@ -22,7 +22,7 @@ Network::Network()
     _tcpPort = -1;
     _udpPort = -1;
     _debugMode = false;
-    _packetReader = ClientPacketreader("", nullptr);
+    _packetReader = ClientPacketreader(sf::Packet(), nullptr);
 }
 
 void Network::getIpAdress(std::string option)
@@ -88,7 +88,7 @@ auto Network::initClient() -> void
     if (_udpSocket.bind(sf::Socket::AnyPort) != sf::Socket::Status::Done)
         throw InitClientException();
     _game = std::make_shared<Game>(*this);
-    _packetReader = ClientPacketreader("", _game);
+    _packetReader = ClientPacketreader(sf::Packet(), _game);
 }
 
 void Network::udpThread()
@@ -104,11 +104,7 @@ void Network::udpThread()
         {
 
         }
-        const void* raw = p.getData();
-        const std::size_t size = p.getDataSize();
-
-        const std::string data(static_cast<const char*>(raw), size);
-        _packetReader.addData(data);
+        _packetReader.addPacket(p);
         try
         {
             _packetReader.interpretPacket();

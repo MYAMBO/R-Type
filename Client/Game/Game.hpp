@@ -61,10 +61,11 @@ class Game {
         ~Game();
 
         void run();
+        void updateEntity(uint32_t id, uint16_t type, float x, float y);
+        void handleAction(uint32_t id, uint8_t action, uint32_t data);
+
         void loadingRun();
         int killEntity(int id);
-        void handleSpawn(int id, int type, float x, float y);
-
         void menudisplay();
         void gameplaydisplay();
     private:
@@ -76,7 +77,9 @@ class Game {
         void updateLoadingState(float progress, const std::string& status);
         void smootherMovement(int entityId, World &world, float targetX, float targetY); 
 
-        void bulletShooting();
+
+        void bulletShooting(); // Need to remove it, maybe
+        void healEntity(uint32_t entityId, uint32_t amount);
 
         sf::RenderWindow _window;
         World _world;

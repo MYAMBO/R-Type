@@ -8,10 +8,10 @@
 #ifndef R_TYPE_PACKETREADER_HPP
     #define R_TYPE_PACKETREADER_HPP
 
-#include <string>
-
+#include <SFML/Network.hpp>
+#include <memory>
+#include "Packet.hpp"
 #include "Game.hpp"
-#include "MyString.hpp"
 
 /**
  * @brief PacketReader class to read and interpret received data
@@ -19,21 +19,16 @@
 class ClientPacketreader
 {
     public:
-        explicit ClientPacketreader(std::string data = "", std::shared_ptr<Game> game = nullptr);
+        explicit ClientPacketreader(sf::Packet data = sf::Packet(), std::shared_ptr<Game> game = nullptr);
         ~ClientPacketreader() = default;
 
         void interpretPacket();
-        void addData(const std::string& data);
+        void addPacket(sf::Packet data);
         void clear();
     private:
-        MyString _data;
+        sf::Packet _packet;
+        UDPHeader _header;
         std::shared_ptr<Game> _game;
-
-        void timestamp();
-        void updateEntity();
-        void hit();
-        void dead();
-        void endGame();
 };
 
 
