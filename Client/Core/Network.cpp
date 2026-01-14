@@ -111,7 +111,7 @@ void Network::udpThread()
         }
         catch (std::exception& e)
         {
-            _packetReader.clear();
+            _packetReader.addPacket(sf::Packet());
             log("UDP | Failed to interpret packet : " + std::string(e.what()));
         }
         log("UDP | Received " + std::to_string(p.getDataSize()) + " bytes from " + sender.value().toString() + " on port " + std::to_string(rport));

@@ -46,10 +46,10 @@ class ServerGame {
         void createWave();
         void createBullet(float x, float y);
         void createEnemyBullet(float x, float y);
-        void EnemyMovement(int entityId, World &world);
-        void EnemySinusMovement(int entityId, World &world);
+        void EnemyMovement(uint32_t  entityId, World &world);
+        void EnemySinusMovement(uint32_t  entityId, World &world);
         void ShootingAction(int entityId, World &world);
-        void BulletMovement(int entityId, World &world);
+        void BulletMovement(uint32_t  entityId, World &world);
         void checkDeaths();
 
 

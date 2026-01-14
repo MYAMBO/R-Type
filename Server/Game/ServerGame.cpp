@@ -127,7 +127,7 @@ void ServerGame::EnemyMovement(const uint32_t entityId, World &world)
     pos->setX(pos->getX() - 1 * world.getDeltaTime());
 
     Packet packet;
-    packet.Spawn(entityId, None, pos->getX(), pos->getY());
+    packet.updatePosition(entityId, pos->getX(), pos->getY());
     _network.sendPacket(packet);
 }
 
@@ -243,7 +243,27 @@ void ServerGame::createShootingEnemy(const float x, const float y)
         }
     );
     Packet packet;
-    packet.positionSpawn(enemy->getId(), ShootingEnemy, x, y);
+    packet.Spawn(enemy->getId(), ShootingEnemy, x, y);
+    _network.sendPacket(packet);
+}
+
+void ServerGame::createSinusShootingEnemy(const float x, const float y)
+{
+    const auto enemy = _world.createEntity();
+    enemy->addComponent<HP>(150);
+    enemy->addComponent<Damage>(10);
+    enemy->addComponent<Position>(x, y);
+    enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+    enemy->addComponent<Tag>("enemy");
+    enemy->addComponent<Script>(
+        [this](const int entityId, World& world)
+        {
+            this->EnemySinusMovement(entityId, world);
+            this->ShootingAction(entityId, world);
+        }
+    );
+    Packet packet;
+    packet.Spawn(enemy->getId(), ShootingEnemy, x, y);
     _network.sendPacket(packet);
 }
 
@@ -286,18 +306,23 @@ void ServerGame::createWave()
 void ServerGame::BulletMovement(const uint32_t entityId, World &world)
 {
     const auto entity = GameHelper::getEntityById(world, entityId);
+    const auto vel = entity->getComponent<Velocity>();
     const auto pos = entity->getComponent<Position>();
     Packet packet;
 
     if (entity->getComponent<BoxCollider>()->isTrigger()) {
         // check collisions with enemies
     }
+    if (vel) {
+        pos->setX(pos->getX() + vel->getVelocityX() * world.getDeltaTime());
+        pos->setY(pos->getY() + vel->getVelocityY() * world.getDeltaTime());
+    }
     if (pos->getX() > 3000 || pos->getX() < -100) {
         world.killEntity(entityId);
         packet.dead(entityId);
     } else {
         pos->setX(pos->getX() + 10 * world.getDeltaTime());
-        packet.Spawn(entityId, None, pos->getX(), pos->getY());
+        packet.updatePosition(entityId, pos->getX(), pos->getY(), Bullet);
     }
     _network.sendPacket(packet);
 }
@@ -347,7 +372,7 @@ void ServerGame::createEnemyBullet(const float x, const float y)
         }
     );
     Packet packet;
-    packet.positionSpawn(bullet->getId(), EnemyBullet, x + 60.f, y + 15.f);
+    packet.Spawn(bullet->getId(), EnemyBullet, x + 60.f, y + 15.f);
     _network.sendPacket(packet);
 }
 
@@ -369,7 +394,8 @@ void ServerGame::handleNewPlayer()
     if (_playerCount == NB_PLAYER_TO_START && !_gameStarted) {
         _gameStarted = true;
         _waveTimer.restart();
-        startLevel(3);   // Need to change that later to have a level management
+        startLevel(5);   // Need to change that later to have a level management
+
     }
 }
 
@@ -473,7 +499,7 @@ void ServerGame::createPortalBoss(const float x, const float y)
         }
     );
     Packet packet;
-    packet.positionSpawn(enemy->getId(), PortalBoss, x, y);
+    packet.Spawn(enemy->getId(), PortalBoss, x, y);
     _network.sendPacket(packet);
 }
 
@@ -490,15 +516,17 @@ void ServerGame::handleAction(const uint32_t id, const uint8_t action, const uin
     {
         case FIRE : {
             handleShoot(id);
+            break;
         }
         case HEAL : {
+            break;
 
         }
         case SHIELD : {
-
+            break;
         }
         case BEAM : {
-
+            break;
         }
     }
 }
