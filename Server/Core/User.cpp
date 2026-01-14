@@ -10,7 +10,7 @@
 static auto getUserId() -> unsigned int
 {
     static unsigned int id = 0;
-    return id++;
+    return ++id;
 }
 
 User::User(const unsigned short port, std::string ip, std::shared_ptr<sf::TcpSocket> socket)
