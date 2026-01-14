@@ -7,15 +7,7 @@
 
 #include "Server.hpp"
 
-#ifdef _WIN32
-    #include <io.h>
-    #include "getopt.h"
-    #include <winsock2.h>
-    #pragma comment(lib, "ws2_32.lib")
-#else
-    #include <netinet/in.h>
-    #include <unistd.h>
-#endif // _WIN32
+#include <cstring>
 
 /**
  * @brief Represents a server that handles client connections and processes requests.
