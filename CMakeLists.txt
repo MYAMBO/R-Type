@@ -41,6 +41,7 @@ CPMAddPackage(
 )
 
 include_directories(.)
+include_directories(Action)
 include_directories(ECS)
 include_directories(ECS/Component)
 include_directories(ECS/Component/HP)

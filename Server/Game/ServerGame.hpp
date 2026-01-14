@@ -30,8 +30,9 @@ class ServerGame {
         ~ServerGame() = default;
 
         void run();
-        void handleNewPlayerPosition(int id, float x, float y);
-        void handleShoot(int id);
+        void serverUpdatePosition(uint32_t id, float x, float y);
+        void handleShoot(uint32_t id);
+        void handleAction(uint32_t id, uint8_t action, uint32_t data);
         void handleNewPlayer();
         void startLevel(int levelId);
         void createEnemy(float x, float y);
@@ -43,9 +44,9 @@ class ServerGame {
         void createPlayer(float x, float y);
         void createWave();
         void createBullet(float x, float y);
-        void EnemyMovement(int entityId, World &world);
-        void EnemySinusMovement(int entityId, World &world);
-        void BulletMovement(int entityId, World &world);
+        void EnemyMovement(uint32_t entityId, World &world);
+        void BulletMovement(uint32_t entityId, World &world);
+        void EnemySinusMovement(uint32_t entityId, World &world);
         void checkDeaths();
 
 
