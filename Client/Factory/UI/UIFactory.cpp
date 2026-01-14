@@ -594,6 +594,25 @@ void UIFactory::createMenu() const
         _world.setCurrentScene(static_cast<int>(SceneType::LANGUAGES));
     });
     createLangSelector();
+    const auto btnCredit = _world.createEntity();
+    btnCredit->addComponent<Data>(std::map<std::string, std::string>{{"text", "CREDITS"}});
+    btnCredit->addComponent<GuiWidget>(WidgetType::BUTTON, _languageHandler->getTranslation(btnCredit->getComponent<Data>()->getData("text")), menuRoot->getId());
+    btnCredit->addComponent<Scene>(static_cast<int>(SceneType::MENU));
+    btnCredit->addComponent<Tag>("menu_credits");
+    btnCredit->addComponent<SoundEffect>("../assets/sounds/clics.mp3", 100.f);
+    btnCredit->getComponent<SoundEffect>()->setGlobal(true);
+    const auto guiCreditOpt = btnCredit->getComponent<GuiWidget>();
+    guiCreditOpt->setSize("300", "100");
+    guiCreditOpt->setPosition("87%", "95%");
+    guiCreditOpt->setOrigin(0.f, 1.f);
+    styleNeonButton(guiCreditOpt);
+    guiCreditOpt->setFont("../assets/font/regular.ttf");
+    guiCreditOpt->setTextSize(50);
+    guiCreditOpt->setCallback([this]() {
+        if (const auto sfx = GameHelper::getEntityByTag(_world, "menu_credits")->getComponent<SoundEffect>())
+            sfx->play();
+        _world.setCurrentScene(static_cast<int>(SceneType::CREDITS));
+    });
     auto spaceEntity2 = _world.createEntity();
     spaceEntity2->addComponent<GuiWidget>(WidgetType::LABEL, "", layoutEntity->getId());
     spaceEntity2->addComponent<Scene>(static_cast<int>(SceneType::MENU));
