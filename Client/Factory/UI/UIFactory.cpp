@@ -382,8 +382,10 @@ void UIFactory::createOptionsMenu() const
     if (entity) {
         auto data = entity->getComponent<Data>();
         std::string dyslexiaStr = data->getData("disclexia_mode");
-        if (dyslexiaStr == "true")
+        if (dyslexiaStr == "true") {
+            data->setData("lastfont_used", "regular");
             dyslexiaMode = true;
+        }
     }
 
     _addColorBlindCycle("SETTINGS_COLOR_BLIND_MODE", layoutGeneralId);
@@ -429,7 +431,7 @@ void UIFactory::createOptionsMenu() const
     auto settingUpdater = _world.createEntity();
     settingUpdater->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
     settingUpdater->addComponent<Tag>("options_setting_updater");
-    settingUpdater->addComponent<Script>([&godMode, &easyMode, &hardMode, &dyslexiaMode](int id, World& w) {
+    settingUpdater->addComponent<Script>([](int id, World& w) {
         auto entity = GameHelper::getEntityById(w, id);
         if (!entity)
             return;
@@ -461,6 +463,9 @@ void UIFactory::createOptionsMenu() const
     guiReturn->setOrigin(0.5f, 0.5f);
     guiReturn->setPosition("50%", "90%");
     guiReturn->setCallback([this]() { _world.setCurrentScene(static_cast<int>(SceneType::MENU)); });
+
+    if (dyslexiaMode == true)
+        availabilitySettingsScript(entity->getId(), _world);
 }
 
 /**
@@ -478,7 +483,7 @@ void UIFactory::createMenu() const
         auto scene = world.getCurrentScene();
         if (!entity)
             return;
-        if (scene == 2 || scene == 3) {
+        if (scene == 2 || scene == 3 || scene == 4) {
             auto musicComp = entity->getComponent<Music>();
             if (musicComp && musicComp->getState() != MusicState::PLAYING) {
                 musicComp->play();

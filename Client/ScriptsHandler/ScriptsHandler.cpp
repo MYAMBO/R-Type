@@ -662,6 +662,7 @@ void creditsNameScript(int id, World& w)
 
 void availabilitySettingsScript(int entityId, World& world)
 {
+    (void)entityId;
     auto entity = GameHelper::getEntityById(world, entityId);
     if (!entity)
         return;
