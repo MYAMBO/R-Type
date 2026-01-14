@@ -459,39 +459,11 @@ void Game::playerInput(int entityId, World &world)
  * This function removes the entity with the specified ID from the game world.
  * @param id The unique ID of the entity to be killed.
 */
-// int Game::killEntity(int id)
-// {
-//     auto entity = GameHelper::getEntityById(_world, id);
-//     if (!entity)
-//         return -1;
-//     _world.killEntity(id);
-//     return 0;
-// }
-
 int Game::killEntity(int id)
 {
-    std::cout << "[CLIENT killEntity] Called for ID=" << id << std::endl;
-
     auto entity = GameHelper::getEntityById(_world, id);
-    if (!entity) {
-        std::cout << "[CLIENT killEntity] Entity " << id << " NOT FOUND!" << std::endl;
+    if (!entity)
         return -1;
-    }
-
-    // ✅ LOG LES HP
-    auto hp = entity->getComponent<HP>();
-    if (hp) {
-        std::cout << "[CLIENT killEntity] Entity " << id
-                  << " HP=" << hp->getHP()
-                  << " isAlive=" << (hp->isAlive() ? "true" : "false")
-                  << std::endl;
-    } else {
-        std::cout << "[CLIENT killEntity] Entity " << id << " has NO HP component!" << std::endl;
-    }
-
-    std::cout << "[CLIENT killEntity] Destroying entity..." << std::endl;
     _world.killEntity(id);
-    std::cout << "[CLIENT killEntity] Entity " << id << " DESTROYED!" << std::endl;
-
     return 0;
 }
