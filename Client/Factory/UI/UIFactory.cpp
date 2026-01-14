@@ -175,14 +175,14 @@ void UIFactory::_addColorBlindCycle(const std::string& label, uint64_t parentId)
         auto settings = GameHelper::getEntityByTag(_world, "game_availability_settings");
         if (!settings) return;
         auto data = settings->getComponent<Data>();
-        
+
         std::string current = data->getData("color_blind_mode");
         auto it = std::find(modes.begin(), modes.end(), current);
         int nextIdx = (it != modes.end()) ? (std::distance(modes.begin(), it) + 1) % modes.size() : 0;
-        
+
         std::string nextMode = modes[nextIdx];
         data->setData("color_blind_mode", nextMode);
-        
+
         std::string display = nextMode;
         std::transform(display.begin(), display.end(), display.begin(), ::toupper);
         guiStatus->setText(display);
@@ -239,13 +239,15 @@ void UIFactory::_addKeyBindingRow(const std::string& actionName, uint64_t parent
     styleNeonRow(guiRow);
 
     auto lbl = _world.createEntity();
-    lbl->addComponent<GuiWidget>(WidgetType::LABEL, actionName, row->getId());
+    lbl->addComponent<Data>(std::map<std::string, std::string>{{"text", "SETTINGS_" + actionName}});
+    lbl->addComponent<GuiWidget>(WidgetType::LABEL, _languageHandler->getTranslation(lbl->getComponent<Data>()->getData("text")), row->getId());
     lbl->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
     lbl->addComponent<Tag>("keybinding_label");
     auto gl = lbl->getComponent<GuiWidget>();
     gl->setTextSize(25);
     gl->setPosition("10%", "50%");
     gl->setOrigin(0.f, 0.5f);
+    gl->setFont("../assets/font/regular.ttf");
     gl->setTextColor(sf::Color::White);
 
     auto btn = _world.createEntity();
@@ -257,6 +259,7 @@ void UIFactory::_addKeyBindingRow(const std::string& actionName, uint64_t parent
     guiBtn->setSize("40%", "70%");
     guiBtn->setPosition("70%", "50%");
     guiBtn->setOrigin(0.5f, 0.5f);
+    guiBtn->setFont("../assets/font/regular.ttf");
 
     auto settings = GameHelper::getEntityByTag(_world, "game_controls_settings");
     if (settings) guiBtn->setText(settings->getComponent<Data>()->getData(actionName));
@@ -351,7 +354,8 @@ void UIFactory::createOptionsMenu() const
     auto addTabButton = [this, tabHeaderEntity, layoutGeneralId, layoutAudioId, layoutGameplayId]
                         (const std::string& label, uint64_t targetId) {
         auto btn = _world.createEntity();
-        btn->addComponent<GuiWidget>(WidgetType::BUTTON, label, tabHeaderEntity->getId());
+        btn->addComponent<Data>(std::map<std::string, std::string>{{"text", label}});
+        btn->addComponent<GuiWidget>(WidgetType::BUTTON, _languageHandler->getTranslation(btn->getComponent<Data>()->getData("text")), tabHeaderEntity->getId());
         btn->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
         btn->addComponent<Tag>("options_tab_button_" + label);
         auto gui = btn->getComponent<GuiWidget>();
@@ -365,9 +369,9 @@ void UIFactory::createOptionsMenu() const
         });
     };
 
-    addTabButton("GENERAL", layoutGeneralId);
-    addTabButton("AUDIO", layoutAudioId);
-    addTabButton("CONTROLS", layoutGameplayId);
+    addTabButton("SETTINGS_GENERAL", layoutGeneralId);
+    addTabButton("SETTINGS_AUDIO", layoutAudioId);
+    addTabButton("SETTINGS_CONTROLS", layoutGameplayId);
 
     static bool godMode = false;
     static bool easyMode = false;
@@ -435,7 +439,7 @@ void UIFactory::createOptionsMenu() const
         auto dataAvailability = GameHelper::getEntityByTag(w, "game_availability_settings");
         if (!dataEntity || !dataAvailability)
             return;
-        auto dataComp = dataEntity->getComponent<Data>(); 
+        auto dataComp = dataEntity->getComponent<Data>();
         if (dataComp) {
             dataComp->setData("is_god_mode", godMode ? "true" : "false");
             dataComp->setData("is_easy_mode", easyMode ? "true" : "false");
@@ -672,7 +676,11 @@ void UIFactory::createLangSelector() const
         {"ENGLISH", "en"},
         {"FRANCAIS", "fr"},
         {"ESPANOL", "es"},
-        {"DEUTSCH", "de"}
+        {"DEUTSCH", "de"},
+        {"LINGÁLA", "li"},
+        {"РУССКИЙ", "ru"},
+        {"PORTUGUÊS", "pt"},
+        {"ITALIANO", "it"}
     };
     for (const auto&[language, id] : languages) {
         const auto rowEntity = _world.createEntity();
