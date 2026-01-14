@@ -11,6 +11,36 @@
     #include <memory>
     #include "World.hpp"
     #include "Camera.hpp"
+    #include <map> 
+/**
+* @brief Enumeration for different color blindness modes.
+*/
+enum class ColorBlindMode {
+    Normal = 0,
+    Protanopia,
+    Deuteranopia,
+    Tritanopia,
+    Achromatopsia
+};
+
+/**
+ * @brief Structure representing a color transformation matrix.
+*/
+struct ColorMatrix {
+    float r[3];
+    float g[3];
+    float b[3];
+};
+
+/**
+* @brief Predefined color matrices for different color blindness modes.
+*/
+const std::map<ColorBlindMode, ColorMatrix> ColorFilters = {
+    {ColorBlindMode::Protanopia,   {{0.567f, 0.433f, 0.0f}, {0.558f, 0.442f, 0.0f}, {0.0f, 0.242f, 0.758f}}},
+    {ColorBlindMode::Deuteranopia, {{0.625f, 0.375f, 0.0f}, {0.70f, 0.30f, 0.0f}, {0.0f, 0.30f, 0.70f}}},
+    {ColorBlindMode::Tritanopia,   {{0.95f, 0.05f, 0.0f}, {0.0f, 0.433f, 0.567f}, {0.0f, 0.475f, 0.525f}}},
+    {ColorBlindMode::Achromatopsia,{{0.299f, 0.587f, 0.114f}, {0.299f, 0.587f, 0.114f}, {0.299f, 0.587f, 0.114f}}}
+};
 
 /**
  * @brief GameHelper class providing utility functions for game entities.
@@ -21,11 +51,12 @@ class GameHelper {
         ~GameHelper() = delete;
 
         static sf::Color hueToRGB(float hue);
+        static ColorMatrix getColorMatrix(ColorBlindMode mode);
         static std::shared_ptr<Camera> getMainCamera(World &world);
+        static void createSparks(World &world, float x, float y, int amount);
         static std::shared_ptr<Entity> getEntityById(World &world, uint64_t id);
         static std::shared_ptr<Entity> getEntityByTag(World &world, const std::string &tag);
         static std::vector<std::shared_ptr<Entity>> getEntitiesByGroup(World &world, size_t groupId);
-        static void createSparks(World &world, float x, float y, int amount);
 
         static void createBasicEnemy(World &world, float x, float y, int entityId);
         static void createSinusEnemy(World &world, float x, float y, int entityId);

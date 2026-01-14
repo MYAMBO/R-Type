@@ -25,6 +25,7 @@ class Text : public Component {
         void setString(const std::string& str);
         void setSize(unsigned int size);
         void setColor(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255);
+        void setFont(const std::string& fontPath);
         
         sf::Text& getSfText();
         std::string getText();

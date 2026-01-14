@@ -14,7 +14,7 @@ if (DEV_COMPILE)
         add_compile_options(-Werror)
 endif ()
 
-add_compile_options(-Wall -Wextra -g)
+add_compile_options(-Wall -Wextra)
 
 set(CPM_DOWNLOAD_VERSION 0.40.2)
 
