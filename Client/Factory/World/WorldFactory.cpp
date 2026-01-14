@@ -103,7 +103,6 @@ void WorldFactory::createEnemyBullet(size_t entityId, int x, int y)
     auto bullet = _world.createEntity(entityId);
     bullet->addComponent<Position>(x, y);
     bullet->addComponent<Rotation>(180.f);
-   // bullet->addComponent<Velocity>(-10.f, 0.f);
     bullet->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet1.gif"));
     bullet->addComponent<Animator>(2, 2, 3.0f, 200, 120, 32, 15, 0, 0);
     bullet->addComponent<Scale>(2.f);
