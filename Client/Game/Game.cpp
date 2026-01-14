@@ -349,32 +349,23 @@ void Game::smootherMovement(int entityId, World &world, float serverX, float ser
 
 void Game::handleSpawn(int id, int type, float x, float y)
 {
-    // ✅ Si type=0 (update), vérifie que l'entity existe
     if (type == 0) {
         auto entity = GameHelper::getEntityById(_world, id);
         if (entity) {
             smootherMovement(id, _world, x, y);
         }
-        // ✅ Si entity n'existe pas, IGNORE (morte ou pas encore créée)
         return;
     }
-
-    // ✅ Pour les spawns (type != 0)
     auto entity = GameHelper::getEntityById(_world, id);
-
     if (entity) {
-        // Entity existe déjà, détruit et recrée
         auto hpComp = entity->getComponent<HP>();
         if (hpComp && !hpComp->isAlive()) {
             _world.killEntity(id);
         } else {
-            // Entity vivante, just update position
             smootherMovement(id, _world, x, y);
             return;
         }
     }
-
-    // Crée l'entity
     switch (type) {
     case Player:
         _factory.createPlayer(id);
@@ -401,7 +392,11 @@ void Game::handleSpawn(int id, int type, float x, float y)
     case EnemyBullet:
         _factory.createEnemyBullet(id, x, y);
         break;
+    case PortalBoss:
+        _factory.createEnemy(x, y, 6, id);
+        break;
     }
+
 }
 
 /**

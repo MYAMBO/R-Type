@@ -67,7 +67,8 @@ void WorldFactory::createEnemy(float x, float y, int type, int entityId)
         FAST,
         TANK,
         SINUS, 
-        SHOOTING
+        SHOOTING,
+        PORTALBOSS
     };
     switch (type) {
         case BASIC:
@@ -84,6 +85,9 @@ void WorldFactory::createEnemy(float x, float y, int type, int entityId)
             break;
         case SHOOTING:
             GameHelper::createShootingEnemy(_world, x, y, entityId);
+            break;
+        case PORTALBOSS:
+            GameHelper::createPortalBoss(_world, x, y, entityId);
             break;
         default:
             std::cerr << "Unknown enemy type: " << type << std::endl;
