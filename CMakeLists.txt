@@ -2,6 +2,26 @@ cmake_minimum_required(VERSION 3.19)
 
 project(R-Type)
 
+
+# =====================================================
+# Force all binaries into the build directory
+# (Visual Studio / multi-config compatible)
+# =====================================================
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+if (CMAKE_CONFIGURATION_TYPES) # Visual Studio / Xcode
+    foreach(CONFIG ${CMAKE_CONFIGURATION_TYPES})
+        string(TOUPPER ${CONFIG} CONFIG)
+        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CONFIG} ${CMAKE_BINARY_DIR})
+        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CONFIG} ${CMAKE_BINARY_DIR})
+        set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CONFIG} ${CMAKE_BINARY_DIR})
+    endforeach()
+endif()
+
+# =====================================================
+
 if (WIN32)
         message(STATUS "Configuring for Windows...")
 elseif(UNIX)
@@ -14,8 +34,19 @@ if (DEV_COMPILE)
         add_compile_options(-Werror)
 endif ()
 
-add_compile_options(-Wall -Wextra)
-
+if (MSVC)
+    # /W4 is the recommended high-level warning level for MSVC
+    add_compile_options(/W4)
+    if (DEV_COMPILE)
+        add_compile_options(/WX) # This is the MSVC equivalent of -Werror
+    endif()
+else()
+    # Flags for GCC and Clang
+    add_compile_options(-Wall -Wextra)
+    if (DEV_COMPILE)
+        add_compile_options(-Werror)
+    endif()
+endif()
 if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake")
     file(DOWNLOAD
         https://raw.githubusercontent.com/cpm-cmake/CPM.cmake/master/cmake/CPM.cmake
@@ -87,6 +118,7 @@ include_directories(Client/Creator)
 include_directories(Client/GameHelper)
 include_directories(Client/ScriptsHandler)
 include_directories(Server/LevelLoader)
+include_directories(Server/GetOpt)
 include_directories(./Server)
 include_directories(./Server/Core)
 include_directories(./Packet)
@@ -115,9 +147,9 @@ add_executable(r-type_server
         ECS/System/Collision/Collision.cpp
         ECS/World.cpp
         ECS/Component/HP/HP.cpp
-        ECS/Component/Damage/Damage.cpp
         Client/GameHelper/GameHelper.cpp
         Server/LevelLoader/LevelLoader.cpp
+        Server/GetOpt/GetOpt.cpp
         ECS/Component/Tag/Tag.cpp
         ECS/Component/Scale/Scale.cpp
         ECS/Component/Layer/Layer.cpp
@@ -179,8 +211,8 @@ add_executable(r-type_client
         Packet/Packet.cpp
         Packet/MyString.cpp
         Client/Core/Network.cpp
-        Client/Core/ClientPacketreader.cpp)
+        Client/Core/ClientPacketreader.cpp "Server/GetOpt/GetOpt.cpp")
 
-target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network sfml-audio tgui)
+target_link_libraries(r-type_client sfml-main sfml-graphics sfml-window sfml-system sfml-network sfml-audio tgui)
 
-target_link_libraries(r-type_server  sfml-graphics sfml-system sfml-network)
+target_link_libraries(r-type_server sfml-main sfml-graphics sfml-system sfml-network)

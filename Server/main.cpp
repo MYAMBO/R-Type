@@ -18,9 +18,8 @@
  * @retval 0 Successful execution.
  * @retval 1 Execution error.
  */
-auto main(int ac, char **av) -> int
+int main(int ac, char **av)
 {
-
 	try
 	{
 		Server server;

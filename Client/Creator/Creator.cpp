@@ -690,10 +690,10 @@ void Creator::createTguiOptions()
         }        
     };
 
-    static bool godMode = false;
-    static bool easyMode = false;
-    static bool hardMode = false;
-    static bool disclexiaMode = false;
+    bool godMode = false;
+    bool easyMode = false;
+    bool hardMode = false;
+    bool disclexiaMode = false;
     createColorBlindCycle("COLORBLIND");
     createOptionToggle("GOD MODE", godMode);
     createOptionToggle("EASY MODE", easyMode);

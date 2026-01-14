@@ -14,7 +14,6 @@
 #include <mutex>
 #include <cstring>
 #include <queue>
-#include <unistd.h>
 
 #include "IGameNetwork.hpp"
 #include "Packet.hpp"
