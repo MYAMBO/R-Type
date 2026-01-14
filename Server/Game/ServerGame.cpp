@@ -267,6 +267,26 @@ void ServerGame::createSinusShootingEnemy(const float x, const float y)
     _network.sendPacket(packet);
 }
 
+void ServerGame::createSinusShootingEnemy(const float x, const float y)
+{
+    const auto enemy = _world.createEntity();
+    enemy->addComponent<HP>(150);
+    enemy->addComponent<Damage>(10);
+    enemy->addComponent<Position>(x, y);
+    enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+    enemy->addComponent<Tag>("enemy");
+    enemy->addComponent<Script>(
+        [this](const int entityId, World& world)
+        {
+            this->EnemySinusMovement(entityId, world);
+            this->ShootingAction(entityId, world);
+        }
+    );
+    Packet packet;
+    packet.positionSpawn(enemy->getId(), ShootingEnemy, x, y);
+    _network.sendPacket(packet);
+}
+
 /**
  * @brief Create a wave of enemies
  */
@@ -375,6 +395,7 @@ void ServerGame::handleNewPlayer()
         _gameStarted = true;
         _waveTimer.restart();
         startLevel(5);   // Need to change that later to have a level management
+
     }
 }
 
