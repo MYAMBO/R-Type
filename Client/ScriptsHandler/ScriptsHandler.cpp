@@ -259,8 +259,8 @@ void dotScript(int entityId, World& world)
         }
     } else if (availableSpace <= 221.f) {
         if (!used) {
-            Creator::createSparks(world, centerX, centerY, 20);
-            Creator::createSparks(world, centerX, centerY + 100.f, 20);
+            EffectFactory::createSparks(world, centerX, centerY, 20);
+            EffectFactory::createSparks(world, centerX, centerY + 100.f, 20);
             used = true;
         }
         rect->setSize(9.0f, 1000.f);
@@ -662,6 +662,7 @@ void creditsNameScript(int id, World& w)
 
 void availabilitySettingsScript(int entityId, World& world)
 {
+    (void)entityId;
     auto entity = GameHelper::getEntityById(world, entityId);
     if (!entity)
         return;
@@ -676,10 +677,16 @@ void availabilitySettingsScript(int entityId, World& world)
                 continue;
             auto textComp = entity->getComponent<Text>();
             auto guiWidgetComp = entity->getComponent<GuiWidget>();
-            if (textComp)
-                textComp->setFont("../assets/font/dyslexic.otf");
-            if (guiWidgetComp)
-                guiWidgetComp->setFont("../assets/font/dyslexic.otf");
+            if (textComp) {
+                auto currentFont = textComp->getFontPath();
+                if (currentFont.find("regular.ttf") != std::string::npos)
+                    textComp->setFont("../assets/font/dyslexic.otf");
+            }
+            if (guiWidgetComp) {
+                auto currentFont = guiWidgetComp->getFontPath();
+                if (currentFont.find("regular.ttf") != std::string::npos)
+                    guiWidgetComp->setFont("../assets/font/dyslexic.otf");
+            }
         }
         dataComp->setData("lastfont_used", "dyslexic");
     } else if (!disclexiaMode && dataComp->getData("lastfont_used") != "regular") {
@@ -688,10 +695,16 @@ void availabilitySettingsScript(int entityId, World& world)
                 continue;
             auto textComp = entity->getComponent<Text>();
             auto guiWidgetComp = entity->getComponent<GuiWidget>();
-            if (textComp)
-                textComp->setFont("../assets/font/regular.ttf");
-            if (guiWidgetComp)
-                guiWidgetComp->setFont("../assets/font/regular.ttf");
+            if (textComp) {
+                auto currentFont = textComp->getFontPath();
+                if (currentFont.find("dyslexic.otf") != std::string::npos)
+                    textComp->setFont("../assets/font/regular.ttf");
+            }
+            if (guiWidgetComp) {
+                auto currentFont = guiWidgetComp->getFontPath();
+                if (currentFont.find("dyslexic.otf") != std::string::npos)
+                    guiWidgetComp->setFont("../assets/font/regular.ttf");
+            }
         }
         dataComp->setData("lastfont_used", "regular");
     }

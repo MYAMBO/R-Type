@@ -9,43 +9,37 @@
 
 #include <cmath>
 #include <thread>
+#include <fstream>
+#include <json.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/VideoMode.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
+#include "iostream"
 
 #include "HP.hpp"
-#include "Tag.hpp" 
+#include "Tag.hpp"
+#include "Draw.hpp"
 #include "Text.hpp"
 #include "Data.hpp"
-#include "Layer.hpp"
-#include "Scale.hpp"
 #include "Scene.hpp"
+#include "Action.hpp"
 #include "Audio.hpp"
-#include "Group.hpp"
 #include "Music.hpp"
 #include "Inputs.hpp"
-#include "Sprite.hpp"
 #include "Entity.hpp"
 #include "Script.hpp"
 #include "Camera.hpp"
 #include "Button.hpp"
-#include "Creator.hpp"
+#include "Factory.hpp"
 #include "Velocity.hpp"
 #include "Position.hpp"
-#include "Animator.hpp"
-#include "Rotation.hpp"
 #include "GameHelper.hpp"
 #include "SoundEffect.hpp"
-#include "BoxCollider.hpp"
 #include "RectangleShape.hpp"
-#include "ScriptsHandler.hpp"
 
-#include "Draw.hpp"
 #include "Mouse.hpp"
-#include "Audio.hpp"
-#include "Inputs.hpp"
 #include "TextSys.hpp"
 #include "Movement.hpp"
 #include "CameraSys.hpp"
@@ -67,17 +61,17 @@
  * @param title The title of the game window. Default is "Game".
  */
 Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const std::string& title)
-    : _window(sf::VideoMode({width, height}), title), _network(network), _creator(_world)
+    : _window(sf::VideoMode({width, height}), title), _network(network), _factory(_world)
 {
     _world.addSystem<CameraSys>();
     _world.addSystem<ScriptsSys>();
     _world.addSystem<TextSystem>();
     _world.addSystem<Movement>();
-    _world.addSystem<Animation>();
     _world.addSystem<Collision>();
     _world.addSystem<DeathSys>();
     _world.addSystem<Mouse>();
     _world.addSystem<Inputs>();
+    _world.addSystem<Animation>();
     _world.addSystem<Draw>();
     _world.addSystem<GuiSystem>(_window);
     _world.addSystem<Audio>();
@@ -137,7 +131,7 @@ void Game::updateLoadingState(float progress, const std::string& status)
             posComp->setY(centerY + 40.f);
         }
     }
-    _window.clear(sf::Color(5, 5, 15)); 
+    _window.clear(sf::Color(5, 5, 15));
     _world.manageSystems();
     _window.display();
 }
@@ -147,13 +141,15 @@ void Game::loadingRun()
     _window.setFramerateLimit(30);
     _world.setWindow(_window);
     _world.setDeltaTime(1.f);
+    _factory.createGameTools();
 
     _world.setCurrentScene(static_cast<int>(SceneType::MYAMBO));
 
+    loadfile();
     auto inputSystem = _world.getSystem<Inputs>();
 
-    _creator.createMyambo();
-    _creator.createKayu();
+    _factory.createMyambo();
+    _factory.createKayu();
     int timeout = 180;
 
     while (_world.getCurrentScene() == static_cast<int>(SceneType::MYAMBO)) {
@@ -188,22 +184,23 @@ void Game::loadingRun()
     }
     _world.setCurrentScene(static_cast<int>(SceneType::LOADING));
 
-    _creator.createLoadingScreen();
+    _factory.createLoadingScreen();
 
     updateLoadingState(0.0f, "Initializing systems...");
-    _creator.createGameTools();
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     updateLoadingState(0.1f, "Loading assets...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
-    _creator.createCamera();
+    _factory.createCamera();
     updateLoadingState(0.3f, "Generating Menu...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
-    _creator.createTguiMenu();
+    _factory.createMenu();
     updateLoadingState(0.6f, "Generating Background...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
-    _creator.createBackground(_window); 
-    _creator.createCredits();
+    _factory.createBackground(_window); 
+    _factory.createCredits();
     updateLoadingState(0.8f, "Connecting to server...");
+    Packet packet;
+
     run();
 }
 
@@ -220,20 +217,20 @@ void Game::run()
     entermusic->addComponent<SoundEffect>("../assets/sounds/loading.mp3", 100.f);
     entermusic->addComponent<Scene>(static_cast<int>(SceneType::LOADING));
     entermusic->addComponent<Tag>("entering_game_music");
-    
+
     Packet packet;
     packet.setId(0);
     packet.setAck(0);
     packet.setPacketNbr(1);
     packet.setTotalPacketNbr(1);
-    packet.positionSpawn(0, Player, 300, 300);
+    packet.Spawn(0, Player, 300, 300);
     _network.sendPacket(packet);
-    
+
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     entermusic->getComponent<SoundEffect>()->play();
     updateLoadingState(1.0f, "Ready!");
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    
+
     _world.setCurrentScene(static_cast<int>(SceneType::MENU));
     auto musicmenu = GameHelper::getEntityByTag(_world, "menu_music");
     if (musicmenu) {
@@ -247,6 +244,7 @@ void Game::run()
         _world.manageSystems();
         _window.display();
     }
+    savefile();
 }
 
 /**
@@ -282,32 +280,62 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
     }
 }
 
-
+/**
+ * @brief Creates the player entity.
+ *
+ * This function initializes the player entity with necessary components.
+ */
 void Game::smootherMovement(int entityId, World &world, float serverX, float serverY)
 {
     auto entity = GameHelper::getEntityById(world, entityId);
     if (!entity)
         return;
+    auto pos = entity->getComponent<Position>();
+    if (!pos)
+        return;
     if (!entity->getComponent<Velocity>()) {
-        auto pos = entity->getComponent<Position>();
         pos->setX(serverX);
         pos->setY(serverY);
         return;
     }
-    auto pos = entity->getComponent<Position>();
 
     float dist = std::hypot(serverX - pos->getX(), serverY - pos->getY());
-
     if (dist > 100.0f) {
         pos->setX(serverX);
         pos->setY(serverY);
     }
     pos->setTargetX(serverX);
     pos->setTargetY(serverY);
-
 }
 
-void Game::handleSpawn(int id, int type, float x, float y)
+/**
+ * @brief Create Enemy
+ * This function initializes an enemy entity with necessary components.
+*/
+void Game::createEnemy(float x, float y, uint16_t type)
+{
+    enum EnemyType {
+        BASIC = 1,
+        FAST,
+        TANK
+    };
+    switch (type) {
+        case BASIC:
+            _creator.createEnemy(x, y, 1, 0);
+            break;
+        case FAST:
+            // Implement fast enemy creation
+            break;
+        case TANK:
+            // Implement tank enemy creation
+            break;
+        default:
+            std::cerr << "Unknown enemy type: " << type << std::endl;
+            break;
+    }
+}
+
+void Game::updateEntity(uint32_t id, uint16_t type, float x, float y)
 {
     auto entity = GameHelper::getEntityById(_world, id);
 
@@ -320,7 +348,7 @@ void Game::handleSpawn(int id, int type, float x, float y)
     }
     switch (type) {
     case Player:
-        _creator.createPlayer(id);
+        _factory.createPlayer(id);
         entity = GameHelper::getEntityById(_world, id);
         if (entity && entity->getComponent<Tag>()->getTag() == "player") {
             entity->addComponent<Script>([this](const int entityId, World& world)
@@ -330,14 +358,32 @@ void Game::handleSpawn(int id, int type, float x, float y)
         }
         break;
     case Enemy:
-        _creator.createEnemy(x, y, 1, id);
+        _factory.createEnemy(x, y, 1, id);
         break;
     case EnemySinus:
-        _creator.createEnemy(x, y, 4, id);
+        _factory.createEnemy(x, y, 4, id);
         break;
     case Bullet:
-        _creator.createBullet(id, x, y, type);
+        _factory.createBullet(id, x, y, type);
         break;
+    case EnemyBullet:
+        _factory.createEnemyBullet(id, x, y);
+        break;
+    case ShootingEnemy:
+        _factory.createEnemy(x, y, 5, id);
+        break;
+    }
+}
+
+void Game::createPlayer(uint32_t id)
+{
+    _creator.createPlayer(id);
+    auto entity = GameHelper::getEntityById(_world, id);
+    if (entity && entity->getComponent<Tag>()->getTag() == "player") {
+        entity->addComponent<Script>([this](const uint32_t entityId, World& world)
+        {
+            this->playerInput(entityId, world);
+        });
     }
 }
 
@@ -350,7 +396,7 @@ void Game::handleSpawn(int id, int type, float x, float y)
  * @param entityId The unique ID of the player entity.
  * @param world The game world containing entities and components.
  */
-void Game::playerInput(int entityId, World &world)
+void Game::playerInput(uint32_t entityId, World &world)
 {
     if (world.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
         return;
@@ -360,8 +406,10 @@ void Game::playerInput(int entityId, World &world)
     auto inputSystem = world.getSystem<Inputs>();
     std::shared_ptr<Camera> compCam = GameHelper::getMainCamera(world);
     std::shared_ptr<Entity> compPlayer = GameHelper::getEntityByTag(world, "player");
+    auto settings = GameHelper::getEntityByTag(world, "game_controls_settings");
+    auto data = settings->getComponent<Data>();
 
-    if (!compCam || !compPlayer)
+    if (!compCam || !compPlayer || !inputSystem || !data)
         return;
 
     auto pos = compPlayer->getComponent<Position>();
@@ -371,25 +419,26 @@ void Game::playerInput(int entityId, World &world)
     float targetVy = 0.0f;
     bool moved = false;
 
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_D)) {
+
+    if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("RIGHT")))) {
         if (compCam->getPosition().x + compCam->getSize().x > pos->getX() + 7.0f) {
             targetVx = 7.0f;
             moved = true;
         }
     }
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_Q)) {
+    if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("LEFT")))) {
         if (compCam->getPosition().x < pos->getX() - 7.0f) {
             targetVx = -7.0f;
             moved = true;
         }
     }
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_Z)) {
+    if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("UP")))) {
         if (compCam->getPosition().y < pos->getY() - 7.0f) {
             targetVy = -7.0f;
             moved = true;
         }
     }
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_S)) {
+    if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("DOWN")))) {
         if (compCam->getPosition().y + compCam->getSize().y > pos->getY() + 7.0f) {
             targetVy = 7.0f;
             moved = true;
@@ -398,11 +447,11 @@ void Game::playerInput(int entityId, World &world)
     vel->setVelocityX(targetVx);
     vel->setVelocityY(targetVy);
 
-    if (inputSystem->isKeyPressed(KeyboardKey::Key_Space)) {
+    if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("SHOOT")))) {
         auto dataComp = compPlayer->getComponent<Data>();
         if (!isShootKeyPressed && dataComp && std::stoi(dataComp->getData("mana")) >= 20) {
             Packet packet;
-            packet.shoot(compPlayer->getId());
+            packet.action(compPlayer->getId(), FIRE, 0);
             packet.setAck(0);
             packet.setId(compPlayer->getId());
             packet.setPacketNbr(1);
@@ -423,15 +472,14 @@ void Game::playerInput(int entityId, World &world)
     }
     if (moved)
     {
-        Packet packet;
-        packet.playerPosition(entityId, pos->getX(), pos->getY());
+        Packet packet = Packet();
+        packet.updatePosition(entityId, pos->getX(), pos->getY());
         packet.setAck(1);
         packet.setId(compPlayer->getId());
         packet.setPacketNbr(1);
         packet.setTotalPacketNbr(1);
         _network.sendPacket(packet);
     }
-    playerScript(entityId, world);
 }
 
 /**
@@ -447,4 +495,90 @@ int Game::killEntity(int id)
         return -1;
     _world.killEntity(id);
     return 0;
+}
+
+void Game::savefile()
+{
+    nlohmann::json save;
+    std::vector<std::string> tagsToSave = {
+        "game_volume_settings",
+        "game_controls_settings",
+        "game_availability_settings"
+    };
+    for (const auto& tag : tagsToSave) {
+        auto entity = GameHelper::getEntityByTag(_world, tag);
+        if (entity) {
+            auto dataComp = entity->getComponent<Data>();
+            if (dataComp) {
+                save[tag] = dataComp->getDataSet();
+            }
+        }
+    }
+    std::ofstream file("settings.json");
+    if (file.is_open()) {
+        file << save.dump(4);
+        file.close();
+        std::cout << "[Config] Settings saved to settings.json" << std::endl;
+    } else {
+        std::cerr << "[Config] ERROR: Could not open settings.json for writing" << std::endl;
+    }
+}
+
+void Game::loadfile()
+{
+    std::ifstream file("settings.json");
+    if (!file.is_open()) {
+        std::cout << "[Config] No settings file found, using default values." << std::endl;
+        return;
+    }
+    try {
+        nlohmann::json save;
+        file >> save;
+        file.close();
+        for (auto& [tag, settings] : save.items()) {
+            auto entity = GameHelper::getEntityByTag(_world, tag);
+            if (entity) {
+                auto dataComp = entity->getComponent<Data>();
+                if (dataComp) {
+                    for (auto& [key, value] : settings.items()) {
+                        dataComp->setData(key, value.get<std::string>());
+                    }
+                }
+            }
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "[Config] ERROR while loading settings: " << e.what() << std::endl;
+    }
+}
+
+void Game::handleAction(const uint32_t id, const uint8_t action, const uint32_t data)
+{
+    switch (action) {
+        case HEAL: {
+            healEntity(id, data);
+            break;
+        }
+        case BEAM: {
+            break;
+        }
+        case SHIELD: {
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void Game::healEntity(const uint32_t entityId, const uint32_t amount)
+{
+    const auto entity = GameHelper::getEntityById(_world, entityId);
+
+    const unsigned int hpMax = entity->getComponent<HP>()->getMaxHP();
+    const unsigned int actualHp = entity->getComponent<HP>()->getHP();
+
+    if (actualHp + amount > hpMax) {
+        entity->getComponent<HP>()->setHP(hpMax);
+    } else {
+        entity->getComponent<HP>()->setHP(actualHp + amount);
+    }
 }

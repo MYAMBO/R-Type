@@ -84,7 +84,7 @@ void GuiWidget::setScale(float x, float y)
  */
 void GuiWidget::setVisible(bool visible)
 {
-    _widget->setVisible(visible);
+    _isVisible = visible;
 }
 
 /**
@@ -207,6 +207,7 @@ void GuiWidget::setTextStyle(tgui::TextStyle style)
  */
 void GuiWidget::setFont(const std::string& fontPath)
 {
+    _fontPath = fontPath;
     _widget->getRenderer()->setFont(tgui::Font(fontPath));
 }
 
@@ -409,4 +410,22 @@ void GuiWidget::addSpace(float ratio)
 {
     if (auto layout = std::dynamic_pointer_cast<tgui::VerticalLayout>(_widget))
         layout->addSpace(ratio);
+}
+
+/**
+ * @brief Check if the widget is visible.
+ * @return True if visible, false otherwise
+ */
+bool GuiWidget::isVisible() const
+{
+    return _isVisible;
+}
+
+/**
+ * @brief Get the font path of the widget.
+ * @return The font path
+ */
+std::string GuiWidget::getFontPath() const
+{
+    return _fontPath;
 }

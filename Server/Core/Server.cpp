@@ -24,7 +24,7 @@ Server::Server()
     _udpPort = -1;
     _debugMode = false;
     _game = std::make_shared<ServerGame>(*this);
-    _packetReader = Packetreader("", _game);
+    _packetReader = Packetreader(sf::Packet(), _game);
 }
 
 /**
@@ -165,11 +165,7 @@ void Server::udpThread()
         if (!sender.has_value())
             continue;
 
-        const void* raw = p.getData();
-        const std::size_t size = p.getDataSize();
-
-        std::string data(static_cast<const char*>(raw), size);
-        _packetReader.addData(data);
+        _packetReader.addPacket(p);
         try
         {
             _packetReader.interpretPacket();
