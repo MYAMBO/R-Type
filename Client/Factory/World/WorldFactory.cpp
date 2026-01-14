@@ -35,7 +35,7 @@ void WorldFactory::createBullet(size_t entityId, int x, int y, int type)
     } else {
         bullet->addComponent<Position>(x - 20.f , y + 15.f);
         bullet->addComponent<Rotation>(180.f);
-        bullet->addComponent<Velocity>(-10.f, 0.f);
+        //bullet->addComponent<Velocity>(-10.f, 0.f);
     }
     bullet->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet1.gif"));
     bullet->addComponent<Scale>(2.f);

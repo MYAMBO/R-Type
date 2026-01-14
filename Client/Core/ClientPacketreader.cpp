@@ -72,6 +72,8 @@ void ClientPacketreader::interpretPacket()
                 uint32_t id;
                 if (payload >> id) {
                     std::cout << "Entity " << id << " dead" << std::endl;
+                    if (_game)
+                        _game->killEntity(id);
                 }
                 break;
             }
@@ -95,42 +97,6 @@ void ClientPacketreader::interpretPacket()
                 return;
         }
     }
-}
-
-void ClientPacketreader::clear()
-{
-    _data.clear();
-}
-
-/**
- * @brief interpret hit action
- */
-void ClientPacketreader::hit()
-{
-    int id = std::stoi( _data.mySubStr(0, 16), nullptr, 16);
-    int damage = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
-
-    // call function and give parameter
-}
-
-/**
- * @brief interpret dead action
- */
-void ClientPacketreader::dead()
-{
-    int id = std::stoi( _data.mySubStr(0, 16), nullptr, 16);
-    _game->killEntity(id);
-}
-
-/**
- * @brief interpret endGame action
- */
-void ClientPacketreader::endGame()
-{
-    unsigned int id = std::stoi(_data.mySubStr(0, 16), nullptr, 16);
-
-    // call function and give parameter
-    _packet.clear();
 }
 
 /**
