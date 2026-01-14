@@ -67,8 +67,6 @@ Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const
     _world.addSystem<ScriptsSys>();
     _world.addSystem<TextSystem>();
     _world.addSystem<Movement>();
-    _world.addSystem<Collision>();
-    _world.addSystem<DeathSys>();
     _world.addSystem<Mouse>();
     _world.addSystem<Inputs>();
     _world.addSystem<Animation>();
@@ -337,14 +335,22 @@ void Game::createEnemy(float x, float y, uint16_t type)
 
 void Game::updateEntity(uint32_t id, uint16_t type, float x, float y)
 {
+    if (type == 0) {
+        auto entity = GameHelper::getEntityById(_world, id);
+        if (entity) {
+            smootherMovement(id, _world, x, y);
+        }
+        return;
+    }
     auto entity = GameHelper::getEntityById(_world, id);
-
     if (entity) {
         auto hpComp = entity->getComponent<HP>();
-        if (hpComp && !hpComp->isAlive())
+        if (hpComp && !hpComp->isAlive()) {
+            _world.killEntity(id);
+        } else {
+            smootherMovement(id, _world, x, y);
             return;
-        smootherMovement(id, _world, x, y);
-        return;
+        }
     }
     switch (type) {
     case Player:
@@ -363,16 +369,20 @@ void Game::updateEntity(uint32_t id, uint16_t type, float x, float y)
     case EnemySinus:
         _factory.createEnemy(x, y, 4, id);
         break;
+    case ShootingEnemy:
+        _factory.createEnemy(x, y, 5, id);
+        break;
     case Bullet:
         _factory.createBullet(id, x, y, type);
         break;
     case EnemyBullet:
         _factory.createEnemyBullet(id, x, y);
         break;
-    case ShootingEnemy:
-        _factory.createEnemy(x, y, 5, id);
+    case PortalBoss:
+        _factory.createEnemy(x, y, 6, id);
         break;
     }
+
 }
 
 void Game::createPlayer(uint32_t id)

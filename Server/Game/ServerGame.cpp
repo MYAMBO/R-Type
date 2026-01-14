@@ -34,9 +34,9 @@
 ServerGame::ServerGame(IGameNetwork& network) : _network(network)
 {
     _world.addSystem<ScriptsSys>();
+    _world.addSystem<Collision>();
+    _world.addSystem<DeathSys>(_network);
     _world.addSystem<Movement>();
-    // _world.addSystem<Collision>();
-    _world.addSystem<DeathSys>();
     _world.setDeltaTime(1.f);
 }
 
@@ -84,6 +84,7 @@ void ServerGame::createPlayer(const float x, const float y)
     player->addComponent<Position>(x, y);
     player->addComponent<BoxCollider>(10.f, 10.f);
     player->addComponent<Tag>("player");
+    player->addComponent<Damage>(10);
     Packet packet;
     packet.Spawn(player->getId(), Player, x, y);
     // send all the entity to the client
@@ -177,7 +178,7 @@ void ServerGame::ShootingAction(int entityId, World& world)
     if (timers[entityId] >= 60.0f)
     {
         timers[entityId] = 0.0f;
-        createEnemyBullet(pos->getX(), pos->getY());
+        createEnemyBullet(pos->getX() + 30, pos->getY() + 30);
     }
 }
 
@@ -192,8 +193,9 @@ void ServerGame::createEnemy(const float x, const float y)
 {
     const auto enemy = _world.createEntity();
     enemy->addComponent<HP>(100);
+    enemy->addComponent<Damage>(10);
     enemy->addComponent<Position>(x, y);
-    enemy->addComponent<BoxCollider>(10.f, 10.f);
+    enemy->addComponent<BoxCollider>(66.0f, 60.0f);
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<Script>(
         [this](const int entityId, World& world)
@@ -210,8 +212,9 @@ void ServerGame::createSinusEnemy(const float x, const float y)
 {
     const auto enemy = _world.createEntity();
     enemy->addComponent<HP>(150);
+    enemy->addComponent<Damage>(10);
     enemy->addComponent<Position>(x, y);
-    enemy->addComponent<BoxCollider>(10.f, 10.f);
+    enemy->addComponent<BoxCollider>(66.0f, 60.0f);
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<Script>(
         [this](const int entityId, World& world)
@@ -228,13 +231,34 @@ void ServerGame::createShootingEnemy(const float x, const float y)
 {
     const auto enemy = _world.createEntity();
     enemy->addComponent<HP>(150);
+    enemy->addComponent<Damage>(10);
     enemy->addComponent<Position>(x, y);
-    enemy->addComponent<BoxCollider>(10.f, 10.f);
+    enemy->addComponent<BoxCollider>(66.0f, 52.0f);
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<Script>(
         [this](const int entityId, World& world)
         {
             this->EnemyMovement(entityId, world);
+            this->ShootingAction(entityId, world);
+        }
+    );
+    Packet packet;
+    packet.positionSpawn(enemy->getId(), ShootingEnemy, x, y);
+    _network.sendPacket(packet);
+}
+
+void ServerGame::createSinusShootingEnemy(const float x, const float y)
+{
+    const auto enemy = _world.createEntity();
+    enemy->addComponent<HP>(150);
+    enemy->addComponent<Damage>(10);
+    enemy->addComponent<Position>(x, y);
+    enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+    enemy->addComponent<Tag>("enemy");
+    enemy->addComponent<Script>(
+        [this](const int entityId, World& world)
+        {
+            this->EnemySinusMovement(entityId, world);
             this->ShootingAction(entityId, world);
         }
     );
@@ -289,10 +313,11 @@ void ServerGame::createBullet(const float x, const float y)
     const auto bullet = _world.createEntity();
 
     bullet->addComponent<Position>(x + 60.f, y + 15.f);
-    bullet->addComponent<BoxCollider>(5.f, 5.f);
+    bullet->addComponent<BoxCollider>(64.0f, 30.0f);
     bullet->addComponent<Velocity>(10.f, 0.f);
     bullet->addComponent<Tag>("player_bullet");
-    bullet->addComponent<Damage>(10);
+    bullet->addComponent<HP>(10);
+    bullet->addComponent<Damage>(50);
     bullet->addComponent<Script>(
         [this](const uint32_t entityId, World& world)
         {
@@ -310,10 +335,11 @@ void ServerGame::createEnemyBullet(const float x, const float y)
     const auto bullet = _world.createEntity();
 
     bullet->addComponent<Position>(x - 60.f, y + 15.f);
-    bullet->addComponent<BoxCollider>(5.f, 5.f);
+    bullet->addComponent<BoxCollider>(64.0f, 30.0f);
     bullet->addComponent<Velocity>(-10.f, 0.f);
     bullet->addComponent<Tag>("enemy_bullet");
     bullet->addComponent<Damage>(10);
+    bullet->addComponent<HP>(10);
     bullet->addComponent<Script>(
         [this](const int entityId, World& world)
         {
@@ -344,7 +370,6 @@ void ServerGame::handleNewPlayer()
         _gameStarted = true;
         _waveTimer.restart();
         startLevel(3);   // Need to change that later to have a level management
-        std::cout << "Game started! Enemy waves will spawn every 20 seconds" << std::endl;
     }
 }
 
@@ -390,7 +415,12 @@ void ServerGame::serverUpdatePosition(const uint32_t id, const float x, const fl
 void ServerGame::handleShoot(const uint32_t id)
 {
     const auto entity = GameHelper::getEntityById(_world, id);
+    if (!entity) {
+        return;
+    }
     const auto pos = entity->getComponent<Position>();
+    if (!pos)
+        return;
     createBullet(pos->getX(), pos->getY());
 }
 
@@ -417,10 +447,8 @@ void ServerGame::checkDeaths()
         auto hp = entity->getComponent<HP>();
         if (!hp || hp->getHP() > 0)
             continue;
-
         if (hp->isAlive()) {
             hp->setAlive(false);
-
             Packet packet;
             packet.dead(entity->getId());
             _network.sendPacket(packet);
@@ -428,6 +456,27 @@ void ServerGame::checkDeaths()
         }
     }
 }
+
+
+void ServerGame::createPortalBoss(const float x, const float y)
+{
+    const auto enemy = _world.createEntity();
+    enemy->addComponent<HP>(5000);
+    enemy->addComponent<Damage>(10);
+    enemy->addComponent<Position>(x, y);
+    enemy->addComponent<BoxCollider>(50.0f, 5000.0f);
+    enemy->addComponent<Tag>("enemy");
+    enemy->addComponent<Script>(
+        [this](const int entityId, World& world)
+        {
+           // this->EnemySinusMovement(entityId, world);
+        }
+    );
+    Packet packet;
+    packet.positionSpawn(enemy->getId(), PortalBoss, x, y);
+    _network.sendPacket(packet);
+}
+
 /**
  * @brief Receive action with id and data and call corresponding function
  *
