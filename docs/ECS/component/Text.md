@@ -17,15 +17,16 @@ This component requires a specific system to be rendered and interacts with spat
 
 ### Public Methods
 
-| Method | Signature | Description |
-|:------|:----------|:------------|
-| **Set String** | `void setString(const std::string& str);` | Updates the text content to be displayed. |
-| **Set Size** | `void setSize(unsigned int size);` | Updates the character size (in pixels). |
-| **Set Color** | `void setColor(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255);` | Updates the text fill color. |
-| **Get SFML Text** | `sf::Text& getSfText();` | Returns a mutable reference to the internal SFML text object (for advanced modifications). |
-| **Get Content** | `std::string getText();` | Returns the current string content. |
-| **Get Bounds** | `sf::FloatRect getGlobalBounds() const;` | Returns the bounding box of the text (useful for alignment or collision). |
-| **Get Size** | `unsigned int getSize() const;` | Returns the Size of the text |
+| Method            | Signature                                                                       | Description                                                                                |
+|:------------------|:--------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------|
+| **Set String**    | `void setString(const std::string& str);`                                       | Updates the text content to be displayed.                                                  |
+| **Set Size**      | `void setSize(unsigned int size);`                                              | Updates the character size (in pixels).                                                    |
+| **Set Color**     | `void setColor(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255);` | Updates the text fill color.                                                               |
+| **Get SFML Text** | `sf::Text& getSfText();`                                                        | Returns a mutable reference to the internal SFML text object (for advanced modifications). |
+| **Get Content**   | `std::string getText();`                                                        | Returns the current string content.                                                        |
+| **Get Bounds**    | `sf::FloatRect getGlobalBounds() const;`                                        | Returns the bounding box of the text (useful for alignment or collision).                  |
+| **Get Size**      | `unsigned int getSize() const;`                                                 | Returns the Size of the text                                                               |
+| **Get Font Path** | `std::string getFontPath() const;`                                              | Returns the Font Path of the text                                                          |
 
 ---
 

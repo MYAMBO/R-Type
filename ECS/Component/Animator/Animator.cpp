@@ -27,9 +27,9 @@ Animator::Animator(const int nbFrame, const int framePerRow, const float frameRa
     const int startX, const int startY, const int frameWidth,
     const int frameHeight, const int offsetX, const int offsetY)
     :   _startX(startX), _startY(startY),
-        _offsetX(offsetX), _offsetY(offsetY), _frameWidth(frameWidth), _framePerRow(framePerRow),
-        _frameHeight(frameHeight), _nbFrame(nbFrame), _frameRate(frameRate),
-        _currentFrame(0), _currentTime(0.f)
+        _offsetX(offsetX), _offsetY(offsetY), _frameWidth(frameWidth), _frameHeight(frameHeight), 
+        _nbFrame(nbFrame), _frameRate(frameRate),
+        _currentFrame(0), _currentTime(0.f),  _framePerRow(framePerRow)
 {
     if (nbFrame <= 0) {
         _nbFrame = 1;

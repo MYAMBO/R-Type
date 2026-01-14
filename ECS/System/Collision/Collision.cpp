@@ -34,12 +34,8 @@ void Collision::update(const float &, World &w)
             if (!colA || !colB || !posA || !posB)
                 continue;
 
-            if (checkCollision(*colA, *posA, *colB, *posB)) {
-                std::cout << "[Collision] Entity "
-              << a->getId() << " <-> "
-              << b->getId() << std::endl;
+            if (checkCollision(*colA, *posA, *colB, *posB))
                 handleCollisionDamage(a, b);
-            }
         }
     }
 }
@@ -104,14 +100,12 @@ void Collision::handleCollisionDamage(const std::shared_ptr<Entity> &a,
         applyDamage(b, a);
     }
 
-    // to use later when player can be hit by enemy bullet
-
-    // else if ((strTagA == "player" && strTagB == "enemy_bullet") ||
-    //     (strTagB == "player" && strTagA == "enemy_bullet")) {
-    //     auto target = (strTagA == "player") ? a : b;
-    //     auto bullet = (strTagA == "enemy_bullet") ? a : b;
-    //     applyDamage(bullet, target);
-    // }
+    else if ((strTagA == "player" && strTagB == "enemy_bullet") ||
+        (strTagB == "player" && strTagA == "enemy_bullet")) {
+        auto target = (strTagA == "player") ? a : b;
+        auto bullet = (strTagA == "enemy_bullet") ? a : b;
+        applyDamage(bullet, target);
+    }
 }
 
 /**
@@ -126,11 +120,7 @@ void Collision::applyDamage(const std::shared_ptr<Entity> &attacker,
     auto damage = attacker->getComponent<Damage>();
     auto hp = target->getComponent<HP>();
 
-    if (damage && hp) {
+    if (damage && hp)
         hp->setHP(hp->getHP() - damage->getDamage());
-        std::cout << "[Damage] Entity " << target->getId()
-                  << " took " << damage->getDamage() << " damage ("
-                  << hp->getHP() << " HP left)" << std::endl;
-    }
 }
 

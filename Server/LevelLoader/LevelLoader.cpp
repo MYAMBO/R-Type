@@ -52,6 +52,9 @@ void LevelLoader::loadFromFile(const std::string &path, ServerGame *server)
                 else if (type == "sinus_enemy") {
                     server->createSinusEnemy(x, y);
                 }
+                else if (type == "shooting_enemy") {
+                    server->createShootingEnemy(x, y);
+                }
             }
         }
     } catch (const json::parse_error& e) {

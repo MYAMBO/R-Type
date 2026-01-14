@@ -12,7 +12,7 @@
 
     #include "World.hpp"
     #include "Inputs.hpp"
-    #include "Creator.hpp"
+    #include "Factory.hpp"
     #include "IGameNetwork.hpp"
     #include "EntitiesType.hpp"
 
@@ -30,6 +30,7 @@ enum class SceneType {
     GAMEPLAY = 1,
     MENU = 2,
     OPTIONS = 3,
+    LANGUAGES = 4,
     MYAMBO = 10,
     KAYU = 11,
     CREDITS = 42,
@@ -70,14 +71,11 @@ class Game {
     private:
         void gameInput(std::shared_ptr<Inputs> inputSystem);
 
-        void createCamera();
-        void createBackground();
-        void createPlayer(uint32_t id = 0);
-        void createEnemy(float x, float y, uint16_t type);
-        void playerInput(uint32_t entityId, World &world);
+        void savefile();
+        void loadfile();
         void playerInput(int entityId, World &world);
         void updateLoadingState(float progress, const std::string& status);
-        void smootherMovement(int entityId, World &world, float targetX, float targetY);
+        void smootherMovement(int entityId, World &world, float targetX, float targetY); 
 
 
         void bulletShooting(); // Need to remove it, maybe
@@ -86,7 +84,7 @@ class Game {
         sf::RenderWindow _window;
         World _world;
         IGameNetwork& _network;
-        Creator _creator;
+        Factory _factory;
 
         bool _isShootKeyPressed = false;
         int _musicVolume = 100;
