@@ -14,6 +14,7 @@
     #pragma comment(lib, "ws2_32.lib")
 #else
     #include <netinet/in.h>
+    #include <unistd.h>
 #endif // _WIN32
 
 /**

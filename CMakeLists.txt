@@ -213,6 +213,12 @@ add_executable(r-type_client
         Client/Core/Network.cpp
         Client/Core/ClientPacketreader.cpp "Server/GetOpt/GetOpt.cpp")
 
-target_link_libraries(r-type_client sfml-main sfml-graphics sfml-window sfml-system sfml-network sfml-audio tgui)
+if (WIN32)
+    target_link_libraries(r-type_client sfml-main sfml-graphics sfml-window sfml-system sfml-network sfml-audio tgui)
 
-target_link_libraries(r-type_server sfml-main sfml-graphics sfml-system sfml-network)
+    target_link_libraries(r-type_server sfml-main sfml-graphics sfml-system sfml-network)
+elseif(UNIX)
+    target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network sfml-audio tgui)
+
+    target_link_libraries(r-type_server sfml-graphics sfml-system sfml-network)
+endif()
