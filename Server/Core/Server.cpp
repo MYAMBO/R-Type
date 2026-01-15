@@ -215,23 +215,25 @@ void Server::tcpThread()
             std::array<char, 1024> data {};
             std::size_t received;
 
-            data.fill(0);
-            sf::Socket::Status status = tmp.getSocket()->receive(data.data(), data.size(), received);
-
-            if (status == sf::Socket::Status::Disconnected)
+            while (true)
             {
-                log("TCP | Client " + std::to_string(tmp.getId()) + " disconnected");
-                _users.erase(std::remove_if(_users.begin(), _users.end(), [&](const auto& user) { return user.getId() == tmp.getId(); }), _users.end());
-                continue;
+                data.fill(0);
+                sf::Socket::Status status = tmp.getSocket()->receive(data.data(), data.size(), received);
+                if (status == sf::Socket::Status::Disconnected)
+                {
+                    _mutex.lock();
+                    _users.erase(std::remove_if(_users.begin(), _users.end(), [&](const auto& user) { return user.getId() == tmp.getId(); }), _users.end());
+                    log("TCP | Client " + std::to_string(tmp.getId()) + " disconnected");
+                    _mutex.unlock();
+                    break;
+                }
+                if (status != sf::Socket::Status::Done || received == 0)
+                    break;
+
+                dataReceived = true;
+                _packetReader.addData(std::string(data.data(), received));
+                log("TCP | Received " + std::to_string(received) + " bytes with value " + std::string(data.data(), received) + " from client " + std::to_string(tmp.getId()) + " with port " + std::to_string(tmp.getPort()) + " with ip " + tmp.getIp());
             }
-
-            if (status != sf::Socket::Status::Done)
-                continue;
-
-            dataReceived = true;
-            data[received - 1] = '\0';
-            std::string message;
-            log("TCP | Received " + std::to_string(received) + " bytes with value " + data.data() + " from client " + std::to_string(tmp.getId()) + " with port " + std::to_string(tmp.getPort()) + " with ip " + tmp.getIp());
         }
 
         if (!dataReceived)
