@@ -31,10 +31,12 @@ class Text : public Component {
         std::string getText();
         unsigned int getSize() const;
         sf::FloatRect getGlobalBounds() const;
+        std::string getFontPath() const;
 
     private:
         std::shared_ptr<sf::Font> _font; 
         std::unique_ptr<sf::Text> _text;
+        std::string _fontPath;
 };
 
 #endif /* !TEXT_HPP_ */

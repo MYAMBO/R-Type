@@ -24,6 +24,7 @@
 #include "DeathSys.hpp"
 #include "Damage.hpp"
 #include "Collision.hpp"
+#include "Action.hpp"
 
 /**
  * @brief Constructs a new Game object.
@@ -84,7 +85,7 @@ void ServerGame::createPlayer(const float x, const float y)
     player->addComponent<BoxCollider>(10.f, 10.f);
     player->addComponent<Tag>("player");
     Packet packet;
-    packet.positionSpawn(player->getId(), Player, x, y);
+    packet.Spawn(player->getId(), Player, x, y);
     // send all the entity to the client
     _network.sendPacket(packet);
     packet = Packet();
@@ -100,7 +101,7 @@ void ServerGame::createPlayer(const float x, const float y)
             type = Enemy;
         else if (tag->getTag() == "bullet")
             type = Bullet;
-        packet.positionSpawn(entity->getId(), type, pos->getX(), pos->getY());
+        packet.Spawn(entity->getId(), type, pos->getX(), pos->getY());
     }
     _network.sendPacket(packet);
 }
@@ -112,7 +113,7 @@ void ServerGame::createPlayer(const float x, const float y)
  * @param world the world where all entity are contains.
  * @param network network interface
  */
-void ServerGame::EnemyMovement(const int entityId, World &world)
+void ServerGame::EnemyMovement(const uint32_t entityId, World &world)
 {
     const auto entity = GameHelper::getEntityById(world, entityId);
 
@@ -125,11 +126,11 @@ void ServerGame::EnemyMovement(const int entityId, World &world)
     pos->setX(pos->getX() - 1 * world.getDeltaTime());
 
     Packet packet;
-    packet.playerPosition(entityId, pos->getX(), pos->getY());
+    packet.updatePosition(entityId, pos->getX(), pos->getY());
     _network.sendPacket(packet);
 }
 
-void ServerGame::EnemySinusMovement(int entityId, World& world)
+void ServerGame::EnemySinusMovement(uint32_t entityId, World& world)
 {
     static std::map<int, float> timers;
     static std::map<int, float> startYPos;
@@ -149,14 +150,35 @@ void ServerGame::EnemySinusMovement(int entityId, World& world)
 
     float dt = world.getDeltaTime();
     float speedX = 2.0f;
-    float sinusSpeed = 0.3f;
-    float amplitude = 30.0f;
+    float sinusSpeed = 0.03f;
+    float amplitude = 200.0f;
     pos->setX(pos->getX() - speedX * dt);
     timers[entityId] += dt * sinusSpeed;
     pos->setY(startYPos[entityId] + std::sin(timers[entityId]) * amplitude);
     Packet packet;
-    packet.playerPosition(entityId, pos->getX(), pos->getY());
+    packet.updatePosition(entityId, pos->getX(), pos->getY());
     _network.sendPacket(packet);
+}
+
+void ServerGame::ShootingAction(int entityId, World& world)
+{
+    static std::map<int, float> timers;
+
+    const auto entity = GameHelper::getEntityById(world, entityId);
+    if (!entity)
+        return;
+
+    auto hpComp = entity->getComponent<HP>();
+    if (!hpComp || !hpComp->isAlive())
+        return;
+    auto pos = entity->getComponent<Position>();
+    float dt = world.getDeltaTime();
+    timers[entityId] += dt;
+    if (timers[entityId] >= 60.0f)
+    {
+        timers[entityId] = 0.0f;
+        createEnemyBullet(pos->getX(), pos->getY());
+    }
 }
 
 /**
@@ -170,6 +192,7 @@ void ServerGame::createEnemy(const float x, const float y)
 {
     const auto enemy = _world.createEntity();
     enemy->addComponent<HP>(100);
+    enemy->addComponent<Damage>(10);
     enemy->addComponent<Position>(x, y);
     enemy->addComponent<BoxCollider>(10.f, 10.f);
     enemy->addComponent<Tag>("enemy");
@@ -180,7 +203,7 @@ void ServerGame::createEnemy(const float x, const float y)
         }
     );
     Packet packet;
-    packet.positionSpawn(enemy->getId(), Enemy, x, y);
+    packet.Spawn(enemy->getId(), Enemy, x, y);
     _network.sendPacket(packet);
 }
 
@@ -188,6 +211,7 @@ void ServerGame::createSinusEnemy(const float x, const float y)
 {
     const auto enemy = _world.createEntity();
     enemy->addComponent<HP>(150);
+    enemy->addComponent<Damage>(10);
     enemy->addComponent<Position>(x, y);
     enemy->addComponent<BoxCollider>(10.f, 10.f);
     enemy->addComponent<Tag>("enemy");
@@ -198,7 +222,27 @@ void ServerGame::createSinusEnemy(const float x, const float y)
         }
     );
     Packet packet;
-    packet.positionSpawn(enemy->getId(), EnemySinus, x, y);
+    packet.Spawn(enemy->getId(), EnemySinus, x, y);
+    _network.sendPacket(packet);
+}
+
+void ServerGame::createShootingEnemy(const float x, const float y)
+{
+    const auto enemy = _world.createEntity();
+    enemy->addComponent<HP>(150);
+    enemy->addComponent<Damage>(10);
+    enemy->addComponent<Position>(x, y);
+    enemy->addComponent<BoxCollider>(10.f, 10.f);
+    enemy->addComponent<Tag>("enemy");
+    enemy->addComponent<Script>(
+        [this](const int entityId, World& world)
+        {
+            this->EnemyMovement(entityId, world);
+            this->ShootingAction(entityId, world);
+        }
+    );
+    Packet packet;
+    packet.Spawn(enemy->getId(), ShootingEnemy, x, y);
     _network.sendPacket(packet);
 }
 
@@ -218,20 +262,26 @@ void ServerGame::createWave()
  * @param entityId the ID if the entity.
  * @param world the world where all entity are contains.
  */
-void ServerGame::BulletMovement(const int entityId, World &world)
+void ServerGame::BulletMovement(const uint32_t entityId, World &world)
 {
     const auto entity = GameHelper::getEntityById(world, entityId);
+    const auto vel = entity->getComponent<Velocity>();
     const auto pos = entity->getComponent<Position>();
     Packet packet;
 
     if (entity->getComponent<BoxCollider>()->isTrigger()) {
         // check collisions with enemies
     }
-    if (pos->getX() > 3000) {
+    if (vel) {
+        pos->setX(pos->getX() + vel->getVelocityX() * world.getDeltaTime());
+        pos->setY(pos->getY() + vel->getVelocityY() * world.getDeltaTime());
+    }
+    if (pos->getX() > 3000 || pos->getX() < -100) {
         world.killEntity(entityId);
         packet.dead(entityId);
     } else {
-        packet.positionSpawn(entityId, None, pos->getX(), pos->getY());
+        pos->setX(pos->getX() + 10 * world.getDeltaTime());
+        packet.updatePosition(entityId, pos->getX(), pos->getY(), Bullet);
     }
     _network.sendPacket(packet);
 }
@@ -250,7 +300,30 @@ void ServerGame::createBullet(const float x, const float y)
     bullet->addComponent<BoxCollider>(5.f, 5.f);
     bullet->addComponent<Velocity>(10.f, 0.f);
     bullet->addComponent<Tag>("player_bullet");
+    bullet->addComponent<Damage>(50);
+    bullet->addComponent<HP>(10);
+    bullet->addComponent<Script>(
+        [this](const uint32_t entityId, World& world)
+        {
+            this->BulletMovement(entityId, world);
+        }
+    );
+    Packet packet;
+    packet.Spawn(bullet->getId(), Bullet, x + 60.f, y + 15.f);
+
+    _network.sendPacket(packet);
+}
+
+void ServerGame::createEnemyBullet(const float x, const float y)
+{
+    const auto bullet = _world.createEntity();
+
+    bullet->addComponent<Position>(x - 60.f, y + 15.f);
+    bullet->addComponent<BoxCollider>(5.f, 5.f);
+    bullet->addComponent<Velocity>(-10.f, 0.f);
+    bullet->addComponent<Tag>("enemy_bullet");
     bullet->addComponent<Damage>(10);
+    bullet->addComponent<HP>(50);
     bullet->addComponent<Script>(
         [this](const int entityId, World& world)
         {
@@ -258,8 +331,7 @@ void ServerGame::createBullet(const float x, const float y)
         }
     );
     Packet packet;
-    packet.positionSpawn(bullet->getId(), Bullet, x + 60.f, y + 15.f);
-
+    packet.Spawn(bullet->getId(), EnemyBullet, x + 60.f, y + 15.f);
     _network.sendPacket(packet);
 }
 
@@ -272,16 +344,16 @@ void ServerGame::handleNewPlayer()
         std::cout << "Maximum number of players reached (" << MAX_PLAYER << ")" << std::endl;
         return;
     }
-    
+
     createPlayer(200, 200);
     _playerCount++;
-    
+
     std::cout << "Player " << _playerCount << " connected" << std::endl;
-    
+
     if (_playerCount == NB_PLAYER_TO_START && !_gameStarted) {
         _gameStarted = true;
         _waveTimer.restart();
-        startLevel(1);   // Need to change that later to have a level management
+        startLevel(3);   // Need to change that later to have a level management
         std::cout << "Game started! Enemy waves will spawn every 20 seconds" << std::endl;
     }
 }
@@ -293,13 +365,13 @@ void ServerGame::handleNewPlayer()
  * @param x The new x position of the player.
  * @param y The new y position of the player.
  */
-void ServerGame::handleNewPlayerPosition(const int id, const float x, const float y)
+void ServerGame::serverUpdatePosition(const uint32_t id, const float x, const float y)
 {
     const auto entity = GameHelper::getEntityById(_world, id);
 
     if (entity == nullptr) {
         std::cerr << "[Warning] Ignore position update for unknown entity ID: " << id << std::endl;
-        return; 
+        return;
     }
 
     const auto pos = entity->getComponent<Position>();
@@ -316,7 +388,7 @@ void ServerGame::handleNewPlayerPosition(const int id, const float x, const floa
     pos->setY(y);
 
     Packet packet;
-    packet.playerPosition(id, x, y);
+    packet.updatePosition(id, x, y);
     _network.sendPacket(packet);
 }
 
@@ -325,7 +397,7 @@ void ServerGame::handleNewPlayerPosition(const int id, const float x, const floa
  *
  * @param id The id of the player who is shooting.
  */
-void ServerGame::handleShoot(const int id)
+void ServerGame::handleShoot(const uint32_t id)
 {
     const auto entity = GameHelper::getEntityById(_world, id);
     const auto pos = entity->getComponent<Position>();
@@ -363,6 +435,31 @@ void ServerGame::checkDeaths()
             packet.dead(entity->getId());
             _network.sendPacket(packet);
             _world.killEntity(entity->getId());
+        }
+    }
+}
+/**
+ * @brief Receive action with id and data and call corresponding function
+ *
+ * @param id
+ * @param action
+ * @param data
+ */
+void ServerGame::handleAction(const uint32_t id, const uint8_t action, const uint32_t data)
+{
+    switch (action)
+    {
+        case FIRE : {
+            handleShoot(id);
+        }
+        case HEAL : {
+
+        }
+        case SHIELD : {
+
+        }
+        case BEAM : {
+
         }
     }
 }
