@@ -274,12 +274,10 @@ void Server::accepterThread()
         buffer[0] = 0x01;
         unsigned int playerId;
 
-        {
-            std::lock_guard<std::mutex> lock(_mutex);
-            _users.emplace_back(port, ip, std::make_shared<sf::TcpSocket>(std::move(_tcpClient)));
-            playerId = _users.back().getId();
-            buffer[1] = static_cast<std::uint8_t>(playerId);
-        }
+        std::lock_guard<std::mutex> lock(_mutex);
+        _users.emplace_back(port, ip, std::make_shared<sf::TcpSocket>(std::move(_tcpClient)));
+        playerId = _users.back().getId();
+        buffer[1] = static_cast<std::uint8_t>(playerId);
 
         std::uint32_t udpPort = htonl(_udpPort);
         std::memcpy(&buffer[2], &udpPort, sizeof(udpPort));
