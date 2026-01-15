@@ -53,6 +53,7 @@ class ServerGame {
         void ShootingAction(int entityId, World &world);
         void BulletMovement(uint32_t  entityId, World &world);
         void checkDeaths();
+        void manaRegenScript(int entityId, World &world);
 
 
         World _world;

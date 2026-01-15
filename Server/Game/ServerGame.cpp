@@ -25,6 +25,7 @@
 #include "Damage.hpp"
 #include "Collision.hpp"
 #include "Action.hpp"
+#include "Data.hpp"
 
 /**
  * @brief Constructs a new Game object.
@@ -70,6 +71,36 @@ void ServerGame::run()
     }
 }
 
+void ServerGame::manaRegenScript(int entityId, World &world)
+{
+    static std::map<int, float> regenTimers;
+
+    const auto entity = GameHelper::getEntityById(world, entityId);
+    if (!entity) {
+        regenTimers.erase(entityId);
+        return;
+    }
+    auto data = entity->getComponent<Data>();
+    if (!data)
+        return;
+    int currentMana = std::stoi(data->getData("mana"));
+    int maxMana = std::stoi(data->getData("max_mana"));
+    if (currentMana >= maxMana)
+        return;
+    float dt = world.getDeltaTime();
+    regenTimers[entityId] += dt;
+    if (regenTimers[entityId] >= 2.0f) {
+        regenTimers[entityId] = 0.0f;
+        currentMana += 1;
+        if (currentMana > maxMana)
+            currentMana = maxMana;
+        data->setData("mana", std::to_string(currentMana));
+        Packet packet;
+        packet.updateMana(entityId, currentMana);
+        _network.sendPacket(packet);
+    }
+}
+
 /**
  * @brief Creates the player entity.
  *
@@ -85,6 +116,17 @@ void ServerGame::createPlayer(const float x, const float y)
     player->addComponent<BoxCollider>(10.f, 10.f);
     player->addComponent<Tag>("player");
     player->addComponent<Damage>(10);
+    std::map<std::string, std::string> dataMap = {
+        {"mana", "100"},
+        {"max_mana", "100"}
+    };
+    player->addComponent<Data>(dataMap);
+    player->addComponent<Script>(
+       [this](const int entityId, World& world)
+       {
+           this->manaRegenScript(entityId, world);
+       }
+   );
     Packet packet;
     packet.Spawn(player->getId(), Player, x, y);
     // send all the entity to the client
@@ -466,8 +508,18 @@ void ServerGame::handleShoot(const uint32_t id)
         return;
     }
     const auto pos = entity->getComponent<Position>();
-    if (!pos)
+    const auto data = entity->getComponent<Data>();
+    if (!pos || !data)
         return;
+    int currentMana = std::stoi(data->getData("mana"));
+    const int manaCost = 5;
+    if (currentMana < manaCost)
+        return;
+    currentMana -= manaCost;
+    data->setData("mana", std::to_string(currentMana));
+    Packet packet;
+    packet.updateMana(id, currentMana);
+    _network.sendPacket(packet);
     createBullet(pos->getX(), pos->getY());
 }
 

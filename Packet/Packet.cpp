@@ -171,3 +171,16 @@ void Packet::action(const uint32_t id, const uint8_t action, const uint32_t data
     _payload << action;                     // 1 byte
     _payload << data;                     // 4 byte
 }
+
+/**
+ * @brief Write in packet to update mana
+ * @param playerId The id of the player
+ * @param mana The current mana value
+ */
+void Packet::updateMana(const uint32_t playerId, const int mana)
+{
+    _payload.clear();
+    _payload << static_cast<uint8_t>(0x0C); // opcode
+    _payload << playerId;                    // 4 bytes
+    _payload << mana;                        // 4 bytes
+}
