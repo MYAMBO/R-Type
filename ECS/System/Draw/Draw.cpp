@@ -20,8 +20,10 @@
 #include "Sprite.hpp"
 #include "Rotation.hpp"
 #include "Position.hpp"
-#include "GameHelper.hpp"
 #include "RectangleShape.hpp"
+
+#include "GameHelper.hpp"
+#include "GameHelperGraphical.hpp"
 
 /**
  * @brief Construct a new Draw system object
@@ -68,7 +70,7 @@ void Draw::update(const float& dt, World &w)
 
     sf::Shader* shaderPtr = nullptr;
     if (mode != ColorBlindMode::Normal) {
-        ColorMatrix matrix = GameHelper::getColorMatrix(mode);
+        ColorMatrix matrix = GameHelperGraphical::getColorMatrix(mode);
         _shader.setUniform("r_mix", sf::Glsl::Vec3(matrix.r[0], matrix.r[1], matrix.r[2]));
         _shader.setUniform("g_mix", sf::Glsl::Vec3(matrix.g[0], matrix.g[1], matrix.g[2]));
         _shader.setUniform("b_mix", sf::Glsl::Vec3(matrix.b[0], matrix.b[1], matrix.b[2]));

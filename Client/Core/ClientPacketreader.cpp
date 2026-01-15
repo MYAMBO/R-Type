@@ -92,6 +92,15 @@ void ClientPacketreader::interpretPacket()
                 }
                 break;
             }
+            case 0x0C: {
+                uint32_t playerId;
+                int mana;
+                if (payload >> playerId >> mana) {
+                    if (_game)
+                        _game->updatePlayerMana(playerId, mana);
+                }
+                break;
+            }
             default:
                 return;
         }

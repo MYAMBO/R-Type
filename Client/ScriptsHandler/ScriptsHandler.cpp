@@ -20,9 +20,11 @@
 #include "Velocity.hpp"
 #include "Animator.hpp"
 #include "GuiWidget.hpp"
-#include "GameHelper.hpp"
 #include "SoundEffect.hpp"
 #include "RectangleShape.hpp"
+
+#include "GameHelper.hpp"
+#include "GameHelperGraphical.hpp"
 
 #include "Network.hpp"
 #include "Packet.hpp"
@@ -469,7 +471,7 @@ void myamboGlowScript(int entityId, World& world)
     hue += 0.5f;
     if (hue >= 360.f)
         hue = 0.f;
-    sf::Color color = GameHelper::hueToRGB(hue);
+    sf::Color color = GameHelperGraphical::hueToRGB(hue);
     text->setColor(color.r, color.g, color.b, 200);
     text->setSize(size);
     if (rand() % 10 == 0) {
@@ -509,7 +511,7 @@ void productionGlowScript(int entityId, World& world)
     hue += 0.5f;
     if (hue >= 360.f)
         hue = 0.f;
-    sf::Color color = GameHelper::hueToRGB(hue);
+    sf::Color color = GameHelperGraphical::hueToRGB(hue);
     text->setColor(color.r, color.g, color.b, 200);
 }
 
@@ -537,7 +539,7 @@ void kayuGlowScript(int entityId, World& world)
     hue += 0.5f;
     if (hue >= 360.f)
         hue = 0.f;
-    sf::Color color = GameHelper::hueToRGB(hue);
+    sf::Color color = GameHelperGraphical::hueToRGB(hue);
     text->setColor(color.r, color.g, color.b, 200);
 }
 
@@ -565,7 +567,7 @@ void corpGlowScript(int entityId, World& world)
     hue += 0.5f;
     if (hue >= 360.f)
         hue = 0.f;
-    sf::Color color = GameHelper::hueToRGB(hue);
+    sf::Color color = GameHelperGraphical::hueToRGB(hue);
     text->setColor(color.r, color.g, color.b, 200);
 }
 
@@ -660,6 +662,13 @@ void creditsNameScript(int id, World& w)
     positionComp->setX(centerX2);
 }
 
+/**
+ * @brief Script to handle availability settings.
+ *
+ * This function updates fonts based on the dyslexia mode setting.
+ * @param entityId The ID of the settings entity.
+ * @param world The game world containing entities and components.
+ */
 void availabilitySettingsScript(int entityId, World& world)
 {
     (void)entityId;
@@ -707,5 +716,93 @@ void availabilitySettingsScript(int entityId, World& world)
             }
         }
         dataComp->setData("lastfont_used", "regular");
+    }
+}
+
+/**
+ * @brief Script to handle companion entity behavior.
+ *
+ * This function updates the position and appearance of the companion entity
+ * based on its orbit around the player and its level.
+ * @param entityId The ID of the companion entity.
+ * @param world The game world containing entities and components.
+ */
+void companionScript(int entityId, World& world)
+{
+    auto companionEntity = GameHelper::getEntityById(world, entityId);
+    auto playerEntity = GameHelper::getEntityByTag(world, "player");
+    
+    if (!companionEntity || !playerEntity)
+        return;
+    auto cPos = companionEntity->getComponent<Position>();
+    auto cLayer = companionEntity->getComponent<Layer>();
+    auto cData = companionEntity->getComponent<Data>();
+    auto pPos = playerEntity->getComponent<Position>();
+
+    if (!cPos || !pPos || !cData)
+        return;
+    float angle = std::stof(cData->getData("orbit_angle"));
+    angle += 0.06f * world.getDeltaTime(); 
+    cData->setData("orbit_angle", std::to_string(angle));
+    float radiusY = 100.0f; 
+    float radiusX = 40.0f;  
+    float offsetX = std::cos(angle) * radiusX;
+    float offsetY = std::sin(angle) * radiusY;
+    cPos->setX(pPos->getX() + offsetX + 20.f);
+    cPos->setY(pPos->getY() + offsetY);
+    int pLayerVal = playerEntity->getComponent<Layer>() ? playerEntity->getComponent<Layer>()->getLayerId() : 10;
+    if (std::cos(angle) < 0) {
+        if (cLayer) cLayer->setLayerId(pLayerVal - 1);
+        companionEntity->getComponent<Scale>()->setScale(1.5f); 
+    } else {
+        if (cLayer) cLayer->setLayerId(pLayerVal + 1);
+        companionEntity->getComponent<Scale>()->setScale(1.8f);  
+    }
+    auto datacomp = companionEntity->getComponent<Data>();
+    if (!datacomp)
+        return;
+    if (std::stoi(datacomp->getData("level")) == 1 && datacomp->getData("changed") == "false") {
+        auto soundeffectEntity = world.createEntity();
+        GameHelperGraphical::soundEffectEntity("../assets/sounds/companionLevelUp.mp3", 100.f, static_cast<int>(SceneType::GAMEPLAY), world);
+        companionEntity->getComponent<Animator>()->resetAnimator(6, 6, 3.f, 120, 66, 30, 26, 0, 0);
+        datacomp->setData("changed", "true");
+    } else if (std::stoi(datacomp->getData("level")) == 2 && datacomp->getData("changed") == "false") {
+        GameHelperGraphical::soundEffectEntity("../assets/sounds/companionLevelUp.mp3", 100.f, static_cast<int>(SceneType::GAMEPLAY), world);
+        companionEntity->getComponent<Animator>()->resetAnimator(4, 4, 3.f, 299, 342, 33, 33, 0, 0);
+        datacomp->setData("changed", "true");
+    } else if (std::stoi(datacomp->getData("level")) == 3 && datacomp->getData("changed") == "false") {
+        GameHelperGraphical::soundEffectEntity("../assets/sounds/companionLevelUp.mp3", 100.f, static_cast<int>(SceneType::GAMEPLAY), world);
+        companionEntity->getComponent<Animator>()->resetAnimator(4, 4, 3.f, 299, 376, 35, 31, 0, 0);
+        companionEntity->getComponent<Sprite>()->getSprite()->setColor(sf::Color(192, 192, 192, 255));
+        datacomp->setData("changed", "true");
+    } else if (std::stoi(datacomp->getData("level")) == 4 && datacomp->getData("changed") == "false") {
+        GameHelperGraphical::soundEffectEntity("../assets/sounds/companionLevelUp.mp3", 100.f, static_cast<int>(SceneType::GAMEPLAY), world);
+        companionEntity->getComponent<Animator>()->resetAnimator(4, 4, 3.f, 301, 406, 35, 29, 0, 0);
+        companionEntity->getComponent<Sprite>()->getSprite()->setColor(sf::Color(255, 215, 0, 255));
+        datacomp->setData("changed", "true");
+    }
+}
+
+/**
+ * @brief Script to handle companion laser entity behavior.
+ *
+ * This function checks the position of the companion laser and
+ * removes it from the world if it goes off-screen.
+ * @param entityId The ID of the companion laser entity.
+ * @param world The game world containing entities and components.
+ */
+void companionLaserScript(int entityId, World& world)
+{
+    auto laserEntity = GameHelper::getEntityById(world, entityId);
+    auto playerEntity = GameHelper::getEntityByTag(world, "player");
+    if (!laserEntity || !playerEntity)
+        return;
+    auto lPos = laserEntity->getComponent<Position>();
+    if (!lPos)
+        return;
+    auto window = world.getWindow();
+    if (lPos->getX() > window->getSize().x + 100) {
+        world.killEntity(entityId);
+        return;
     }
 }

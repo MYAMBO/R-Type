@@ -40,6 +40,7 @@ class Packet
 
         void timeSync(uint32_t time);
         void updatePosition(uint32_t id, float x, float y, uint16_t type = 0);
+        void updateMana(uint32_t playerId, int mana);
         void Spawn(uint32_t id, uint16_t type, float x, float y);
         void collision(uint32_t entityOneId, uint32_t entityTwoId);
         void dead(uint32_t id);
