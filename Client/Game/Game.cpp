@@ -38,6 +38,8 @@
 #include "GameHelper.hpp"
 #include "SoundEffect.hpp"
 #include "RectangleShape.hpp"
+#include "ScriptsHandler.hpp"
+#include "GameHelperGraphical.hpp"
 
 #include "Mouse.hpp"
 #include "TextSys.hpp"
@@ -192,10 +194,15 @@ void Game::loadingRun()
     updateLoadingState(0.3f, "Generating Menu...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _factory.createMenu();
+    _factory.createLevelCompanionUI();
     updateLoadingState(0.6f, "Generating Background...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _factory.createBackground(_window); 
     _factory.createCredits();
+    _factory.createScrapUIEmpty(1);
+    _factory.createScrapUIEmpty(2);
+    _factory.createScrapUIEmpty(3);
+    _factory.createBackGameUI();
     updateLoadingState(0.8f, "Connecting to server...");
     Packet packet;
 
@@ -274,6 +281,8 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
             sf::FloatRect visibleArea({0, 0}, {static_cast<float>(_window.getSize().x), static_cast<float>( _window.getSize().y)});
             _window.setView(sf::View(visibleArea));
         }
+        if (inputSystem->isTriggered(*eventOpt, KeyboardKey::Key_M))
+            _factory.createScraps(_world, 500.f, 0.f);
         inputSystem->update(0.0f, _world);
     }
 }
@@ -377,11 +386,10 @@ void Game::playerInput(uint32_t entityId, World &world)
 {
     if (world.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
         return;
-    (void)entityId;
     static bool isShootKeyPressed = false;
 
     auto inputSystem = world.getSystem<Inputs>();
-    std::shared_ptr<Camera> compCam = GameHelper::getMainCamera(world);
+    std::shared_ptr<Camera> compCam = GameHelperGraphical::getMainCamera(world);
     std::shared_ptr<Entity> compPlayer = GameHelper::getEntityByTag(world, "player");
     auto settings = GameHelper::getEntityByTag(world, "game_controls_settings");
     auto data = settings->getComponent<Data>();
@@ -436,6 +444,19 @@ void Game::playerInput(uint32_t entityId, World &world)
             _network.sendPacket(packet);
             isShootKeyPressed = true;
             compPlayer->getComponent<SoundEffect>()->play();
+            int mana = std::stoi(dataComp->getData("mana"));
+            if (mana >= 20) {
+                mana -= 20;
+                if (mana < 0)
+                    mana = 0;
+                dataComp->setData("mana", std::to_string(mana));
+            }
+            auto group = GameHelper::getEntitiesByGroup(world, compPlayer->getComponent<Group>()->getId());
+            for (auto& entity : group) {
+                if (entity->getComponent<Tag>()->getTag() == "companion") {
+                    _factory.createLasersCompanion(entity->getId(), compPlayer->getId());
+                }
+            }
             // int mana = std::stoi(dataComp->getData("mana"));
             // if (mana >= 20) {
             //     mana -= 20;
