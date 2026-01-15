@@ -71,6 +71,8 @@ void ClientPacketreader::interpretPacket()
                 uint32_t id;
                 if (payload >> id) {
                     std::cout << "Entity " << id << " dead" << std::endl;
+                    if (_game)
+                        _game->killEntity(id);
                 }
                 break;
             }
@@ -94,11 +96,6 @@ void ClientPacketreader::interpretPacket()
                 return;
         }
     }
-}
-
-void ClientPacketreader::clear()
-{
-    _packet.clear();
 }
 
 /**
