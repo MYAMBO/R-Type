@@ -436,13 +436,13 @@ void Game::playerInput(uint32_t entityId, World &world)
             _network.sendPacket(packet);
             isShootKeyPressed = true;
             compPlayer->getComponent<SoundEffect>()->play();
-            int mana = std::stoi(dataComp->getData("mana"));
-            if (mana >= 20) {
-                mana -= 20;
-                if (mana < 0)
-                    mana = 0;
-                dataComp->setData("mana", std::to_string(mana));
-            }
+            // int mana = std::stoi(dataComp->getData("mana"));
+            // if (mana >= 20) {
+            //     mana -= 20;
+            //     if (mana < 0)
+            //         mana = 0;
+            //     dataComp->setData("mana", std::to_string(mana));
+            // }
         }
     } else {
         isShootKeyPressed = false;
@@ -558,4 +558,15 @@ void Game::healEntity(const uint32_t entityId, const uint32_t amount)
     } else {
         entity->getComponent<HP>()->setHP(actualHp + amount);
     }
+}
+
+void Game::updatePlayerMana(uint32_t playerId, int mana)
+{
+    auto player = GameHelper::getEntityById(_world, playerId);
+    if (!player)
+        return;
+
+    auto dataComp = player->getComponent<Data>();
+    if (dataComp)
+        dataComp->setData("mana", std::to_string(mana));
 }
