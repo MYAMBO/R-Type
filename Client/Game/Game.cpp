@@ -306,33 +306,6 @@ void Game::smootherMovement(int entityId, World &world, float serverX, float ser
     pos->setTargetY(serverY);
 }
 
-/**
- * @brief Create Enemy
- * This function initializes an enemy entity with necessary components.
-*/
-// void Game::createEnemy(float x, float y, uint16_t type)
-// {
-//     enum EnemyType {
-//         BASIC = 1,
-//         FAST,
-//         TANK
-//     };
-//     switch (type) {
-//         case BASIC:
-//             _factory.createEnemy(x, y, 1, 0);
-//             break;
-//         case FAST:
-//             // Implement fast enemy creation
-//             break;
-//         case TANK:
-//             // Implement tank enemy creation
-//             break;
-//         default:
-//             std::cerr << "Unknown enemy type: " << type << std::endl;
-//             break;
-//     }
-// }
-
 void Game::updateEntity(uint32_t id, uint16_t type, float x, float y)
 {
     if (type == 0) {
@@ -366,6 +339,12 @@ void Game::updateEntity(uint32_t id, uint16_t type, float x, float y)
     case Enemy:
         _factory.createEnemy(x, y, 1, id);
         break;
+    case Fast:
+        _factory.createEnemy(x, y, 2, id);
+        break;
+    case Tank:
+        _factory.createEnemy(x, y, 3, id);
+        break;
     case EnemySinus:
         _factory.createEnemy(x, y, 4, id);
         break;
@@ -384,18 +363,6 @@ void Game::updateEntity(uint32_t id, uint16_t type, float x, float y)
     }
 
 }
-
-// void Game::createPlayer(uint32_t id)
-// {
-//     _factory.createPlayer(id);
-//     auto entity = GameHelper::getEntityById(_world, id);
-//     if (entity && entity->getComponent<Tag>()->getTag() == "player") {
-//         entity->addComponent<Script>([this](const uint32_t entityId, World& world)
-//         {
-//             this->playerInput(entityId, world);
-//         });
-//     }
-// }
 
 /**
  * @brief Handles player input for movement and shooting.

@@ -74,10 +74,10 @@ void WorldFactory::createEnemy(float x, float y, int type, int entityId)
             GameHelper::createBasicEnemy(_world, x, y, entityId);
             break;
         case FAST:
-            // Implement fast enemy creation
+            GameHelper::createFastEnemy(_world, x, y, entityId);
             break;
         case TANK:
-            // Implement tank enemy creation
+            GameHelper::createTankEnemy(_world, x, y, entityId);
             break;
         case SINUS:
             GameHelper::createSinusEnemy(_world, x, y, entityId);
