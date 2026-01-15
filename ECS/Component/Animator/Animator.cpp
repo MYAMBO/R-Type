@@ -122,4 +122,29 @@ void Animator::setCurrentTime(const float currentTime)
     _currentTime = currentTime;
 }
 
-
+void Animator::resetAnimator(int nbFrame, int framePerRow, float frameRate,
+             int startX, int startY, int frameWidth, int frameHeight,
+             int offsetX, int offsetY)
+{
+    _startX = startX;
+    _startY = startY;
+    _offsetX = offsetX;
+    _offsetY = offsetY;
+    _frameWidth = frameWidth;
+    _frameHeight = frameHeight;
+    if (nbFrame <= 0) {
+        _nbFrame = 1;
+        std::cerr << "Warning: nbFrame value is <= 0, set it at 1 by default" << std::endl;
+    } else {
+        _nbFrame = nbFrame;
+    }
+    if (framePerRow <= 0) {
+        _framePerRow = 1;
+        std::cerr << "Warning: framePerRow value is <= 0, set it at 1 by default" << std::endl;
+    } else {
+        _framePerRow = framePerRow;
+    }
+    _frameRate = frameRate;
+    _currentFrame = 0;
+    _currentTime = 0.f;
+}
