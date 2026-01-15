@@ -125,6 +125,7 @@ add_executable(r-type_server
         Client/GameHelper/GameHelper.cpp
         Server/LevelLoader/LevelLoader.cpp
         ECS/Component/Tag/Tag.cpp
+        ECS/Component/Data/Data.cpp
         ECS/Component/Scale/Scale.cpp
         ECS/Component/Layer/Layer.cpp
         ECS/Component/Scene/Scene.cpp
