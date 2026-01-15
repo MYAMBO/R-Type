@@ -49,11 +49,20 @@ void LevelLoader::loadFromFile(const std::string &path, ServerGame *server)
                 if (type == "enemy") {
                     server->createEnemy(x, y);
                 }
+                else if (type == "fast_enemy") {
+                    server->createFast(x, y);
+                }
+                else if (type == "tank_enemy") {
+                    server->createTank(x, y);
+                }
                 else if (type == "sinus_enemy") {
                     server->createSinusEnemy(x, y);
                 }
                 else if (type == "shooting_enemy") {
                     server->createShootingEnemy(x, y);
+                }
+                else if (type == "portal_boss") {
+                    server->createPortalBoss(x, y);
                 }
             }
         }

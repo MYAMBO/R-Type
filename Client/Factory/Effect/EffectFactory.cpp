@@ -260,8 +260,12 @@ void EffectFactory::createCredits()
     music->addComponent<Script>([](int id, World& w) {
         auto entity = GameHelper::getEntityById(w, id);
         auto sceneComp = entity->getComponent<Scene>();
-        if (w.getCurrentScene() != sceneComp->getScene())
+        if (w.getCurrentScene() != sceneComp->getScene()) {
+            auto musicComp = entity->getComponent<Music>();
+            if (musicComp && musicComp->getState() != MusicState::STOPPED)
+                musicComp->stop();
             return;
+        }
         if (!entity)
             return;
         auto musicComp = entity->getComponent<Music>();
