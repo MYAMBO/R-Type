@@ -24,6 +24,7 @@ endif()
 
 if (WIN32)
         message(STATUS "Configuring for Windows...")
+        add_compile_definitions(NOMINMAX)
 elseif(UNIX)
         message(STATUS "Configuring for Linux...")
 endif()
@@ -35,13 +36,11 @@ if (DEV_COMPILE)
 endif ()
 
 if (MSVC)
-    # /W4 is the recommended high-level warning level for MSVC
     add_compile_options(/W4)
     if (DEV_COMPILE)
-        add_compile_options(/WX) # This is the MSVC equivalent of -Werror
+        add_compile_options(/WX)
     endif()
 else()
-    # Flags for GCC and Clang
     add_compile_options(-Wall -Wextra)
     if (DEV_COMPILE)
         add_compile_options(-Werror)
@@ -225,7 +224,8 @@ add_executable(r-type_client
         Packet/MyString.cpp
         Client/Core/Network.cpp
         Client/Core/ClientPacketreader.cpp
-        Client/LanguageHandler/LanguageHandler.cpp)
+        Client/LanguageHandler/LanguageHandler.cpp
+        Server/GetOpt/GetOpt.cpp)
 
 if (WIN32)
     target_link_libraries(r-type_client sfml-main sfml-graphics sfml-window sfml-system sfml-network sfml-audio tgui)

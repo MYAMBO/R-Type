@@ -5,6 +5,10 @@
 ** Network
 */
 
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
 #include <cstring>
 #include <iostream>
 #include <optional>
