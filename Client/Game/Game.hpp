@@ -61,22 +61,28 @@ class Game {
         ~Game();
 
         void run();
+        void updateEntity(uint32_t id, uint16_t type, float x, float y);
+        void handleAction(uint32_t id, uint8_t action, uint32_t data);
+
         void loadingRun();
         int killEntity(int id);
-        void handleSpawn(int id, int type, float x, float y);
-
         void menudisplay();
         void gameplaydisplay();
+        void createEnemy(float x, float y, uint16_t type);
+        void updatePlayerMana(uint32_t playerId, int mana);
+
     private:
         void gameInput(std::shared_ptr<Inputs> inputSystem);
 
         void savefile();
         void loadfile();
-        void playerInput(int entityId, World &world);
+        void playerInput(uint32_t entityId, World &world);
         void updateLoadingState(float progress, const std::string& status);
-        void smootherMovement(int entityId, World &world, float targetX, float targetY); 
+        void smootherMovement(int entityId, World &world, float targetX, float targetY);
 
-        void bulletShooting();
+
+        void bulletShooting(); // Need to remove it, maybe
+        void healEntity(uint32_t entityId, uint32_t amount);
 
         sf::RenderWindow _window;
         World _world;

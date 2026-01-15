@@ -29,7 +29,6 @@ void WorldFactory::createBullet(size_t entityId, int x, int y, int type)
     auto bullet = _world.createEntity(entityId);
     if (isPlayer) {
         bullet->addComponent<Position>(x, y);
-        bullet->addComponent<Velocity>(10.f, 0.f);
         bullet->addComponent<Animator>(2, 2, 3.0f, 200, 120, 32, 15, 0, 0);
         bullet->addComponent<HP>(10);
         bullet->addComponent<Damage>(10);
@@ -37,7 +36,7 @@ void WorldFactory::createBullet(size_t entityId, int x, int y, int type)
     } else {
         bullet->addComponent<Position>(x - 20.f , y + 15.f);
         bullet->addComponent<Rotation>(180.f);
-        bullet->addComponent<Velocity>(-10.f, 0.f);
+        //bullet->addComponent<Velocity>(-10.f, 0.f);
     }
     bullet->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet1.gif"));
     bullet->addComponent<Scale>(2.f);
@@ -68,23 +67,27 @@ void WorldFactory::createEnemy(float x, float y, int type, int entityId)
         FAST,
         TANK,
         SINUS, 
-        SHOOTING
+        SHOOTING,
+        PORTALBOSS
     };
     switch (type) {
         case BASIC:
             GameHelperGraphical::createBasicEnemy(_world, x, y, entityId);
             break;
         case FAST:
-            // Implement fast enemy creation
+            GameHelper::createFastEnemy(_world, x, y, entityId);
             break;
         case TANK:
-            // Implement tank enemy creation
+            GameHelper::createTankEnemy(_world, x, y, entityId);
             break;
         case SINUS:
             GameHelperGraphical::createSinusEnemy(_world, x, y, entityId);
             break;
         case SHOOTING:
             GameHelperGraphical::createShootingEnemy(_world, x, y, entityId);
+            break;
+        case PORTALBOSS:
+            GameHelper::createPortalBoss(_world, x, y, entityId);
             break;
         default:
             std::cerr << "Unknown enemy type: " << type << std::endl;
@@ -104,7 +107,6 @@ void WorldFactory::createEnemyBullet(size_t entityId, int x, int y)
     auto bullet = _world.createEntity(entityId);
     bullet->addComponent<Position>(x, y);
     bullet->addComponent<Rotation>(180.f);
-   // bullet->addComponent<Velocity>(-10.f, 0.f);
     bullet->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet1.gif"));
     bullet->addComponent<Animator>(2, 2, 3.0f, 200, 120, 32, 15, 0, 0);
     bullet->addComponent<Scale>(2.f);

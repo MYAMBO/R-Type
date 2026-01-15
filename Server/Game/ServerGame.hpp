@@ -30,25 +30,30 @@ class ServerGame {
         ~ServerGame() = default;
 
         void run();
-        void handleNewPlayerPosition(int id, float x, float y);
-        void handleShoot(int id);
+        void serverUpdatePosition(uint32_t id, float x, float y);
+        void handleShoot(uint32_t id);
+        void handleAction(uint32_t id, uint8_t action, uint32_t data);
         void handleNewPlayer();
         void startLevel(int levelId);
         void createEnemy(float x, float y);
+        void createFast(float x, float y);
+        void createTank(float x, float y);
         void createSinusEnemy(float x, float y);
         void createShootingEnemy(float x, float y);
-        // void createSinusShootingEnemy(const float x, const float y);
+        void createSinusShootingEnemy(const float x, const float y);
+        void createPortalBoss(const float x, const float y);
 
     private:
         void createPlayer(float x, float y);
         void createWave();
         void createBullet(float x, float y);
         void createEnemyBullet(float x, float y);
-        void EnemyMovement(int entityId, World &world);
-        void EnemySinusMovement(int entityId, World &world);
+        void EnemyMovement(uint32_t  entityId, World &world);
+        void EnemySinusMovement(uint32_t  entityId, World &world);
         void ShootingAction(int entityId, World &world);
-        void BulletMovement(int entityId, World &world);
+        void BulletMovement(uint32_t  entityId, World &world);
         void checkDeaths();
+        void manaRegenScript(int entityId, World &world);
 
 
         World _world;
