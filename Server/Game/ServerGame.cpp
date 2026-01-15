@@ -196,6 +196,7 @@ void ServerGame::createEnemy(const float x, const float y)
     enemy->addComponent<Damage>(10);
     enemy->addComponent<Position>(x, y);
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+    enemy->addComponent<Velocity>(-3.0f, 0.0f);
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<Script>(
         [this](const int entityId, World& world)
@@ -205,6 +206,46 @@ void ServerGame::createEnemy(const float x, const float y)
     );
     Packet packet;
     packet.Spawn(enemy->getId(), Enemy, x, y);
+    _network.sendPacket(packet);
+}
+
+void ServerGame::createFast(const float x, const float y)
+{
+    const auto enemy = _world.createEntity();
+    enemy->addComponent<HP>(50);
+    enemy->addComponent<Damage>(10);
+    enemy->addComponent<Position>(x, y);
+    enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+    enemy->addComponent<Tag>("enemy");
+    enemy->addComponent<Velocity>(-5.0f, 0.0f);
+    enemy->addComponent<Script>(
+        [this](const int entityId, World& world)
+        {
+            this->EnemyMovement(entityId, world);
+        }
+    );
+    Packet packet;
+    packet.Spawn(enemy->getId(), Fast, x, y);
+    _network.sendPacket(packet);
+}
+
+void ServerGame::createTank(const float x, const float y)
+{
+    const auto enemy = _world.createEntity();
+    enemy->addComponent<HP>(150);
+    enemy->addComponent<Damage>(10);
+    enemy->addComponent<Position>(x, y);
+    enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+    enemy->addComponent<Velocity>(-1.0f, 0.0f);
+    enemy->addComponent<Tag>("enemy");
+    enemy->addComponent<Script>(
+        [this](const int entityId, World& world)
+        {
+            this->EnemyMovement(entityId, world);
+        }
+    );
+    Packet packet;
+    packet.Spawn(enemy->getId(), Tank, x, y);
     _network.sendPacket(packet);
 }
 
@@ -374,7 +415,7 @@ void ServerGame::handleNewPlayer()
     if (_playerCount == NB_PLAYER_TO_START && !_gameStarted) {
         _gameStarted = true;
         _waveTimer.restart();
-        startLevel(5);   // Need to change that later to have a level management
+        startLevel(4);   // Need to change that later to have a level management
 
     }
 }
