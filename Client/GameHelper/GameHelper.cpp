@@ -56,21 +56,6 @@ std::shared_ptr<Entity> GameHelper::getEntityById(World &world, uint64_t id)
 }
 
 
-void GameHelper::createPortalBoss(World &world, float x, float y, int entityId)
-{
-    auto enemy = world.createEntity(entityId);
-    enemy->addComponent<HP>(5000);
-    enemy->addComponent<Damage>(10);
-    enemy->addComponent<Position>(x, y);
-    enemy->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet41.gif"));
-    enemy->addComponent<Animator>(5, 5, 5.0f, 116, 0, 67, 79, 0, 0);
-    enemy->addComponent<Scale>(14.f);
-    enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
-    enemy->addComponent<Tag>("enemy");
-    enemy->addComponent<BoxCollider>(66.0f, 600.0f);
-}
-
-
 /**
  * @brief Retrieves all entities belonging to a specific group from the world.
  *

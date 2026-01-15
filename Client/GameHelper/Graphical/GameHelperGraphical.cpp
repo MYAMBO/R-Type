@@ -65,6 +65,34 @@ void GameHelperGraphical::createBasicEnemy(World &world, float x, float y, int e
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
 }
 
+void GameHelperGraphical::createFastEnemy(World &world, float x, float y, int entityId)
+{
+    auto enemy = world.createEntity(entityId);
+    enemy->addComponent<HP>(50);
+    enemy->addComponent<Damage>(10);
+    enemy->addComponent<Position>(x, y);
+    enemy->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet5.gif"));
+    enemy->addComponent<Animator>(8, 8, 5.0f, 0, 0, 27, 30, 6, 0);
+    enemy->addComponent<Scale>(2.f);
+    enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    enemy->addComponent<Tag>("enemy");
+    enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+}
+
+void GameHelperGraphical::createTankEnemy(World &world, float x, float y, int entityId)
+{
+    auto enemy = world.createEntity(entityId);
+    enemy->addComponent<HP>(50);
+    enemy->addComponent<Damage>(10);
+    enemy->addComponent<Position>(x, y);
+    enemy->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet20.gif"));
+    enemy->addComponent<Animator>(3, 3, 5.0f, 16, 0, 33, 33, 0, 0);
+    enemy->addComponent<Scale>(2.f);
+    enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    enemy->addComponent<Tag>("enemy");
+    enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+}
+
 /**
  * @brief Creates a sinusoidal enemy entity in the world at the specified position.
  *

@@ -75,10 +75,10 @@ void WorldFactory::createEnemy(float x, float y, int type, int entityId)
             GameHelperGraphical::createBasicEnemy(_world, x, y, entityId);
             break;
         case FAST:
-            GameHelper::createFastEnemy(_world, x, y, entityId);
+            GameHelperGraphical::createFastEnemy(_world, x, y, entityId);
             break;
         case TANK:
-            GameHelper::createTankEnemy(_world, x, y, entityId);
+            GameHelperGraphical::createTankEnemy(_world, x, y, entityId);
             break;
         case SINUS:
             GameHelperGraphical::createSinusEnemy(_world, x, y, entityId);
@@ -87,7 +87,7 @@ void WorldFactory::createEnemy(float x, float y, int type, int entityId)
             GameHelperGraphical::createShootingEnemy(_world, x, y, entityId);
             break;
         case PORTALBOSS:
-            GameHelper::createPortalBoss(_world, x, y, entityId);
+            GameHelperGraphical::createPortalBoss(_world, x, y, entityId);
             break;
         default:
             std::cerr << "Unknown enemy type: " << type << std::endl;
