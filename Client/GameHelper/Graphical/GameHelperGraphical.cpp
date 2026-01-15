@@ -190,3 +190,24 @@ void GameHelperGraphical::soundEffectEntity(const std::string& filepath, float v
         }
     });
 }
+
+/**
+ * @brief Creates a portal boss enemy entity in the world at the specified position.
+ *
+ * @param world The world to create the enemy in.
+ * @param x The x-coordinate of the enemy's position.
+ * @param y The y-coordinate of the enemy's position.
+*/
+void GameHelperGraphical::createPortalBoss(World &world, float x, float y, int entityId)
+{
+    auto enemy = world.createEntity(entityId);
+    enemy->addComponent<HP>(5000);
+    enemy->addComponent<Damage>(10);
+    enemy->addComponent<Position>(x, y);
+    enemy->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet41.gif"));
+    enemy->addComponent<Animator>(5, 5, 5.0f, 116, 0, 67, 79, 0, 0);
+    enemy->addComponent<Scale>(14.f);
+    enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    enemy->addComponent<Tag>("enemy");
+    enemy->addComponent<BoxCollider>(66.0f, 600.0f);
+}

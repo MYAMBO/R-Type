@@ -55,6 +55,7 @@ class GameHelperGraphical {
 
         static void createSparks(World &world, float x, float y, int amount);
         static void createBasicEnemy(World &world, float x, float y, int entityId);
+        static void createPortalBoss(World &world, float x, float y, int entityId);
         static void createSinusEnemy(World &world, float x, float y, int entityId);
         static void createShootingEnemy(World &world, float x, float y, int entityId);
         static void soundEffectEntity(const std::string& filepath, float volume, int scene, World& world);
