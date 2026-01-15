@@ -23,12 +23,14 @@ void playerfire(size_t entityId, World &world);
 void creditsScript(int entityId, World& world);
 void kayuGlowScript(int entityId, World& world);
 void corpGlowScript(int entityId, World& world);
+void companionScript(int entityId, World& world);
 void productionScript(int entityId, World& world);
 void myamboGlowScript(int entityId, World& world);
 void creditsNameScript(int entityId, World& world);
 void changeSceneScript(int entityId, World& world);
 void volumeSettingsScript(int entityId, World& world);
 void productionGlowScript(int entityId, World& world);
+void companionLaserScript(int entityId, World& world);
 void backgroundScrollScript(size_t entityId, World &world);
 void availabilitySettingsScript(int entityId, World& world);
 
