@@ -12,7 +12,7 @@
 
     #include "World.hpp"
     #include "Inputs.hpp"
-    #include "Creator.hpp"
+    #include "Factory.hpp"
     #include "IGameNetwork.hpp"
     #include "EntitiesType.hpp"
 
@@ -30,6 +30,7 @@ enum class SceneType {
     GAMEPLAY = 1,
     MENU = 2,
     OPTIONS = 3,
+    LANGUAGES = 4,
     MYAMBO = 10,
     KAYU = 11,
     CREDITS = 42,
@@ -60,26 +61,31 @@ class Game {
         ~Game();
 
         void run();
+        void updateEntity(uint32_t id, uint16_t type, float x, float y);
+        void handleAction(uint32_t id, uint8_t action, uint32_t data);
+
         void loadingRun();
         int killEntity(int id);
-        void handleSpawn(int id, int type, float x, float y);
-
         void menudisplay();
         void gameplaydisplay();
+        void createEnemy(float x, float y, uint16_t type);
     private:
         void gameInput(std::shared_ptr<Inputs> inputSystem);
 
-        void playerInput(int entityId, World &world);
+        void savefile();
+        void loadfile();
+        void playerInput(uint32_t entityId, World &world);
         void updateLoadingState(float progress, const std::string& status);
         void smootherMovement(int entityId, World &world, float targetX, float targetY); 
-        
 
-        void bulletShooting();
+
+        void bulletShooting(); // Need to remove it, maybe
+        void healEntity(uint32_t entityId, uint32_t amount);
 
         sf::RenderWindow _window;
         World _world;
         IGameNetwork& _network;
-        Creator _creator;
+        Factory _factory;
 
         bool _isShootKeyPressed = false;
         int _musicVolume = 100;

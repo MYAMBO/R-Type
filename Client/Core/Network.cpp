@@ -23,7 +23,7 @@ Network::Network()
     _udpPort = -1;
     _debugMode = false;
     _isRunning = true;
-    _packetReader = ClientPacketreader("", nullptr);
+    _packetReader = ClientPacketreader(sf::Packet(), nullptr);
 }
 
 void Network::getIpAdress(std::string option)
@@ -90,7 +90,7 @@ auto Network::initClient() -> void
         throw InitClientException();
 
     _game = std::make_shared<Game>(*this);
-    _packetReader = ClientPacketreader("", _game);
+    _packetReader = ClientPacketreader(sf::Packet(), _game);
 }
 
 void Network::udpThread()
