@@ -283,7 +283,8 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
         }
         // temp
         if (inputSystem->isTriggered(*eventOpt, KeyboardKey::Key_M)) {
-            GameHelperGraphical::createAnimatorEntity(_world, 200, 200, "../assets/sprites/r-typesheet1.gif", 5, 5, 2.f, 288, 295, 31, 32, 3, 0, 1.5f);
+            GameHelperGraphical::createScoreGUI(_world, 400, 300, "1000");
+            //GameHelperGraphical::createAnimatorEntity(_world, 200, 200, "../assets/sprites/r-typesheet1.gif", 5, 5, 2.f, 288, 295, 31, 32, 3, 0, 1.5f);
             //_factory.createScraps(_world, 500.f, 0.f);
         }
         inputSystem->update(0.0f, _world);
@@ -496,7 +497,13 @@ int Game::killEntity(int id)
     auto name = entity->getComponent<Tag>();
     if (name && name->getTag() == "enemy") {
         auto pos = entity->getComponent<Position>();
-            GameHelperGraphical::createAnimatorEntity(_world, pos->getX(), pos->getY(), "../assets/sprites/r-typesheet1.gif", 5, 5, 2.f, 288, 295, 31, 32, 3, 0, 3.f);
+        GameHelperGraphical::createAnimatorEntity(_world, pos->getX(), pos->getY(), "../assets/sprites/r-typesheet1.gif", 5, 5, 2.f, 288, 295, 31, 32, 3, 0, 3.f);
+        auto data = entity->getComponent<Data>();
+        if (!data) {
+            _world.killEntity(id);
+            return -1;
+        }
+        GameHelperGraphical::createScoreGUI(_world, pos->getX(), pos->getY(), data->getData("score"));
     }
     if (!entity)
         return -1;
