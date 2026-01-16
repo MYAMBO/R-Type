@@ -759,3 +759,73 @@ void UIFactory::createLangSelector() const
         _world.setCurrentScene(static_cast<int>(SceneType::MENU));
     });
 }
+
+/**
+ * @brief Create the in-game UI background
+ */
+void UIFactory::createBackGameUI() const
+{
+    auto uiBackground = _world.createEntity();
+    uiBackground->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    uiBackground->addComponent<Layer>(LayerType::UI);
+    uiBackground->addComponent<Position>(0.f, 0.f);
+    uiBackground->addComponent<RectangleShape>(450.f, 100.f, 100, 100, 100, 255);
+    uiBackground->addComponent<Tag>("ui_background");
+}
+
+/**
+ * @brief Create an empty scrap UI icon at the given index
+ * 
+ * @param index The index of the scrap icon (1-based)
+ */
+void UIFactory::createScrapUIEmpty(int index) const
+{
+    float posX = 20.f + (index - 1) * 30.f;
+    float posY = 65.f; 
+
+    auto uiScrap = _world.createEntity();
+    uiScrap->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    uiScrap->addComponent<Layer>(LayerType::UI + 2);
+    uiScrap->addComponent<Position>(posX, posY);
+    uiScrap->addComponent<Sprite>("../assets/sprites/r-typesheet3.gif");
+    uiScrap->addComponent<Animator>(1, 1, 1.f, 0, 0, 16, 16, 0, 0);
+    uiScrap->addComponent<Scale>(1.5f);
+    uiScrap->addComponent<Tag>("ui_scrap_icon_empty_" + std::to_string(index));
+    uiScrap->getComponent<Sprite>()->getSprite()->setColor(sf::Color(100, 100, 100, 255));
+}
+
+void UIFactory::createLevelCompanionUI()
+{
+    auto uiCompanion = _world.createEntity();
+    uiCompanion->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    uiCompanion->addComponent<Layer>(LayerType::UI + 2);
+    uiCompanion->addComponent<Position>(130.f, 46.f);
+    uiCompanion->addComponent<Text>("0", "../assets/font/regular.ttf", 40);
+    uiCompanion->addComponent<Scale>(1.f);
+    uiCompanion->addComponent<Tag>("ui_level_companion_icon");
+    uiCompanion->addComponent<Script>([](int id, World& w) {
+        auto entity = GameHelper::getEntityById(w, id);
+        if (!entity)
+            return;
+        auto player = GameHelper::getEntityByTag(w, "player");
+        if (!player)
+            return;
+        auto groupComp = player->getComponent<Group>();
+        if (!groupComp)
+            return;
+        auto groupPlayer = GameHelper::getEntitiesByGroup(w, groupComp->getId());
+        for (const auto& ent : groupPlayer) {
+            auto companion = GameHelper::getEntityById(w, ent->getId());
+            if (!companion)
+                continue;
+            auto name = companion->getComponent<Tag>()->getTag();
+            if (name != "companion")
+                continue;
+            auto dataCompanion = companion->getComponent<Data>();
+            if (!dataCompanion)
+                continue;
+            entity->getComponent<Text>()->setString(std::to_string(std::stoi(dataCompanion->getData("level")) + 1));
+        }
+    });
+
+}

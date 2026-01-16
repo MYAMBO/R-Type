@@ -19,6 +19,8 @@ BoxCollider::BoxCollider(const float width, const float height)
         _x = 0.1f;
     if (height <= 0)
         _y = 0.1f;
+    _offsetX = -_x / 2.f;
+    _offsetY = -_y / 2.f;
 }
 
 /**
@@ -54,7 +56,7 @@ sf::Vector2f BoxCollider::getSize() const
 */
 sf::Vector2f BoxCollider::getOffset() const
 {
-    return {-_x / 2.f, -_y / 2.f};
+    return {_offsetX, _offsetY};
 }
 /**
  * @brief Sets the trigger value of the box collider.
@@ -88,4 +90,15 @@ void BoxCollider::setSize(const float width, const float height)
         _x = 0.1f;
     if (_y <= 0.0f)
         _y = 0.1f;
+}
+
+/**
+ * @brief Sets the offset vector of the box collider.
+ * @param x The new x offset of the box collider.
+ * @param y The new y offset of the box collider.
+*/
+void BoxCollider::setOffset(const float x, const float y)
+{
+    _offsetX = x;
+    _offsetY = y;
 }

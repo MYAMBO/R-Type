@@ -2,8 +2,29 @@ cmake_minimum_required(VERSION 3.19)
 
 project(R-Type)
 
+
+# =====================================================
+# Force all binaries into the build directory
+# (Visual Studio / multi-config compatible)
+# =====================================================
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+if (CMAKE_CONFIGURATION_TYPES) # Visual Studio / Xcode
+    foreach(CONFIG ${CMAKE_CONFIGURATION_TYPES})
+        string(TOUPPER ${CONFIG} CONFIG)
+        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CONFIG} ${CMAKE_BINARY_DIR})
+        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CONFIG} ${CMAKE_BINARY_DIR})
+        set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CONFIG} ${CMAKE_BINARY_DIR})
+    endforeach()
+endif()
+
+# =====================================================
+
 if (WIN32)
         message(STATUS "Configuring for Windows...")
+        add_compile_definitions(NOMINMAX)
 elseif(UNIX)
         message(STATUS "Configuring for Linux...")
 endif()
@@ -14,8 +35,17 @@ if (DEV_COMPILE)
         add_compile_options(-Werror)
 endif ()
 
-add_compile_options(-Wall -Wextra)
-
+if (MSVC)
+    add_compile_options(/W4)
+    if (DEV_COMPILE)
+        add_compile_options(/WX)
+    endif()
+else()
+    add_compile_options(-Wall -Wextra)
+    if (DEV_COMPILE)
+        add_compile_options(-Werror)
+    endif()
+endif()
 if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake")
     file(DOWNLOAD
         https://raw.githubusercontent.com/cpm-cmake/CPM.cmake/master/cmake/CPM.cmake
@@ -85,6 +115,7 @@ include_directories(Client)
 include_directories(Client/Core)
 include_directories(Client/Game)
 include_directories(Client/GameHelper)
+include_directories(Client/GameHelper/Graphical)
 include_directories(Client/Factory)
 include_directories(Client/Factory/UI)
 include_directories(Client/Factory/World)
@@ -93,6 +124,7 @@ include_directories(Client/Factory/Effect)
 include_directories(Client/ScriptsHandler)
 include_directories(Client/LanguageHandler)
 include_directories(Server/LevelLoader)
+include_directories(Server/GetOpt)
 include_directories(./Server)
 include_directories(./Server/Core)
 include_directories(./Packet)
@@ -121,10 +153,11 @@ add_executable(r-type_server
         ECS/System/Collision/Collision.cpp
         ECS/World.cpp
         ECS/Component/HP/HP.cpp
-        ECS/Component/Damage/Damage.cpp
         Client/GameHelper/GameHelper.cpp
         Server/LevelLoader/LevelLoader.cpp
+        Server/GetOpt/GetOpt.cpp
         ECS/Component/Tag/Tag.cpp
+        ECS/Component/Data/Data.cpp
         ECS/Component/Scale/Scale.cpp
         ECS/Component/Layer/Layer.cpp
         ECS/Component/Scene/Scene.cpp
@@ -149,6 +182,7 @@ add_executable(r-type_client
         Client/Factory/World/WorldFactory.cpp
         Client/Factory/Effect/EffectFactory.cpp
         Client/GameHelper/GameHelper.cpp
+        Client/GameHelper/Graphical/GameHelperGraphical.cpp
         Client/ScriptsHandler/ScriptsHandler.cpp
         ECS/Entity/Entity.cpp
         ECS/System/Draw/Draw.cpp
@@ -190,8 +224,15 @@ add_executable(r-type_client
         Packet/MyString.cpp
         Client/Core/Network.cpp
         Client/Core/ClientPacketreader.cpp
-        Client/LanguageHandler/LanguageHandler.cpp)
+        Client/LanguageHandler/LanguageHandler.cpp
+        Server/GetOpt/GetOpt.cpp)
 
-target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network sfml-audio tgui)
+if (WIN32)
+    target_link_libraries(r-type_client sfml-main sfml-graphics sfml-window sfml-system sfml-network sfml-audio tgui)
 
-target_link_libraries(r-type_server  sfml-graphics sfml-system sfml-network tgui)
+    target_link_libraries(r-type_server sfml-main sfml-graphics sfml-system sfml-network)
+elseif(UNIX)
+    target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network sfml-audio tgui)
+
+    target_link_libraries(r-type_server sfml-graphics sfml-system sfml-network)
+endif()

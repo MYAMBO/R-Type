@@ -8,13 +8,19 @@
 #ifndef SERVER
 #define SERVER
 
+#ifdef _WIN32
+    #include <io.h>
+    #include "getopt.h"
+    #include <winsock2.h>
+    #pragma comment(lib, "ws2_32.lib")
+#else
+    #include <netinet/in.h>
+    #include <unistd.h>
+#endif // _WIN32
+
 #include <thread>
 #include <utility>
-#include <iostream>
 #include <mutex>
-#include <cstring>
-#include <queue>
-#include <unistd.h>
 
 #include "IGameNetwork.hpp"
 #include "Packet.hpp"

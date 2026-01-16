@@ -36,9 +36,12 @@ class ServerGame {
         void handleNewPlayer();
         void startLevel(int levelId);
         void createEnemy(float x, float y);
+        void createFast(float x, float y);
+        void createTank(float x, float y);
         void createSinusEnemy(float x, float y);
         void createShootingEnemy(float x, float y);
-        // void createSinusShootingEnemy(const float x, const float y);
+        void createSinusShootingEnemy(const float x, const float y);
+        void createPortalBoss(const float x, const float y);
 
     private:
         void createPlayer(float x, float y);
@@ -50,6 +53,7 @@ class ServerGame {
         void ShootingAction(int entityId, World &world);
         void BulletMovement(uint32_t  entityId, World &world);
         void checkDeaths();
+        void manaRegenScript(int entityId, World &world);
 
 
         World _world;
