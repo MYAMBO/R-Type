@@ -74,9 +74,9 @@ If a message payload exceeds the maximum payload size:
 ## 7. Client → Server
 
 ### 7.1 Position Update
-| Command Name | Code |
-|-------------|------|
-| SendPosition | `0x07` |
+| Command Name | Code   |
+|-------------|--------|
+| SendPosition | `0x09` |
 
 | Field | Type | Size |
 |-----|-----|-----|
@@ -95,9 +95,9 @@ Type is always `0`.
 ---
 
 ### 7.2 Action
-| Command Name | Code |
-|-------------|------|
-| Action | `0x0B` |
+| Command Name | Code   |
+|-------------|--------|
+| Action | `0x0D` |
 
 | Field | Type | Size |
 |-----|-----|-----|
@@ -114,9 +114,9 @@ The client sends an action performed by an entity.
 ## 8. Server → Client
 
 ### 8.1 Time Synchronization
-| Command Name | Code |
-|-------------|------|
-| TimeSync | `0x06` |
+| Command Name | Code   |
+|-------------|--------|
+| TimeSync | `0x08` |
 
 | Field | Type | Size |
 |-----|-----|-----|
@@ -129,9 +129,9 @@ The server sends the current server timestamp (milliseconds since epoch).
 ---
 
 ### 8.2 Entity Spawn / Position Update
-| Command Name | Code |
-|-------------|------|
-| EntityUpdate | `0x07` |
+| Command Name | Code   |
+|-------------|--------|
+| EntityUpdate | `0x09` |
 
 | Field | Type | Size |
 |-----|-----|-----|
@@ -148,9 +148,9 @@ The server sends the current server timestamp (milliseconds since epoch).
 ---
 
 ### 8.3 Collision
-| Command Name | Code |
-|-------------|------|
-| Collision | `0x08` |
+| Command Name | Code   |
+|-------------|--------|
+| Collision | `0x0A` |
 
 | Field | Type | Size |
 |-----|-----|-----|
@@ -164,9 +164,9 @@ Indicates that two entities have collided.
 ---
 
 ### 8.4 Entity Death
-| Command Name | Code |
-|-------------|------|
-| Dead | `0x09` |
+| Command Name | Code   |
+|-------------|--------|
+| Dead | `0x0B` |
 
 | Field | Type | Size |
 |-----|-----|-----|
@@ -180,9 +180,9 @@ Notifies the client that an entity has died.
 ---
 
 ### 8.5 Game End
-| Command Name | Code |
-|-------------|------|
-| EndGame | `0x0A` |
+| Command Name | Code   |
+|-------------|--------|
+| EndGame | `0x0C` |
 
 | Field | Type | Size |
 |-----|-----|-----|
@@ -196,9 +196,9 @@ Notifies the client that an entity has died.
 ---
 
 ### 8.6 Action (Server Broadcast)
-| Command Name | Code |
-|-------------|------|
-| Action | `0x0B` |
+| Command Name | Code   |
+|-------------|--------|
+| Action | `0x0D` |
 
 | Field | Type | Size |
 |-----|-----|-----|

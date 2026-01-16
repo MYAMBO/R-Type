@@ -87,7 +87,7 @@ Packet& Packet::setTotalPacketNbr(const uint8_t totalPacketNbr)
 void Packet::timeSync(const uint32_t time)
 {
     _payload.clear();
-    _payload << static_cast<uint8_t>(0x06); // opcode
+    _payload << static_cast<uint8_t>(0x08); // opcode
     _payload << time;                       // 4 bytes
 }
 
@@ -100,7 +100,7 @@ void Packet::timeSync(const uint32_t time)
 void Packet::updatePosition(const uint32_t id, const float x, const float y, uint16_t type)
 {
     _payload.clear();
-    _payload << static_cast<uint8_t>(0x07); // opcode
+    _payload << static_cast<uint8_t>(0x09); // opcode
     _payload << id;                         // 4 bytes
     _payload << type;                       // 2 bytes
     _payload << x;                          // 4 bytes
@@ -117,7 +117,7 @@ void Packet::updatePosition(const uint32_t id, const float x, const float y, uin
 void Packet::Spawn(const uint32_t id, const uint16_t type, const float x, const float y)
 {
     _payload.clear();
-    _payload << static_cast<uint8_t>(0x07); // opcode
+    _payload << static_cast<uint8_t>(0x09); // opcode
     _payload << id;                         // 4 bytes
     _payload << type;                       // 2 bytes
     _payload << x;                          // 4 bytes
@@ -132,7 +132,7 @@ void Packet::Spawn(const uint32_t id, const uint16_t type, const float x, const 
 void Packet::collision(const uint32_t entityOneId, const uint32_t entityTwoId)
 {
     _payload.clear();
-    _payload << static_cast<uint8_t>(0x08); // opcode
+    _payload << static_cast<uint8_t>(0x0A); // opcode
     _payload << entityOneId;                // 4 bytes
     _payload << entityTwoId;                // 4 bytes
 }
@@ -144,7 +144,7 @@ void Packet::collision(const uint32_t entityOneId, const uint32_t entityTwoId)
 void Packet::dead(const uint32_t id)
 {
     _payload.clear();
-    _payload << static_cast<uint8_t>(0x09); // opcode
+    _payload << static_cast<uint8_t>(0x0B); // opcode
     _payload << id;                         // 4 bytes
 }
 
@@ -155,7 +155,7 @@ void Packet::dead(const uint32_t id)
 void Packet::endGame(const uint8_t status)
 {
     _payload.clear();
-    _payload << static_cast<uint8_t>(0x0A); // opcode
+    _payload << static_cast<uint8_t>(0x0C); // opcode
     _payload << status;                     // 1 byte
 }
 
@@ -166,7 +166,7 @@ void Packet::endGame(const uint8_t status)
  */
 void Packet::action(const uint32_t id, const uint8_t action, const uint32_t data) {
     _payload.clear();
-    _payload << static_cast<uint8_t>(0x0B); // opcode
+    _payload << static_cast<uint8_t>(0x0D); // opcode
     _payload << id;                         // 4 bytes
     _payload << action;                     // 1 byte
     _payload << data;                     // 4 byte
@@ -180,7 +180,7 @@ void Packet::action(const uint32_t id, const uint8_t action, const uint32_t data
 void Packet::updateMana(const uint32_t playerId, const int mana)
 {
     _payload.clear();
-    _payload << static_cast<uint8_t>(0x0C); // opcode
+    _payload << static_cast<uint8_t>(0x0E); // opcode
     _payload << playerId;                    // 4 bytes
     _payload << mana;                        // 4 bytes
 }
