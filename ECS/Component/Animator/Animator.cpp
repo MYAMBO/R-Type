@@ -27,9 +27,9 @@ Animator::Animator(const int nbFrame, const int framePerRow, const float frameRa
     const int startX, const int startY, const int frameWidth,
     const int frameHeight, const int offsetX, const int offsetY)
     :   _startX(startX), _startY(startY),
-        _offsetX(offsetX), _offsetY(offsetY), _frameWidth(frameWidth), _framePerRow(framePerRow),
-        _frameHeight(frameHeight), _nbFrame(nbFrame), _frameRate(frameRate),
-        _currentFrame(0), _currentTime(0.f)
+        _offsetX(offsetX), _offsetY(offsetY), _frameWidth(frameWidth), _frameHeight(frameHeight), 
+        _nbFrame(nbFrame), _frameRate(frameRate),
+        _currentFrame(0), _currentTime(0.f),  _framePerRow(framePerRow)
 {
     if (nbFrame <= 0) {
         _nbFrame = 1;
@@ -53,8 +53,8 @@ sf::IntRect Animator::getFrameRect() const
     int column = _currentFrame % _framePerRow;
     int row = _currentFrame / _framePerRow;
 
-    int x = _startX + row * (_frameWidth + _offsetX);
-    int y = _startY + column * (_frameHeight + _offsetY);
+    int x = _startX + column * (_frameWidth + _offsetX);
+    int y = _startY + row * (_frameHeight + _offsetY);
     return {
             sf::Vector2i(x, y),
             sf::Vector2i(_frameWidth, _frameHeight)
@@ -122,4 +122,29 @@ void Animator::setCurrentTime(const float currentTime)
     _currentTime = currentTime;
 }
 
-
+void Animator::resetAnimator(int nbFrame, int framePerRow, float frameRate,
+             int startX, int startY, int frameWidth, int frameHeight,
+             int offsetX, int offsetY)
+{
+    _startX = startX;
+    _startY = startY;
+    _offsetX = offsetX;
+    _offsetY = offsetY;
+    _frameWidth = frameWidth;
+    _frameHeight = frameHeight;
+    if (nbFrame <= 0) {
+        _nbFrame = 1;
+        std::cerr << "Warning: nbFrame value is <= 0, set it at 1 by default" << std::endl;
+    } else {
+        _nbFrame = nbFrame;
+    }
+    if (framePerRow <= 0) {
+        _framePerRow = 1;
+        std::cerr << "Warning: framePerRow value is <= 0, set it at 1 by default" << std::endl;
+    } else {
+        _framePerRow = framePerRow;
+    }
+    _frameRate = frameRate;
+    _currentFrame = 0;
+    _currentTime = 0.f;
+}

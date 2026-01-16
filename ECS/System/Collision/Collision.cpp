@@ -9,8 +9,13 @@
 #include "Tag.hpp"
 #include "Damage.hpp"
 #include "HP.hpp"
+#include "Packet.hpp"
+#include "Action.hpp"
 
 
+Collision::Collision(IGameNetwork& network) : _network(network)
+{
+}
 
 
 /**
@@ -34,12 +39,8 @@ void Collision::update(const float &, World &w)
             if (!colA || !colB || !posA || !posB)
                 continue;
 
-            if (checkCollision(*colA, *posA, *colB, *posB)) {
-                std::cout << "[Collision] Entity "
-              << a->getId() << " <-> "
-              << b->getId() << std::endl;
+            if (checkCollision(*colA, *posA, *colB, *posB))
                 handleCollisionDamage(a, b);
-            }
         }
     }
 }
@@ -96,6 +97,7 @@ void Collision::handleCollisionDamage(const std::shared_ptr<Entity> &a,
         auto target = (strTagA == "enemy") ? a : b;
         auto bullet = (strTagA == "player_bullet") ? a : b;
         applyDamage(bullet, target);
+        applyDamage(target, bullet);
     }
     else if ((strTagA == "player" && strTagB == "enemy") ||
              (strTagB == "player" && strTagA == "enemy")) {
@@ -103,14 +105,32 @@ void Collision::handleCollisionDamage(const std::shared_ptr<Entity> &a,
         applyDamage(b, a);
     }
 
-    // to use later when player can be hit by enemy bullet
-
-    // else if ((strTagA == "player" && strTagB == "enemy_bullet") ||
-    //     (strTagB == "player" && strTagA == "enemy_bullet")) {
-    //     auto target = (strTagA == "player") ? a : b;
-    //     auto bullet = (strTagA == "enemy_bullet") ? a : b;
-    //     applyDamage(bullet, target);
-    // }
+    else if ((strTagA == "player" && strTagB == "enemy_bullet") ||
+        (strTagB == "player" && strTagA == "enemy_bullet")) {
+        auto target = (strTagA == "player") ? a : b;
+        auto bullet = (strTagA == "enemy_bullet") ? a : b;
+        applyDamage(bullet, target);
+        applyDamage(target, bullet);
+    }
+    else if ((strTagA == "player_bullet" && strTagB == "enemy_bullet") ||
+        (strTagB == "player_bullet" && strTagA == "enemy_bullet")) {
+        auto target = (strTagA == "player_bullet") ? a : b;
+        auto bullet = (strTagA == "enemy_bullet") ? a : b;
+        applyDamage(bullet, target);
+        applyDamage(target, bullet);
+        auto hpComp1 = bullet->getComponent<HP>();
+        auto hpComp2 = target->getComponent<HP>();
+        if (hpComp1)
+            hpComp1->setHP(0);
+        if (hpComp2)
+            hpComp2->setHP(0);
+    }
+    else if ((strTagA == "player" && strTagB == "heal") ||
+             (strTagB == "player" && strTagA == "heal")) {
+        auto player = (strTagA == "player") ? a : b;
+        auto heal = (strTagA == "heal") ? a : b;
+        applyHeal(player, heal);
+    }
 }
 
 /**
@@ -120,16 +140,43 @@ void Collision::handleCollisionDamage(const std::shared_ptr<Entity> &a,
  */
 
 void Collision::applyDamage(const std::shared_ptr<Entity> &attacker,
-                            const std::shared_ptr<Entity> &target)
+     const std::shared_ptr<Entity> &target)
 {
     auto damage = attacker->getComponent<Damage>();
     auto hp = target->getComponent<HP>();
+    auto targetTag = target->getComponent<Tag>();
 
     if (damage && hp) {
-        hp->setHP(hp->getHP() - damage->getDamage());
-        std::cout << "[Damage] Entity " << target->getId()
-                  << " took " << damage->getDamage() << " damage ("
-                  << hp->getHP() << " HP left)" << std::endl;
+        int oldHp = hp->getHP();
+        int newHp = oldHp - damage->getDamage();
+        if (newHp < 0)
+            newHp = 0;
+        hp->setHP(newHp);
+        if (targetTag && targetTag->getTag() == "player") {
+            Packet packet;
+            packet.action(target->getId(), HEAL, newHp);
+            _network.sendPacket(packet);
+        }
     }
+}
+
+void Collision::applyHeal(const std::shared_ptr<Entity> &player,
+    const std::shared_ptr<Entity> &heal)
+{
+    auto hp = player->getComponent<HP>();
+    if (!hp)
+        return;
+    unsigned int currentHp = hp->getHP();
+    unsigned int maxHp = hp->getMaxHP();
+    unsigned int healAmount = 20;
+    unsigned int newHp = std::min(currentHp + healAmount, maxHp);
+    hp->setHP(newHp);
+    Packet packet;
+    packet.action(player->getId(), HEAL, newHp);
+    _network.sendPacket(packet);
+
+    auto powerupHp = heal->getComponent<HP>();
+    if (powerupHp)
+        powerupHp->setHP(0);
 }
 

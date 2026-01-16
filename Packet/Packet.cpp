@@ -8,33 +8,14 @@
 #include "Packet.hpp"
 #include "CustomError.hpp"
 
-#include <iomanip>
-#include <sstream>
 #include <cstring>
 
 /**
  * @brief Constructor for Packet
  */
-Packet::Packet() : _dataSize(0), _idSetted(false), _ackSetted(false), _packetNumberSetted(false), _totalPacketNumberSetted(false)
+Packet::Packet() : _idSetted(false), _ackSetted(false), _packetNumberSetted(false), _totalPacketNumberSetted(false)
 {
-}
-
-/**
- * @brief Convert integer to hex string
- */
-std::string Packet::toHex(int value, int digits) const
-{
-    std::ostringstream oss;
-    oss << std::hex << std::setfill('0') << std::setw(digits) << value;
-    return oss.str();
-}
-
-/**
- * @brief Append hex string to data
- */
-void Packet::appendHex(const std::string& hex)
-{
-    _hexData += hex;
+    std::memset(&_header, 0, sizeof(UDPHeader));
 }
 
 /**
@@ -47,46 +28,54 @@ sf::Packet Packet::getPacket() const
     }
     
     sf::Packet packet;
-    packet.append(_hexData.c_str(), _hexData.size());
+    UDPHeader headerCopy = _header;
+    headerCopy.dataSize = static_cast<uint16_t>(_payload.getDataSize());
+
+    packet.append(&headerCopy, sizeof(UDPHeader));
+    packet.append(_payload.getData(), _payload.getDataSize());
     return packet;
 }
 
 /**
- * @brief Setter for packet id (unused in hex format)
+ * @brief Setter for packet id
+ * @param id The Id of the Packet
  */
-Packet &Packet::setId(const int id)
+Packet& Packet::setId(const uint32_t id)
 {
-    (void)id;
+    _header.id = id;
     _idSetted = true;
     return *this;
 }
 
 /**
- * @brief Setter for packet ack (unused in hex format)
+ * @brief Setter for packet ack
+ * @param ack The ack of the Packet
  */
-Packet &Packet::setAck(const int ack)
+Packet& Packet::setAck(const uint32_t ack)
 {
-    (void)ack;
+    _header.ack = ack;
     _ackSetted = true;
     return *this;
 }
 
 /**
- * @brief Setter for Packet packetNbr (unused in hex format)
+ * @brief Setter for Packet packetNbr
+ * @param  packetNbr The number of the Packet
  */
-Packet &Packet::setPacketNbr(const uint8_t packetNbr)
+Packet& Packet::setPacketNbr(const uint8_t packetNbr)
 {
-    (void)packetNbr;
+    _header.packetNbr = packetNbr;
     _packetNumberSetted = true;
     return *this;
 }
 
 /**
- * @brief Setter for Packet totalPacketNbr (unused in hex format)
+ * @brief Setter for Packet totalPacketNbr
+ * @param totalPacketNbr The total of Packet
  */
-Packet &Packet::setTotalPacketNbr(const uint8_t totalPacketNbr)
+Packet& Packet::setTotalPacketNbr(const uint8_t totalPacketNbr)
 {
-    (void)totalPacketNbr;
+    _header.totalPacketNbr = totalPacketNbr;
     _totalPacketNumberSetted = true;
     return *this;
 }
@@ -95,80 +84,103 @@ Packet &Packet::setTotalPacketNbr(const uint8_t totalPacketNbr)
  * @brief Write timeSync action in packet
  * @param time The time from serv
  */
-void Packet::timeSync(const int time)
+void Packet::timeSync(const uint32_t time)
 {
-    appendHex("06");  // opcode
-    appendHex(toHex(time, 4));  // 4 hex digits for time
+    _payload.clear();
+    _payload << static_cast<uint8_t>(0x06); // opcode
+    _payload << time;                       // 4 bytes
 }
 
 /**
- * @brief Write playerPosition action in packet
+ * @brief Write in packet to update position
  * @param id The id of the entity
  * @param x The x coordinate
  * @param y The y coordinate
  */
-void Packet::playerPosition(const size_t id, const float x, const float y)
+void Packet::updatePosition(const uint32_t id, const float x, const float y, uint16_t type)
 {
-    appendHex("07");  // opcode
-    appendHex(toHex(static_cast<uint64_t>(id), 16));  // 16 hex digits for id
-    appendHex(toHex(0, 2));   // 2 hex digits for type (unused here)
-    appendHex(toHex(static_cast<int>(x), 4));   // 4 hex digits for x
-    appendHex(toHex(static_cast<int>(y), 4));   // 4 hex digits for y
+    _payload.clear();
+    _payload << static_cast<uint8_t>(0x07); // opcode
+    _payload << id;                         // 4 bytes
+    _payload << type;                       // 2 bytes
+    _payload << x;                          // 4 bytes
+    _payload << y;                          // 4 bytes
 }
 
 /**
- * @brief Write positionSpawn action in packet
+ * @brief Write in packet to spawn entity
  * @param id The id of the entity
  * @param type The type of entity
  * @param x The x coordinate
  * @param y The y coordinate
  */
-void Packet::positionSpawn(const size_t id, const uint16_t type, const float x, const float y)
+void Packet::Spawn(const uint32_t id, const uint16_t type, const float x, const float y)
 {
-    appendHex("07");  // opcode (same as playerPosition)
-    appendHex(toHex(static_cast<uint64_t>(id), 16));    // 16 hex digits for id
-    appendHex(toHex(static_cast<int>(type), 2));  // 2 hex digits for type
-    appendHex(toHex(static_cast<int>(x), 4));     // 4 hex digits for x
-    appendHex(toHex(static_cast<int>(y), 4));     // 4 hex digits for y
+    _payload.clear();
+    _payload << static_cast<uint8_t>(0x07); // opcode
+    _payload << id;                         // 4 bytes
+    _payload << type;                       // 2 bytes
+    _payload << x;                          // 4 bytes
+    _payload << y;                          // 4 bytes
 }
 
 /**
- * @brief Write hit action in packet
- * @param id The of the entity
- * @param value The value of damage
+ * @brief Write collision in packet
+ * @param entityOneId The Id of the first entity
+ * @param entityTwoId The Id of the second entity
  */
-void Packet::hit(const size_t id, const int value)
+void Packet::collision(const uint32_t entityOneId, const uint32_t entityTwoId)
 {
-    appendHex("08");  // opcode
-    appendHex(toHex(static_cast<uint64_t>(id), 16));    // 16 hex digits for id
-    appendHex(toHex(value, 4));                    // 4 hex digits for damage
+    _payload.clear();
+    _payload << static_cast<uint8_t>(0x08); // opcode
+    _payload << entityOneId;                // 4 bytes
+    _payload << entityTwoId;                // 4 bytes
 }
 
 /**
- * @brief Write dead action in packet
+ * @brief Write dead in packet
  * @param id The id of the entity
  */
-void Packet::dead(const size_t id)
+void Packet::dead(const uint32_t id)
 {
-    appendHex("09");  // opcode
-    appendHex(toHex(static_cast<uint64_t>(id), 16));  // 16 hex digits for id
+    _payload.clear();
+    _payload << static_cast<uint8_t>(0x09); // opcode
+    _payload << id;                         // 4 bytes
 }
 
 /**
- * @brief Write endGame action in packet
+ * @brief Write endGame in packet
  * @param status Alive or dead (0/1)
  */
 void Packet::endGame(const uint8_t status)
 {
-    appendHex("0A");  // opcode
-    appendHex(toHex(static_cast<int>(status), 4));  // 4 hex digits for status
+    _payload.clear();
+    _payload << static_cast<uint8_t>(0x0A); // opcode
+    _payload << status;                     // 1 byte
 }
 
 /**
- * @brief Write shoot action in packet
- * @param id The id of the shooter
+ * @brief Write action in packet
+ * @param id The id of the entity doing the action
+ * @param action The id of the action who is called 
  */
-void Packet::shoot(const size_t id) {
-    appendHex("0B");  // opcode
-    appendHex(toHex(static_cast<uint64_t>(id), 16));  // 16 hex digits for id
+void Packet::action(const uint32_t id, const uint8_t action, const uint32_t data) {
+    _payload.clear();
+    _payload << static_cast<uint8_t>(0x0B); // opcode
+    _payload << id;                         // 4 bytes
+    _payload << action;                     // 1 byte
+    _payload << data;                     // 4 byte
+}
+
+/**
+ * @brief Write in packet to update mana
+ * @param playerId The id of the player
+ * @param mana The current mana value
+ */
+void Packet::updateMana(const uint32_t playerId, const int mana)
+{
+    _payload.clear();
+    _payload << static_cast<uint8_t>(0x0C); // opcode
+    _payload << playerId;                    // 4 bytes
+    _payload << mana;                        // 4 bytes
 }

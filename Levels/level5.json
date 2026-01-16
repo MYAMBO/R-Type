@@ -1,0 +1,9 @@
+{
+  "metadata": {
+    "name": "Level 5 - Boss",
+    "scene": 1
+  },
+  "entities": [
+    { "type": "portal_boss", "tag": "enemy", "x": 1400,  "y": 0, "hp": 50, "velocity": { "x": -2, "y": 0 } }
+  ]
+}

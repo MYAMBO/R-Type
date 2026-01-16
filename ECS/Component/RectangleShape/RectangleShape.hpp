@@ -30,6 +30,8 @@ class RectangleShape : public Component {
 
         [[nodiscard]] sf::Vector2f getSize() const;
 
+        [[nodiscard]] sf::Color getColor() const;
+
     private:
         sf::RectangleShape _shape;
 };

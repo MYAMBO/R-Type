@@ -11,6 +11,7 @@
     #include <memory>
     #include "World.hpp"
     #include "Camera.hpp"
+    #include <map> 
 
 /**
  * @brief GameHelper class providing utility functions for game entities.
@@ -20,12 +21,9 @@ class GameHelper {
         GameHelper() = delete; 
         ~GameHelper() = delete;
 
-        static std::shared_ptr<Camera> getMainCamera(World &world);
         static std::shared_ptr<Entity> getEntityById(World &world, uint64_t id);
         static std::shared_ptr<Entity> getEntityByTag(World &world, const std::string &tag);
         static std::vector<std::shared_ptr<Entity>> getEntitiesByGroup(World &world, size_t groupId);
-
-        static void createBasicEnemy(World &world, float x, float y);
 };
 
 #endif /* !GAMEHELPER_HPP_ */

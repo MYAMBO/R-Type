@@ -5,11 +5,23 @@
 ** Network
 */
 
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
 #include <cstring>
 #include <iostream>
 #include <optional>
-#include <netinet/in.h>
-#include <bits/getopt_core.h>
+
+#ifdef _WIN32
+    #include <io.h>
+    #include "getopt.h"
+    #include <winsock2.h>
+    #pragma comment(lib, "ws2_32.lib")
+#else
+    #include <netinet/in.h>
+    #include <bits/getopt_core.h>
+#endif // _WIN32
 
 #include "Game.hpp"
 #include "Network.hpp"
@@ -22,7 +34,8 @@ Network::Network()
     _tcpPort = -1;
     _udpPort = -1;
     _debugMode = false;
-    _packetReader = ClientPacketreader("", nullptr);
+    _packetReader = ClientPacketreader(sf::Packet(), nullptr);
+    _isRunning = true;
 }
 
 void Network::getIpAdress(std::string option)
@@ -87,8 +100,9 @@ auto Network::initClient() -> void
     log("TCP server listening on port " + std::to_string(_tcpPort));
     if (_udpSocket.bind(sf::Socket::AnyPort) != sf::Socket::Status::Done)
         throw InitClientException();
+
     _game = std::make_shared<Game>(*this);
-    _packetReader = ClientPacketreader("", _game);
+    _packetReader = ClientPacketreader(sf::Packet(), _game);
 }
 
 void Network::udpThread()
@@ -97,25 +111,21 @@ void Network::udpThread()
 
     std::optional<sf::IpAddress> sender;
     unsigned short rport;
-    while (true)
+    while (_isRunning)
     {
         p.clear();
         if (_udpSocket.receive(p, sender, rport) != sf::Socket::Status::Done)
         {
-
+            continue;
         }
-        const void* raw = p.getData();
-        const std::size_t size = p.getDataSize();
-
-        const std::string data(static_cast<const char*>(raw), size);
-        _packetReader.addData(data);
+        _packetReader.addPacket(p);
         try
         {
             _packetReader.interpretPacket();
         }
         catch (std::exception& e)
         {
-            _packetReader.clear();
+            _packetReader.addPacket(sf::Packet());
             log("UDP | Failed to interpret packet : " + std::string(e.what()));
         }
         log("UDP | Received " + std::to_string(p.getDataSize()) + " bytes from " + sender.value().toString() + " on port " + std::to_string(rport));
@@ -124,12 +134,17 @@ void Network::udpThread()
 
 void Network::tcpThread()
 {
-    while (true)
+    while (_isRunning)
     {
         char data[1024];
-        std::size_t received;
+        std::size_t received = 0;
 
-        if (_tcpClient.receive(data, sizeof(data), received) != sf::Socket::Status::Done)
+        auto status = _tcpClient.receive(data, sizeof(data), received);
+
+        if (status == sf::Socket::Status::Disconnected)
+            break;
+
+        if (status != sf::Socket::Status::Done)
             continue;
 
         if (received < 6)
@@ -137,14 +152,13 @@ void Network::tcpThread()
 
         uint32_t value32;
         std::memcpy(&value32, &data[2], sizeof(value32));
-        value32 = ntohl(value32);
-        _udpPort = value32;
+        _udpPort = ntohl(value32);
         _playerId = static_cast<unsigned char>(data[1]);
 
         _udpSocket.send("", 0, _ip, _udpPort);
 
         {
-            std::lock_guard<std::mutex> lock(_mutex);
+            std::lock_guard lock(_mutex);
             _ready = true;
         }
         _readyCond.notify_all();
@@ -165,19 +179,14 @@ void Network::log(const std::string& message) const
 
 void Network::sendPacket(Packet& packet)
 {
-    {
-        std::unique_lock<std::mutex> lock(_mutex);
-        _readyCond.wait(lock, [this]{ return _udpPort != -1; });
-    }
+     std::unique_lock lock(_mutex);
+    _readyCond.wait(lock, [this]{ return _udpPort != -1; });
 
     const sf::Packet p = packet.getPacket();
-
-    if (_udpSocket.send(p.getData(), p.getDataSize(), _ip, _udpPort) != sf::Socket::Status::Done) {
-        log("UDP | Failed to send packet to server");
-    }
+    _udpSocket.send(p.getData(), p.getDataSize(), _ip, _udpPort);
 }
 
-void Network::sendAll(sf::TcpSocket& socket, const void* data, const std::size_t size)
+void Network::sendAll(sf::TcpSocket& socket, const void* data, std::size_t size)
 {
     std::size_t sent = 0;
 
@@ -204,13 +213,19 @@ void Network::sendMessage(const std::string &message)
 
 void Network::start()
 {
-    std::unique_lock<std::mutex> lock(_mutex);
-    std::thread tcpThread(&Network::tcpThread, this);
-    std::thread udpThread(&Network::udpThread, this);
-    _readyCond.wait(lock, [this]{ return _udpPort != -1; });
-    lock.unlock();
+    _tcpClient.setBlocking(false);
+    _udpSocket.setBlocking(false);
 
-    _game->run();
-    tcpThread.join();
-    udpThread.join();
+    std::thread tcp(&Network::tcpThread, this);
+    std::thread udp(&Network::udpThread, this);
+
+    _game->loadingRun();
+
+    _isRunning = false;
+
+    _tcpClient.disconnect();
+    _udpSocket.unbind();
+
+    tcp.join();
+    udp.join();
 }

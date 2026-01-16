@@ -1,7 +1,7 @@
 ## Tag
 
-The **Tag** component provides a string-based identifier for an entity.  
-It allows systems and game logic to locate specific entities without relying on dynamic numerical IDs.
+The **Tag** component provides a string-based identifier for an entity. The component Tag is a **must** component for every entity, or the `GameHelper` will not work with them. 
+It allows systems and game logic to locate specific entities without relying on dynamic numerical IDs. 
 
 ### Dependencies & Integration
 

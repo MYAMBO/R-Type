@@ -21,7 +21,7 @@
  * @retval 0 Successful execution.
  * @retval 1 Execution error.
  */
-auto main(const int ac, char **av) -> int
+int main(const int ac, char **av)
 {
 	try
 	{

@@ -2,8 +2,29 @@ cmake_minimum_required(VERSION 3.19)
 
 project(R-Type)
 
+
+# =====================================================
+# Force all binaries into the build directory
+# (Visual Studio / multi-config compatible)
+# =====================================================
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+if (CMAKE_CONFIGURATION_TYPES) # Visual Studio / Xcode
+    foreach(CONFIG ${CMAKE_CONFIGURATION_TYPES})
+        string(TOUPPER ${CONFIG} CONFIG)
+        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CONFIG} ${CMAKE_BINARY_DIR})
+        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CONFIG} ${CMAKE_BINARY_DIR})
+        set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CONFIG} ${CMAKE_BINARY_DIR})
+    endforeach()
+endif()
+
+# =====================================================
+
 if (WIN32)
         message(STATUS "Configuring for Windows...")
+        add_compile_definitions(NOMINMAX)
 elseif(UNIX)
         message(STATUS "Configuring for Linux...")
 endif()
@@ -14,13 +35,24 @@ if (DEV_COMPILE)
         add_compile_options(-Werror)
 endif ()
 
-add_compile_options(-Wall -Wextra)
+if (MSVC)
+    add_compile_options(/W4)
+    if (DEV_COMPILE)
+        add_compile_options(/WX)
+    endif()
+else()
+    add_compile_options(-Wall -Wextra)
+    if (DEV_COMPILE)
+        add_compile_options(-Werror)
+    endif()
+endif()
+
+set(CPM_DOWNLOAD_VERSION 0.40.2)
 
 if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake")
     file(DOWNLOAD
-        https://raw.githubusercontent.com/cpm-cmake/CPM.cmake/master/cmake/CPM.cmake
-        "${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake"
-
+            https://github.com/cpm-cmake/CPM.cmake/releases/download/v${CPM_DOWNLOAD_VERSION}/CPM.cmake
+            "${CMAKE_BINARY_DIR}/cmake/CPM.cmake"
     )
 endif()
 include("${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake")
@@ -32,7 +64,16 @@ CPMAddPackage(
     EXCLUDE_FROM_ALL YES
 )
 
+set(TGUI_BACKEND SFML_GRAPHICS CACHE STRING "" FORCE)
+
+CPMAddPackage(
+    NAME tgui
+    URL "https://github.com/texus/TGUI/archive/refs/heads/1.x.zip"
+    DOWNLOAD_ONLY NO
+)
+
 include_directories(.)
+include_directories(Action)
 include_directories(ECS)
 include_directories(ECS/Component)
 include_directories(ECS/Component/HP)
@@ -42,8 +83,9 @@ include_directories(ECS/Component/Data)
 include_directories(ECS/Component/Scene)
 include_directories(ECS/Component/Layer)
 include_directories(ECS/Component/Scale)
-include_directories(ECS/Component/Button)
+include_directories(ECS/Component/Music)
 include_directories(ECS/Component/Group)
+include_directories(ECS/Component/Button)
 include_directories(ECS/Component/Camera)
 include_directories(ECS/Component/Sprite)
 include_directories(ECS/Component/Camera)
@@ -53,30 +95,43 @@ include_directories(ECS/Component/Animator)
 include_directories(ECS/Component/Position)
 include_directories(ECS/Component/Velocity)
 include_directories(ECS/Component/Rotation)
+include_directories(ECS/Component/GuiWidget)
 include_directories(ECS/Component/BoxCollider)
+include_directories(ECS/Component/SoundEffect)
 include_directories(ECS/Component/RectangleShape)
 include_directories(ECS/System)
 include_directories(ECS/System/Draw)
 include_directories(ECS/System/Mouse)
+include_directories(ECS/System/Audio)
 include_directories(ECS/System/Inputs)
 include_directories(ECS/System/TextSys)
 include_directories(ECS/System/Movement)
 include_directories(ECS/System/Animation)
 include_directories(ECS/System/CameraSys)
 include_directories(ECS/System/Collision)
+include_directories(ECS/System/GuiSystem)
 include_directories(ECS/System/ScriptsSys)
 include_directories(ECS/System/DeathSys)
 include_directories(ECS/Entity)
 include_directories(Client)
 include_directories(Client/Core)
 include_directories(Client/Game)
-include_directories(Client/Creator)
 include_directories(Client/GameHelper)
+include_directories(Client/GameHelper/Graphical)
+include_directories(Client/Factory)
+include_directories(Client/Factory/UI)
+include_directories(Client/Factory/World)
+include_directories(Client/Factory/Tools)
+include_directories(Client/Factory/Effect)
 include_directories(Client/ScriptsHandler)
+include_directories(Client/LanguageHandler)
+include_directories(Server/LevelLoader)
+include_directories(Server/GetOpt)
 include_directories(./Server)
 include_directories(./Server/Core)
 include_directories(./Packet)
 include_directories(Server/Game)
+include_directories(Common)
 
 add_executable(r-type_server
         Server/main.cpp
@@ -96,39 +151,53 @@ add_executable(r-type_server
         ECS/System/CameraSys/CameraSys.cpp
         ECS/System/Movement/Movement.cpp
         ECS/System/ScriptsSys/ScriptsSys.cpp
+        ECS/System/DeathSys/DeathSys.cpp
+        ECS/System/Collision/Collision.cpp
         ECS/World.cpp
         ECS/Component/HP/HP.cpp
-        ECS/Component/Damage/Damage.cpp
         Client/GameHelper/GameHelper.cpp
+        Server/LevelLoader/LevelLoader.cpp
+        Server/GetOpt/GetOpt.cpp
         ECS/Component/Tag/Tag.cpp
+        ECS/Component/Data/Data.cpp
         ECS/Component/Scale/Scale.cpp
         ECS/Component/Layer/Layer.cpp
         ECS/Component/Scene/Scene.cpp
         ECS/Component/Group/Group.cpp
         ECS/Component/Script/Script.cpp
         ECS/Component/Sprite/Sprite.cpp
+        ECS/Component/Damage/Damage.cpp
         ECS/Component/Camera/Camera.cpp
         ECS/Component/Position/Position.cpp
         ECS/Component/Velocity/Velocity.cpp
         ECS/Component/Rotation/Rotation.cpp
         ECS/Component/Animator/Animator.cpp
         ECS/Component/BoxCollider/BoxCollider.cpp
-        Server/IGameNetwork.hpp)
+        Server/IGameNetwork.hpp
+        Packet/TcpReader.cpp
+        Packet/TcpReader.hpp)
 
 add_executable(r-type_client
         Client/main.cpp
         Client/Game/Game.cpp
-        Client/Creator/Creator.cpp
+        Client/Factory/Factory.cpp
+        Client/Factory/UI/UIFactory.cpp
+        Client/Factory/Tools/ToolsFactory.cpp
+        Client/Factory/World/WorldFactory.cpp
+        Client/Factory/Effect/EffectFactory.cpp
         Client/GameHelper/GameHelper.cpp
+        Client/GameHelper/Graphical/GameHelperGraphical.cpp
         Client/ScriptsHandler/ScriptsHandler.cpp
         ECS/Entity/Entity.cpp
         ECS/System/Draw/Draw.cpp
         ECS/System/Mouse/Mouse.cpp
+        ECS/System/Audio/Audio.cpp
         ECS/System/Inputs/Inputs.cpp
         ECS/System/TextSys/TextSys.cpp
         ECS/System/Movement/Movement.cpp
         ECS/System/Animation/Animation.cpp
         ECS/System/CameraSys/CameraSys.cpp
+        ECS/System/GuiSystem/GuiSystem.cpp
         ECS/System/Collision/Collision.cpp
         ECS/System/ScriptsSys/ScriptsSys.cpp
         ECS/World.cpp
@@ -140,6 +209,7 @@ add_executable(r-type_client
         ECS/Component/Layer/Layer.cpp
         ECS/Component/Group/Group.cpp
         ECS/Component/Scene/Scene.cpp
+        ECS/Component/Music/Music.cpp
         ECS/Component/Button/Button.cpp
         ECS/Component/Script/Script.cpp
         ECS/Component/Sprite/Sprite.cpp
@@ -149,14 +219,26 @@ add_executable(r-type_client
         ECS/Component/Velocity/Velocity.cpp
         ECS/Component/Rotation/Rotation.cpp
         ECS/Component/Animator/Animator.cpp
+        ECS/Component/GuiWidget/GuiWidget.cpp
         ECS/Component/BoxCollider/BoxCollider.cpp
+        ECS/Component/SoundEffect/SoundEffect.cpp
         ECS/Component/RectangleShape/RectangleShape.cpp
+        ECS/System/DeathSys/DeathSys.cpp
         Packet/Packet.cpp
         Packet/MyString.cpp
         Client/Core/Network.cpp
         Client/Core/ClientPacketreader.cpp
-        ECS/System/DeathSys/DeathSys.cpp)
+        Client/LanguageHandler/LanguageHandler.cpp
+        Server/GetOpt/GetOpt.cpp
+        Packet/TcpReader.cpp
+        Packet/TcpReader.hpp)
 
-target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network)
+if (WIN32)
+    target_link_libraries(r-type_client sfml-main sfml-graphics sfml-window sfml-system sfml-network sfml-audio tgui)
 
-target_link_libraries(r-type_server  sfml-graphics sfml-system sfml-network)
+    target_link_libraries(r-type_server sfml-main sfml-graphics sfml-system sfml-network)
+elseif(UNIX)
+    target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network sfml-audio tgui)
+
+    target_link_libraries(r-type_server sfml-graphics sfml-system sfml-network)
+endif()

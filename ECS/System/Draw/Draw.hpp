@@ -8,7 +8,9 @@
 #ifndef DRAW_HPP_
     #define DRAW_HPP_
 
-#include "World.hpp"
+    #include "World.hpp"
+    #include <SFML/Graphics/Shader.hpp>
+    #include <SFML/Graphics/RenderTexture.hpp>
 
 /**
  * @brief Draw system responsible for rendering entities with Sprite components.
@@ -18,11 +20,14 @@
 */
 class Draw : public System {
     public:
-        Draw() = default;
+        Draw();
         ~Draw() override = default;
 
         void update(const float& dt, World &w) override;
     private:
+        sf::Shader _shader;
+        bool _shaderLoaded = false;
+        sf::Texture _whiteTexture;
 };
 
 #endif

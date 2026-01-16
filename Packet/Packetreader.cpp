@@ -9,15 +9,17 @@
 
 #include <iostream>
 #include <utility>
+#include <cstring>
 
 /**
  * @brief Construct a packetReader
- * @param data The string to be parsed
- * @param isClient If it's client side or not
+ * @param data The packet to be parsed
  * @param game Pointer to the Server-side game
  */
-Packetreader::Packetreader(std::string data, std::shared_ptr<ServerGame> game) : _data(MyString(std::move(data)))
+Packetreader::Packetreader(sf::Packet data, std::shared_ptr<ServerGame> game) : _packet(std::move(data))
 {
+    _header.id = 0;
+    _header.packetNbr = 0;
     _game = std::move(game);
 }
 
@@ -26,104 +28,95 @@ Packetreader::Packetreader(std::string data, std::shared_ptr<ServerGame> game) :
  */
 void Packetreader::interpretPacket()
 {
-    std::cout << "server received packet" << std::endl;
-    while (_data.size() > 0)
-    {
-        switch (std::stoi( _data.mySubStr(0, 2) , nullptr, 16)) {
-            case 0x06: timestamp(); break;
-            case 0x07: updateEntity(); break;
-            case 0x08: hit(); break;
-            case 0x09: dead(); break;
-            case 0x0A: endGame(); break;
-            case 0x0B: shoot(); break;
-            default:
-                _data.clear();
-                break;
-        }
+    if (_packet.getDataSize() < sizeof(UDPHeader)) {
+        std::cerr << "Packet too small to contain header" << std::endl;
+        return;
     }
-}
 
-/**
- * @brief interpret timeStamp action
- */
-void Packetreader::timestamp()
-{
-    int  time = std::stoi( _data.mySubStr(0, 4) , nullptr, 16);
+    std::memcpy(&_header, _packet.getData(), sizeof(UDPHeader));
 
-    // call function and give int
-}
+    sf::Packet payload;
+    const char* dataPtr = static_cast<const char*>(_packet.getData());
+    payload.append(dataPtr + sizeof(UDPHeader), _packet.getDataSize() - sizeof(UDPHeader));
 
-/**
- * @brief interpret updateEntity action
- */
-void Packetreader::updateEntity()
-{
-    uint64_t id = std::stoull( _data.mySubStr(0, 16), nullptr, 16);
-    int type = std::stoi( _data.mySubStr(0, 2), nullptr, 16);
-    float x = static_cast<float>(std::stoi(_data.mySubStr(0, 4), nullptr, 16));
-    float y = static_cast<float>(std::stoi(_data.mySubStr(0, 4) , nullptr, 16));
+    std::cout << "server received packet from ID: " << _header.id << std::endl;
 
-    if (type == 0) {
-        // type == None (0) = mise à jour de position seulement
-        std::cout << "Player " << id << " moved to (" << x << ", " << y << ")" << std::endl;
-        _game->handleNewPlayerPosition(id, x, y);
-    } else if (type == 1) {
-        // type == Player (1) = nouveau joueur qui se connecte
-        std::cout << "New player " << id << " spawning at (" << x << ", " << y << ")" << std::endl;
-        _game->handleNewPlayer();
+    while (!payload.endOfPacket())
+    {
+        uint8_t opcode;
+        if (!(payload >> opcode)) break;
+
+        switch (opcode) {
+            case 0x06: {
+                uint32_t time;
+                if (payload >> time) {
+                    std::cout << "TimeSync: " << time << std::endl;
+                    // _game->handleTimeSync(time);
+                }
+                break;
+            }
+            case 0x07: {
+                uint32_t id;
+                uint16_t type;
+                float x, y;
+                if (payload >> id >> type >> x >> y) {
+                    if (type == 0) {
+                        std::cout << "Player " << id << " moved to (" << x << ", " << y << ")" << std::endl;
+                        if (_game) _game->serverUpdatePosition(id, x, y);
+                    } else {
+                        std::cout << "New player " << id << " spawning at (" << x << ", " << y << ")" << std::endl;
+                        if (_game) _game->handleNewPlayer();
+                    }
+                }
+                break;
+            }
+            case 0x08: {
+                uint32_t id1, id2;
+                if (payload >> id1 >> id2) {
+                    std::cout << "Collision between " << id1 << " and " << id2 << std::endl;
+                }
+                break;
+            }
+            case 0x09: {
+                uint32_t id;
+                if (payload >> id) {
+                    std::cout << "Entity " << id << " is dead" << std::endl;
+                }
+                break;
+            }
+            case 0x0A: {
+                uint8_t status;
+                if (payload >> status) {
+                    std::cout << "EndGame status: " << static_cast<int>(status) << std::endl;
+                }
+                break;
+            }
+            case 0x0B: {
+                uint32_t id;
+                uint8_t actionId;
+                uint32_t data;
+                if (payload >> id >> actionId >> data) {
+                    std::cout << "Action " << static_cast<int>(actionId) << " from " << id << std::endl;
+                    if (_game) _game->handleAction(id, actionId, data);
+                }
+                break;
+            }
+            default:
+                std::cerr << "Unknown opcode: " << static_cast<int>(opcode) << std::endl;
+                return;
+        }
     }
 }
 
 void Packetreader::clear()
 {
-    _data.clear();
+    _packet.clear();
 }
 
 /**
- * @brief interpret hit action
+ * @brief add packet data
  */
-void Packetreader::hit()
+void Packetreader::addPacket(sf::Packet data)
 {
-    uint64_t id = std::stoull( _data.mySubStr(0, 16), nullptr, 16);
-    int damage = std::stoi( _data.mySubStr(0, 4), nullptr, 16);
-
-    // call function and give parameter
-}
-
-/**
- * @brief interpret dead action
- */
-void Packetreader::dead()
-{
-    uint64_t id = std::stoull( _data.mySubStr(0, 16), nullptr, 16);
-
-    // call function and give parameter
-}
-
-/**
- * @brief interpret endGame action
- */
-void Packetreader::endGame()
-{
-    uint64_t id = std::stoull(_data.mySubStr(0, 16), nullptr, 16);
-
-    // call function and give parameter
-}
-
-/**
- * @brief interpret shoot action
- */
-void Packetreader::shoot()
-{
-    const uint64_t id = std::stoull(_data.mySubStr(0, 16), nullptr, 16);
-
-    _game->handleShoot(id);
-}
-
-/**
- * @brief interpret shoot action
- */
-void Packetreader::addData(const std::string& data)
-{
-    _data.append(data.c_str());
+    _packet = std::move(data);
 }

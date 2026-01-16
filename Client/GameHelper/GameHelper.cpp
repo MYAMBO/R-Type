@@ -7,33 +7,15 @@
 
 #include "HP.hpp"
 #include "Tag.hpp"
-#include "Scale.hpp"
-#include "Scene.hpp"
 #include "Group.hpp"
+#include "Damage.hpp"
 #include "Camera.hpp"
-#include "Sprite.hpp"
 #include "Position.hpp"
-#include "Animator.hpp"
+#include "Velocity.hpp"
 #include "GameHelper.hpp"
 #include "BoxCollider.hpp"
-#include "Damage.hpp"
 
-/**
- * @brief Retrieves the main camera from the world.
- *
- * @param world The world containing entities and components.
- * @return A shared pointer to the main Camera component, or nullptr if not found.
- */
-std::shared_ptr<Camera> GameHelper::getMainCamera(World &world)
-{
-    for (const auto& entity : world.getAllEntitiesWithComponent<Camera>()) {
-        auto tagComp = entity->getComponent<Tag>();
-        if (tagComp && tagComp->getTag() == "main_camera") {
-            return entity->getComponent<Camera>();
-        }
-    }
-    return nullptr;
-}
+
 
 /**
  * @brief Retrieves the main player from the world.
@@ -44,6 +26,8 @@ std::shared_ptr<Camera> GameHelper::getMainCamera(World &world)
 std::shared_ptr<Entity> GameHelper::getEntityByTag(World &world, const std::string &tag)
 {
     for (const auto& entity : world.getAllEntitiesWithComponent<Tag>()) {
+        if (!entity)
+            continue;
         auto tagComp = entity->getComponent<Tag>();
         if (tagComp && tagComp->getTag() == tag) {
             return entity;
@@ -62,33 +46,13 @@ std::shared_ptr<Entity> GameHelper::getEntityByTag(World &world, const std::stri
 std::shared_ptr<Entity> GameHelper::getEntityById(World &world, uint64_t id)
 {
     for (const auto& entity : world.getAllEntitiesWithComponent<Tag>()) {
+        if (!entity)
+            continue;
         if (entity->getId() == id) {
             return entity;
         }
     }
-    //std::cerr << "Entity with id " << id << " not found." << std::endl;
     return nullptr;
-}
-
-/**
- * @brief Creates a basic enemy entity in the world at the specified position.
- *
- * @param world The world to create the enemy in.
- * @param x The x-coordinate of the enemy's position.
- * @param y The y-coordinate of the enemy's position.
-*/
-void GameHelper::createBasicEnemy(World &world, float x, float y)
-{
-    auto enemy = world.createEntity();
-    enemy->addComponent<HP>(50);
-    enemy->addComponent<Damage>(20);
-    enemy->addComponent<Position>(x, y);
-    enemy->addComponent<Sprite>(std::string("../sprites/r-typesheet42.gif"));
-    enemy->addComponent<Animator>(2, 1, 3.0f, 0, 0, 33, 19, 33, 0);
-    enemy->addComponent<Scale>(2.f);
-    enemy->addComponent<Scene>(1);
-    enemy->addComponent<Tag>("enemy");
-    enemy->addComponent<BoxCollider>(33.0f, 19.0f);
 }
 
 
@@ -104,6 +68,8 @@ std::vector<std::shared_ptr<Entity>> GameHelper::getEntitiesByGroup(World &world
     std::vector<std::shared_ptr<Entity>> members;
 
     for (const auto& entity : world.getAllEntitiesWithComponent<Group>()) {
+        if (!entity)
+            continue;
         if (entity->getComponent<Group>()->getId() == groupId) {
             members.push_back(entity);
         }
