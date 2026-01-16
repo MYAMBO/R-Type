@@ -507,6 +507,7 @@ int Game::killEntity(int id)
         }
         GameHelperGraphical::createScoreGUI(_world, pos->getX(), pos->getY(), data->getData("score"));
         GameHelperGraphical::soundEffectEntity(data->getData("death_sound"), 100.f, _world.getCurrentScene(), _world);
+        _factory.createSparks(_world, pos->getX() + 10, pos->getY() + 10, 15, static_cast<SceneType>(_world.getCurrentScene()), 300);
     }
     _world.killEntity(id);
     return 0;
