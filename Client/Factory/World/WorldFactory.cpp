@@ -95,6 +95,23 @@ void WorldFactory::createEnemy(float x, float y, int type, int entityId)
     }
 }
 
+void WorldFactory::createPowerUp(float x, float y, int type, int entityId)
+{
+    enum EnemyType {
+        HEAL = 1,
+        SPEED,
+        HOMING
+    };
+    switch (type) {
+    case HEAL:
+        GameHelperGraphical::createHealPowerUp(_world, x, y, entityId);
+        break;
+    default:
+        std::cerr << "Unknown power up type: " << type << std::endl;
+        break;
+    }
+}
+
 /**
  * @brief Create Enemy Bullet
  * This function initializes an enemy bullet entity with necessary components.

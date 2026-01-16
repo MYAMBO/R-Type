@@ -61,6 +61,7 @@ class GameHelperGraphical {
         static void createSinusEnemy(World &world, float x, float y, int entityId);
         static void createBasicEnemy(World &world, float x, float y, int entityId);
         static void createShootingEnemy(World &world, float x, float y, int entityId);
+        static void createHealPowerUp(World &world, float x, float y, int entityId);
         static void createScoreGUI(World &world, float x, float y, const std::string& scoreText);
         static void soundEffectEntity(const std::string& filepath, float volume, int scene, World& world);
         static void createAnimatorEntity(World &world, float x, float y, const std::string& spritePath, int rows,
