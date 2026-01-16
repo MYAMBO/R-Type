@@ -86,6 +86,7 @@ include_directories(Client)
 include_directories(Client/Core)
 include_directories(Client/Game)
 include_directories(Client/GameHelper)
+include_directories(Client/GameHelper/Graphical)
 include_directories(Client/Factory)
 include_directories(Client/Factory/UI)
 include_directories(Client/Factory/World)
@@ -126,6 +127,7 @@ add_executable(r-type_server
         Client/GameHelper/GameHelper.cpp
         Server/LevelLoader/LevelLoader.cpp
         ECS/Component/Tag/Tag.cpp
+        ECS/Component/Data/Data.cpp
         ECS/Component/Scale/Scale.cpp
         ECS/Component/Layer/Layer.cpp
         ECS/Component/Scene/Scene.cpp
@@ -150,6 +152,7 @@ add_executable(r-type_client
         Client/Factory/World/WorldFactory.cpp
         Client/Factory/Effect/EffectFactory.cpp
         Client/GameHelper/GameHelper.cpp
+        Client/GameHelper/Graphical/GameHelperGraphical.cpp
         Client/ScriptsHandler/ScriptsHandler.cpp
         ECS/Entity/Entity.cpp
         ECS/System/Draw/Draw.cpp
@@ -195,4 +198,4 @@ add_executable(r-type_client
 
 target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network sfml-audio tgui)
 
-target_link_libraries(r-type_server  sfml-graphics sfml-system sfml-network tgui)
+target_link_libraries(r-type_server  sfml-graphics sfml-system sfml-network)

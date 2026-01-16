@@ -116,3 +116,12 @@ bool SoundEffect::isGlobal() const
 {
     return _global;
 }
+
+/**
+ * @brief Get the current SFML sound status.
+ * @return sf::Sound::Status Current SFML sound status
+*/
+sf::Sound::Status SoundEffect::getSfStatus() const
+{
+    return _sound.getStatus();
+}

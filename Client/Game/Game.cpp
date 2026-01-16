@@ -38,6 +38,8 @@
 #include "GameHelper.hpp"
 #include "SoundEffect.hpp"
 #include "RectangleShape.hpp"
+#include "ScriptsHandler.hpp"
+#include "GameHelperGraphical.hpp"
 
 #include "Mouse.hpp"
 #include "TextSys.hpp"
@@ -192,10 +194,15 @@ void Game::loadingRun()
     updateLoadingState(0.3f, "Generating Menu...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _factory.createMenu();
+    _factory.createLevelCompanionUI();
     updateLoadingState(0.6f, "Generating Background...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _factory.createBackground(_window); 
     _factory.createCredits();
+    _factory.createScrapUIEmpty(1);
+    _factory.createScrapUIEmpty(2);
+    _factory.createScrapUIEmpty(3);
+    _factory.createBackGameUI();
     updateLoadingState(0.8f, "Connecting to server...");
     Packet packet;
 
@@ -274,6 +281,8 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
             sf::FloatRect visibleArea({0, 0}, {static_cast<float>(_window.getSize().x), static_cast<float>( _window.getSize().y)});
             _window.setView(sf::View(visibleArea));
         }
+        if (inputSystem->isTriggered(*eventOpt, KeyboardKey::Key_M))
+            _factory.createScraps(_world, 500.f, 0.f);
         inputSystem->update(0.0f, _world);
     }
 }
@@ -306,43 +315,24 @@ void Game::smootherMovement(int entityId, World &world, float serverX, float ser
     pos->setTargetY(serverY);
 }
 
-/**
- * @brief Create Enemy
- * This function initializes an enemy entity with necessary components.
-*/
-// void Game::createEnemy(float x, float y, uint16_t type)
-// {
-//     enum EnemyType {
-//         BASIC = 1,
-//         FAST,
-//         TANK
-//     };
-//     switch (type) {
-//         case BASIC:
-//             _factory.createEnemy(x, y, 1, 0);
-//             break;
-//         case FAST:
-//             // Implement fast enemy creation
-//             break;
-//         case TANK:
-//             // Implement tank enemy creation
-//             break;
-//         default:
-//             std::cerr << "Unknown enemy type: " << type << std::endl;
-//             break;
-//     }
-// }
-
 void Game::updateEntity(uint32_t id, uint16_t type, float x, float y)
 {
+    if (type == 0) {
+        auto entity = GameHelper::getEntityById(_world, id);
+        if (entity) {
+            smootherMovement(id, _world, x, y);
+        }
+        return;
+    }
     auto entity = GameHelper::getEntityById(_world, id);
-
     if (entity) {
         auto hpComp = entity->getComponent<HP>();
-        if (hpComp && !hpComp->isAlive())
+        if (hpComp && !hpComp->isAlive()) {
+            _world.killEntity(id);
+        } else {
+            smootherMovement(id, _world, x, y);
             return;
-        smootherMovement(id, _world, x, y);
-        return;
+        }
     }
     switch (type) {
     case Player:
@@ -358,8 +348,17 @@ void Game::updateEntity(uint32_t id, uint16_t type, float x, float y)
     case Enemy:
         _factory.createEnemy(x, y, 1, id);
         break;
+    case Fast:
+        _factory.createEnemy(x, y, 2, id);
+        break;
+    case Tank:
+        _factory.createEnemy(x, y, 3, id);
+        break;
     case EnemySinus:
         _factory.createEnemy(x, y, 4, id);
+        break;
+    case ShootingEnemy:
+        _factory.createEnemy(x, y, 5, id);
         break;
     case Bullet:
         _factory.createBullet(id, x, y, type);
@@ -367,23 +366,12 @@ void Game::updateEntity(uint32_t id, uint16_t type, float x, float y)
     case EnemyBullet:
         _factory.createEnemyBullet(id, x, y);
         break;
-    case ShootingEnemy:
-        _factory.createEnemy(x, y, 5, id);
+    case PortalBoss:
+        _factory.createEnemy(x, y, 6, id);
         break;
     }
-}
 
-// void Game::createPlayer(uint32_t id)
-// {
-//     _factory.createPlayer(id);
-//     auto entity = GameHelper::getEntityById(_world, id);
-//     if (entity && entity->getComponent<Tag>()->getTag() == "player") {
-//         entity->addComponent<Script>([this](const uint32_t entityId, World& world)
-//         {
-//             this->playerInput(entityId, world);
-//         });
-//     }
-// }
+}
 
 /**
  * @brief Handles player input for movement and shooting.
@@ -398,11 +386,10 @@ void Game::playerInput(uint32_t entityId, World &world)
 {
     if (world.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
         return;
-    (void)entityId;
     static bool isShootKeyPressed = false;
 
     auto inputSystem = world.getSystem<Inputs>();
-    std::shared_ptr<Camera> compCam = GameHelper::getMainCamera(world);
+    std::shared_ptr<Camera> compCam = GameHelperGraphical::getMainCamera(world);
     std::shared_ptr<Entity> compPlayer = GameHelper::getEntityByTag(world, "player");
     auto settings = GameHelper::getEntityByTag(world, "game_controls_settings");
     auto data = settings->getComponent<Data>();
@@ -464,6 +451,19 @@ void Game::playerInput(uint32_t entityId, World &world)
                     mana = 0;
                 dataComp->setData("mana", std::to_string(mana));
             }
+            auto group = GameHelper::getEntitiesByGroup(world, compPlayer->getComponent<Group>()->getId());
+            for (auto& entity : group) {
+                if (entity->getComponent<Tag>()->getTag() == "companion") {
+                    _factory.createLasersCompanion(entity->getId(), compPlayer->getId());
+                }
+            }
+            // int mana = std::stoi(dataComp->getData("mana"));
+            // if (mana >= 20) {
+            //     mana -= 20;
+            //     if (mana < 0)
+            //         mana = 0;
+            //     dataComp->setData("mana", std::to_string(mana));
+            // }
         }
     } else {
         isShootKeyPressed = false;
@@ -579,4 +579,15 @@ void Game::healEntity(const uint32_t entityId, const uint32_t amount)
     } else {
         entity->getComponent<HP>()->setHP(actualHp + amount);
     }
+}
+
+void Game::updatePlayerMana(uint32_t playerId, int mana)
+{
+    auto player = GameHelper::getEntityById(_world, playerId);
+    if (!player)
+        return;
+
+    auto dataComp = player->getComponent<Data>();
+    if (dataComp)
+        dataComp->setData("mana", std::to_string(mana));
 }

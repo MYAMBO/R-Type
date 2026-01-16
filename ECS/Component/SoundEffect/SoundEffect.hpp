@@ -37,6 +37,7 @@ class SoundEffect : public Component {
         [[nodiscard]] bool isGlobal() const;
         [[nodiscard]] AudioState getStatus() const;
         [[nodiscard]] std::shared_ptr<sf::SoundBuffer> getBuffer() const;
+        [[nodiscard]] sf::Sound::Status getSfStatus() const;
 
     private:
         AudioState _state;
