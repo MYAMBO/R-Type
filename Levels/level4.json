@@ -13,6 +13,6 @@
     { "type": "fast_enemy", "tag": "enemy", "x": 1400, "y": 400, "hp": 50, "velocity": { "x": -2, "y": 0 } },
     { "type": "fast_enemy", "tag": "enemy", "x": 1500, "y": 450, "hp": 50, "velocity": { "x": -2, "y": 0 } },
     { "type": "tank_enemy", "tag": "enemy", "x": 1600, "y": 500, "hp": 50, "velocity": { "x": -2, "y": 0 } },
-    { "type": "tank_enemy", "tag": "enemy", "x": 1700, "y": 550, "hp": 50, "velocity": { "x": -2, "y": 0 } }
+    { "type": "heal", "tag": "heal", "x": 1700, "y": 550, "hp": 50, "velocity": { "x": -2, "y": 0 } }
   ]
 }
