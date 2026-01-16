@@ -60,6 +60,7 @@ class GameHelperGraphical {
         static void createPortalBoss(World &world, float x, float y, int entityId);
         static void createSinusEnemy(World &world, float x, float y, int entityId);
         static void createShootingEnemy(World &world, float x, float y, int entityId);
+        static void createHealPowerUp(World &world, float x, float y, int entityId);
         static void soundEffectEntity(const std::string& filepath, float volume, int scene, World& world);
 };
 

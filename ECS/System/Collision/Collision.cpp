@@ -9,8 +9,13 @@
 #include "Tag.hpp"
 #include "Damage.hpp"
 #include "HP.hpp"
+#include "Packet.hpp"
+#include "Action.hpp"
 
 
+Collision::Collision(IGameNetwork& network) : _network(network)
+{
+}
 
 
 /**
@@ -119,7 +124,13 @@ void Collision::handleCollisionDamage(const std::shared_ptr<Entity> &a,
             hpComp1->setHP(0);
         if (hpComp2)
             hpComp2->setHP(0);
-        }
+    }
+    else if ((strTagA == "player" && strTagB == "heal") ||
+             (strTagB == "player" && strTagA == "heal")) {
+        auto player = (strTagA == "player") ? a : b;
+        auto heal = (strTagA == "heal") ? a : b;
+        applyHeal(player, heal);
+    }
 }
 
 /**
@@ -133,8 +144,39 @@ void Collision::applyDamage(const std::shared_ptr<Entity> &attacker,
 {
     auto damage = attacker->getComponent<Damage>();
     auto hp = target->getComponent<HP>();
+    auto targetTag = target->getComponent<Tag>();
 
-    if (damage && hp)
-        hp->setHP(hp->getHP() - damage->getDamage());
+    if (damage && hp) {
+        int oldHp = hp->getHP();
+        int newHp = oldHp - damage->getDamage();
+        if (newHp < 0)
+            newHp = 0;
+        hp->setHP(newHp);
+        if (targetTag && targetTag->getTag() == "player") {
+            Packet packet;
+            packet.action(target->getId(), HEAL, newHp);
+            _network.sendPacket(packet);
+        }
+    }
+}
+
+void Collision::applyHeal(const std::shared_ptr<Entity> &player,
+    const std::shared_ptr<Entity> &heal)
+{
+    auto hp = player->getComponent<HP>();
+    if (!hp)
+        return;
+    unsigned int currentHp = hp->getHP();
+    unsigned int maxHp = hp->getMaxHP();
+    unsigned int healAmount = 20;
+    unsigned int newHp = std::min(currentHp + healAmount, maxHp);
+    hp->setHP(newHp);
+    Packet packet;
+    packet.action(player->getId(), HEAL, newHp);
+    _network.sendPacket(packet);
+
+    auto powerupHp = heal->getComponent<HP>();
+    if (powerupHp)
+        powerupHp->setHP(0);
 }
 
