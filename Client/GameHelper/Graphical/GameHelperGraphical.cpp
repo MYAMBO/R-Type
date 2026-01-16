@@ -62,7 +62,9 @@ void GameHelperGraphical::createBasicEnemy(World &world, float x, float y, int e
     enemy->addComponent<Scale>(2.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     enemy->addComponent<Data>(std::map<std::string, std::string>{
-        {"score", "+100"}
+        {"score", "+100"},
+        {"type", "basic"},
+        {"death_sound", "../assets/sounds/killed_first.mp3"}
     });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
@@ -79,7 +81,9 @@ void GameHelperGraphical::createFastEnemy(World &world, float x, float y, int en
     enemy->addComponent<Scale>(2.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     enemy->addComponent<Data>(std::map<std::string, std::string>{
-        {"score", "+150"}
+        {"score", "+150"},
+        {"type", "fast"},
+        {"death_sound", "../assets/sounds/killed_second.mp3"}
     });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
@@ -96,7 +100,9 @@ void GameHelperGraphical::createTankEnemy(World &world, float x, float y, int en
     enemy->addComponent<Scale>(2.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     enemy->addComponent<Data>(std::map<std::string, std::string>{
-        {"score", "+200"}
+        {"score", "+200"},
+        {"type", "tank"},
+        {"death_sound", "../assets/sounds/killed_first.mp3"}
     });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
@@ -120,7 +126,9 @@ void GameHelperGraphical::createSinusEnemy(World &world, float x, float y, int e
     enemy->addComponent<Scale>(2.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     enemy->addComponent<Data>(std::map<std::string, std::string>{
-        {"score", "+300"}
+        {"score", "+300"},
+        {"type", "sinus"},
+        {"death_sound", "../assets/sounds/killed_second.mp3"}
     });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
@@ -144,7 +152,9 @@ void GameHelperGraphical::createShootingEnemy(World &world, float x, float y, in
     enemy->addComponent<Scale>(2.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     enemy->addComponent<Data>(std::map<std::string, std::string>{
-        {"score", "+250"}
+        {"score", "+250"},
+        {"type", "shooting"},
+        {"death_sound", "../assets/sounds/killed_second.mp3"}
     });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
@@ -252,7 +262,8 @@ void GameHelperGraphical::createPortalBoss(World &world, float x, float y, int e
     enemy->addComponent<Scale>(14.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     enemy->addComponent<Data>(std::map<std::string, std::string>{
-        {"score", "+10000"}
+        {"score", "+10000"},
+        {"type", "portal_boss"}
     });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 600.0f);
