@@ -170,7 +170,9 @@ add_executable(r-type_server
         ECS/Component/Rotation/Rotation.cpp
         ECS/Component/Animator/Animator.cpp
         ECS/Component/BoxCollider/BoxCollider.cpp
-        Server/IGameNetwork.hpp)
+        Server/IGameNetwork.hpp
+        Packet/TcpReader.cpp
+        Packet/TcpReader.hpp)
 
 add_executable(r-type_client
         Client/main.cpp
@@ -224,7 +226,9 @@ add_executable(r-type_client
         Client/Core/Network.cpp
         Client/Core/ClientPacketreader.cpp
         Client/LanguageHandler/LanguageHandler.cpp
-        Server/GetOpt/GetOpt.cpp)
+        Server/GetOpt/GetOpt.cpp
+        Packet/TcpReader.cpp
+        Packet/TcpReader.hpp)
 
 if (WIN32)
     target_link_libraries(r-type_client sfml-main sfml-graphics sfml-window sfml-system sfml-network sfml-audio tgui)
