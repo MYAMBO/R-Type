@@ -31,7 +31,6 @@ void ClientPacketreader::interpretPacket()
         return;
     }
 
-    // Extraire le header
     std::memcpy(&_header, _packet.getData(), sizeof(UDPHeader));
 
     sf::Packet payload;
