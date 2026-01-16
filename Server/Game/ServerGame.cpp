@@ -35,7 +35,7 @@
 ServerGame::ServerGame(IGameNetwork& network) : _network(network)
 {
     _world.addSystem<ScriptsSys>();
-    _world.addSystem<Collision>();
+    _world.addSystem<Collision>(_network);
     _world.addSystem<DeathSys>(_network);
     _world.addSystem<Movement>();
     _world.setDeltaTime(1.f);
@@ -523,6 +523,23 @@ void ServerGame::handleShoot(const uint32_t id)
     createBullet(pos->getX(), pos->getY());
 }
 
+void ServerGame::handleHeal(const uint32_t id)
+{
+    auto player = GameHelper::getEntityById(_world, id);
+    if (!player)
+        return;
+    auto hp = player->getComponent<HP>();
+    if (!hp)
+        return;
+    unsigned int currentHp = hp->getHP();
+    unsigned int maxHp = hp->getMaxHP();
+    unsigned int newHp = std::min(currentHp + 20, maxHp);
+    hp->setHP(newHp);
+    Packet packet;
+    packet.action(id, HEAL, newHp);
+    _network.sendPacket(packet);
+}
+
 
 /**
  * @brief Create the level and place the enemies via the packet sent.
@@ -592,6 +609,7 @@ void ServerGame::handleAction(const uint32_t id, const uint8_t action, const uin
             break;
         }
         case HEAL : {
+            handleHeal(id);
             break;
 
         }
