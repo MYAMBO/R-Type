@@ -17,7 +17,10 @@ enum entitiesType
     EnemySinus = 3,
     Bullet = 4,
     ShootingEnemy = 5,
-    EnemyBullet = 6
+    EnemyBullet = 6,
+    PortalBoss = 7,
+    Tank = 8,
+    Fast = 9,
 };
 
 #endif //R_TYPE_ENTITIESTYPE_HPP

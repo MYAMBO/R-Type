@@ -7,6 +7,7 @@
 
 #include "Game.hpp"
 #include "Factory.hpp"
+#include "Collision.hpp"
 #include "WorldFactory.hpp"
 
 WorldFactory::WorldFactory(World& world) : _world(world)
@@ -35,7 +36,7 @@ void WorldFactory::createBullet(size_t entityId, int x, int y, int type)
     } else {
         bullet->addComponent<Position>(x - 20.f , y + 15.f);
         bullet->addComponent<Rotation>(180.f);
-        bullet->addComponent<Velocity>(-10.f, 0.f);
+        //bullet->addComponent<Velocity>(-10.f, 0.f);
     }
     bullet->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet1.gif"));
     bullet->addComponent<Scale>(2.f);
@@ -66,23 +67,27 @@ void WorldFactory::createEnemy(float x, float y, int type, int entityId)
         FAST,
         TANK,
         SINUS, 
-        SHOOTING
+        SHOOTING,
+        PORTALBOSS
     };
     switch (type) {
         case BASIC:
-            GameHelper::createBasicEnemy(_world, x, y, entityId);
+            GameHelperGraphical::createBasicEnemy(_world, x, y, entityId);
             break;
         case FAST:
-            // Implement fast enemy creation
+            GameHelperGraphical::createFastEnemy(_world, x, y, entityId);
             break;
         case TANK:
-            // Implement tank enemy creation
+            GameHelperGraphical::createTankEnemy(_world, x, y, entityId);
             break;
         case SINUS:
-            GameHelper::createSinusEnemy(_world, x, y, entityId);
+            GameHelperGraphical::createSinusEnemy(_world, x, y, entityId);
             break;
         case SHOOTING:
-            GameHelper::createShootingEnemy(_world, x, y, entityId);
+            GameHelperGraphical::createShootingEnemy(_world, x, y, entityId);
+            break;
+        case PORTALBOSS:
+            GameHelperGraphical::createPortalBoss(_world, x, y, entityId);
             break;
         default:
             std::cerr << "Unknown enemy type: " << type << std::endl;
@@ -102,7 +107,6 @@ void WorldFactory::createEnemyBullet(size_t entityId, int x, int y)
     auto bullet = _world.createEntity(entityId);
     bullet->addComponent<Position>(x, y);
     bullet->addComponent<Rotation>(180.f);
-   // bullet->addComponent<Velocity>(-10.f, 0.f);
     bullet->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet1.gif"));
     bullet->addComponent<Animator>(2, 2, 3.0f, 200, 120, 32, 15, 0, 0);
     bullet->addComponent<Scale>(2.f);
@@ -179,7 +183,8 @@ void WorldFactory::createPlayer(uint64_t id)
     player->addComponent<BoxCollider>(33.0f, 19.0f);
 
     std::map<std::string, std::string> dataMap = {
-        {"mana", "100"}
+        {"mana", "100"},
+        {"scraps", "0"}
     };
     player->addComponent<Data>(dataMap);
 
@@ -242,3 +247,186 @@ void WorldFactory::createPlayer(uint64_t id)
     manaBar->addComponent<Script>(manaBarScript);
 }
 
+/**
+ * @brief Creates a companion entity that orbits around the player.
+ * 
+ * This function initializes a companion entity with necessary components.
+ * @param playerId The ID of the player entity to which the companion will be linked.
+ */
+void WorldFactory::createCompanion(uint64_t playerId)
+{
+    auto player = GameHelper::getEntityById(_world, playerId);
+    if (!player) {
+        std::cerr << "Player entity not found for companion creation." << std::endl;
+        return;
+    }
+    auto companion = _world.createEntity();
+    companion->addComponent<Position>(player->getComponent<Position>()->getX() + 20.f,
+                                     player->getComponent<Position>()->getY() - 50.f);
+    companion->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet2.gif"));
+    companion->addComponent<Scale>(1.5f);
+    companion->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    companion->addComponent<Layer>(LayerType::UI + 1);
+    companion->addComponent<Tag>("companion");
+    companion->addComponent<Animator>(5, 5, 3.f, 158, 35, 21, 16, 3, 3);
+    companion->addComponent<Group>(player->getComponent<Group>()->getId());
+    companion->addComponent<Data>(std::map<std::string, std::string>{{"orbit_angle", "0.0"}, {"level", "0"}, {"changed", "false"}});
+    companion->addComponent<SoundEffect>(std::string("../assets/sounds/create2.mp3"), 100.f);
+    companion->getComponent<SoundEffect>()->play();
+    companion->addComponent<Script>(companionScript);
+}
+
+void WorldFactory::createLasersCompanion(uint64_t companionId, uint64_t playerId)
+{
+    auto companion = GameHelper::getEntityById(_world, companionId);
+    auto player = GameHelper::getEntityById(_world, playerId);
+    if (!companion || !player) {
+        std::cerr << "Companion or Player entity not found for laser creation." << std::endl;
+        return;
+    }
+    auto laser = _world.createEntity();
+    laser->addComponent<Position>(companion->getComponent<Position>()->getX() + 10.f,
+                                 companion->getComponent<Position>()->getY());
+    laser->addComponent<Sprite>("../assets/sprites/r-typesheet3.gif");
+    laser->addComponent<Animator>(1, 1, 1.f, 0, 0, 16, 16, 0, 0);
+    laser->addComponent<Scale>(2.f);
+    laser->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    laser->addComponent<Velocity>(9.f, 0.f);
+    laser->addComponent<Layer>(10);
+    laser->addComponent<Tag>("companion_laser");
+    laser->addComponent<Group>(companion->getComponent<Group>()->getId());
+    laser->addComponent<SoundEffect>(std::string("../assets/sounds/miniLaser.mp3"), 100.f);
+    laser->addComponent<Script>(companionLaserScript);
+    laser->getComponent<SoundEffect>()->play();
+}
+
+void WorldFactory::createScraps(World &world, float x, float y)
+{
+    auto scrap = world.createEntity();
+    scrap->addComponent<Position>(x, y);
+    scrap->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    scrap->addComponent<Layer>(5);
+    scrap->addComponent<Sprite>("../assets/sprites/r-typesheet3.gif");
+    scrap->getComponent<Sprite>()->getSprite()->setTextureRect(sf::IntRect({0, 0}, {16, 16}));
+    scrap->getComponent<Sprite>()->getSprite()->setOrigin({scrap->getComponent<Sprite>()->getSprite()->getGlobalBounds().size.x / 2,
+                                                            scrap->getComponent<Sprite>()->getSprite()->getGlobalBounds().size.y / 2});
+    scrap->addComponent<Animator>(1, 1, 1.f, 0, 0, 16, 16, 0, 0);
+    scrap->addComponent<Scale>(3.0f);
+    scrap->addComponent<Tag>("scrap");
+    scrap->addComponent<BoxCollider>(42.f, 42.f);
+    scrap->getComponent<BoxCollider>()->setOffset(-42.f, -42.f);
+    scrap->addComponent<Rotation>(0.f);
+    scrap->addComponent<SoundEffect>("../assets/sounds/pickup.mp3", 100.f);
+
+    scrap->addComponent<Script>([this](int entityId, World& w) {
+        auto sEnt = GameHelper::getEntityById(w, entityId);
+        auto pEnt = GameHelper::getEntityByTag(w, "player");
+        if (!sEnt || !pEnt)
+            return;
+
+        auto sCol = sEnt->getComponent<BoxCollider>();
+        auto sPos = sEnt->getComponent<Position>();
+        auto pCol = pEnt->getComponent<BoxCollider>();
+        auto pPos = pEnt->getComponent<Position>();
+        if (!sCol || !sPos || !pCol || !pPos)
+            return;
+
+        sPos->setY(sPos->getY() + 1.f);
+        sPos->setX(sPos->getX() - 0.5f);
+        if (auto rot = sEnt->getComponent<Rotation>())
+            rot->setRotation(rot->getRotation() + 5.f);
+
+        if (Collision::checkCollision(*sCol, *sPos, *pCol, *pPos)) {
+            if (auto pSfx = pEnt->getComponent<SoundEffect>())
+                pSfx->play();
+            auto companion = GameHelper::getEntityByTag(w, "companion");
+            if (companion)
+                if (auto cData = companion->getComponent<Data>())
+                    if (cData->getData("level") == "4") {
+                        w.killEntity(entityId);
+                        return;
+                    }
+            auto pData = pEnt->getComponent<Data>();
+            int count = std::stoi(pData->getData("scraps")) + 1;
+            if (count <= 3) {
+                pData->setData("scraps", std::to_string(count));
+                this->createScrapUI(w, count);
+            } 
+            else {
+                pData->setData("scraps", "0");
+                auto companion = GameHelper::getEntityByTag(w, "companion");
+                if (!companion) {
+                    this->createCompanion(pEnt->getId());
+                } else {
+                    auto cData = companion->getComponent<Data>();
+                    if (cData) {
+                        int currentLvl = std::stoi(cData->getData("level"));
+                        if (currentLvl >= 4) {
+                            w.killEntity(entityId);
+                            return;
+                        }
+                        if (currentLvl < 4)
+                            cData->setData("level", std::to_string(currentLvl + 1));
+                        cData->setData("changed", "false");
+                    }
+                    if (cData->getData("level") != "4") {
+                        for (int i = 1; i <= 3; i++) {
+                            auto uiIcon = GameHelper::getEntityByTag(w, "ui_scrap_icon_" + std::to_string(i));
+                            if (uiIcon)
+                                w.killEntity(uiIcon->getId());
+                        }
+                    }
+                    w.killEntity(entityId);
+                    return;
+                }
+                for (int i = 1; i <= 3; i++) {
+                    auto uiIcon = GameHelper::getEntityByTag(w, "ui_scrap_icon_" + std::to_string(i));
+                    if (uiIcon)
+                        w.killEntity(uiIcon->getId());
+                }
+            }
+            w.killEntity(entityId);
+        }
+    });
+}
+
+/**
+ * @brief Create Scrap UI Element
+ * This function initializes a scrap UI element entity with necessary components.
+*/
+void WorldFactory::createScrapUI(World &world, int index)
+{
+    float posX = 20.f + (index - 1) * 30.f;
+    float posY = 65.f; 
+
+    printf("Creating scrap UI icon at index %d\n", index);
+    auto uiScrap = world.createEntity();
+    uiScrap->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    uiScrap->addComponent<Layer>(LayerType::UI + 2);
+    uiScrap->addComponent<Position>(posX, posY);
+    uiScrap->addComponent<Sprite>("../assets/sprites/r-typesheet3.gif");
+    uiScrap->addComponent<Animator>(1, 1, 1.f, 0, 0, 16, 16, 0, 0);
+    uiScrap->addComponent<Scale>(1.5f);
+    uiScrap->addComponent<Tag>("ui_scrap_icon_" + std::to_string(index));
+    uiScrap->addComponent<Script>([](int entityId, World& world) {
+        auto player = GameHelper::getEntityByTag(world, "player");
+        auto uiScrap = GameHelper::getEntityById(world, entityId);
+        if (!player || !uiScrap)
+            return;
+        auto group = player->getComponent<Group>();
+        if (!group)
+            return;
+        auto groupEntities = GameHelper::getEntitiesByGroup(world, group->getId());
+        for (auto& ent : groupEntities) {
+            if (ent->getComponent<Tag>()->getTag() == "companion") {
+                auto companionData = ent->getComponent<Data>();
+                if (companionData) {
+                    int currentLvl = std::stoi(companionData->getData("level"));
+                    if (currentLvl == 4)
+                        uiScrap->getComponent<Sprite>()->getSprite()->setColor(sf::Color(255, 215, 0, 255));
+                }
+                break;
+            }
+        }
+    });
+}

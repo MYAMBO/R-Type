@@ -7,6 +7,8 @@
 
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
+#include <SFML/Graphics/Image.hpp>
+#include <filesystem>
 
 #include "Sprite.hpp"
 
@@ -20,10 +22,9 @@ Sprite::Sprite(const std::string& filepath)
 {
     if (!_texture.loadFromFile(filepath)) {
         std::cerr << "[Sprite] Failed to load texture: " << filepath << std::endl;
-        const sf::Texture texture({1, 1});
-        _texture = texture;
-        _sprite = std::make_shared<sf::Sprite>(_texture);
-        return;
+        sf::Image fallbackImage;
+        fallbackImage.resize({ 1, 1 }, sf::Color::Magenta);
+        _texture.loadFromImage(fallbackImage);
     }
     _sprite = std::make_shared<sf::Sprite>(_texture);
 }

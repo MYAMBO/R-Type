@@ -25,6 +25,7 @@
 #include "Damage.hpp"
 #include "Collision.hpp"
 #include "Action.hpp"
+#include "Data.hpp"
 
 /**
  * @brief Constructs a new Game object.
@@ -34,9 +35,9 @@
 ServerGame::ServerGame(IGameNetwork& network) : _network(network)
 {
     _world.addSystem<ScriptsSys>();
-    _world.addSystem<Movement>();
     _world.addSystem<Collision>();
-    _world.addSystem<DeathSys>();
+    _world.addSystem<DeathSys>(_network);
+    _world.addSystem<Movement>();
     _world.setDeltaTime(1.f);
 }
 
@@ -70,6 +71,36 @@ void ServerGame::run()
     }
 }
 
+void ServerGame::manaRegenScript(int entityId, World &world)
+{
+    static std::map<int, float> regenTimers;
+
+    const auto entity = GameHelper::getEntityById(world, entityId);
+    if (!entity) {
+        regenTimers.erase(entityId);
+        return;
+    }
+    auto data = entity->getComponent<Data>();
+    if (!data)
+        return;
+    int currentMana = std::stoi(data->getData("mana"));
+    int maxMana = std::stoi(data->getData("max_mana"));
+    if (currentMana >= maxMana)
+        return;
+    float dt = world.getDeltaTime();
+    regenTimers[entityId] += dt;
+    if (regenTimers[entityId] >= 2.0f) {
+        regenTimers[entityId] = 0.0f;
+        currentMana += 1;
+        if (currentMana > maxMana)
+            currentMana = maxMana;
+        data->setData("mana", std::to_string(currentMana));
+        Packet packet;
+        packet.updateMana(entityId, currentMana);
+        _network.sendPacket(packet);
+    }
+}
+
 /**
  * @brief Creates the player entity.
  *
@@ -84,6 +115,18 @@ void ServerGame::createPlayer(const float x, const float y)
     player->addComponent<Position>(x, y);
     player->addComponent<BoxCollider>(10.f, 10.f);
     player->addComponent<Tag>("player");
+    player->addComponent<Damage>(10);
+    std::map<std::string, std::string> dataMap = {
+        {"mana", "100"},
+        {"max_mana", "100"}
+    };
+    player->addComponent<Data>(dataMap);
+    player->addComponent<Script>(
+       [this](const int entityId, World& world)
+       {
+           this->manaRegenScript(entityId, world);
+       }
+   );
     Packet packet;
     packet.Spawn(player->getId(), Player, x, y);
     // send all the entity to the client
@@ -177,7 +220,7 @@ void ServerGame::ShootingAction(int entityId, World& world)
     if (timers[entityId] >= 60.0f)
     {
         timers[entityId] = 0.0f;
-        createEnemyBullet(pos->getX(), pos->getY());
+        createEnemyBullet(pos->getX() + 30, pos->getY() + 30);
     }
 }
 
@@ -194,7 +237,8 @@ void ServerGame::createEnemy(const float x, const float y)
     enemy->addComponent<HP>(100);
     enemy->addComponent<Damage>(10);
     enemy->addComponent<Position>(x, y);
-    enemy->addComponent<BoxCollider>(10.f, 10.f);
+    enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+    enemy->addComponent<Velocity>(-3.0f, 0.0f);
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<Script>(
         [this](const int entityId, World& world)
@@ -207,13 +251,53 @@ void ServerGame::createEnemy(const float x, const float y)
     _network.sendPacket(packet);
 }
 
+void ServerGame::createFast(const float x, const float y)
+{
+    const auto enemy = _world.createEntity();
+    enemy->addComponent<HP>(50);
+    enemy->addComponent<Damage>(10);
+    enemy->addComponent<Position>(x, y);
+    enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+    enemy->addComponent<Tag>("enemy");
+    enemy->addComponent<Velocity>(-5.0f, 0.0f);
+    enemy->addComponent<Script>(
+        [this](const int entityId, World& world)
+        {
+            this->EnemyMovement(entityId, world);
+        }
+    );
+    Packet packet;
+    packet.Spawn(enemy->getId(), Fast, x, y);
+    _network.sendPacket(packet);
+}
+
+void ServerGame::createTank(const float x, const float y)
+{
+    const auto enemy = _world.createEntity();
+    enemy->addComponent<HP>(150);
+    enemy->addComponent<Damage>(10);
+    enemy->addComponent<Position>(x, y);
+    enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+    enemy->addComponent<Velocity>(-1.0f, 0.0f);
+    enemy->addComponent<Tag>("enemy");
+    enemy->addComponent<Script>(
+        [this](const int entityId, World& world)
+        {
+            this->EnemyMovement(entityId, world);
+        }
+    );
+    Packet packet;
+    packet.Spawn(enemy->getId(), Tank, x, y);
+    _network.sendPacket(packet);
+}
+
 void ServerGame::createSinusEnemy(const float x, const float y)
 {
     const auto enemy = _world.createEntity();
     enemy->addComponent<HP>(150);
     enemy->addComponent<Damage>(10);
     enemy->addComponent<Position>(x, y);
-    enemy->addComponent<BoxCollider>(10.f, 10.f);
+    enemy->addComponent<BoxCollider>(66.0f, 60.0f);
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<Script>(
         [this](const int entityId, World& world)
@@ -232,12 +316,32 @@ void ServerGame::createShootingEnemy(const float x, const float y)
     enemy->addComponent<HP>(150);
     enemy->addComponent<Damage>(10);
     enemy->addComponent<Position>(x, y);
-    enemy->addComponent<BoxCollider>(10.f, 10.f);
+    enemy->addComponent<BoxCollider>(66.0f, 52.0f);
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<Script>(
         [this](const int entityId, World& world)
         {
             this->EnemyMovement(entityId, world);
+            this->ShootingAction(entityId, world);
+        }
+    );
+    Packet packet;
+    packet.Spawn(enemy->getId(), ShootingEnemy, x, y);
+    _network.sendPacket(packet);
+}
+
+void ServerGame::createSinusShootingEnemy(const float x, const float y)
+{
+    const auto enemy = _world.createEntity();
+    enemy->addComponent<HP>(150);
+    enemy->addComponent<Damage>(10);
+    enemy->addComponent<Position>(x, y);
+    enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+    enemy->addComponent<Tag>("enemy");
+    enemy->addComponent<Script>(
+        [this](const int entityId, World& world)
+        {
+            this->EnemySinusMovement(entityId, world);
             this->ShootingAction(entityId, world);
         }
     );
@@ -297,11 +401,11 @@ void ServerGame::createBullet(const float x, const float y)
     const auto bullet = _world.createEntity();
 
     bullet->addComponent<Position>(x + 60.f, y + 15.f);
-    bullet->addComponent<BoxCollider>(5.f, 5.f);
+    bullet->addComponent<BoxCollider>(64.0f, 30.0f);
     bullet->addComponent<Velocity>(10.f, 0.f);
     bullet->addComponent<Tag>("player_bullet");
-    bullet->addComponent<Damage>(50);
     bullet->addComponent<HP>(10);
+    bullet->addComponent<Damage>(50);
     bullet->addComponent<Script>(
         [this](const uint32_t entityId, World& world)
         {
@@ -319,11 +423,11 @@ void ServerGame::createEnemyBullet(const float x, const float y)
     const auto bullet = _world.createEntity();
 
     bullet->addComponent<Position>(x - 60.f, y + 15.f);
-    bullet->addComponent<BoxCollider>(5.f, 5.f);
+    bullet->addComponent<BoxCollider>(64.0f, 30.0f);
     bullet->addComponent<Velocity>(-10.f, 0.f);
     bullet->addComponent<Tag>("enemy_bullet");
     bullet->addComponent<Damage>(10);
-    bullet->addComponent<HP>(50);
+    bullet->addComponent<HP>(10);
     bullet->addComponent<Script>(
         [this](const int entityId, World& world)
         {
@@ -353,8 +457,8 @@ void ServerGame::handleNewPlayer()
     if (_playerCount == NB_PLAYER_TO_START && !_gameStarted) {
         _gameStarted = true;
         _waveTimer.restart();
-        startLevel(3);   // Need to change that later to have a level management
-        std::cout << "Game started! Enemy waves will spawn every 20 seconds" << std::endl;
+        startLevel(4);   // Need to change that later to have a level management
+
     }
 }
 
@@ -400,7 +504,22 @@ void ServerGame::serverUpdatePosition(const uint32_t id, const float x, const fl
 void ServerGame::handleShoot(const uint32_t id)
 {
     const auto entity = GameHelper::getEntityById(_world, id);
+    if (!entity) {
+        return;
+    }
     const auto pos = entity->getComponent<Position>();
+    const auto data = entity->getComponent<Data>();
+    if (!pos || !data)
+        return;
+    int currentMana = std::stoi(data->getData("mana"));
+    const int manaCost = 5;
+    if (currentMana < manaCost)
+        return;
+    currentMana -= manaCost;
+    data->setData("mana", std::to_string(currentMana));
+    Packet packet;
+    packet.updateMana(id, currentMana);
+    _network.sendPacket(packet);
     createBullet(pos->getX(), pos->getY());
 }
 
@@ -427,10 +546,8 @@ void ServerGame::checkDeaths()
         auto hp = entity->getComponent<HP>();
         if (!hp || hp->getHP() > 0)
             continue;
-
         if (hp->isAlive()) {
             hp->setAlive(false);
-
             Packet packet;
             packet.dead(entity->getId());
             _network.sendPacket(packet);
@@ -438,6 +555,27 @@ void ServerGame::checkDeaths()
         }
     }
 }
+
+
+void ServerGame::createPortalBoss(const float x, const float y)
+{
+    const auto enemy = _world.createEntity();
+    enemy->addComponent<HP>(5000);
+    enemy->addComponent<Damage>(10);
+    enemy->addComponent<Position>(x, y);
+    enemy->addComponent<BoxCollider>(50.0f, 5000.0f);
+    enemy->addComponent<Tag>("enemy");
+    enemy->addComponent<Script>(
+        [this](const int entityId, World& world)
+        {
+           // this->EnemySinusMovement(entityId, world);
+        }
+    );
+    Packet packet;
+    packet.Spawn(enemy->getId(), PortalBoss, x, y);
+    _network.sendPacket(packet);
+}
+
 /**
  * @brief Receive action with id and data and call corresponding function
  *
@@ -451,15 +589,17 @@ void ServerGame::handleAction(const uint32_t id, const uint8_t action, const uin
     {
         case FIRE : {
             handleShoot(id);
+            break;
         }
         case HEAL : {
+            break;
 
         }
         case SHIELD : {
-
+            break;
         }
         case BEAM : {
-
+            break;
         }
     }
 }

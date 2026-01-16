@@ -105,7 +105,21 @@ void Collision::handleCollisionDamage(const std::shared_ptr<Entity> &a,
         auto target = (strTagA == "player") ? a : b;
         auto bullet = (strTagA == "enemy_bullet") ? a : b;
         applyDamage(bullet, target);
+        applyDamage(target, bullet);
     }
+    else if ((strTagA == "player_bullet" && strTagB == "enemy_bullet") ||
+        (strTagB == "player_bullet" && strTagA == "enemy_bullet")) {
+        auto target = (strTagA == "player_bullet") ? a : b;
+        auto bullet = (strTagA == "enemy_bullet") ? a : b;
+        applyDamage(bullet, target);
+        applyDamage(target, bullet);
+        auto hpComp1 = bullet->getComponent<HP>();
+        auto hpComp2 = target->getComponent<HP>();
+        if (hpComp1)
+            hpComp1->setHP(0);
+        if (hpComp2)
+            hpComp2->setHP(0);
+        }
 }
 
 /**

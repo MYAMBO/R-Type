@@ -36,6 +36,9 @@ public:
     void setFrameRate(float frameRate);
     void setCurrentFrame(int frame);
     void setCurrentTime(float currentTime);
+    void resetAnimator(int nbFrame, int framePerRow, float frameRate,
+             int startX, int startY, int frameWidth, int frameHeight,
+             int offsetX = 0, int offsetY = 0);
 
 private:
     int _startX;

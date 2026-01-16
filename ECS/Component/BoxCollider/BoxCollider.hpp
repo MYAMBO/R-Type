@@ -30,11 +30,14 @@ public:
 
     void setTrigger(bool trigger);
     void setVisibility(bool visible);
+    void setOffset(float x, float y);
     void setSize(float width, float height);
 
 private:
     float _x;
     float _y;
+    float _offsetX;
+    float _offsetY;
     bool _visible = false;
     bool _trigger = false;
 };

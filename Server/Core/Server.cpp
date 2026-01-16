@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <netinet/in.h>
+#include <cstring>
 
 #include "TcpReader.hpp"
 
