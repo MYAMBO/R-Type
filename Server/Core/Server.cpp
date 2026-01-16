@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <netinet/in.h>
+#include <cstring>
 
 /**
  * @brief Represents a server that handles client connections and processes requests.

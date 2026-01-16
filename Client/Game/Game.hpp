@@ -69,6 +69,8 @@ class Game {
         void menudisplay();
         void gameplaydisplay();
         void createEnemy(float x, float y, uint16_t type);
+        void updatePlayerMana(uint32_t playerId, int mana);
+
     private:
         void gameInput(std::shared_ptr<Inputs> inputSystem);
 
@@ -76,7 +78,7 @@ class Game {
         void loadfile();
         void playerInput(uint32_t entityId, World &world);
         void updateLoadingState(float progress, const std::string& status);
-        void smootherMovement(int entityId, World &world, float targetX, float targetY); 
+        void smootherMovement(int entityId, World &world, float targetX, float targetY);
 
 
         void bulletShooting(); // Need to remove it, maybe
