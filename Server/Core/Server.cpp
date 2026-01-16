@@ -214,6 +214,7 @@ void Server::tcpThread()
         {
             std::array<char, 1024> data {};
             std::size_t received;
+            std::string message;
 
             while (true)
             {
@@ -227,15 +228,27 @@ void Server::tcpThread()
                     _mutex.unlock();
                     break;
                 }
-                if (status != sf::Socket::Status::Done || received == 0)
+                if ((status != sf::Socket::Status::Done && message.empty()))
                     break;
 
-                dataReceived = true;
-                std::string message = _tcpReader.InterpretData(data.data());
-                _mutex.lock();
-                sendMessage(message, tmp.getId());
-                _mutex.unlock();
-                log("TCP | Received " + std::to_string(received) + " bytes with value " + std::string(data.data(), received) + " from client " + std::to_string(tmp.getId()) + " with port " + std::to_string(tmp.getPort()) + " with ip " + tmp.getIp());
+                if (received != 0)
+                {
+                    dataReceived = true;
+                    message += std::string(data.data(), received);
+
+                    log("TCP | Received " + std::to_string(received) + " bytes with value " + std::string(data.data(), received) + " from client " + std::to_string(tmp.getId()) + " with port " + std::to_string(tmp.getPort()) + " with ip " + tmp.getIp());
+
+                    if ((received < data.size() || status != sf::Socket::Status::Done) && !message.empty())
+                    {
+                        std::string messageResponse = _tcpReader.InterpretData(message);
+                        _mutex.lock();
+                        sendMessage(messageResponse, tmp.getId());
+                        _mutex.unlock();
+                        message.clear();
+                        log("sent");
+                        break;
+                    }
+                }
             }
         }
 
