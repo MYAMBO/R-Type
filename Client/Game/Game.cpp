@@ -369,6 +369,8 @@ void Game::updateEntity(uint32_t id, uint16_t type, float x, float y)
     case PortalBoss:
         _factory.createEnemy(x, y, 6, id);
         break;
+    case HealPU:
+        _factory.createPowerUp(x, y, 1, id);
     }
 
 }
@@ -567,18 +569,17 @@ void Game::handleAction(const uint32_t id, const uint8_t action, const uint32_t 
     }
 }
 
-void Game::healEntity(const uint32_t entityId, const uint32_t amount)
+void Game::healEntity(const uint32_t entityId, const uint32_t newHp)
 {
     const auto entity = GameHelper::getEntityById(_world, entityId);
+    if (!entity) return;
 
-    const unsigned int hpMax = entity->getComponent<HP>()->getMaxHP();
-    const unsigned int actualHp = entity->getComponent<HP>()->getHP();
+    auto hp = entity->getComponent<HP>();
+    if (!hp)
+        return;
+    hp->setHP(newHp);
 
-    if (actualHp + amount > hpMax) {
-        entity->getComponent<HP>()->setHP(hpMax);
-    } else {
-        entity->getComponent<HP>()->setHP(actualHp + amount);
-    }
+    std::cout << "Entity " << entityId << " HP set to: " << newHp << std::endl;
 }
 
 void Game::updatePlayerMana(uint32_t playerId, int mana)
