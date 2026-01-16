@@ -5,6 +5,7 @@
 ** UIFactory
 */
 
+#include "HP.hpp"
 #include "Game.hpp"
 #include "Factory.hpp"
 #include "UIFactory.hpp"
@@ -781,7 +782,7 @@ void UIFactory::createBackGameUI() const
 void UIFactory::createScrapUIEmpty(int index) const
 {
     float posX = 20.f + (index - 1) * 30.f;
-    float posY = 65.f; 
+    float posY = 130.f; 
 
     auto uiScrap = _world.createEntity();
     uiScrap->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
@@ -799,7 +800,7 @@ void UIFactory::createLevelCompanionUI()
     auto uiCompanion = _world.createEntity();
     uiCompanion->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     uiCompanion->addComponent<Layer>(LayerType::UI + 2);
-    uiCompanion->addComponent<Position>(130.f, 46.f);
+    uiCompanion->addComponent<Position>(130.f, 110.f);
     uiCompanion->addComponent<Text>("0", "../assets/font/regular.ttf", 40);
     uiCompanion->addComponent<Scale>(1.f);
     uiCompanion->addComponent<Tag>("ui_level_companion_icon");
@@ -828,4 +829,63 @@ void UIFactory::createLevelCompanionUI()
         }
     });
 
+}
+
+/**
+ * @brief Create a professional and high-quality HUD for the player
+ * Version améliorée avec meilleure lisibilité et design moderne
+ */
+void UIFactory::createPlayerHUD()
+{
+    auto playerEntity = GameHelper::getEntityByTag(_world, "player");
+    if (!playerEntity) return;
+
+    auto groupComp = playerEntity->getComponent<Group>();
+    int playerCount = groupComp ? groupComp->getId() : 1;
+
+    float startX = 80.f;
+    float startY = 60.f + (playerCount - 1) * 120.f;
+    float barWidth = 380.f;
+    float hpHeight = 28.f;
+    float manaHeight = 16.f;
+    float spacing = 10.f;
+    float cornerRadius = 2.f;
+
+    auto hpBarBg = _world.createEntity();
+    hpBarBg->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    hpBarBg->addComponent<Layer>(LayerType::UI + 2);
+    hpBarBg->addComponent<Position>(startX, startY);
+    hpBarBg->addComponent<Sprite>("../assets/sprites/06.png");
+    hpBarBg->addComponent<Animator>(1, 1, 10.f, 0, 30, 48, 14, 0, 0);
+    hpBarBg->getComponent<Animator>()->setCurrentFrame(0);
+    hpBarBg->addComponent<Scale>(10.f);
+    hpBarBg->addComponent<Tag>("player_hp_bar_bg");
+    hpBarBg->addComponent<Script>([](int id, World& w) {
+        auto barEnt = GameHelper::getEntityById(w, id);
+        if (!barEnt)
+            return;
+
+        auto animator = barEnt->getComponent<Animator>();
+        if (!animator)
+            return;
+
+        auto targetPlayer = GameHelper::getEntityByTag(w, "player");
+        if (targetPlayer) {
+            auto hpComp = targetPlayer->getComponent<HP>();
+            if (hpComp) {
+                printf("hp =%d, maxhp=%d\n", hpComp->getHP(), hpComp->getMaxHP());
+                float hpRatio = static_cast<float>(hpComp->getHP()) / hpComp->getMaxHP();
+                if (hpRatio >= 0.8f)
+                    animator->resetAnimator(1, 1, 10.f, 0, 30, 48, 14, 0, 0);
+                else if (hpRatio >= 0.6f)
+                    animator->resetAnimator(1, 1, 10.f, 48, 30, 48, 14, 0, 0);
+                else if (hpRatio >= 0.4f)
+                    animator->resetAnimator(1, 1, 10.f, 96, 30, 48, 14, 0, 0);
+                else if (hpRatio >= 0.2f)
+                    animator->resetAnimator(1, 1, 10.f, 144, 30, 48, 14, 0, 0);
+                else
+                    animator->resetAnimator(1, 1, 10.f, 192, 30, 48, 14, 0, 0);
+            }
+        }
+    });
 }

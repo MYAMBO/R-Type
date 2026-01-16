@@ -211,40 +211,6 @@ void WorldFactory::createPlayer(uint64_t id)
     fire->addComponent<Group>(playerCount);
     fire->addComponent<Layer>(10);
     fire->addComponent<Tag>("fire");
-
-    auto hpBarRed = _world.createEntity();
-    hpBarRed->addComponent<RectangleShape>(400.f, 20.f, 150, 0, 0, 200);
-    hpBarRed->addComponent<Position>(20.f, 20.f + (playerCount - 1) * 30.f);
-    hpBarRed->addComponent<Layer>(LayerType::UI);
-    hpBarRed->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
-    hpBarRed->addComponent<Tag>("hp_bar_red_" + std::to_string(playerCount));
-    hpBarRed->addComponent<Group>(playerCount);
-
-    auto hpBarGreen = _world.createEntity();
-    hpBarGreen->addComponent<RectangleShape>(400.f, 20.f, 0, 200, 0, 200);
-    hpBarGreen->addComponent<Position>(21.f, 21.f + (playerCount - 1) * 30.f);
-    hpBarGreen->addComponent<Layer>(LayerType::UI + 1);
-    hpBarGreen->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
-    hpBarGreen->addComponent<Tag>("hp_bar_green_" + std::to_string(playerCount));
-    hpBarGreen->addComponent<Group>(playerCount);
-    hpBarGreen->addComponent<Script>(hpBarScript);
-
-    auto manaBarEmpty = _world.createEntity();
-    manaBarEmpty->addComponent<RectangleShape>(400.f, 10.f, 150, 150, 255, 200);
-    manaBarEmpty->addComponent<Position>(20.f, 45.f + (playerCount - 1) * 30.f);
-    manaBarEmpty->addComponent<Layer>(LayerType::UI);
-    manaBarEmpty->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
-    manaBarEmpty->addComponent<Tag>("mana_bar_empty_" + std::to_string(playerCount));
-    manaBarEmpty->addComponent<Group>(playerCount);
-
-    auto manaBar = _world.createEntity();
-    manaBar->addComponent<RectangleShape>(400.f, 10.f, 0, 0, 255, 200);
-    manaBar->addComponent<Position>(21.f, 46.f + (playerCount - 1) * 30.f);
-    manaBar->addComponent<Layer>(LayerType::UI + 1);
-    manaBar->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
-    manaBar->addComponent<Tag>("mana_bar_full_" + std::to_string(playerCount));
-    manaBar->addComponent<Group>(playerCount);
-    manaBar->addComponent<Script>(manaBarScript);
 }
 
 /**
@@ -397,9 +363,8 @@ void WorldFactory::createScraps(World &world, float x, float y)
 void WorldFactory::createScrapUI(World &world, int index)
 {
     float posX = 20.f + (index - 1) * 30.f;
-    float posY = 65.f; 
+    float posY = 130.f; 
 
-    printf("Creating scrap UI icon at index %d\n", index);
     auto uiScrap = world.createEntity();
     uiScrap->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     uiScrap->addComponent<Layer>(LayerType::UI + 2);

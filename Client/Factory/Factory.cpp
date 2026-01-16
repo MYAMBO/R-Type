@@ -117,3 +117,8 @@ void Factory::createLevelCompanionUI()
 {
     _uiFactory.createLevelCompanionUI();
 }
+
+void Factory::createPlayerHUD()
+{
+    _uiFactory.createPlayerHUD();
+}

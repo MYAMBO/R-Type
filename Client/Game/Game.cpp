@@ -199,10 +199,11 @@ void Game::loadingRun()
     //std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _factory.createBackground(_window); 
     _factory.createCredits();
+    _factory.createPlayerHUD();
     _factory.createScrapUIEmpty(1);
     _factory.createScrapUIEmpty(2);
     _factory.createScrapUIEmpty(3);
-    _factory.createBackGameUI();
+    //_factory.createBackGameUI();
     updateLoadingState(0.8f, "Connecting to server...");
     Packet packet;
 
@@ -243,6 +244,7 @@ void Game::run()
         if (musicComp)
             musicComp->play();
     }
+    _factory.createPlayerHUD();
     while (_window.isOpen()) {
         _window.clear(sf::Color::Black);
         gameInput(inputSystem);
