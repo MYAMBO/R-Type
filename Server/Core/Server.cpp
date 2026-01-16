@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <netinet/in.h>
 
+#include "TcpReader.hpp"
+
 /**
  * @brief Represents a server that handles client connections and processes requests.
  *
@@ -199,6 +201,7 @@ void Server::udpThread()
  */
 void Server::tcpThread()
 {
+    TcpReader _tcpReader;
     while (true)
     {
         _mutex.lock();
@@ -227,7 +230,10 @@ void Server::tcpThread()
                     break;
 
                 dataReceived = true;
-                _packetReader.addData(std::string(data.data(), received));
+                std::string message = _tcpReader.InterpretData(data.data());
+                _mutex.lock();
+                sendMessage(message, tmp.getId());
+                _mutex.unlock();
                 log("TCP | Received " + std::to_string(received) + " bytes with value " + std::string(data.data(), received) + " from client " + std::to_string(tmp.getId()) + " with port " + std::to_string(tmp.getPort()) + " with ip " + tmp.getIp());
             }
         }
