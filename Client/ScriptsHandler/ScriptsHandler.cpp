@@ -806,3 +806,24 @@ void companionLaserScript(int entityId, World& world)
         return;
     }
 }
+
+
+void enemyScript(int entityId, World& world)
+{
+    auto e = GameHelper::getEntityById(world, entityId);
+    if (!e || world.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
+        return;
+
+    auto data = e->getComponent<Data>();
+    if (!data)
+        return;
+    int cooldown = std::stoi(data->getData("sound_cooldown"));
+    if (cooldown > 0) {
+        data->setData("sound_cooldown", std::to_string(cooldown - 1));
+        return;
+    }
+    if (cooldown == 0 && rand() % 6000 == 0) {
+        GameHelperGraphical::playRandomAmbianceEnemy(world);
+        data->setData("sound_cooldown", "3000");
+    }
+}

@@ -15,6 +15,7 @@ void dotScript(int entityId, World& world);
 void kayuScript(int entityId, World& world);
 void corpScript(int entityId, World& world);
 void sparkScript(int entityId, World& world);
+void enemyScript(int entityId, World& world);
 void hpBarScript(int entityId, World& world);
 void myamboScript(int entityId, World& world);
 void playerScript(int entityId, World& world);

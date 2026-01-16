@@ -66,6 +66,7 @@ Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const
     : _window(sf::VideoMode({width, height}), title), _network(network), _factory(_world)
 {
     _world.addSystem<CameraSys>();
+    _world.addSystem<Audio>();
     _world.addSystem<ScriptsSys>();
     _world.addSystem<TextSystem>();
     _world.addSystem<Movement>();
@@ -74,7 +75,6 @@ Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const
     _world.addSystem<Animation>();
     _world.addSystem<Draw>();
     _world.addSystem<GuiSystem>(_window);
-    _world.addSystem<Audio>();
 }
 
 /**
@@ -493,6 +493,8 @@ void Game::playerInput(uint32_t entityId, World &world)
 int Game::killEntity(int id)
 {
     auto entity = GameHelper::getEntityById(_world, id);
+    if (!entity)
+        return -1;
 
     auto name = entity->getComponent<Tag>();
     if (name && name->getTag() == "enemy") {
@@ -504,9 +506,8 @@ int Game::killEntity(int id)
             return -1;
         }
         GameHelperGraphical::createScoreGUI(_world, pos->getX(), pos->getY(), data->getData("score"));
+        GameHelperGraphical::soundEffectEntity(data->getData("death_sound"), 100.f, _world.getCurrentScene(), _world);
     }
-    if (!entity)
-        return -1;
     _world.killEntity(id);
     return 0;
 }

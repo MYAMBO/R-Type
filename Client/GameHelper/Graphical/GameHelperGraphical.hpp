@@ -53,6 +53,7 @@ class GameHelperGraphical {
         static ColorMatrix getColorMatrix(ColorBlindMode mode);
         static std::shared_ptr<Camera> getMainCamera(World &world);
 
+        static void playRandomAmbianceEnemy(World &world);
         static void createSparks(World &world, float x, float y, int amount);
         static void createTankEnemy(World &world, float x, float y, int entityId);
         static void createFastEnemy(World &world, float x, float y, int entityId);

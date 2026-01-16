@@ -62,10 +62,14 @@ void GameHelperGraphical::createBasicEnemy(World &world, float x, float y, int e
     enemy->addComponent<Scale>(2.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     enemy->addComponent<Data>(std::map<std::string, std::string>{
-        {"score", "+100"}
+        {"score", "+100"},
+        {"type", "basic"},
+        {"death_sound", "../assets/sounds/killed_first.mp3"},
+        {"sound_cooldown", "1"}
     });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+    enemy->addComponent<Script>(enemyScript);
 }
 
 void GameHelperGraphical::createFastEnemy(World &world, float x, float y, int entityId)
@@ -79,10 +83,14 @@ void GameHelperGraphical::createFastEnemy(World &world, float x, float y, int en
     enemy->addComponent<Scale>(2.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     enemy->addComponent<Data>(std::map<std::string, std::string>{
-        {"score", "+150"}
+        {"score", "+150"},
+        {"type", "fast"},
+        {"death_sound", "../assets/sounds/killed_second.mp3"},
+        {"sound_cooldown", "1"}
     });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+    enemy->addComponent<Script>(enemyScript);
 }
 
 void GameHelperGraphical::createTankEnemy(World &world, float x, float y, int entityId)
@@ -96,10 +104,14 @@ void GameHelperGraphical::createTankEnemy(World &world, float x, float y, int en
     enemy->addComponent<Scale>(2.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     enemy->addComponent<Data>(std::map<std::string, std::string>{
-        {"score", "+200"}
+        {"score", "+200"},
+        {"type", "tank"},
+        {"death_sound", "../assets/sounds/killed_first.mp3"},
+        {"sound_cooldown", "100"}
     });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+    enemy->addComponent<Script>(enemyScript);
 }
 
 /**
@@ -120,10 +132,14 @@ void GameHelperGraphical::createSinusEnemy(World &world, float x, float y, int e
     enemy->addComponent<Scale>(2.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     enemy->addComponent<Data>(std::map<std::string, std::string>{
-        {"score", "+300"}
+        {"score", "+300"},
+        {"type", "sinus"},
+        {"death_sound", "../assets/sounds/killed_second.mp3"},
+        {"sound_cooldown", "300"}
     });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+    enemy->addComponent<Script>(enemyScript);
 }
 
 /**
@@ -144,10 +160,14 @@ void GameHelperGraphical::createShootingEnemy(World &world, float x, float y, in
     enemy->addComponent<Scale>(2.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     enemy->addComponent<Data>(std::map<std::string, std::string>{
-        {"score", "+250"}
+        {"score", "+250"},
+        {"type", "shooting"},
+        {"death_sound", "../assets/sounds/killed_second.mp3"},
+        {"sound_cooldown", "300"}
     });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+    enemy->addComponent<Script>(enemyScript);
 }
 
 /**
@@ -218,7 +238,7 @@ void GameHelperGraphical::soundEffectEntity(const std::string& filepath, float v
     auto soundEntity = world.createEntity();
     soundEntity->addComponent<SoundEffect>(filepath, volume);
     soundEntity->addComponent<Scene>(scene);
-    soundEntity->addComponent<Tag>("sound_effect");
+    soundEntity->addComponent<Tag>("sound_effect" + std::to_string(soundEntity->getId()));
     soundEntity->getComponent<SoundEffect>()->play();
     soundEntity->addComponent<Script>([](int id, World& w) {
         auto entity = GameHelper::getEntityById(w, id);
@@ -252,7 +272,8 @@ void GameHelperGraphical::createPortalBoss(World &world, float x, float y, int e
     enemy->addComponent<Scale>(14.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     enemy->addComponent<Data>(std::map<std::string, std::string>{
-        {"score", "+10000"}
+        {"score", "+10000"},
+        {"type", "portal_boss"}
     });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 600.0f);
@@ -319,6 +340,34 @@ void GameHelperGraphical::createScoreGUI(World &world, float x, float y, const s
             data->setData("lifetime", std::to_string(life - 1));
             data->setData("hue", std::to_string(hue));
         } else {
+            w.killEntity(id);
+        }
+    });
+}
+
+void GameHelperGraphical::playRandomAmbianceEnemy(World &world)
+{
+    static std::vector<std::string> sounds = {
+        "../assets/sounds/first_moaning.mp3",
+        "../assets/sounds/second_moaning.mp3",
+        "../assets/sounds/third_moaning.mp3"
+    };
+
+    printf("Playing enemy ambiance sound\n");
+    int choice = rand() % sounds.size();
+    
+    auto soundEnt = world.createEntity();
+    soundEnt->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    soundEnt->addComponent<SoundEffect>(sounds[choice], 40.f);
+    float randomPitch = 0.8f + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (1.2f - 0.8f)));
+    auto sfx = soundEnt->getComponent<SoundEffect>();
+    sfx->setPitch(randomPitch);
+    if (sfx)
+        sfx->play();
+
+    soundEnt->addComponent<Script>([](int id, World& w) {
+        auto e = GameHelper::getEntityById(w, id);
+        if (e && e->getComponent<SoundEffect>()->getSfStatus() == sf::Sound::Status::Stopped) {
             w.killEntity(id);
         }
     });
