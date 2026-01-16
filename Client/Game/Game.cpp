@@ -283,7 +283,8 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
         }
         // temp
         if (inputSystem->isTriggered(*eventOpt, KeyboardKey::Key_M)) {
-            GameHelperGraphical::createScoreGUI(_world, 400, 300, "1000");
+            GameHelperGraphical::createAnimatorEntity(_world, 400, 400, "../assets/sprites/r-typesheet1.gif", 7, 7, 2.f, 209, 276, 16, 14, 0, 0, 10.f);
+            //GameHelperGraphical::createScoreGUI(_world, 400, 300, "1000");
             //GameHelperGraphical::createAnimatorEntity(_world, 200, 200, "../assets/sprites/r-typesheet1.gif", 5, 5, 2.f, 288, 295, 31, 32, 3, 0, 1.5f);
             //_factory.createScraps(_world, 500.f, 0.f);
         }
@@ -508,6 +509,15 @@ int Game::killEntity(int id)
         GameHelperGraphical::createScoreGUI(_world, pos->getX(), pos->getY(), data->getData("score"));
         GameHelperGraphical::soundEffectEntity(data->getData("death_sound"), 100.f, _world.getCurrentScene(), _world);
         _factory.createSparks(_world, pos->getX() + 10, pos->getY() + 10, 15, static_cast<SceneType>(_world.getCurrentScene()), 300);
+    }
+    if (name && name->getTag() == "player_bullet") {
+        auto pos = entity->getComponent<Position>();
+        if (pos->getX() > _world.getWindow()->getSize().x || pos->getY() > _world.getWindow()->getSize().y || pos->getX() < 0 || pos->getY() < 0) {
+            _world.killEntity(id);
+            return 0;
+        }
+        GameHelperGraphical::createAnimatorEntity(_world, pos->getX(), pos->getY(), "../assets/sprites/r-typesheet1.gif", 7, 7, 2.f, 209, 276, 16, 14, 0, 0, 3.5f);
+        GameHelperGraphical::soundEffectEntity("../assets/sounds/bullet_hit.mp3", 50.f, _world.getCurrentScene(), _world);
     }
     _world.killEntity(id);
     return 0;
