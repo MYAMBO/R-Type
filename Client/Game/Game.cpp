@@ -203,7 +203,7 @@ void Game::loadingRun()
     _factory.createScrapUIEmpty(1);
     _factory.createScrapUIEmpty(2);
     _factory.createScrapUIEmpty(3);
-    //_factory.createBackGameUI();
+    _factory.createBackGameUI();
     updateLoadingState(0.8f, "Connecting to server...");
     Packet packet;
 

@@ -769,8 +769,8 @@ void UIFactory::createBackGameUI() const
     auto uiBackground = _world.createEntity();
     uiBackground->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     uiBackground->addComponent<Layer>(LayerType::UI);
-    uiBackground->addComponent<Position>(0.f, 0.f);
-    uiBackground->addComponent<RectangleShape>(450.f, 100.f, 100, 100, 100, 255);
+    uiBackground->addComponent<Position>(5.f, 5.f);
+    uiBackground->addComponent<RectangleShape>(356.f, 160.f, 139, 0, 139, 200);
     uiBackground->addComponent<Tag>("ui_background");
 }
 
@@ -781,8 +781,8 @@ void UIFactory::createBackGameUI() const
  */
 void UIFactory::createScrapUIEmpty(int index) const
 {
-    float posX = 20.f + (index - 1) * 30.f;
-    float posY = 130.f; 
+    float posX = 40.f + (index - 1) * 30.f;
+    float posY = 110.f; 
 
     auto uiScrap = _world.createEntity();
     uiScrap->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
@@ -790,7 +790,7 @@ void UIFactory::createScrapUIEmpty(int index) const
     uiScrap->addComponent<Position>(posX, posY);
     uiScrap->addComponent<Sprite>("../assets/sprites/r-typesheet3.gif");
     uiScrap->addComponent<Animator>(1, 1, 1.f, 0, 0, 16, 16, 0, 0);
-    uiScrap->addComponent<Scale>(1.5f);
+    uiScrap->addComponent<Scale>(2.f);
     uiScrap->addComponent<Tag>("ui_scrap_icon_empty_" + std::to_string(index));
     uiScrap->getComponent<Sprite>()->getSprite()->setColor(sf::Color(100, 100, 100, 255));
 }
@@ -800,7 +800,7 @@ void UIFactory::createLevelCompanionUI()
     auto uiCompanion = _world.createEntity();
     uiCompanion->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     uiCompanion->addComponent<Layer>(LayerType::UI + 2);
-    uiCompanion->addComponent<Position>(130.f, 110.f);
+    uiCompanion->addComponent<Position>(150.f, 95.f);
     uiCompanion->addComponent<Text>("0", "../assets/font/regular.ttf", 40);
     uiCompanion->addComponent<Scale>(1.f);
     uiCompanion->addComponent<Tag>("ui_level_companion_icon");
@@ -846,7 +846,7 @@ void UIFactory::createPlayerHUD()
     float startX = 80.f;
     float startY = 60.f + (playerCount - 1) * 120.f;
     float barWidth = 380.f;
-    float hpHeight = 28.f;
+    float hpHeight = 50.f;
     float manaHeight = 16.f;
     float spacing = 10.f;
     float cornerRadius = 2.f;
@@ -854,11 +854,10 @@ void UIFactory::createPlayerHUD()
     auto hpBarBg = _world.createEntity();
     hpBarBg->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     hpBarBg->addComponent<Layer>(LayerType::UI + 2);
-    hpBarBg->addComponent<Position>(startX, startY);
+    hpBarBg->addComponent<Position>(0, -35);
     hpBarBg->addComponent<Sprite>("../assets/sprites/06.png");
     hpBarBg->addComponent<Animator>(1, 1, 10.f, 0, 30, 48, 14, 0, 0);
-    hpBarBg->getComponent<Animator>()->setCurrentFrame(0);
-    hpBarBg->addComponent<Scale>(10.f);
+    hpBarBg->addComponent<Scale>(7.f);
     hpBarBg->addComponent<Tag>("player_hp_bar_bg");
     hpBarBg->addComponent<Script>([](int id, World& w) {
         auto barEnt = GameHelper::getEntityById(w, id);
@@ -873,7 +872,6 @@ void UIFactory::createPlayerHUD()
         if (targetPlayer) {
             auto hpComp = targetPlayer->getComponent<HP>();
             if (hpComp) {
-                printf("hp =%d, maxhp=%d\n", hpComp->getHP(), hpComp->getMaxHP());
                 float hpRatio = static_cast<float>(hpComp->getHP()) / hpComp->getMaxHP();
                 if (hpRatio >= 0.8f)
                     animator->resetAnimator(1, 1, 10.f, 0, 30, 48, 14, 0, 0);
@@ -888,4 +886,77 @@ void UIFactory::createPlayerHUD()
             }
         }
     });
+
+    auto manaBarBg = _world.createEntity();
+    manaBarBg->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    manaBarBg->addComponent<Layer>(LayerType::UI + 2);
+    manaBarBg->addComponent<Position>(10, hpHeight + spacing - 35);
+    manaBarBg->addComponent<Sprite>("../assets/sprites/06.png");
+    manaBarBg->addComponent<Animator>(1, 1, 10.f, 0, 16, 48, 14, 0, 0);
+    manaBarBg->addComponent<Scale>(7.f);
+    manaBarBg->addComponent<Tag>("player_mana_bar_bg");
+    manaBarBg->addComponent<Script>([](int id, World& w) {
+        auto barEnt = GameHelper::getEntityById(w, id);
+        if (!barEnt)
+            return;
+
+        auto animator = barEnt->getComponent<Animator>();
+        if (!animator)
+            return;
+
+        auto targetPlayer = GameHelper::getEntityByTag(w, "player");
+        if (targetPlayer) {
+            auto dataComp = targetPlayer->getComponent<Data>();
+            if (!dataComp)
+                return;
+            auto ratio = std::stof(dataComp->getData("mana"));
+            float manaRatio = static_cast<float>(ratio / 100.f);
+            if (manaRatio >= 0.8f)
+                animator->resetAnimator(1, 1, 10.f, 0, 16, 48, 14, 0, 0);
+            else if (manaRatio >= 0.6f)
+                animator->resetAnimator(1, 1, 10.f, 48, 16, 48, 14, 0, 0);
+            else if (manaRatio >= 0.4f)
+                animator->resetAnimator(1, 1, 10.f, 96, 16, 48, 14, 0, 0);
+            else if (manaRatio >= 0.2f)
+                animator->resetAnimator(1, 1, 10.f, 144, 16, 48, 14, 0, 0);
+            else
+                animator->resetAnimator(1, 1, 10.f, 192, 16, 48, 14, 0, 0);
+        }
+    });
+
+    auto backTopLeft = _world.createEntity();
+    backTopLeft->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    backTopLeft->addComponent<Layer>(LayerType::UI + 2);
+    backTopLeft->addComponent<Position>(5.f, 5.f);
+    backTopLeft->addComponent<Sprite>("../assets/sprites/02.png");
+    backTopLeft->addComponent<Animator>(4, 4, 10.f, 128, 128, 17, 14, 15, 0);
+    backTopLeft->addComponent<Scale>(4.f);
+    backTopLeft->addComponent<Tag>("player_hud_back_top_left");
+
+    auto backBottomLeft = _world.createEntity();
+    backBottomLeft->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    backBottomLeft->addComponent<Layer>(LayerType::UI + 2);
+    backBottomLeft->addComponent<Position>(5.f, hpHeight + manaHeight + (2 * spacing) + 20.f);
+    backBottomLeft->addComponent<Sprite>("../assets/sprites/02.png");
+    backBottomLeft->addComponent<Animator>(4, 4, 10.f, 128, 146, 17, 14, 15, 0);
+    backBottomLeft->addComponent<Scale>(4.f);
+    backBottomLeft->addComponent<Tag>("player_hud_back_bottom_left");
+
+    auto backTopRight = _world.createEntity();
+    backTopRight->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    backTopRight->addComponent<Layer>(LayerType::UI + 2);
+    backTopRight->addComponent<Position>(295.f, 5.f);
+    backTopRight->addComponent<Sprite>("../assets/sprites/02.png");
+    backTopRight->addComponent<Animator>(4, 4, 10.f, 144, 128, 17, 14, 15, 0);
+    backTopRight->addComponent<Scale>(4.f);
+    backTopRight->addComponent<Tag>("player_hud_back_top_right");
+
+    auto backBottomRight = _world.createEntity();
+    backBottomRight->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    backBottomRight->addComponent<Layer>(LayerType::UI + 2);
+    backBottomRight->addComponent<Position>(295.f, hpHeight + manaHeight + (2 * spacing) + 20.f);
+    backBottomRight->addComponent<Sprite>("../assets/sprites/02.png");
+    backBottomRight->addComponent<Animator>(4, 4, 10.f, 144, 146, 17, 14, 15, 0);
+    backBottomRight->addComponent<Scale>(4.f);
+    backBottomRight->addComponent<Tag>("player_hud_back_bottom_right");
 }

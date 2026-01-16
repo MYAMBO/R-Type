@@ -379,8 +379,8 @@ void WorldFactory::createScraps(World &world, float x, float y)
 */
 void WorldFactory::createScrapUI(World &world, int index)
 {
-    float posX = 20.f + (index - 1) * 30.f;
-    float posY = 130.f; 
+    float posX = 40.f + (index - 1) * 30.f;
+    float posY = 100.f; 
 
     auto uiScrap = world.createEntity();
     uiScrap->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
