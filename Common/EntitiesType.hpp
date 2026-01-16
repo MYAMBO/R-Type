@@ -21,6 +21,7 @@ enum entitiesType
     PortalBoss = 7,
     Tank = 8,
     Fast = 9,
+    HealPU = 10
 };
 
 #endif //R_TYPE_ENTITIESTYPE_HPP

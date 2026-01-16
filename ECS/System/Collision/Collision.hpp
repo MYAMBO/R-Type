@@ -38,6 +38,8 @@ class Collision : public System {
                                      const std::shared_ptr<Entity> &b);
         void applyDamage(const std::shared_ptr<Entity> &attacker,
                            const std::shared_ptr<Entity> &target);
+        void applyHeal(const std::shared_ptr<Entity> &attacker,
+                           const std::shared_ptr<Entity> &heal);
 };
 
 
