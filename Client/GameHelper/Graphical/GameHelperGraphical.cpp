@@ -61,6 +61,9 @@ void GameHelperGraphical::createBasicEnemy(World &world, float x, float y, int e
     enemy->addComponent<Animator>(2, 6, 5.0f, 0, 0, 33, 30, 33, 0);
     enemy->addComponent<Scale>(2.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    enemy->addComponent<Data>(std::map<std::string, std::string>{
+        {"score", "+100"}
+    });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
 }
@@ -75,6 +78,9 @@ void GameHelperGraphical::createFastEnemy(World &world, float x, float y, int en
     enemy->addComponent<Animator>(8, 8, 5.0f, 0, 0, 27, 30, 6, 0);
     enemy->addComponent<Scale>(2.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    enemy->addComponent<Data>(std::map<std::string, std::string>{
+        {"score", "+150"}
+    });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
 }
@@ -89,6 +95,9 @@ void GameHelperGraphical::createTankEnemy(World &world, float x, float y, int en
     enemy->addComponent<Animator>(3, 3, 5.0f, 16, 0, 33, 33, 0, 0);
     enemy->addComponent<Scale>(2.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    enemy->addComponent<Data>(std::map<std::string, std::string>{
+        {"score", "+200"}
+    });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
 }
@@ -110,6 +119,9 @@ void GameHelperGraphical::createSinusEnemy(World &world, float x, float y, int e
     enemy->addComponent<Animator>(2, 6, 5.0f, 0, 0, 33, 30, 33, 0);
     enemy->addComponent<Scale>(2.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    enemy->addComponent<Data>(std::map<std::string, std::string>{
+        {"score", "+300"}
+    });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
 }
@@ -131,6 +143,9 @@ void GameHelperGraphical::createShootingEnemy(World &world, float x, float y, in
     enemy->addComponent<Animator>(2, 6, 5.0f, 0, 0, 33, 30, 33, 0);
     enemy->addComponent<Scale>(2.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    enemy->addComponent<Data>(std::map<std::string, std::string>{
+        {"score", "+250"}
+    });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
 }
@@ -236,6 +251,9 @@ void GameHelperGraphical::createPortalBoss(World &world, float x, float y, int e
     enemy->addComponent<Animator>(5, 5, 5.0f, 116, 0, 67, 79, 0, 0);
     enemy->addComponent<Scale>(14.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    enemy->addComponent<Data>(std::map<std::string, std::string>{
+        {"score", "+10000"}
+    });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 600.0f);
 }
@@ -258,6 +276,49 @@ void GameHelperGraphical::createAnimatorEntity(World &world, float x, float y, c
         if (!animatorComp)
             return;
         if (animatorComp->getCurrentFrame() == animatorComp->getTotalFrames() - 1) {
+            w.killEntity(id);
+        }
+    });
+}
+
+void GameHelperGraphical::createScoreGUI(World &world, float x, float y, const std::string& scoreText)
+{
+    auto entity = world.createEntity();
+    entity->addComponent<Position>(x, y);
+    entity->addComponent<Velocity>(0.f, -0.5f);
+    entity->addComponent<Text>(scoreText, "../assets/font/regular.ttf", 50);
+    entity->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    entity->addComponent<Layer>(LayerType::UI + 5);
+    entity->addComponent<Tag>("score_popup");
+    entity->addComponent<Data>(std::map<std::string, std::string>{
+        {"lifetime", "30"},
+        {"hue", "60.0"} 
+    });
+
+    entity->addComponent<Script>([](int id, World& w) {
+        auto e = GameHelper::getEntityById(w, id);
+        if (!e)
+            return;
+
+        auto text = e->getComponent<Text>();
+        auto data = e->getComponent<Data>();
+        if (!text || !data)
+            return;
+
+        int life = std::stoi(data->getData("lifetime"));
+        float hue = std::stof(data->getData("hue"));
+
+        if (life > 0) {
+            hue += 15.0f;
+            if (hue >= 360.0f)
+                hue = 0.0f;
+            sf::Color rainbowCol = GameHelperGraphical::hueToRGB(hue);
+            sf::Color currentCol = text->getSfText().getFillColor();
+            int newAlpha = (currentCol.a > 8) ? (currentCol.a - 8) : 0;
+            text->setColor(rainbowCol.r, rainbowCol.g, rainbowCol.b, newAlpha);
+            data->setData("lifetime", std::to_string(life - 1));
+            data->setData("hue", std::to_string(hue));
+        } else {
             w.killEntity(id);
         }
     });
