@@ -10,6 +10,13 @@
 
     #include <string>
 
+/**
+ * @class TcpReader
+ * @brief A class for interpreting TCP data and processing specific kinds of requests.
+ *
+ * The TcpReader class provides functionality to interpret received TCP data
+ * and process specific commands or requests, such as login-related actions.
+ */
 class TcpReader
 {
     public:
