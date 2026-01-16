@@ -239,3 +239,26 @@ void GameHelperGraphical::createPortalBoss(World &world, float x, float y, int e
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 600.0f);
 }
+
+void GameHelperGraphical::createAnimatorEntity(World &world, float x, float y, const std::string& spritePath,
+    int rows, int cols, float animSpeed, int startX, int startY, int frameWidth, int frameHeight, int offsetX, int offsetY, float scale)
+{
+    auto entity = world.createEntity();
+    entity->addComponent<Position>(x, y);
+    entity->addComponent<Sprite>(spritePath);
+    entity->addComponent<Animator>(rows, cols, animSpeed, startX, startY, frameWidth, frameHeight, offsetX, offsetY);
+    entity->addComponent<Scale>(scale);
+    entity->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    entity->addComponent<Tag>("animator_entity");
+    entity->addComponent<Script>([](int id, World& w) {
+        auto entity = GameHelper::getEntityById(w, id);
+        if (!entity)
+            return;
+        auto animatorComp = entity->getComponent<Animator>();
+        if (!animatorComp)
+            return;
+        if (animatorComp->getCurrentFrame() == animatorComp->getTotalFrames() - 1) {
+            w.killEntity(id);
+        }
+    });
+}

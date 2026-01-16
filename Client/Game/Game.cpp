@@ -143,7 +143,7 @@ void Game::loadingRun()
     _world.setDeltaTime(1.f);
     _factory.createGameTools();
 
-    _world.setCurrentScene(static_cast<int>(SceneType::MYAMBO));
+    _world.setCurrentScene(static_cast<int>(SceneType::MENU));
 
     loadfile();
     auto inputSystem = _world.getSystem<Inputs>();
@@ -161,7 +161,7 @@ void Game::loadingRun()
         if (timeout <= 0)
             break;
     }
-    _world.setCurrentScene(static_cast<int>(SceneType::PAUSE));
+    _world.setCurrentScene(static_cast<int>(SceneType::MENU));
     timeout = 10;
     while (timeout > 0) {
         _window.clear(sf::Color::Black);
@@ -170,7 +170,7 @@ void Game::loadingRun()
         _window.display();
         timeout--;
     }
-    _world.setCurrentScene(static_cast<int>(SceneType::KAYU));
+    _world.setCurrentScene(static_cast<int>(SceneType::MENU));
     timeout = 180;
 
     while (_world.getCurrentScene() == static_cast<int>(SceneType::KAYU)) {
@@ -182,21 +182,21 @@ void Game::loadingRun()
         if (timeout <= 0)
             break;
     }
-    _world.setCurrentScene(static_cast<int>(SceneType::LOADING));
+    _world.setCurrentScene(static_cast<int>(SceneType::MENU));
 
     _factory.createLoadingScreen();
 
     updateLoadingState(0.0f, "Initializing systems...");
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    //std::this_thread::sleep_for(std::chrono::milliseconds(300));
     updateLoadingState(0.1f, "Loading assets...");
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    //std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _factory.createCamera();
     updateLoadingState(0.3f, "Generating Menu...");
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    //std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _factory.createMenu();
     _factory.createLevelCompanionUI();
     updateLoadingState(0.6f, "Generating Background...");
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    //std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _factory.createBackground(_window); 
     _factory.createCredits();
     _factory.createScrapUIEmpty(1);
@@ -281,8 +281,11 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
             sf::FloatRect visibleArea({0, 0}, {static_cast<float>(_window.getSize().x), static_cast<float>( _window.getSize().y)});
             _window.setView(sf::View(visibleArea));
         }
-        if (inputSystem->isTriggered(*eventOpt, KeyboardKey::Key_M))
-            _factory.createScraps(_world, 500.f, 0.f);
+        // temp
+        if (inputSystem->isTriggered(*eventOpt, KeyboardKey::Key_M)) {
+            GameHelperGraphical::createAnimatorEntity(_world, 200, 200, "../assets/sprites/r-typesheet1.gif", 5, 5, 2.f, 288, 295, 31, 32, 3, 0, 1.5f);
+            //_factory.createScraps(_world, 500.f, 0.f);
+        }
         inputSystem->update(0.0f, _world);
     }
 }
@@ -489,6 +492,12 @@ void Game::playerInput(uint32_t entityId, World &world)
 int Game::killEntity(int id)
 {
     auto entity = GameHelper::getEntityById(_world, id);
+
+    auto name = entity->getComponent<Tag>();
+    if (name && name->getTag() == "enemy") {
+        auto pos = entity->getComponent<Position>();
+            GameHelperGraphical::createAnimatorEntity(_world, pos->getX(), pos->getY(), "../assets/sprites/r-typesheet1.gif", 5, 5, 2.f, 288, 295, 31, 32, 3, 0, 3.f);
+    }
     if (!entity)
         return -1;
     _world.killEntity(id);
