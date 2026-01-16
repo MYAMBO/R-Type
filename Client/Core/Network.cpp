@@ -106,11 +106,7 @@ void Network::udpThread()
         {
             continue;
         }
-        const void* raw = p.getData();
-        const std::size_t size = p.getDataSize();
-
-        const std::string data(static_cast<const char*>(raw), size);
-        _packetReader.addData(data);
+        _packetReader.addPacket(p);
         try
         {
             _packetReader.interpretPacket();
