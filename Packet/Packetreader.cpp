@@ -18,6 +18,8 @@
  */
 Packetreader::Packetreader(sf::Packet data, std::shared_ptr<ServerGame> game) : _packet(std::move(data))
 {
+    _header.id = 0;
+    _header.packetNbr = 0;
     _game = std::move(game);
 }
 

@@ -65,6 +65,7 @@ class Network : public IGameNetwork {
         unsigned int _playerId = 0;
         std::shared_ptr<Game> _game;
         ClientPacketreader _packetReader;
+        bool _isRunning = true;
 };
 
 
