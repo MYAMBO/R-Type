@@ -369,6 +369,8 @@ void Game::updateEntity(uint32_t id, uint16_t type, float x, float y)
     case PortalBoss:
         _factory.createEnemy(x, y, 6, id);
         break;
+    case HealPU:
+        _factory.createPowerUp(x, y, 1, id);
     }
 
 }
