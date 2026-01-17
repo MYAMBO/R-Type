@@ -2,7 +2,7 @@
 ** EPITECH PROJECT, 2025
 ** R-Type
 ** File description:
-** Draw.cpp (DEBUG VERSION)
+** Draw.cpp
 */
 
 #include <iostream>
@@ -22,27 +22,6 @@
 #include "Position.hpp"
 #include "RectangleShape.hpp"
 
-#include "GameHelper.hpp"
-#include "GameHelperGraphical.hpp"
-/*
-** EPITECH PROJECT, 2025
-** R-Type
-** File description:
-** Draw.cpp - Optimized Version
-*/
-
-#include <algorithm>
-#include <map>
-#include "Draw.hpp"
-#include "Text.hpp"
-#include "Data.hpp"
-#include "Scale.hpp"
-#include "Scene.hpp"
-#include "Layer.hpp"
-#include "Sprite.hpp"
-#include "Rotation.hpp"
-#include "Position.hpp"
-#include "RectangleShape.hpp"
 #include "GameHelper.hpp"
 #include "GameHelperGraphical.hpp"
 
