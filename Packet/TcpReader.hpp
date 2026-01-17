@@ -8,6 +8,7 @@
 #ifndef TCP_READER_HPP
     #define TCP_READER_HPP
 
+    #include <vector>
     #include <string>
 
 /**
@@ -27,6 +28,7 @@ class TcpReader
 
     private:
         std::string loginRequest(const std::string& data);
+        static std::vector<std::string> levelSelection(const std::string& data);
 };
 
 #endif //TCP_READER_HPP
