@@ -88,6 +88,7 @@ class Game {
         World _world;
         IGameNetwork& _network;
         Factory _factory;
+        Packet _packet;
 
         bool _isShootKeyPressed = false;
         int _musicVolume = 100;

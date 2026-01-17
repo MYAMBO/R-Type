@@ -59,6 +59,7 @@ class ServerGame {
 
 
         World _world;
+        Packet _packet;
         IGameNetwork& _network;
         int _playerCount = 0;
         bool _gameStarted = false;
