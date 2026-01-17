@@ -63,6 +63,7 @@ void ServerGame::run()
         // }
         _world.manageSystems();
         checkDeaths();
+        checkGameEnd();
         auto end = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
         if (elapsed < tickRate) {
@@ -756,7 +757,7 @@ void ServerGame::createPortalBoss(const float x, const float y)
         {
             this->portalBossBarrageScript(entityId, world);
             this->portalBossBackwardPortalScript(entityId, world);
-            this->portalBossSpawnTankScript(entityId, world);
+          //  this->portalBossSpawnTankScript(entityId, world);
         }
     );
     Packet packet;
@@ -789,5 +790,57 @@ void ServerGame::handleAction(const uint32_t id, const uint8_t action, const uin
         case BEAM : {
             break;
         }
+    }
+}
+
+
+void ServerGame::sendGameEnd(uint8_t status)
+{
+    Packet packet;
+    packet.endGame(status);
+    _network.sendPacket(packet);
+}
+
+void ServerGame::checkGameEnd()
+{
+    if (!_gameStarted)
+        return;
+    auto players = _world.getAllEntitiesWithComponent<Tag>();
+    int alivePlayers = 0;
+    for (const auto& entity : players) {
+        auto tag = entity->getComponent<Tag>();
+        if (tag && tag->getTag() == "player") {
+            auto hp = entity->getComponent<HP>();
+            if (hp && hp->isAlive() && hp->getHP() > 0) {
+                alivePlayers++;
+            }
+        }
+    }
+    if (alivePlayers == 0 && _playerCount > 0) {
+        static bool gameOverSent = false;
+        if (!gameOverSent) {
+            std::cout << "GAME OVER - All players dead!" << std::endl;
+            sendGameEnd(0);
+            gameOverSent = true;
+        }
+        return;
+    }
+    auto enemies = _world.getAllEntitiesWithComponent<Tag>();
+    bool enemyAlive = false;
+    for (const auto& entity : enemies) {
+        auto tag = entity->getComponent<Tag>();
+        if (tag && tag->getTag() == "enemy") {
+            auto hp = entity->getComponent<HP>();
+            if (hp && hp->isAlive() && hp->getHP() > 0) {
+                enemyAlive = true;
+                break;
+            }
+        }
+    }
+    static bool victorySent = false;
+    if (!enemyAlive && !victorySent && alivePlayers > 0) {
+        victorySent = true;
+        std::cout << "VICTORY - All enemies defeated!" << std::endl;
+        sendGameEnd(1);
     }
 }
