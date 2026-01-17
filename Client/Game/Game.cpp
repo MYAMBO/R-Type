@@ -530,6 +530,9 @@ static void addScore(World &w, int entityId)
     int currentScore = std::stoi(dataComp->getData("score"));
     currentScore += std::stoi(entityData->getData("score"));
     dataComp->setData("score", std::to_string(currentScore));
+    if (currentScore > std::stoi(dataComp->getData("high_score"))) {
+        dataComp->setData("high_score", std::to_string(currentScore));
+    }
 }
 
 /**
@@ -590,7 +593,8 @@ void Game::savefile()
     std::vector<std::string> tagsToSave = {
         "game_volume_settings",
         "game_controls_settings",
-        "game_availability_settings"
+        "game_availability_settings",
+        "game_stats"
     };
     for (const auto& tag : tagsToSave) {
         auto entity = GameHelper::getEntityByTag(_world, tag);

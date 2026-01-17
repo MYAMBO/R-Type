@@ -546,6 +546,35 @@ void UIFactory::createMenu() const
     guiTitle->setOrigin(0.5f, 0.5f);
     guiTitle->setPosition("50%", "20%");
 
+    auto gameStatsEntity = GameHelper::getEntityByTag(_world, "game_stats");
+    auto data = gameStatsEntity ? gameStatsEntity->getComponent<Data>() : nullptr;
+    std::string highscore = "0";
+    if (data && data->hasData("high_score")) {
+        highscore = data->getData("high_score");
+    }
+    auto highscoreEntity = _world.createEntity();
+    highscoreEntity->addComponent<Text>("HIGHSCORE: " + highscore, "../assets/font/regular.ttf", 30);
+    highscoreEntity->getComponent<Text>()->setColor(255, 255, 255, 255);
+    highscoreEntity->addComponent<Position>(20.f, 20.f);
+    highscoreEntity->addComponent<Scene>(static_cast<int>(SceneType::MENU));
+    highscoreEntity->addComponent<Tag>("menu_highscore");
+    highscoreEntity->addComponent<Layer>(LayerType::UI + 1);
+    highscoreEntity->addComponent<Script>([](int id, World& world) {
+        (void)id;
+        if (world.getCurrentScene() != static_cast<int>(SceneType::MENU))
+            return;
+        auto entity = GameHelper::getEntityByTag(world, "game_stats");
+        auto data = entity ? entity->getComponent<Data>() : nullptr;
+        std::string highscore = "0";
+        if (data && data->hasData("high_score")) {
+            highscore = data->getData("high_score");
+        }
+        auto hsEntity = GameHelper::getEntityByTag(world, "menu_highscore");
+        if (hsEntity) {
+            hsEntity->getComponent<Text>()->setString("HIGHSCORE: " + highscore);
+        }
+    });
+
     auto layoutEntity = _world.createEntity();
     layoutEntity->addComponent<GuiWidget>(WidgetType::VERTICAL_LAYOUT, "", menuRoot->getId());
     layoutEntity->addComponent<Scene>(static_cast<int>(SceneType::MENU));
@@ -946,6 +975,12 @@ void UIFactory::createVictoryScreen()
         auto title = e->getComponent<Text>();
         if (pos && title)
             pos->setX((static_cast<float>(w.getWindow()->getSize().x) / 2.0f) - title->getGlobalBounds().size.x / 2.0f);
+        auto stats = GameHelper::getEntityByTag(w, "game_stats");
+        if (!stats)
+            return;
+        auto score = stats->getComponent<Data>()->getData("score");
+        if (title)
+            title->setString("FINAL SCORE: " + score);
     });
 
     auto layoutEnt = _world.createEntity();
