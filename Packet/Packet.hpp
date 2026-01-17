@@ -38,6 +38,7 @@ class Packet
         Packet& setPacketNbr(uint8_t packetNbr);
         Packet& setTotalPacketNbr(uint8_t totalPacketNbr);
 
+        void clear();
         void timeSync(uint32_t time);
         void updatePosition(uint32_t id, float x, float y, uint16_t type = 0);
         void updateMana(uint32_t playerId, int mana);
