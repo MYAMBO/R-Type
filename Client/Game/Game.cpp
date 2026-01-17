@@ -284,14 +284,14 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
             _window.setView(sf::View(visibleArea));
         }
         // temporary testing code
-        //if (inputSystem->isTriggered(*eventOpt, KeyboardKey::Key_M)) {
+        if (inputSystem->isTriggered(*eventOpt, KeyboardKey::Key_M)) {
             //GameHelperGraphical::createAnimatorEntity(_world, 400, 400, "../assets/sprites/green_effect.png", 5, 5, 2.f, 478, 154, 20, 20, 0, 0, 10.f);
             //GameHelperGraphical::createAnimatorEntity(_world, 400, 400, "../assets/sprites/r-typesheet1.gif", 7, 7, 2.f, 209, 276, 16, 14, 0, 0, 10.f);
             //GameHelperGraphical::createScoreGUI(_world, 400, 300, "1000");
-            //GameHelperGraphical::createAnimatorEntity(_world, 200, 200, "../assets/sprites/r-typesheet1.gif", 5, 5, 2.f, 288, 295, 31, 32, 3, 0, 1.5f);
-            //_factory.createScraps(_world, 500.f, 0.f);
+            //GameHelperGraphical::createAnimatorEntity(_world, 200, 200, "../assets/sprites/fire_effect.png", 2, 2, 1.f, 223, 0, 16, 16, 0, 0, 10.f);
+            _factory.createScraps(_world, 500.f, 0.f);
            
-        //}
+        }
         inputSystem->update(0.0f, _world);
     }
 }

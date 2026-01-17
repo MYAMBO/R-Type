@@ -232,10 +232,11 @@ void WorldFactory::createLasersCompanion(uint64_t companionId, uint64_t playerId
     }
     auto laser = _world.createEntity();
     laser->addComponent<Position>(companion->getComponent<Position>()->getX() + 10.f,
-                                 companion->getComponent<Position>()->getY());
-    laser->addComponent<Sprite>("../assets/sprites/r-typesheet3.gif");
-    laser->addComponent<Animator>(1, 1, 1.f, 0, 0, 16, 16, 0, 0);
-    laser->addComponent<Scale>(2.f);
+                                 companion->getComponent<Position>()->getY() + 30.f);
+    laser->addComponent<Sprite>("../assets/sprites/fire_effect.png");
+    laser->addComponent<Animator>(2, 2, 1.f, 223, 0, 16, 16, 0, 0);
+    laser->addComponent<Rotation>(270.f);
+    laser->addComponent<Scale>(3.f);
     laser->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     laser->addComponent<Velocity>(9.f, 0.f);
     laser->addComponent<Layer>(10);
@@ -343,15 +344,15 @@ void WorldFactory::createScraps(World &world, float x, float y)
 void WorldFactory::createScrapUI(World &world, int index)
 {
     float posX = 40.f + (index - 1) * 30.f;
-    float posY = 100.f; 
+    float posY = 110.f; 
 
     auto uiScrap = world.createEntity();
     uiScrap->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
-    uiScrap->addComponent<Layer>(LayerType::UI + 2);
+    uiScrap->addComponent<Layer>(LayerType::UI + 3);
     uiScrap->addComponent<Position>(posX, posY);
     uiScrap->addComponent<Sprite>("../assets/sprites/r-typesheet3.gif");
     uiScrap->addComponent<Animator>(1, 1, 1.f, 0, 0, 16, 16, 0, 0);
-    uiScrap->addComponent<Scale>(1.5f);
+    uiScrap->addComponent<Scale>(2.f);
     uiScrap->addComponent<Tag>("ui_scrap_icon_" + std::to_string(index));
     uiScrap->addComponent<Script>([](int entityId, World& world) {
         auto player = GameHelper::getEntityByTag(world, "player");
