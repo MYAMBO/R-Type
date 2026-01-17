@@ -236,7 +236,6 @@ void WorldFactory::createPlayer(uint64_t id)
     fire->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     fire->addComponent<Script>(playerfire);
     fire->addComponent<Group>(playerCount);
-    fire->addComponent<Script>(playerfire);
     fire->addComponent<Layer>(10);
     fire->addComponent<Tag>("fire");
 }

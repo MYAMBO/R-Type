@@ -20,7 +20,8 @@ void ToolsFactory::createGameTools()
     stats->addComponent<Data>(std::map<std::string, std::string>{
         {"score", "0"},
         {"last_score", "0"},
-        {"color_timer", "15"}
+        {"color_timer", "15"},
+        {"high_score", "0"}
     });
     auto volume = _world.createEntity();
     volume->addComponent<Scene>(static_cast<int>(SceneType::LOADING));
