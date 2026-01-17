@@ -60,6 +60,7 @@ class ServerGame {
         void manaRegenScript(int entityId, World &world);
         void portalBossBarrageScript(int entityId, World& world);
         void portalBossBackwardPortalScript(int entityId, World& world);
+        void portalBossSpawnTankScript(int entityId, World& world);
 
         World _world;
         IGameNetwork& _network;

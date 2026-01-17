@@ -399,7 +399,7 @@ void ServerGame::BulletMovement(const uint32_t entityId, World &world)
         pos->setX(pos->getX() + vel->getVelocityX() * world.getDeltaTime());
         pos->setY(pos->getY() + vel->getVelocityY() * world.getDeltaTime());
     }
-    if (pos->getX() > 3000 || pos->getX() < -100) {
+    if (pos->getX() > 2800 || pos->getX() < -100) {
         world.killEntity(entityId);
         packet.dead(entityId);
     } else {
@@ -663,7 +663,6 @@ void ServerGame::portalBossBackwardPortalScript(int entityId, World& world)
         }
         phase[entityId] = 1;
         phaseTimer[entityId] = 0.0f;
-        std::cout << "Portals opening!" << std::endl;
     }
     else if (phase[entityId] == 1 && phaseTimer[entityId] >= 30.0f) {
         phase[entityId] = 2;
@@ -721,6 +720,28 @@ void ServerGame::portalBossBarrageScript(int entityId, World &world)
     }
 }
 
+void ServerGame::portalBossSpawnTankScript(int entityId, World& world)
+{
+    static std::map<int, float> spawnTimer;
+    static std::map<int, float> spawnTimer2;
+
+    const auto boss = GameHelper::getEntityById(world, entityId);
+    if (!boss)
+        return;
+    auto pos = boss->getComponent<Position>();
+    float dt = world.getDeltaTime();
+    spawnTimer[entityId] += dt;
+    spawnTimer2[entityId] += dt;
+    if (spawnTimer[entityId] >= 300.0f) {
+        spawnTimer[entityId] = 0.0f;
+        float offsetY =  800.0f;
+        createTank(pos->getX(), pos->getY() + 60.0f);
+        createTank(pos->getX(), pos->getY() + 60.0f + offsetY);
+
+
+    }
+}
+
 
 void ServerGame::createPortalBoss(const float x, const float y)
 {
@@ -735,6 +756,7 @@ void ServerGame::createPortalBoss(const float x, const float y)
         {
             this->portalBossBarrageScript(entityId, world);
             this->portalBossBackwardPortalScript(entityId, world);
+            this->portalBossSpawnTankScript(entityId, world);
         }
     );
     Packet packet;
