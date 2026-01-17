@@ -145,6 +145,7 @@ void WorldFactory::createEnemyBullet(size_t entityId, int x, int y)
  */
 void WorldFactory::createPlayer(uint64_t id)
 {
+    
     if (GameHelper::getEntityById(_world, id) != nullptr)
         return;
     static int playerCount = 0;

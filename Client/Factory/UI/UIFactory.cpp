@@ -841,15 +841,10 @@ void UIFactory::createPlayerHUD()
     if (!playerEntity) return;
 
     auto groupComp = playerEntity->getComponent<Group>();
-    int playerCount = groupComp ? groupComp->getId() : 1;
 
-    float startX = 80.f;
-    float startY = 60.f + (playerCount - 1) * 120.f;
-    float barWidth = 380.f;
     float hpHeight = 50.f;
     float manaHeight = 16.f;
     float spacing = 10.f;
-    float cornerRadius = 2.f;
 
     auto hpBarBg = _world.createEntity();
     hpBarBg->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
@@ -859,15 +854,14 @@ void UIFactory::createPlayerHUD()
     hpBarBg->addComponent<Animator>(1, 1, 10.f, 0, 30, 48, 14, 0, 0);
     hpBarBg->addComponent<Scale>(7.f);
     hpBarBg->addComponent<Tag>("player_hp_bar_bg");
+
     hpBarBg->addComponent<Script>([](int id, World& w) {
         auto barEnt = GameHelper::getEntityById(w, id);
         if (!barEnt)
             return;
-
         auto animator = barEnt->getComponent<Animator>();
         if (!animator)
             return;
-
         auto targetPlayer = GameHelper::getEntityByTag(w, "player");
         if (targetPlayer) {
             auto hpComp = targetPlayer->getComponent<HP>();
@@ -895,15 +889,14 @@ void UIFactory::createPlayerHUD()
     manaBarBg->addComponent<Animator>(1, 1, 10.f, 0, 16, 48, 14, 0, 0);
     manaBarBg->addComponent<Scale>(7.f);
     manaBarBg->addComponent<Tag>("player_mana_bar_bg");
+
     manaBarBg->addComponent<Script>([](int id, World& w) {
         auto barEnt = GameHelper::getEntityById(w, id);
         if (!barEnt)
             return;
-
         auto animator = barEnt->getComponent<Animator>();
         if (!animator)
             return;
-
         auto targetPlayer = GameHelper::getEntityByTag(w, "player");
         if (targetPlayer) {
             auto dataComp = targetPlayer->getComponent<Data>();
@@ -959,4 +952,52 @@ void UIFactory::createPlayerHUD()
     backBottomRight->addComponent<Animator>(4, 4, 10.f, 144, 146, 17, 14, 15, 0);
     backBottomRight->addComponent<Scale>(4.f);
     backBottomRight->addComponent<Tag>("player_hud_back_bottom_right");
+}
+
+void UIFactory::createScoreDisplay()
+{
+    auto window = _world.getWindow();
+    float width = static_cast<float>(window->getSize().x);
+
+    auto scoreTxt = _world.createEntity();
+    scoreTxt->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    scoreTxt->addComponent<Layer>(LayerType::UI + 5);
+    scoreTxt->addComponent<Tag>("score_ui_text");
+    scoreTxt->addComponent<Position>(width - 50.f, 30.f);
+    scoreTxt->addComponent<Text>("000000", "../assets/font/regular.ttf", 50);
+    auto tComp = scoreTxt->getComponent<Text>();
+    tComp->setColor(0, 255, 255, 255);
+
+    scoreTxt->addComponent<Script>([](int id, World& w) {
+        auto e = GameHelper::getEntityById(w, id);
+        auto stats = GameHelper::getEntityByTag(w, "game_stats");
+        if (!e || !stats)
+            return;
+
+        auto textComp = e->getComponent<Text>();
+        auto posComp = e->getComponent<Position>();
+        auto dataComp = stats->getComponent<Data>();
+        int currentScore = std::stoi(dataComp->getData("score"));
+        int lastScore = std::stoi(dataComp->getData("last_score"));
+        int colorTimer = std::stoi(dataComp->getData("color_timer"));
+
+        if (currentScore != lastScore) {
+            dataComp->setData("last_score", std::to_string(currentScore));
+            dataComp->setData("color_timer", "15");
+            colorTimer = 15;
+        }
+        if (colorTimer > 0) {
+            textComp->setColor(255, 255, 0, 255);
+            dataComp->setData("color_timer", std::to_string(colorTimer - 1));
+        } else {
+            textComp->setColor(0, 255, 255, 255);
+        }
+
+        std::string s = std::to_string(currentScore);
+        std::string formatted = std::string(7 - s.length(), '0') + s;
+        textComp->setString(formatted);
+        float winWidth = static_cast<float>(w.getWindow()->getSize().x);
+        float textWidth = textComp->getSfText().getGlobalBounds().size.x;
+        posComp->setX(winWidth - textWidth - 50.f);
+    });
 }

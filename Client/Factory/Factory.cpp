@@ -122,3 +122,8 @@ void Factory::createPlayerHUD()
 {
     _uiFactory.createPlayerHUD();
 }
+
+void Factory::createScoreDisplay()
+{
+    _uiFactory.createScoreDisplay();
+}

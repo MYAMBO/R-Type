@@ -203,6 +203,7 @@ void Game::loadingRun()
     _factory.createScrapUIEmpty(2);
     _factory.createScrapUIEmpty(3);
     _factory.createBackGameUI();
+    _factory.createScoreDisplay();
     GameHelperGraphical::createStarField(_world);
     updateLoadingState(0.8f, "Connecting to server...");
     Packet packet;
@@ -484,6 +485,21 @@ void Game::playerInput(uint32_t entityId, World &world)
     }
 }
 
+static void addScore(World &w, int entityId)
+{
+    auto stats = GameHelper::getEntityByTag(w, "game_stats");
+    auto entity = GameHelper::getEntityById(w, entityId);
+    if (!stats || !entity)
+        return;
+    auto dataComp = stats->getComponent<Data>();
+    auto entityData = entity->getComponent<Data>();
+    if (!entityData || !dataComp)
+        return;
+    int currentScore = std::stoi(dataComp->getData("score"));
+    currentScore += std::stoi(entityData->getData("score"));
+    dataComp->setData("score", std::to_string(currentScore));
+}
+
 /**
  * @brief Kills an entity by its ID.
  *
@@ -507,7 +523,7 @@ int Game::killEntity(int id)
         }
         GameHelperGraphical::createScoreGUI(_world, pos->getX(), pos->getY(), data->getData("score"));
         GameHelperGraphical::soundEffectEntity(data->getData("death_sound"), 100.f, _world.getCurrentScene(), _world);
-        _factory.createSparks(_world, pos->getX() + 10, pos->getY() + 10, 15, static_cast<SceneType>(_world.getCurrentScene()), 300);
+        addScore(_world, id);
     }
     if (name && name->getTag() == "player_bullet") {
         auto pos = entity->getComponent<Position>();
