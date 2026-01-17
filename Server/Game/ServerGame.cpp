@@ -449,9 +449,7 @@ void ServerGame::createEnemyBackwardBullet(const float x, const float y)
             this->BulletMovement(entityId, world);
         }
     );
-    Packet packet;
-    packet.Spawn(bullet->getId(), BackwardEnemyBullet, x + 60.f, y + 15.f);
-    _network.sendPacket(packet);
+    _packet.Spawn(bullet->getId(), BackwardEnemyBullet, x + 60.f, y + 15.f);
 }
 
 /**
@@ -600,15 +598,11 @@ void ServerGame::createWarningPortal(float x, float y, float duration)
             data->setData("lifetime", std::to_string(lifetime));
             if (lifetime >= duration) {
                 world.killEntity(entityId);
-                Packet packet;
-                packet.dead(entityId);
-                _network.sendPacket(packet);
+                _packet.dead(entityId);
             }
         }
     );
-    Packet packet;
-    packet.Spawn(portal->getId(), Portal, x, y);
-    _network.sendPacket(packet);
+    _packet.Spawn(portal->getId(), Portal, x, y);
 }
 
 void ServerGame::portalBossBackwardPortalScript(int entityId, World& world)

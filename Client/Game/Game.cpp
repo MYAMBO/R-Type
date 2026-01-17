@@ -211,7 +211,6 @@ void Game::loadingRun()
     GameHelperGraphical::createStarField(_world);
 
     updateLoadingState(0.8f, "Connecting to server...");
-    Packet packet;
 
     run();
 }
