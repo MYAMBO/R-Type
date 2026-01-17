@@ -24,6 +24,11 @@ class UIFactory {
         void createBackGameUI() const;
         void createScrapUIEmpty(int index) const;
         void createLevelCompanionUI();
+        void createGameOverScreen();
+        void createVictoryScreen();
+        void createPlayerHUD();
+        void createScoreDisplay();
+  
     private:
         World& _world;
         std::shared_ptr<LanguageHandler> _languageHandler;

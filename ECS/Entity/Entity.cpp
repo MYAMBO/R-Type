@@ -16,7 +16,7 @@
 Entity::Entity(uint32_t id)
 {
     if (id != 0) {
-        printf("Assigned Entity ID: %d\n", id);
+        //printf("Assigned Entity ID: %d\n", id);
         _id = id;
         return;
     }
@@ -28,7 +28,7 @@ Entity::Entity(uint32_t id)
     uint32_t randomPart = dis(gen);
 
     _id = randomPart;
-    printf("Generated Entity ID: %d\n", _id);
+    //printf("Generated Entity ID: %d\n", _id);
 }
 
 /**

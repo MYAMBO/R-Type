@@ -45,7 +45,7 @@ void ClientPacketreader::interpretPacket()
             case 0x06: {
                 uint32_t time;
                 if (payload >> time) {
-                    std::cout << "TimeSync received: " << time << std::endl;
+                    //std::cout << "TimeSync received: " << time << std::endl;
                 }
                 break;
             }
@@ -54,7 +54,7 @@ void ClientPacketreader::interpretPacket()
                 uint16_t type;
                 float x, y;
                 if (payload >> id >> type >> x >> y) {
-                    printf("Update entity received: id=%u, type=%d, x=%f, y=%f\n", id, type, x, y);
+                    //printf("Update entity received: id=%u, type=%d, x=%f, y=%f\n", id, type, x, y);
                     if (_game) _game->updateEntity(id, type, x, y);
                 }
                 break;
@@ -62,14 +62,14 @@ void ClientPacketreader::interpretPacket()
             case 0x08: {
                 uint32_t id1, id2;
                 if (payload >> id1 >> id2) {
-                    std::cout << "Collision between " << id1 << " and " << id2 << std::endl;
+                    //std::cout << "Collision between " << id1 << " and " << id2 << std::endl;
                 }
                 break;
             }
             case 0x09: {
                 uint32_t id;
                 if (payload >> id) {
-                    std::cout << "Entity " << id << " dead" << std::endl;
+                    //std::cout << "Entity " << id << " dead" << std::endl;
                     if (_game)
                         _game->killEntity(id);
                 }
@@ -78,7 +78,8 @@ void ClientPacketreader::interpretPacket()
             case 0x0A: {
                 uint8_t status;
                 if (payload >> status) {
-                    std::cout << "EndGame: " << static_cast<int>(status) << std::endl;
+                    if (_game)
+                        _game->showEndScreen(status);
                 }
                 break;
             }

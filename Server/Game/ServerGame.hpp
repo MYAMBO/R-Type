@@ -44,19 +44,26 @@ class ServerGame {
         void createSinusShootingEnemy(const float x, const float y);
         void createPortalBoss(const float x, const float y);
         void createHealPowerUp(const float x, const float y);
+        void createWarningPortal(const float x, const float y, float duration);
+        void checkGameEnd();
+        void sendGameEnd(uint8_t status);
+
 
     private:
         void createPlayer(float x, float y);
         void createWave();
         void createBullet(float x, float y);
         void createEnemyBullet(float x, float y);
+        void createEnemyBackwardBullet(float x, float y);
         void EnemyMovement(uint32_t  entityId, World &world);
         void EnemySinusMovement(uint32_t  entityId, World &world);
         void ShootingAction(int entityId, World &world);
         void BulletMovement(uint32_t  entityId, World &world);
         void checkDeaths();
         void manaRegenScript(int entityId, World &world);
-
+        void portalBossBarrageScript(int entityId, World& world);
+        void portalBossBackwardPortalScript(int entityId, World& world);
+        void portalBossSpawnTankScript(int entityId, World& world);
 
         int& _tick;
         World _world;

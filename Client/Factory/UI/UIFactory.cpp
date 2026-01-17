@@ -5,6 +5,7 @@
 ** UIFactory
 */
 
+#include "HP.hpp"
 #include "Game.hpp"
 #include "Factory.hpp"
 #include "UIFactory.hpp"
@@ -215,7 +216,8 @@ void UIFactory::_addOptionSlider(const std::string& label, float initialValue, u
     slider->addComponent<GuiWidget>(WidgetType::SLIDER, "", row->getId());
     slider->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
     slider->addComponent<Tag>("option_slider");
-    if (onUpdate) slider->addComponent<Script>(onUpdate);
+    if (onUpdate)
+        slider->addComponent<Script>(onUpdate);
     auto gs = slider->getComponent<GuiWidget>();
     gs->setSize("40%", "20");
     gs->setPosition("70%", "50%");
@@ -270,6 +272,8 @@ void UIFactory::_addKeyBindingRow(const std::string& actionName, uint64_t parent
         listener->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
         listener->addComponent<Tag>("keybinding_listener");
         listener->addComponent<Script>([guiBtn, actionName](int id, World& w) {
+            if (w.getCurrentScene() != static_cast<int>(SceneType::OPTIONS))
+                return;
             auto input = w.getSystem<Inputs>();
             if (!input) return;
             KeyboardKey key = input->consumeLastKey();
@@ -407,16 +411,22 @@ void UIFactory::createOptionsMenu() const
     }
 
     _addOptionSlider("SETTINGS_MUSIC_VOLUME", musicVolume, layoutAudioId, [](float){}, [](int id, World& w) {
+        if (w.getCurrentScene() != static_cast<int>(SceneType::OPTIONS))
+            return;
         auto raw = std::dynamic_pointer_cast<tgui::Slider>(GameHelper::getEntityById(w, id)->getComponent<GuiWidget>()->getRawWidget());
         auto settings = GameHelper::getEntityByTag(w, "game_volume_settings");
         if (settings) settings->getComponent<Data>()->setData("music_volume", std::to_string((int)raw->getValue()));
     });
     _addOptionSlider("SETTINGS_SFX_VOLUME", sfxVolume, layoutAudioId, [](float){}, [](int id, World& w) {
+        if (w.getCurrentScene() != static_cast<int>(SceneType::OPTIONS))
+            return;
         auto raw = std::dynamic_pointer_cast<tgui::Slider>(GameHelper::getEntityById(w, id)->getComponent<GuiWidget>()->getRawWidget());
         auto settings = GameHelper::getEntityByTag(w, "game_volume_settings");
         if (settings) settings->getComponent<Data>()->setData("sfx_volume", std::to_string((int)raw->getValue()));
     });
     _addOptionSlider("SETTINGS_MASTER_VOLUME", masterVolume, layoutAudioId, [](float){}, [](int id, World& w) {
+        if (w.getCurrentScene() != static_cast<int>(SceneType::OPTIONS))
+            return;
         auto raw = std::dynamic_pointer_cast<tgui::Slider>(GameHelper::getEntityById(w, id)->getComponent<GuiWidget>()->getRawWidget());
         auto settings = GameHelper::getEntityByTag(w, "game_volume_settings");
         if (settings) settings->getComponent<Data>()->setData("master_volume", std::to_string((int)raw->getValue()));
@@ -432,6 +442,8 @@ void UIFactory::createOptionsMenu() const
     settingUpdater->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
     settingUpdater->addComponent<Tag>("options_setting_updater");
     settingUpdater->addComponent<Script>([](int id, World& w) {
+        if (w.getCurrentScene() != static_cast<int>(SceneType::OPTIONS))
+            return;
         auto entity = GameHelper::getEntityById(w, id);
         if (!entity)
             return;
@@ -479,6 +491,10 @@ void UIFactory::createMenu() const
     music->addComponent<Tag>("menu_music");
     music->getComponent<Music>()->play();
     music->addComponent<Script>([](int entityId, World& world) {
+        if (world.getCurrentScene() != static_cast<int>(SceneType::MENU) &&
+            world.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY) &&
+            world.getCurrentScene() != static_cast<int>(SceneType::OPTIONS))
+            return;
         auto entity = GameHelper::getEntityById(world, entityId);
         auto scene = world.getCurrentScene();
         if (!entity)
@@ -768,8 +784,8 @@ void UIFactory::createBackGameUI() const
     auto uiBackground = _world.createEntity();
     uiBackground->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     uiBackground->addComponent<Layer>(LayerType::UI);
-    uiBackground->addComponent<Position>(0.f, 0.f);
-    uiBackground->addComponent<RectangleShape>(450.f, 100.f, 100, 100, 100, 255);
+    uiBackground->addComponent<Position>(5.f, 5.f);
+    uiBackground->addComponent<RectangleShape>(356.f, 160.f, 139, 0, 139, 200);
     uiBackground->addComponent<Tag>("ui_background");
 }
 
@@ -780,8 +796,8 @@ void UIFactory::createBackGameUI() const
  */
 void UIFactory::createScrapUIEmpty(int index) const
 {
-    float posX = 20.f + (index - 1) * 30.f;
-    float posY = 65.f; 
+    float posX = 40.f + (index - 1) * 30.f;
+    float posY = 110.f; 
 
     auto uiScrap = _world.createEntity();
     uiScrap->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
@@ -789,7 +805,7 @@ void UIFactory::createScrapUIEmpty(int index) const
     uiScrap->addComponent<Position>(posX, posY);
     uiScrap->addComponent<Sprite>("../assets/sprites/r-typesheet3.gif");
     uiScrap->addComponent<Animator>(1, 1, 1.f, 0, 0, 16, 16, 0, 0);
-    uiScrap->addComponent<Scale>(1.5f);
+    uiScrap->addComponent<Scale>(2.f);
     uiScrap->addComponent<Tag>("ui_scrap_icon_empty_" + std::to_string(index));
     uiScrap->getComponent<Sprite>()->getSprite()->setColor(sf::Color(100, 100, 100, 255));
 }
@@ -799,33 +815,217 @@ void UIFactory::createLevelCompanionUI()
     auto uiCompanion = _world.createEntity();
     uiCompanion->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     uiCompanion->addComponent<Layer>(LayerType::UI + 2);
-    uiCompanion->addComponent<Position>(130.f, 46.f);
+    uiCompanion->addComponent<Position>(150.f, 95.f);
     uiCompanion->addComponent<Text>("0", "../assets/font/regular.ttf", 40);
     uiCompanion->addComponent<Scale>(1.f);
     uiCompanion->addComponent<Tag>("ui_level_companion_icon");
-    uiCompanion->addComponent<Script>([](int id, World& w) {
-        auto entity = GameHelper::getEntityById(w, id);
-        if (!entity)
+    uiCompanion->addComponent<Script>(uiLevelCompanionScript);
+}
+
+void UIFactory::createGameOverScreen()
+{
+    auto window = _world.getWindow();
+    float width = static_cast<float>(window->getSize().x);
+    float height = static_cast<float>(window->getSize().y);
+    float centerX = width / 2.0f;
+    float centerY = height / 2.0f;
+
+    auto bg = _world.createEntity();
+    bg->addComponent<Position>(0, 0);
+    bg->addComponent<RectangleShape>(3840.f, 2160.f, 50, 0, 0, 220);
+    bg->addComponent<Scene>(static_cast<int>(SceneType::GAME_OVER));
+    bg->addComponent<Layer>(LayerType::BACKGROUND);
+
+    auto title = _world.createEntity();
+    title->addComponent<Position>(centerX, centerY - 150);
+    title->addComponent<Text>("GAME OVER", "../assets/font/logo.ttf", 100);
+    title->getComponent<Text>()->setColor(255, 0, 0, 255);
+    title->addComponent<Scene>(static_cast<int>(SceneType::GAME_OVER));
+    title->addComponent<Layer>(LayerType::UI);
+    title->addComponent<Tag>("game_over_title");
+
+    auto subtitle = _world.createEntity();
+    subtitle->addComponent<Position>(centerX, centerY - 50);
+    subtitle->addComponent<Text>("All players have been defeated", "../assets/font/logo.ttf", 40);
+    subtitle->getComponent<Text>()->setColor(200, 100, 100, 255);
+    subtitle->addComponent<Scene>(static_cast<int>(SceneType::GAME_OVER));
+    subtitle->addComponent<Layer>(LayerType::UI);
+}
+
+void UIFactory::createVictoryScreen()
+{
+    auto window = _world.getWindow();
+    float width = static_cast<float>(window->getSize().x);
+    float height = static_cast<float>(window->getSize().y);
+    float centerX = width / 2.0f;
+    float centerY = height / 2.0f;
+
+    auto bg = _world.createEntity();
+    bg->addComponent<Position>(0, 0);
+    bg->addComponent<RectangleShape>(3840.f, 2160.f, 30, 50, 10, 220);
+    bg->addComponent<Scene>(static_cast<int>(SceneType::VICTORY));
+    bg->addComponent<Layer>(LayerType::BACKGROUND);
+    auto title = _world.createEntity();
+    title->addComponent<Position>(centerX, centerY - 200);
+    title->addComponent<Text>("VICTORY!", "../assets/font/logo.ttf", 120);
+    title->getComponent<Text>()->setColor(255, 215, 0, 255);
+    title->addComponent<Scene>(static_cast<int>(SceneType::VICTORY));
+    title->addComponent<Layer>(LayerType::UI);
+    title->addComponent<Tag>("victory_title");
+    auto congrats = _world.createEntity();
+    congrats->addComponent<Position>(centerX, centerY);
+    congrats->addComponent<Text>("Congratulations!", "../assets/font/logo.ttf", 50);
+    congrats->getComponent<Text>()->setColor(100, 255, 100, 255);
+    congrats->addComponent<Scene>(static_cast<int>(SceneType::VICTORY));
+    congrats->addComponent<Layer>(LayerType::UI);
+}
+/**
+ * @brief Create a professional and high-quality HUD for the player
+ * Version améliorée avec meilleure lisibilité et design moderne
+ */
+void UIFactory::createPlayerHUD()
+{
+    auto playerEntity = GameHelper::getEntityByTag(_world, "player");
+    if (!playerEntity) return;
+
+    auto groupComp = playerEntity->getComponent<Group>();
+
+    float hpHeight = 50.f;
+    float manaHeight = 16.f;
+    float spacing = 10.f;
+
+    auto hpBarBg = _world.createEntity();
+    hpBarBg->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    hpBarBg->addComponent<Layer>(LayerType::UI + 2);
+    hpBarBg->addComponent<Position>(0, -35);
+    hpBarBg->addComponent<Sprite>("../assets/sprites/06.png");
+    hpBarBg->addComponent<Animator>(1, 1, 10.f, 0, 30, 48, 14, 0, 0);
+    hpBarBg->addComponent<Scale>(7.f);
+    hpBarBg->addComponent<Tag>("player_hp_bar_bg");
+
+    hpBarBg->addComponent<Script>(hpBarScript);
+
+    auto manaBarBg = _world.createEntity();
+    manaBarBg->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    manaBarBg->addComponent<Layer>(LayerType::UI + 2);
+    manaBarBg->addComponent<Position>(10, hpHeight + spacing - 35);
+    manaBarBg->addComponent<Sprite>("../assets/sprites/06.png");
+    manaBarBg->addComponent<Animator>(1, 1, 10.f, 0, 16, 48, 14, 0, 0);
+    manaBarBg->addComponent<Scale>(7.f);
+    manaBarBg->addComponent<Tag>("player_mana_bar_bg");
+
+    manaBarBg->addComponent<Script>([](int id, World& w) {
+        if (w.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
             return;
-        auto player = GameHelper::getEntityByTag(w, "player");
-        if (!player)
+        auto barEnt = GameHelper::getEntityById(w, id);
+        if (!barEnt)
             return;
-        auto groupComp = player->getComponent<Group>();
-        if (!groupComp)
+        auto animator = barEnt->getComponent<Animator>();
+        if (!animator)
             return;
-        auto groupPlayer = GameHelper::getEntitiesByGroup(w, groupComp->getId());
-        for (const auto& ent : groupPlayer) {
-            auto companion = GameHelper::getEntityById(w, ent->getId());
-            if (!companion)
-                continue;
-            auto name = companion->getComponent<Tag>()->getTag();
-            if (name != "companion")
-                continue;
-            auto dataCompanion = companion->getComponent<Data>();
-            if (!dataCompanion)
-                continue;
-            entity->getComponent<Text>()->setString(std::to_string(std::stoi(dataCompanion->getData("level")) + 1));
+        auto targetPlayer = GameHelper::getEntityByTag(w, "player");
+        if (targetPlayer) {
+            auto dataComp = targetPlayer->getComponent<Data>();
+            if (!dataComp)
+                return;
+            auto ratio = std::stof(dataComp->getData("mana"));
+            float manaRatio = static_cast<float>(ratio / 100.f);
+            if (manaRatio >= 0.8f)
+                animator->resetAnimator(1, 1, 10.f, 0, 16, 48, 14, 0, 0);
+            else if (manaRatio >= 0.6f)
+                animator->resetAnimator(1, 1, 10.f, 48, 16, 48, 14, 0, 0);
+            else if (manaRatio >= 0.4f)
+                animator->resetAnimator(1, 1, 10.f, 96, 16, 48, 14, 0, 0);
+            else if (manaRatio >= 0.2f)
+                animator->resetAnimator(1, 1, 10.f, 144, 16, 48, 14, 0, 0);
+            else
+                animator->resetAnimator(1, 1, 10.f, 192, 16, 48, 14, 0, 0);
         }
     });
 
+    auto backTopLeft = _world.createEntity();
+    backTopLeft->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    backTopLeft->addComponent<Layer>(LayerType::UI + 2);
+    backTopLeft->addComponent<Position>(5.f, 5.f);
+    backTopLeft->addComponent<Sprite>("../assets/sprites/02.png");
+    backTopLeft->addComponent<Animator>(4, 4, 10.f, 128, 128, 17, 14, 15, 0);
+    backTopLeft->addComponent<Scale>(4.f);
+    backTopLeft->addComponent<Tag>("player_hud_back_top_left");
+
+    auto backBottomLeft = _world.createEntity();
+    backBottomLeft->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    backBottomLeft->addComponent<Layer>(LayerType::UI + 2);
+    backBottomLeft->addComponent<Position>(5.f, hpHeight + manaHeight + (2 * spacing) + 20.f);
+    backBottomLeft->addComponent<Sprite>("../assets/sprites/02.png");
+    backBottomLeft->addComponent<Animator>(4, 4, 10.f, 128, 146, 17, 14, 15, 0);
+    backBottomLeft->addComponent<Scale>(4.f);
+    backBottomLeft->addComponent<Tag>("player_hud_back_bottom_left");
+
+    auto backTopRight = _world.createEntity();
+    backTopRight->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    backTopRight->addComponent<Layer>(LayerType::UI + 2);
+    backTopRight->addComponent<Position>(295.f, 5.f);
+    backTopRight->addComponent<Sprite>("../assets/sprites/02.png");
+    backTopRight->addComponent<Animator>(4, 4, 10.f, 144, 128, 17, 14, 15, 0);
+    backTopRight->addComponent<Scale>(4.f);
+    backTopRight->addComponent<Tag>("player_hud_back_top_right");
+
+    auto backBottomRight = _world.createEntity();
+    backBottomRight->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    backBottomRight->addComponent<Layer>(LayerType::UI + 2);
+    backBottomRight->addComponent<Position>(295.f, hpHeight + manaHeight + (2 * spacing) + 20.f);
+    backBottomRight->addComponent<Sprite>("../assets/sprites/02.png");
+    backBottomRight->addComponent<Animator>(4, 4, 10.f, 144, 146, 17, 14, 15, 0);
+    backBottomRight->addComponent<Scale>(4.f);
+    backBottomRight->addComponent<Tag>("player_hud_back_bottom_right");
+}
+
+void UIFactory::createScoreDisplay()
+{
+    auto window = _world.getWindow();
+    float width = static_cast<float>(window->getSize().x);
+
+    auto scoreTxt = _world.createEntity();
+    scoreTxt->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    scoreTxt->addComponent<Layer>(LayerType::UI + 5);
+    scoreTxt->addComponent<Tag>("score_ui_text");
+    scoreTxt->addComponent<Position>(width - 50.f, 30.f);
+    scoreTxt->addComponent<Text>("000000", "../assets/font/regular.ttf", 50);
+    auto tComp = scoreTxt->getComponent<Text>();
+    tComp->setColor(0, 255, 255, 255);
+
+    scoreTxt->addComponent<Script>([](int id, World& w) {
+        if (w.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
+            return;
+        auto e = GameHelper::getEntityById(w, id);
+        auto stats = GameHelper::getEntityByTag(w, "game_stats");
+        if (!e || !stats)
+            return;
+
+        auto textComp = e->getComponent<Text>();
+        auto posComp = e->getComponent<Position>();
+        auto dataComp = stats->getComponent<Data>();
+        int currentScore = std::stoi(dataComp->getData("score"));
+        int lastScore = std::stoi(dataComp->getData("last_score"));
+        int colorTimer = std::stoi(dataComp->getData("color_timer"));
+
+        if (currentScore != lastScore) {
+            dataComp->setData("last_score", std::to_string(currentScore));
+            dataComp->setData("color_timer", "15");
+            colorTimer = 15;
+        }
+        if (colorTimer > 0) {
+            textComp->setColor(255, 255, 0, 255);
+            dataComp->setData("color_timer", std::to_string(colorTimer - 1));
+        } else {
+            textComp->setColor(0, 255, 255, 255);
+        }
+
+        std::string s = std::to_string(currentScore);
+        std::string formatted = std::string(7 - s.length(), '0') + s;
+        textComp->setString(formatted);
+        float winWidth = static_cast<float>(w.getWindow()->getSize().x);
+        float textWidth = textComp->getSfText().getGlobalBounds().size.x;
+        posComp->setX(winWidth - textWidth - 50.f);
+    });
 }

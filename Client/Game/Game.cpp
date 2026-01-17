@@ -66,6 +66,7 @@ Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const
     : _window(sf::VideoMode({width, height}), title), _network(network), _factory(_world)
 {
     _world.addSystem<CameraSys>();
+    _world.addSystem<Audio>();
     _world.addSystem<ScriptsSys>();
     _world.addSystem<TextSystem>();
     _world.addSystem<Movement>();
@@ -198,12 +199,17 @@ void Game::loadingRun()
     _factory.createLevelCompanionUI();
     updateLoadingState(0.6f, "Generating Background...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
-    _factory.createBackground(_window); 
     _factory.createCredits();
+    _factory.createPlayerHUD();
     _factory.createScrapUIEmpty(1);
     _factory.createScrapUIEmpty(2);
     _factory.createScrapUIEmpty(3);
     _factory.createBackGameUI();
+    _factory.createGameOverScreen();
+    _factory.createVictoryScreen();
+    _factory.createScoreDisplay();
+    GameHelperGraphical::createStarField(_world);
+
     updateLoadingState(0.8f, "Connecting to server...");
     Packet packet;
 
@@ -245,6 +251,8 @@ void Game::run()
         if (musicComp)
             musicComp->play();
     }
+    _factory.createPlayerHUD();
+    static sf::Clock timer;
     while (_window.isOpen()) {
         auto start = std::chrono::steady_clock::now();
         _window.clear(sf::Color::Black);
@@ -255,6 +263,28 @@ void Game::run()
             _packet.clear();
         }
         _window.display();
+        refreshCaches(_world);
+        /*if (timer.getElapsedTime().asSeconds() >= 1.0f) {
+            size_t total = 0;
+            auto allEntities = _world.getAllEntitiesWithComponent<Tag>();
+            total = allEntities.size();
+            int scene = _world.getCurrentScene();
+
+            std::cout << "--- [PERF MONITOR] ---" << std::endl;
+            std::cout << "  Total Entities: " << total << std::endl;
+            std::cout << "  Current Scene : " << scene << std::endl;
+
+            auto stars = _world.getAllEntitiesWithComponent<Tag>();
+            int starCount = 0;
+            for (auto& s : stars) {
+                if (s->getComponent<Tag>()->getTag() == "background_star") starCount++;
+            }
+            std::cout << "  Active Stars  : " << starCount << std::endl;
+            std::cout << "----------------------" << std::endl;
+
+            timer.restart();
+        }*/
+
         auto end = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
         if (elapsed < tickRate)
@@ -292,8 +322,15 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
             sf::FloatRect visibleArea({0, 0}, {static_cast<float>(_window.getSize().x), static_cast<float>( _window.getSize().y)});
             _window.setView(sf::View(visibleArea));
         }
-        if (inputSystem->isTriggered(*eventOpt, KeyboardKey::Key_M))
+        // temporary testing code
+        if (inputSystem->isTriggered(*eventOpt, KeyboardKey::Key_M)) {
+            //GameHelperGraphical::createAnimatorEntity(_world, 400, 400, "../assets/sprites/green_effect.png", 5, 5, 2.f, 478, 154, 20, 20, 0, 0, 10.f);
+            //GameHelperGraphical::createAnimatorEntity(_world, 400, 400, "../assets/sprites/r-typesheet1.gif", 7, 7, 2.f, 209, 276, 16, 14, 0, 0, 10.f);
+            //GameHelperGraphical::createScoreGUI(_world, 400, 300, "1000");
+            //GameHelperGraphical::createAnimatorEntity(_world, 200, 200, "../assets/sprites/fire_effect.png", 2, 2, 1.f, 223, 0, 16, 16, 0, 0, 10.f);
             _factory.createScraps(_world, 500.f, 0.f);
+
+        }
         inputSystem->update(0.0f, _world);
     }
 }
@@ -377,11 +414,18 @@ void Game::updateEntity(uint32_t id, uint16_t type, float x, float y)
     case EnemyBullet:
         _factory.createEnemyBullet(id, x, y);
         break;
+    case BackwardEnemyBullet:
+        _factory.createBackwardEnemyBullet(id, x, y);
+        break;
     case PortalBoss:
         _factory.createEnemy(x, y, 6, id);
         break;
+    case Portal:
+        _factory.createEnemy(x, y, 7, id);
+        break;
     case HealPU:
         _factory.createPowerUp(x, y, 1, id);
+        break;
     }
 
 }
@@ -468,13 +512,6 @@ void Game::playerInput(uint32_t entityId, World &world)
                     _factory.createLasersCompanion(entity->getId(), compPlayer->getId());
                 }
             }
-            // int mana = std::stoi(dataComp->getData("mana"));
-            // if (mana >= 20) {
-            //     mana -= 20;
-            //     if (mana < 0)
-            //         mana = 0;
-            //     dataComp->setData("mana", std::to_string(mana));
-            // }
         }
     } else {
         isShootKeyPressed = false;
@@ -489,6 +526,21 @@ void Game::playerInput(uint32_t entityId, World &world)
     }
 }
 
+static void addScore(World &w, int entityId)
+{
+    auto stats = GameHelper::getEntityByTag(w, "game_stats");
+    auto entity = GameHelper::getEntityById(w, entityId);
+    if (!stats || !entity)
+        return;
+    auto dataComp = stats->getComponent<Data>();
+    auto entityData = entity->getComponent<Data>();
+    if (!entityData || !dataComp)
+        return;
+    int currentScore = std::stoi(dataComp->getData("score"));
+    currentScore += std::stoi(entityData->getData("score"));
+    dataComp->setData("score", std::to_string(currentScore));
+}
+
 /**
  * @brief Kills an entity by its ID.
  *
@@ -500,6 +552,43 @@ int Game::killEntity(int id)
     auto entity = GameHelper::getEntityById(_world, id);
     if (!entity)
         return -1;
+
+    auto name = entity->getComponent<Tag>();
+    if (name && name->getTag() == "enemy") {
+        auto pos = entity->getComponent<Position>();
+        GameHelperGraphical::createAnimatorEntity(_world, pos->getX(), pos->getY(), "../assets/sprites/r-typesheet1.gif", 5, 5, 2.f, 288, 295, 31, 32, 3, 0, 3.f);
+        auto data = entity->getComponent<Data>();
+        if (!data) {
+            _world.killEntity(id);
+            return -1;
+        }
+        GameHelperGraphical::createScoreGUI(_world, pos->getX(), pos->getY(), data->getData("score"));
+        GameHelperGraphical::soundEffectEntity(data->getData("death_sound"), 100.f, _world.getCurrentScene(), _world);
+        addScore(_world, id);
+    }
+    if (name && name->getTag() == "player_bullet") {
+        auto pos = entity->getComponent<Position>();
+        if (pos->getX() > _world.getWindow()->getSize().x || pos->getY() > _world.getWindow()->getSize().y || pos->getX() < 0 || pos->getY() < 0) {
+            _world.killEntity(id);
+            return 0;
+        }
+        GameHelperGraphical::createAnimatorEntity(_world, pos->getX(), pos->getY(), "../assets/sprites/r-typesheet1.gif", 7, 7, 2.f, 209, 276, 16, 14, 0, 0, 3.5f);
+        GameHelperGraphical::soundEffectEntity("../assets/sounds/bullet_hit.mp3", 50.f, _world.getCurrentScene(), _world);
+    }
+    if (name && name->getTag() == "enemy_bullet") {
+        auto pos = entity->getComponent<Position>();
+        if (pos->getX() > _world.getWindow()->getSize().x || pos->getY() > _world.getWindow()->getSize().y || pos->getX() < 0 || pos->getY() < 0) {
+            _world.killEntity(id);
+            return 0;
+        }
+        GameHelperGraphical::createAnimatorEntity(_world, pos->getX(), pos->getY(), "../assets/sprites/r-typesheet1.gif", 7, 7, 2.f, 209, 276, 16, 14, 0, 0, 3.5f);
+        GameHelperGraphical::soundEffectEntity("../assets/sounds/bullet_hit.mp3", 50.f, _world.getCurrentScene(), _world);
+    }
+    if (name && name->getTag() == "heal") {
+        auto pos = entity->getComponent<Position>();
+        GameHelperGraphical::createAnimatorEntity(_world, pos->getX(), pos->getY(), "../assets/sprites/green_effect.png", 5, 5, 2.f, 478, 154, 20, 20, 0, 0, 4.f);
+        GameHelperGraphical::soundEffectEntity("../assets/sounds/heal.mp3", 75.f, _world.getCurrentScene(), _world);
+    }
     _world.killEntity(id);
     return 0;
 }
@@ -585,7 +674,6 @@ void Game::healEntity(const uint32_t entityId, const uint32_t newHp)
     if (!hp)
         return;
     hp->setHP(newHp);
-
     std::cout << "Entity " << entityId << " HP set to: " << newHp << std::endl;
 }
 
@@ -598,4 +686,13 @@ void Game::updatePlayerMana(uint32_t playerId, int mana)
     auto dataComp = player->getComponent<Data>();
     if (dataComp)
         dataComp->setData("mana", std::to_string(mana));
+}
+
+void Game::showEndScreen(uint8_t status)
+{
+    if (status == 0) {
+        _world.setCurrentScene(static_cast<int>(SceneType::GAME_OVER));
+    } else {
+        _world.setCurrentScene(static_cast<int>(SceneType::VICTORY));
+    }
 }

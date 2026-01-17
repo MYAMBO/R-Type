@@ -22,11 +22,16 @@ EffectFactory::EffectFactory(World& world) : _world(world)
  * @param y The y-coordinate for the spark origin.
  * @param amount The number of sparks to create.
  */
-void EffectFactory::createSparks(World &world, float x, float y, int amount)
+void EffectFactory::createSparks(World &world, float x, float y, int amount, SceneType scene, int lifeTime)
 {
     for (int i = 0; i < amount; i++) {
         auto spark = world.createEntity();
-        spark->addComponent<Scene>(static_cast<int>(SceneType::KAYU));
+        spark->addComponent<Scene>(static_cast<int>(scene));
+        spark->addComponent<Tag>("spark_effect");
+        spark->addComponent<Data>(std::map<std::string, std::string>{
+            {"lifetime", std::to_string(lifeTime)},
+            {"scene", std::to_string(static_cast<int>(scene))}
+        });
         spark->addComponent<Position>(x, y);
         float vx = (rand() % 200 - 100) / 10.f;
         float vy = (rand() % 200 - 100) / 10.f;
