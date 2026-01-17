@@ -58,11 +58,6 @@ void Factory::createPlayer(uint64_t id)
     _worldFactory.createPlayer(static_cast<int>(id));
 }
 
-void Factory::createBackground(sf::RenderWindow& window)
-{
-    _worldFactory.createBackground(window);
-}
-
 void Factory::createEnemy(float x, float y, int type, int entityId)
 {
     _worldFactory.createEnemy(x, y, type, entityId);

@@ -386,3 +386,99 @@ void GameHelperGraphical::playRandomAmbianceEnemy(World &world)
         }
     });
 }
+
+/**
+ * @brief Creates a star entity in the world at the specified position.
+ */
+void GameHelperGraphical::createStar(World &world, float x, float y)
+{
+    auto star = world.createEntity();
+    star->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    star->addComponent<Layer>(LayerType::BACKGROUND);
+    star->addComponent<Tag>("background_star");
+
+    float randScale = 0.5f + static_cast<float>(rand() % 15) / 10.f;
+    float speed = randScale;
+
+    star->addComponent<Position>(x, y);
+    star->addComponent<Velocity>(-speed, 0.f);
+    star->addComponent<Scale>(randScale);
+    
+    int starColor = rand() % 2;
+    if (starColor == 0) {
+        star->addComponent<Sprite>(std::string("../assets/sprites/water_effect.png"));
+    } else {
+        star->addComponent<Sprite>(std::string("../assets/sprites/purple_effect.png"));
+    }
+    int starType = rand() % 7;
+    switch (starType) {
+        case 0: star->addComponent<Animator>(4, 4, 5.f, 223, 48, 16, 16, 0, 0); break;
+        case 1: star->addComponent<Animator>(2, 2, 20.f, 160, 80, 16, 16, 0, 0); break;
+        case 2: star->addComponent<Animator>(5, 5, 8.f, 385, 16, 16, 16, 0, 0); break;
+        case 3: star->addComponent<Animator>(5, 5, 6.f, 480, 0, 16, 16, 0, 0); break;
+        case 4: star->addComponent<Animator>(5, 5, 12.f, 480, 48, 16, 16, 0, 0); break;
+        case 5: star->addComponent<Animator>(5, 5, 4.f, 480, 96, 16, 16, 0, 0); break;
+        case 6: default: 
+                star->addComponent<Animator>(5, 5, 10.f, 480, 112, 16, 16, 0, 0); break;
+    }
+}
+
+/**
+ * @brief Initialise le champ d'étoiles et le générateur
+ */
+void GameHelperGraphical::createStarField(World &world)
+{
+    auto window = world.getWindow();
+    float width = static_cast<float>(window->getSize().x);
+    float height = static_cast<float>(window->getSize().y);
+
+    for (int i = 0; i < 50; i++) {
+        GameHelperGraphical::createStar(world, static_cast<float>(rand() % (int)width), static_cast<float>(rand() % (int)height));
+    }
+
+    auto spawner = world.createEntity();
+    spawner->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    spawner->addComponent<Tag>("star_spawner");
+    spawner->addComponent<Data>(std::map<std::string, std::string>{{"last_heigt", "0"}, {"last_width", "0"}});
+    spawner->getComponent<Data>()->setData("last_width", std::to_string(width));
+    spawner->getComponent<Data>()->setData("last_height", std::to_string(height));
+    
+    spawner->addComponent<Script>([](int id, World& w) {
+        auto windowsizeX = w.getWindow()->getSize().x;
+        auto windowsizeY = w.getWindow()->getSize().y;
+        if (rand() % 5 == 0)
+            GameHelperGraphical::createStar(w, windowsizeX + 50.f, static_cast<float>(rand() % (int)windowsizeY));
+
+        auto compData = GameHelper::getEntityById(w, id)->getComponent<Data>();
+        if (!compData)
+            return;
+        if (windowsizeX != std::stof(compData->getData("last_width")) || windowsizeY != std::stof(compData->getData("last_height"))) {
+            compData->setData("last_height", std::to_string(windowsizeY));
+            compData->setData("last_width", std::to_string(windowsizeX));
+            auto allStars = w.getAllEntitiesWithComponent<Tag>();
+            int starCount = 0;
+            for (auto& s : allStars) {
+                if (s->getComponent<Tag>()->getTag() == "background_star") starCount++;
+            }
+            if (starCount < 150) {
+                for (int i = 0; i < 10; i++) { 
+                    GameHelperGraphical::createStar(w, 
+                        static_cast<float>(rand() % (int)windowsizeX), 
+                        static_cast<float>(rand() % (int)windowsizeY)
+                    );
+                }
+            }
+        }
+        for (const auto& star : w.getAllEntitiesWithComponent<Tag>()) {
+            if (!star)
+                continue;
+            auto tagComp = star->getComponent<Tag>();
+            if (tagComp && tagComp->getTag() == "background_star") {
+                auto posComp = star->getComponent<Position>();
+                if (posComp && posComp->getX() < -40.f) {
+                    w.killEntity(star->getId());
+                }
+            }
+        }
+    });
+}

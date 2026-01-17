@@ -139,43 +139,6 @@ void WorldFactory::createEnemyBullet(size_t entityId, int x, int y)
 }
 
 /**
- * @brief Create Background
- * This function initializes the background entities with necessary components.
-*/
-void WorldFactory::createBackground(sf::RenderWindow& window)
-{
-    auto backgroundFirst = _world.createEntity();
-    backgroundFirst->addComponent<Sprite>(std::string("../assets/sprites/background.png"));
-    
-    auto windowSize = window.getSize();
-    auto spriteComp = backgroundFirst->getComponent<Sprite>();
-    auto boundsSize = spriteComp->getSprite()->getGlobalBounds(); 
-    float scaleX = static_cast<float>(windowSize.x) / boundsSize.size.x;
-    float scaleY = static_cast<float>(windowSize.y) / boundsSize.size.y;
-    float finalScale = std::max(scaleX, scaleY);
-    if (finalScale < 1.0f)
-        finalScale = 1.0f;
-    backgroundFirst->addComponent<Scale>(finalScale);
-
-    backgroundFirst->addComponent<Scene>(_world.getCurrentScene());
-    backgroundFirst->addComponent<Position>(0.f, 0.f);
-    backgroundFirst->addComponent<Script>(backgroundScrollScript);
-    backgroundFirst->addComponent<Layer>(LayerType::BACKGROUND);
-    backgroundFirst->addComponent<Velocity>(-5.f, 0.f);
-    backgroundFirst->addComponent<Tag>("background_first");
-    auto backgroundSecond = _world.createEntity();
-    backgroundSecond->addComponent<Sprite>(std::string("../assets/sprites/background.png"));
-    backgroundSecond->addComponent<Scale>(1.f);
-    backgroundSecond->addComponent<Scene>(_world.getCurrentScene());
-    auto bounds = backgroundFirst->getComponent<Sprite>()->getSprite()->getGlobalBounds();
-    backgroundSecond->addComponent<Position>(bounds.size.x - 10.f, 0.f);
-    backgroundSecond->addComponent<Velocity>(-5.f, 0.f);
-    backgroundSecond->addComponent<Script>(backgroundScrollScript);
-    backgroundSecond->addComponent<Layer>(LayerType::BACKGROUND);
-    backgroundSecond->addComponent<Tag>("background_second");
-}
-
-/**
  * @brief Creates the player entity.
  * 
  * This function initializes the player entity with necessary components.
