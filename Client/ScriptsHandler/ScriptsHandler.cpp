@@ -99,15 +99,7 @@ void playerfire(size_t entityId, World &world)
         }
     }
     if (!player)
-    return;
-    auto musicComp = fire->getComponent<Music>();
-    if (!musicComp)
         return;
-    if (world.getCurrentScene() == static_cast<int>(SceneType::GAMEPLAY)) {
-        musicComp->play();
-    } else if (musicComp) {
-        musicComp->stop();
-    }
     auto posPlayer = player->getComponent<Position>();
     auto posFire = fire->getComponent<Position>();
     if (!posFire || !posPlayer)
@@ -614,7 +606,7 @@ void creditsScript(int id, World& w)
 {
     if (w.getCurrentScene() != static_cast<int>(SceneType::CREDITS))
         return;
-    auto centerX = static_cast<float>(w.getWindow()->getSize().x) / 8.f;
+    auto centerX = static_cast<float>(w.getWindow()->getSize().x) / 5.f;
     auto pos = GameHelper::getEntityById(w, id);
     if (!pos)
         return;
@@ -633,12 +625,12 @@ void creditsNameScript(int id, World& w)
 {
     if (w.getCurrentScene() != static_cast<int>(SceneType::CREDITS))
         return;
-    auto centerX2 = static_cast<float>(w.getWindow()->getSize().x) / 2.f;
+    auto centerX = static_cast<float>(w.getWindow()->getSize().x) / 3 + static_cast<float>(w.getWindow()->getSize().x) / 3.f;
     auto pos = GameHelper::getEntityById(w, id);
     if (!pos)
         return;
     auto positionComp = pos->getComponent<Position>();
-    positionComp->setX(centerX2);
+    positionComp->setX(centerX);
 }
 
 /**
