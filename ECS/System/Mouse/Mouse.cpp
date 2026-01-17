@@ -29,14 +29,16 @@ void Mouse::update(const float& dt, World &world)
 
     for (auto &entity : world.getAllEntitiesWithComponent<Button>()) {
         auto sceneComp = entity->getComponent<Scene>();
+        if (!sceneComp)
+            continue;
+        if (world.getCurrentScene() != sceneComp->getScene())
+            continue;
         auto button = entity->getComponent<Button>();
         auto pos = entity->getComponent<Position>();
         auto spriteComp = entity->getComponent<Sprite>();
         if (!button || !pos || !sceneComp || !spriteComp)
             continue;
         
-        if (world.getCurrentScene() != sceneComp->getScene())
-            continue;
         sf::FloatRect bounds({pos->getX(), pos->getY()}, {button->getWidth(), button->getHeight()});
 
         ButtonState oldState = button->getState();

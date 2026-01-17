@@ -63,6 +63,7 @@ class Factory {
         void createPauseMenu();
         void createOptionsMenu();
         void createLevelSelect();
+        void createMusicGameplay();
         void createLoadingScreen();
         void createPlayer(uint64_t id = 0);
         void createBackground(sf::RenderWindow& window);

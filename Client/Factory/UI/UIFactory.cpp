@@ -9,6 +9,7 @@
 #include "Game.hpp"
 #include "Factory.hpp"
 #include "UIFactory.hpp"
+#include "GameHelperGraphical.hpp"
 
 #include <thread>
 
@@ -492,14 +493,21 @@ void UIFactory::createMenu() const
     music->getComponent<Music>()->play();
     music->addComponent<Script>([](int entityId, World& world) {
         if (world.getCurrentScene() != static_cast<int>(SceneType::MENU) &&
-            world.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY) &&
-            world.getCurrentScene() != static_cast<int>(SceneType::OPTIONS))
+            world.getCurrentScene() != static_cast<int>(SceneType::LANGUAGES) &&
+            world.getCurrentScene() != static_cast<int>(SceneType::OPTIONS)) {
+            if (auto entity = GameHelper::getEntityById(world, entityId)) {
+                auto musicComp = entity->getComponent<Music>();
+                if (musicComp && musicComp->getState() == MusicState::PLAYING) {
+                    musicComp->stop();
+                }
+            }
             return;
+        }
         auto entity = GameHelper::getEntityById(world, entityId);
         auto scene = world.getCurrentScene();
         if (!entity)
             return;
-        if (scene == 2 || scene == 3 || scene == 4) {
+        if (scene == static_cast<int>(SceneType::MENU) || scene == static_cast<int>(SceneType::LANGUAGES) || scene == static_cast<int>(SceneType::OPTIONS)) {
             auto musicComp = entity->getComponent<Music>();
             if (musicComp && musicComp->getState() != MusicState::PLAYING) {
                 musicComp->play();
@@ -627,6 +635,7 @@ void UIFactory::createMenu() const
     guiCreditOpt->setCallback([this]() {
         if (const auto sfx = GameHelper::getEntityByTag(_world, "menu_credits")->getComponent<SoundEffect>())
             sfx->play();
+        GameHelperGraphical::resetCreditsPositions(_world);
         _world.setCurrentScene(static_cast<int>(SceneType::CREDITS));
     });
     auto spaceEntity2 = _world.createEntity();
@@ -828,28 +837,59 @@ void UIFactory::createGameOverScreen()
     float width = static_cast<float>(window->getSize().x);
     float height = static_cast<float>(window->getSize().y);
     float centerX = width / 2.0f;
-    float centerY = height / 2.0f;
 
-    auto bg = _world.createEntity();
-    bg->addComponent<Position>(0, 0);
-    bg->addComponent<RectangleShape>(3840.f, 2160.f, 50, 0, 0, 220);
-    bg->addComponent<Scene>(static_cast<int>(SceneType::GAME_OVER));
-    bg->addComponent<Layer>(LayerType::BACKGROUND);
+    auto root = _world.createEntity();
+    root->addComponent<Scene>(static_cast<int>(SceneType::GAME_OVER));
+    root->addComponent<GuiWidget>(WidgetType::PANEL);
+    root->addComponent<Tag>("game_over_root");
+    auto rootGui = root->getComponent<GuiWidget>();
+    rootGui->setSize("100%", "100%");
+    rootGui->getRawWidget()->getRenderer()->setProperty("BackgroundColor", tgui::Color(40, 0, 0, 100));
 
     auto title = _world.createEntity();
-    title->addComponent<Position>(centerX, centerY - 150);
-    title->addComponent<Text>("GAME OVER", "../assets/font/logo.ttf", 100);
-    title->getComponent<Text>()->setColor(255, 0, 0, 255);
     title->addComponent<Scene>(static_cast<int>(SceneType::GAME_OVER));
-    title->addComponent<Layer>(LayerType::UI);
+    title->addComponent<Layer>(LayerType::UI + 2);
+    title->addComponent<Text>("SYSTEM FAILURE", "../assets/font/regular.ttf", 120);
+    title->getComponent<Text>()->setColor(255, 0, 0, 255);
     title->addComponent<Tag>("game_over_title");
+    title->addComponent<Position>(centerX - title->getComponent<Text>()->getGlobalBounds().size.x / 2.0f, height * 0.3f);
+    
+    title->addComponent<Script>([](int id, World& w) {
+        if (w.getCurrentScene() != static_cast<int>(SceneType::GAME_OVER))
+            return;
+        auto e = GameHelper::getEntityById(w, id);
+        if (e && rand() % 5 == 0) {
+            auto pos = e->getComponent<Position>();
+            auto title = e->getComponent<Text>();
+            if (pos && title)
+                pos->setX((static_cast<float>(w.getWindow()->getSize().x) / 2.0f) - title->getGlobalBounds().size.x / 2.0f + (rand() % 6 - 3));
+        }
+    });
 
-    auto subtitle = _world.createEntity();
-    subtitle->addComponent<Position>(centerX, centerY - 50);
-    subtitle->addComponent<Text>("All players have been defeated", "../assets/font/logo.ttf", 40);
-    subtitle->getComponent<Text>()->setColor(200, 100, 100, 255);
-    subtitle->addComponent<Scene>(static_cast<int>(SceneType::GAME_OVER));
-    subtitle->addComponent<Layer>(LayerType::UI);
+    auto layoutEnt = _world.createEntity();
+    layoutEnt->addComponent<GuiWidget>(WidgetType::VERTICAL_LAYOUT, "", root->getId());
+    layoutEnt->addComponent<Scene>(static_cast<int>(SceneType::GAME_OVER));
+    layoutEnt->addComponent<Tag>("game_over_button_layout");
+    auto guiLayout = layoutEnt->getComponent<GuiWidget>();
+    guiLayout->setSize("30%", "30%");
+    guiLayout->setPosition("50%", "70%");
+    guiLayout->setOrigin(0.5f, 0.5f);
+
+    auto btnRetry = _world.createEntity();
+    btnRetry->addComponent<GuiWidget>(WidgetType::BUTTON, "RETRY", layoutEnt->getId());
+    btnRetry->addComponent<Scene>(static_cast<int>(SceneType::GAME_OVER));
+    btnRetry->addComponent<Tag>("game_over_button_retry");
+    auto guiRetry = btnRetry->getComponent<GuiWidget>();
+    styleNeonButton(guiRetry);
+    guiRetry->setCallback([this]() { _world.setCurrentScene(static_cast<int>(SceneType::GAMEPLAY)); });
+
+    auto btnMenu = _world.createEntity();
+    btnMenu->addComponent<GuiWidget>(WidgetType::BUTTON, "ABANDON MISSION", layoutEnt->getId());
+    btnMenu->addComponent<Scene>(static_cast<int>(SceneType::GAME_OVER));
+    btnMenu->addComponent<Tag>("game_over_button_menu");
+    auto guiMenu = btnMenu->getComponent<GuiWidget>();
+    styleNeonButton(guiMenu);
+    guiMenu->setCallback([this]() { _world.setCurrentScene(static_cast<int>(SceneType::MENU)); });
 }
 
 void UIFactory::createVictoryScreen()
@@ -858,27 +898,85 @@ void UIFactory::createVictoryScreen()
     float width = static_cast<float>(window->getSize().x);
     float height = static_cast<float>(window->getSize().y);
     float centerX = width / 2.0f;
-    float centerY = height / 2.0f;
 
-    auto bg = _world.createEntity();
-    bg->addComponent<Position>(0, 0);
-    bg->addComponent<RectangleShape>(3840.f, 2160.f, 30, 50, 10, 220);
-    bg->addComponent<Scene>(static_cast<int>(SceneType::VICTORY));
-    bg->addComponent<Layer>(LayerType::BACKGROUND);
+    auto root = _world.createEntity();
+    root->addComponent<Scene>(static_cast<int>(SceneType::VICTORY));
+    root->addComponent<GuiWidget>(WidgetType::PANEL);
+    root->addComponent<Tag>("victory_root");
+    root->getComponent<GuiWidget>()->setSize("100%", "100%");
+    root->getComponent<GuiWidget>()->getRawWidget()->getRenderer()->setProperty("BackgroundColor", tgui::Color(0, 20, 10, 100));
+
     auto title = _world.createEntity();
-    title->addComponent<Position>(centerX, centerY - 200);
-    title->addComponent<Text>("VICTORY!", "../assets/font/logo.ttf", 120);
-    title->getComponent<Text>()->setColor(255, 215, 0, 255);
     title->addComponent<Scene>(static_cast<int>(SceneType::VICTORY));
-    title->addComponent<Layer>(LayerType::UI);
+    title->addComponent<Layer>(LayerType::UI + 2);
     title->addComponent<Tag>("victory_title");
-    auto congrats = _world.createEntity();
-    congrats->addComponent<Position>(centerX, centerY);
-    congrats->addComponent<Text>("Congratulations!", "../assets/font/logo.ttf", 50);
-    congrats->getComponent<Text>()->setColor(100, 255, 100, 255);
-    congrats->addComponent<Scene>(static_cast<int>(SceneType::VICTORY));
-    congrats->addComponent<Layer>(LayerType::UI);
+    title->addComponent<Text>("MISSION ACCOMPLISHED", "../assets/font/regular.ttf", 100);
+    title->getComponent<Text>()->setColor(255, 215, 0, 255);
+    title->addComponent<Position>(centerX - title->getComponent<Text>()->getGlobalBounds().size.x / 2.0f, height * 0.25f);
+    title->addComponent<Script>([](int id, World& w) {
+        if (w.getCurrentScene() != static_cast<int>(SceneType::VICTORY))
+            return;
+        auto e = GameHelper::getEntityById(w, id);
+        if (e && rand() % 5 == 0) {
+            auto pos = e->getComponent<Position>();
+            auto title = e->getComponent<Text>();
+            if (pos && title)
+                pos->setX((static_cast<float>(w.getWindow()->getSize().x) / 2.0f) - title->getGlobalBounds().size.x / 2.0f + (rand() % 6 - 3));
+        }
+    });
+
+    auto scoreEnt = _world.createEntity();
+    scoreEnt->addComponent<Scene>(static_cast<int>(SceneType::VICTORY));
+    scoreEnt->addComponent<Layer>(LayerType::UI + 2);
+    scoreEnt->addComponent<Tag>("victory_final_score");
+    
+    std::string finalScore = "0";
+    auto stats = GameHelper::getEntityByTag(_world, "game_stats");
+    if (stats)
+        finalScore = stats->getComponent<Data>()->getData("score");
+
+    scoreEnt->addComponent<Text>("FINAL SCORE: " + finalScore, "../assets/font/regular.ttf", 50);
+    scoreEnt->getComponent<Text>()->setColor(0, 255, 255, 255);
+    scoreEnt->addComponent<Position>(centerX - scoreEnt->getComponent<Text>()->getGlobalBounds().size.x / 2.0f, height * 0.45f);
+    scoreEnt->addComponent<Script>([](int id, World& w) {
+        if (w.getCurrentScene() != static_cast<int>(SceneType::VICTORY))
+            return;
+        auto e = GameHelper::getEntityById(w, id);
+        auto pos = e->getComponent<Position>();
+        auto title = e->getComponent<Text>();
+        if (pos && title)
+            pos->setX((static_cast<float>(w.getWindow()->getSize().x) / 2.0f) - title->getGlobalBounds().size.x / 2.0f);
+    });
+
+    auto layoutEnt = _world.createEntity();
+    layoutEnt->addComponent<GuiWidget>(WidgetType::VERTICAL_LAYOUT, "", root->getId());
+    layoutEnt->addComponent<Scene>(static_cast<int>(SceneType::VICTORY));
+    layoutEnt->addComponent<Tag>("victory_button_layout");
+    auto guiLayout = layoutEnt->getComponent<GuiWidget>();
+    guiLayout->setSize("30%", "30%");
+    guiLayout->setPosition("50%", "75%");
+    guiLayout->setOrigin(0.5f, 0.5f);
+
+    auto btnNext = _world.createEntity();
+    btnNext->addComponent<GuiWidget>(WidgetType::BUTTON, "NEXT MISSION", layoutEnt->getId());
+    btnNext->addComponent<Scene>(static_cast<int>(SceneType::VICTORY));
+    btnNext->addComponent<Tag>("victory_button_next");
+    auto guiNext = btnNext->getComponent<GuiWidget>();
+    styleNeonButton(guiNext);
+    guiNext->setCallback([this]() { _world.setCurrentScene(static_cast<int>(SceneType::MENU)); });
+
+    auto btnCredits = _world.createEntity();
+    btnCredits->addComponent<GuiWidget>(WidgetType::BUTTON, "VIEW CREDITS", layoutEnt->getId());
+    btnCredits->addComponent<Scene>(static_cast<int>(SceneType::VICTORY));
+    btnCredits->addComponent<Tag>("victory_button_credits");
+    auto guiCred = btnCredits->getComponent<GuiWidget>();
+    styleNeonButton(guiCred);
+    guiCred->setCallback([this]() {
+        GameHelperGraphical::resetCreditsPositions(_world);
+        _world.setCurrentScene(static_cast<int>(SceneType::CREDITS)); 
+    });
 }
+
 /**
  * @brief Create a professional and high-quality HUD for the player
  * Version améliorée avec meilleure lisibilité et design moderne
