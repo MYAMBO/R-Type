@@ -7,7 +7,10 @@
 
 #include "Server.hpp"
 
+#include <algorithm>
 #include <cstring>
+
+#include "TcpReader.hpp"
 
 /**
  * @brief Represents a server that handles client connections and processes requests.
@@ -182,7 +185,7 @@ void Server::udpThread()
                 found = true;
         if (found == false)
             _udpUsers.push_back(std::make_pair<>(sender.value().toString(), rport));
-        log("UDP | Received " + std::to_string(p.getDataSize()) + " bytes from " + sender.value().toString() + " on port " + std::to_string(rport));
+        // log("UDP | Received " + std::to_string(p.getDataSize()) + " bytes from " + sender.value().toString() + " on port " + std::to_string(rport));
     }
 }
 
@@ -198,6 +201,7 @@ void Server::udpThread()
  */
 void Server::tcpThread()
 {
+    TcpReader _tcpReader;
     while (true)
     {
         _mutex.lock();
@@ -209,15 +213,42 @@ void Server::tcpThread()
         {
             std::array<char, 1024> data {};
             std::size_t received;
-
-            data.fill(0);
-            if (tmp.getSocket()->receive(data.data(), data.size(), received) != sf::Socket::Status::Done)
-                continue;
-
-            dataReceived = true;
-            data[received - 1] = '\0';
             std::string message;
-            log("TCP | Received " + std::to_string(received) + " bytes with value " + data.data() + " from client " + std::to_string(tmp.getId()) + " with port " + std::to_string(tmp.getPort()) + " with ip " + tmp.getIp());
+
+            while (true)
+            {
+                data.fill(0);
+                sf::Socket::Status status = tmp.getSocket()->receive(data.data(), data.size(), received);
+                if (status == sf::Socket::Status::Disconnected)
+                {
+                    _mutex.lock();
+                    _users.erase(std::remove_if(_users.begin(), _users.end(), [&](const auto& user) { return user.getId() == tmp.getId(); }), _users.end());
+                    log("TCP | Client " + std::to_string(tmp.getId()) + " disconnected");
+                    _mutex.unlock();
+                    break;
+                }
+                if ((status != sf::Socket::Status::Done && message.empty()))
+                    break;
+
+                if (received != 0)
+                {
+                    dataReceived = true;
+                    message += std::string(data.data(), received);
+
+                    log("TCP | Received " + std::to_string(received) + " bytes with value " + std::string(data.data(), received) + " from client " + std::to_string(tmp.getId()) + " with port " + std::to_string(tmp.getPort()) + " with ip " + tmp.getIp());
+
+                    if ((received < data.size() || status != sf::Socket::Status::Done) && !message.empty())
+                    {
+                        std::string messageResponse = _tcpReader.InterpretData(message);
+                        _mutex.lock();
+                        sendMessage(messageResponse, tmp.getId());
+                        _mutex.unlock();
+                        message.clear();
+                        log("sent");
+                        break;
+                    }
+                }
+            }
         }
 
         if (!dataReceived)
@@ -258,12 +289,10 @@ void Server::accepterThread()
         buffer[0] = 0x01;
         unsigned int playerId;
 
-        {
-            std::lock_guard<std::mutex> lock(_mutex);
-            _users.emplace_back(port, ip, std::make_shared<sf::TcpSocket>(std::move(_tcpClient)));
-            playerId = _users.back().getId();
-            buffer[1] = static_cast<std::uint8_t>(playerId);
-        }
+        std::lock_guard<std::mutex> lock(_mutex);
+        _users.emplace_back(port, ip, std::make_shared<sf::TcpSocket>(std::move(_tcpClient)));
+        playerId = _users.back().getId();
+        buffer[1] = static_cast<std::uint8_t>(playerId);
 
         std::uint32_t udpPort = htonl(_udpPort);
         std::memcpy(&buffer[2], &udpPort, sizeof(udpPort));
@@ -302,9 +331,9 @@ void Server::sendPacket(Packet& packet)
         if (!optIp.has_value() || _udpSocket.send(p.getData(), p.getDataSize(), optIp.value(), snd) != sf::Socket::Status::Done) {
             log("UDP | Failed to send packet to client at port " + std::to_string(snd));
         }
-        log("port : " + std::to_string(snd) + " ip : " + optIp.value().toString());
+        // log("port : " + std::to_string(snd) + " ip : " + optIp.value().toString());
     }
-    log("Packet queued");
+    // log("Packet queued");
 }
 
 /**

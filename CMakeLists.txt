@@ -46,11 +46,13 @@ else()
         add_compile_options(-Werror)
     endif()
 endif()
+
+set(CPM_DOWNLOAD_VERSION 0.40.2)
+
 if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake")
     file(DOWNLOAD
-        https://raw.githubusercontent.com/cpm-cmake/CPM.cmake/master/cmake/CPM.cmake
-        "${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake"
-
+            https://github.com/cpm-cmake/CPM.cmake/releases/download/v${CPM_DOWNLOAD_VERSION}/CPM.cmake
+            "${CMAKE_BINARY_DIR}/cmake/CPM.cmake"
     )
 endif()
 include("${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake")
@@ -171,7 +173,9 @@ add_executable(r-type_server
         ECS/Component/Rotation/Rotation.cpp
         ECS/Component/Animator/Animator.cpp
         ECS/Component/BoxCollider/BoxCollider.cpp
-        Server/IGameNetwork.hpp)
+        Server/IGameNetwork.hpp
+        Packet/TcpReader.cpp
+        Packet/TcpReader.hpp)
 
 add_executable(r-type_client
         Client/main.cpp
@@ -225,7 +229,9 @@ add_executable(r-type_client
         Client/Core/Network.cpp
         Client/Core/ClientPacketreader.cpp
         Client/LanguageHandler/LanguageHandler.cpp
-        Server/GetOpt/GetOpt.cpp)
+        Server/GetOpt/GetOpt.cpp
+        Packet/TcpReader.cpp
+        Packet/TcpReader.hpp)
 
 if (WIN32)
     target_link_libraries(r-type_client sfml-main sfml-graphics sfml-window sfml-system sfml-network sfml-audio tgui)

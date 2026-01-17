@@ -36,7 +36,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: make
-        timeout-minutes: 2
+        timeout-minutes: 8
         run: |
           mkdir build
           cd build
