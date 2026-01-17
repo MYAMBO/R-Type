@@ -454,45 +454,43 @@ void GameHelperGraphical::createStarField(World &world)
     auto spawner = world.createEntity();
     spawner->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     spawner->addComponent<Tag>("star_spawner");
-    spawner->addComponent<Data>(std::map<std::string, std::string>{{"last_heigt", "0"}, {"last_width", "0"}});
-    spawner->getComponent<Data>()->setData("last_width", std::to_string(width));
-    spawner->getComponent<Data>()->setData("last_height", std::to_string(height));
     
     spawner->addComponent<Script>([](int id, World& w) {
-        auto windowsizeX = w.getWindow()->getSize().x;
-        auto windowsizeY = w.getWindow()->getSize().y;
-        if (rand() % 5 == 0)
-            GameHelperGraphical::createStar(w, windowsizeX + 50.f, static_cast<float>(rand() % (int)windowsizeY));
-
-        auto compData = GameHelper::getEntityById(w, id)->getComponent<Data>();
-        if (!compData)
+        if (w.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
             return;
-        if (windowsizeX != std::stof(compData->getData("last_width")) || windowsizeY != std::stof(compData->getData("last_height"))) {
-            compData->setData("last_height", std::to_string(windowsizeY));
-            compData->setData("last_width", std::to_string(windowsizeX));
-            auto allStars = w.getAllEntitiesWithComponent<Tag>();
-            int starCount = 0;
-            for (auto& s : allStars) {
-                if (s->getComponent<Tag>()->getTag() == "background_star") starCount++;
-            }
-            if (starCount < 150) {
-                for (int i = 0; i < 10; i++) { 
-                    GameHelperGraphical::createStar(w, 
-                        static_cast<float>(rand() % (int)windowsizeX), 
-                        static_cast<float>(rand() % (int)windowsizeY)
-                    );
+        static int frameSkip = 0;
+        if (frameSkip++ % 2 != 0)
+            return;
+        auto window = w.getWindow();
+        if (!window) return;
+        auto winSize = window->getSize();
+        int starCount = 0;
+        auto allEntities = w.getAllEntitiesWithComponent<Tag>(); 
+
+        for (const auto& ent : allEntities) {
+            auto tagComp = ent->getComponent<Tag>();
+            if (tagComp && tagComp->getTag() == "background_star") {
+                auto pos = ent->getComponent<Position>();
+                if (pos) {
+                    if (pos->getX() < -50.f) {
+                        w.killEntity(ent->getId());
+                    } else {
+                        starCount++;
+                    }
                 }
             }
         }
-        for (const auto& star : w.getAllEntitiesWithComponent<Tag>()) {
-            if (!star)
-                continue;
-            auto tagComp = star->getComponent<Tag>();
-            if (tagComp && tagComp->getTag() == "background_star") {
-                auto posComp = star->getComponent<Position>();
-                if (posComp && posComp->getX() < -40.f) {
-                    w.killEntity(star->getId());
-                }
+
+        if (starCount < 150 && (rand() % 5 == 0)) {
+            GameHelperGraphical::createStar(w, static_cast<float>(winSize.x + 50), static_cast<float>(rand() % winSize.y));
+        }
+        static unsigned int lastW = 0, lastH = 0;
+        if (winSize.x != lastW || winSize.y != lastH) {
+            lastW = winSize.x;
+            lastH = winSize.y;
+            if (starCount < 100) {
+                for (int i = 0; i < 15; i++)
+                    GameHelperGraphical::createStar(w, static_cast<float>(rand() % lastW), static_cast<float>(rand() % lastH));
             }
         }
     });

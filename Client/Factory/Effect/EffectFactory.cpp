@@ -29,7 +29,8 @@ void EffectFactory::createSparks(World &world, float x, float y, int amount, Sce
         spark->addComponent<Scene>(static_cast<int>(scene));
         spark->addComponent<Tag>("spark_effect");
         spark->addComponent<Data>(std::map<std::string, std::string>{
-            {"lifetime", std::to_string(lifeTime)}
+            {"lifetime", std::to_string(lifeTime)},
+            {"scene", std::to_string(static_cast<int>(scene))}
         });
         spark->addComponent<Position>(x, y);
         float vx = (rand() % 200 - 100) / 10.f;

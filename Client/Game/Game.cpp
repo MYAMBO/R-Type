@@ -249,11 +249,34 @@ void Game::run()
             musicComp->play();
     }
     _factory.createPlayerHUD();
+    static sf::Clock timer;
     while (_window.isOpen()) {
         _window.clear(sf::Color::Black);
         gameInput(inputSystem);
         _world.manageSystems();
         _window.display();
+        refreshCaches(_world);
+        /*if (timer.getElapsedTime().asSeconds() >= 1.0f) {
+            size_t total = 0;
+            auto allEntities = _world.getAllEntitiesWithComponent<Tag>();
+            total = allEntities.size();
+            int scene = _world.getCurrentScene();
+            
+            std::cout << "--- [PERF MONITOR] ---" << std::endl;
+            std::cout << "  Total Entities: " << total << std::endl;
+            std::cout << "  Current Scene : " << scene << std::endl;
+            
+            auto stars = _world.getAllEntitiesWithComponent<Tag>();
+            int starCount = 0;
+            for (auto& s : stars) {
+                if (s->getComponent<Tag>()->getTag() == "background_star") starCount++;
+            }
+            std::cout << "  Active Stars  : " << starCount << std::endl;
+            std::cout << "----------------------" << std::endl;
+
+            timer.restart();
+        }*/
+
     }
     savefile();
 }
