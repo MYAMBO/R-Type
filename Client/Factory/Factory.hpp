@@ -77,8 +77,10 @@ class Factory {
         void createBackGameUI();
         void createLasersCompanion(uint64_t companionId, uint64_t playerId);
         void createLevelCompanionUI();
+        void createPlayerHUD();
+        void createScoreDisplay();
 
-        void createSparks(World &world, float x, float y, int amount);
+        void createSparks(World &world, float x, float y, int amount, SceneType scene, int lifeTime = 300);
     private:
         UIFactory _uiFactory;
         WorldFactory _worldFactory;

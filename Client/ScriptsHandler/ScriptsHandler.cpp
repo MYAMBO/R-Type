@@ -261,8 +261,8 @@ void dotScript(int entityId, World& world)
         }
     } else if (availableSpace <= 221.f) {
         if (!used) {
-            EffectFactory::createSparks(world, centerX, centerY, 20);
-            EffectFactory::createSparks(world, centerX, centerY + 100.f, 20);
+            EffectFactory::createSparks(world, centerX, centerY, 20, SceneType::KAYU);
+            EffectFactory::createSparks(world, centerX, centerY + 100.f, 20, SceneType::KAYU);
             used = true;
         }
         rect->setSize(9.0f, 1000.f);
@@ -618,11 +618,22 @@ void volumeSettingsScript(int entityId, World& world)
 void sparkScript(int id, World& w)
 {
     auto e = GameHelper::getEntityById(w, id);
-    if (!e) return;
+    if (!e)
+        return;
+
     auto r = e->getComponent<RectangleShape>();
-    if (r->getSize().x > 0.1f) {
-        r->setSize(r->getSize().x * 0.8f, r->getSize().y * 0.8f);
-        r->setColor(r->getColor().r, r->getColor().g * 0.8f, r->getColor().b, r->getColor().a);
+    auto data = e->getComponent<Data>();
+    if (!r || !data)
+        return;
+
+    int lifetime = std::atoi(data->getData("lifetime").c_str());
+
+    if (lifetime > 0) {
+        float newSize = r->getSize().x * 0.98f;
+        r->setSize(newSize, newSize);
+        sf::Color col = r->getColor();
+        r->setColor(col.r, static_cast<int>(col.g * 0.8f), col.b, static_cast<int>(col.a * 0.9f));
+        data->setData("lifetime", std::to_string(lifetime - 1));
     }
     else
         w.killEntity(id);
@@ -804,5 +815,26 @@ void companionLaserScript(int entityId, World& world)
     if (lPos->getX() > window->getSize().x + 100) {
         world.killEntity(entityId);
         return;
+    }
+}
+
+
+void enemyScript(int entityId, World& world)
+{
+    auto e = GameHelper::getEntityById(world, entityId);
+    if (!e || world.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
+        return;
+
+    auto data = e->getComponent<Data>();
+    if (!data)
+        return;
+    int cooldown = std::stoi(data->getData("sound_cooldown"));
+    if (cooldown > 0) {
+        data->setData("sound_cooldown", std::to_string(cooldown - 1));
+        return;
+    }
+    if (cooldown == 0 && rand() % 6000 == 0) {
+        GameHelperGraphical::playRandomAmbianceEnemy(world);
+        data->setData("sound_cooldown", "3000");
     }
 }

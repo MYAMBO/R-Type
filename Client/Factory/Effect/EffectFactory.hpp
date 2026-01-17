@@ -9,6 +9,8 @@
     #define EFFECTFACTORY_HPP_
 
 class Game;
+class World;
+enum class SceneType;
 
 class EffectFactory {
     public:
@@ -18,7 +20,7 @@ class EffectFactory {
         void createKayu();
         void createMyambo();
         void createCredits();
-        static void createSparks(World &world, float x, float y, int amount);
+        static void createSparks(World &world, float x, float y, int amount, SceneType scene, int lifeTime = 300);
     private:
         World& _world;
 };

@@ -15,6 +15,13 @@ ToolsFactory::ToolsFactory(World& world) : _world(world)
 
 void ToolsFactory::createGameTools()
 {
+    auto stats = _world.createEntity();
+    stats->addComponent<Tag>("game_stats");
+    stats->addComponent<Data>(std::map<std::string, std::string>{
+        {"score", "0"},
+        {"last_score", "0"},
+        {"color_timer", "15"}
+    });
     auto volume = _world.createEntity();
     volume->addComponent<Scene>(static_cast<int>(SceneType::LOADING));
     volume->addComponent<Data>(std::map<std::string, std::string>{
