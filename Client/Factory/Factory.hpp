@@ -80,8 +80,10 @@ class Factory {
         void createLevelCompanionUI();
         void createGameOverScreen();
         void createVictoryScreen();
+        void createPlayerHUD();
+        void createScoreDisplay();
 
-        void createSparks(World &world, float x, float y, int amount);
+        void createSparks(World &world, float x, float y, int amount, SceneType scene, int lifeTime = 300);
     private:
         UIFactory _uiFactory;
         WorldFactory _worldFactory;
