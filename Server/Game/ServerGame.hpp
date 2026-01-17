@@ -45,6 +45,9 @@ class ServerGame {
         void createPortalBoss(const float x, const float y);
         void createHealPowerUp(const float x, const float y);
         void createWarningPortal(const float x, const float y, float duration);
+        void checkGameEnd();
+        void sendGameEnd(uint8_t status);
+
 
     private:
         void createPlayer(float x, float y);

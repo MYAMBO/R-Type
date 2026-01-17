@@ -123,6 +123,16 @@ void Factory::createLevelCompanionUI()
     _uiFactory.createLevelCompanionUI();
 }
 
+void Factory::createGameOverScreen()
+{
+    _uiFactory.createGameOverScreen();
+}
+
+void Factory::createVictoryScreen()
+{
+    _uiFactory.createVictoryScreen();
+}
+
 void Factory::createPlayerHUD()
 {
     _uiFactory.createPlayerHUD();
@@ -131,4 +141,5 @@ void Factory::createPlayerHUD()
 void Factory::createScoreDisplay()
 {
     _uiFactory.createScoreDisplay();
+
 }
