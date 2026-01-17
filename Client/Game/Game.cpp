@@ -143,7 +143,7 @@ void Game::loadingRun()
     _world.setDeltaTime(1.f);
     _factory.createGameTools();
 
-    _world.setCurrentScene(static_cast<int>(SceneType::MENU));
+    _world.setCurrentScene(static_cast<int>(SceneType::MYAMBO));
 
     loadfile();
     auto inputSystem = _world.getSystem<Inputs>();
@@ -161,7 +161,7 @@ void Game::loadingRun()
         if (timeout <= 0)
             break;
     }
-    _world.setCurrentScene(static_cast<int>(SceneType::MENU));
+    _world.setCurrentScene(static_cast<int>(SceneType::PAUSE));
     timeout = 10;
     while (timeout > 0) {
         _window.clear(sf::Color::Black);
@@ -170,7 +170,7 @@ void Game::loadingRun()
         _window.display();
         timeout--;
     }
-    _world.setCurrentScene(static_cast<int>(SceneType::MENU));
+    _world.setCurrentScene(static_cast<int>(SceneType::KAYU));
     timeout = 180;
 
     while (_world.getCurrentScene() == static_cast<int>(SceneType::KAYU)) {
@@ -182,21 +182,21 @@ void Game::loadingRun()
         if (timeout <= 0)
             break;
     }
-    _world.setCurrentScene(static_cast<int>(SceneType::MENU));
+    _world.setCurrentScene(static_cast<int>(SceneType::LOADING));
 
     _factory.createLoadingScreen();
 
     updateLoadingState(0.0f, "Initializing systems...");
-    //std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
     updateLoadingState(0.1f, "Loading assets...");
-    //std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _factory.createCamera();
     updateLoadingState(0.3f, "Generating Menu...");
-    //std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _factory.createMenu();
     _factory.createLevelCompanionUI();
     updateLoadingState(0.6f, "Generating Background...");
-    //std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _factory.createCredits();
     _factory.createPlayerHUD();
     _factory.createScrapUIEmpty(1);
