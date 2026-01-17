@@ -32,7 +32,7 @@
  *
  * Initializes the game.
  */
-ServerGame::ServerGame(IGameNetwork& network) : _network(network)
+ServerGame::ServerGame(IGameNetwork& network, int &tick) : _tick(tick), _network(network)
 {
     _world.addSystem<ScriptsSys>();
     _world.addSystem<Collision>(_network);
@@ -72,6 +72,7 @@ void ServerGame::run()
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
         if (elapsed < tickRate) {
             std::this_thread::sleep_for(tickRate - elapsed);
+            _tick++;
         }
     }
 }
