@@ -288,6 +288,8 @@ void WorldFactory::createScraps(World &world, float x, float y)
     scrap->addComponent<SoundEffect>("../assets/sounds/pickup.mp3", 100.f);
 
     scrap->addComponent<Script>([this](int entityId, World& w) {
+        if (w.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
+            return;
         auto sEnt = GameHelper::getEntityById(w, entityId);
         auto pEnt = GameHelper::getEntityByTag(w, "player");
         if (!sEnt || !pEnt)
@@ -377,6 +379,8 @@ void WorldFactory::createScrapUI(World &world, int index)
     uiScrap->addComponent<Scale>(2.f);
     uiScrap->addComponent<Tag>("ui_scrap_icon_" + std::to_string(index));
     uiScrap->addComponent<Script>([](int entityId, World& world) {
+        if (world.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
+            return;
         auto player = GameHelper::getEntityByTag(world, "player");
         auto uiScrap = GameHelper::getEntityById(world, entityId);
         if (!player || !uiScrap)

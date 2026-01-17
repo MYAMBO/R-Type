@@ -216,7 +216,8 @@ void UIFactory::_addOptionSlider(const std::string& label, float initialValue, u
     slider->addComponent<GuiWidget>(WidgetType::SLIDER, "", row->getId());
     slider->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
     slider->addComponent<Tag>("option_slider");
-    if (onUpdate) slider->addComponent<Script>(onUpdate);
+    if (onUpdate)
+        slider->addComponent<Script>(onUpdate);
     auto gs = slider->getComponent<GuiWidget>();
     gs->setSize("40%", "20");
     gs->setPosition("70%", "50%");
@@ -271,6 +272,8 @@ void UIFactory::_addKeyBindingRow(const std::string& actionName, uint64_t parent
         listener->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
         listener->addComponent<Tag>("keybinding_listener");
         listener->addComponent<Script>([guiBtn, actionName](int id, World& w) {
+            if (w.getCurrentScene() != static_cast<int>(SceneType::OPTIONS))
+                return;
             auto input = w.getSystem<Inputs>();
             if (!input) return;
             KeyboardKey key = input->consumeLastKey();
@@ -408,16 +411,22 @@ void UIFactory::createOptionsMenu() const
     }
 
     _addOptionSlider("SETTINGS_MUSIC_VOLUME", musicVolume, layoutAudioId, [](float){}, [](int id, World& w) {
+        if (w.getCurrentScene() != static_cast<int>(SceneType::OPTIONS))
+            return;
         auto raw = std::dynamic_pointer_cast<tgui::Slider>(GameHelper::getEntityById(w, id)->getComponent<GuiWidget>()->getRawWidget());
         auto settings = GameHelper::getEntityByTag(w, "game_volume_settings");
         if (settings) settings->getComponent<Data>()->setData("music_volume", std::to_string((int)raw->getValue()));
     });
     _addOptionSlider("SETTINGS_SFX_VOLUME", sfxVolume, layoutAudioId, [](float){}, [](int id, World& w) {
+        if (w.getCurrentScene() != static_cast<int>(SceneType::OPTIONS))
+            return;
         auto raw = std::dynamic_pointer_cast<tgui::Slider>(GameHelper::getEntityById(w, id)->getComponent<GuiWidget>()->getRawWidget());
         auto settings = GameHelper::getEntityByTag(w, "game_volume_settings");
         if (settings) settings->getComponent<Data>()->setData("sfx_volume", std::to_string((int)raw->getValue()));
     });
     _addOptionSlider("SETTINGS_MASTER_VOLUME", masterVolume, layoutAudioId, [](float){}, [](int id, World& w) {
+        if (w.getCurrentScene() != static_cast<int>(SceneType::OPTIONS))
+            return;
         auto raw = std::dynamic_pointer_cast<tgui::Slider>(GameHelper::getEntityById(w, id)->getComponent<GuiWidget>()->getRawWidget());
         auto settings = GameHelper::getEntityByTag(w, "game_volume_settings");
         if (settings) settings->getComponent<Data>()->setData("master_volume", std::to_string((int)raw->getValue()));
@@ -433,6 +442,8 @@ void UIFactory::createOptionsMenu() const
     settingUpdater->addComponent<Scene>(static_cast<int>(SceneType::OPTIONS));
     settingUpdater->addComponent<Tag>("options_setting_updater");
     settingUpdater->addComponent<Script>([](int id, World& w) {
+        if (w.getCurrentScene() != static_cast<int>(SceneType::OPTIONS))
+            return;
         auto entity = GameHelper::getEntityById(w, id);
         if (!entity)
             return;
@@ -480,6 +491,10 @@ void UIFactory::createMenu() const
     music->addComponent<Tag>("menu_music");
     music->getComponent<Music>()->play();
     music->addComponent<Script>([](int entityId, World& world) {
+        if (world.getCurrentScene() != static_cast<int>(SceneType::MENU) &&
+            world.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY) &&
+            world.getCurrentScene() != static_cast<int>(SceneType::OPTIONS))
+            return;
         auto entity = GameHelper::getEntityById(world, entityId);
         auto scene = world.getCurrentScene();
         if (!entity)
@@ -804,31 +819,7 @@ void UIFactory::createLevelCompanionUI()
     uiCompanion->addComponent<Text>("0", "../assets/font/regular.ttf", 40);
     uiCompanion->addComponent<Scale>(1.f);
     uiCompanion->addComponent<Tag>("ui_level_companion_icon");
-    uiCompanion->addComponent<Script>([](int id, World& w) {
-        auto entity = GameHelper::getEntityById(w, id);
-        if (!entity)
-            return;
-        auto player = GameHelper::getEntityByTag(w, "player");
-        if (!player)
-            return;
-        auto groupComp = player->getComponent<Group>();
-        if (!groupComp)
-            return;
-        auto groupPlayer = GameHelper::getEntitiesByGroup(w, groupComp->getId());
-        for (const auto& ent : groupPlayer) {
-            auto companion = GameHelper::getEntityById(w, ent->getId());
-            if (!companion)
-                continue;
-            auto name = companion->getComponent<Tag>()->getTag();
-            if (name != "companion")
-                continue;
-            auto dataCompanion = companion->getComponent<Data>();
-            if (!dataCompanion)
-                continue;
-            entity->getComponent<Text>()->setString(std::to_string(std::stoi(dataCompanion->getData("level")) + 1));
-        }
-    });
-
+    uiCompanion->addComponent<Script>(uiLevelCompanionScript);
 }
 
 /**
@@ -855,31 +846,7 @@ void UIFactory::createPlayerHUD()
     hpBarBg->addComponent<Scale>(7.f);
     hpBarBg->addComponent<Tag>("player_hp_bar_bg");
 
-    hpBarBg->addComponent<Script>([](int id, World& w) {
-        auto barEnt = GameHelper::getEntityById(w, id);
-        if (!barEnt)
-            return;
-        auto animator = barEnt->getComponent<Animator>();
-        if (!animator)
-            return;
-        auto targetPlayer = GameHelper::getEntityByTag(w, "player");
-        if (targetPlayer) {
-            auto hpComp = targetPlayer->getComponent<HP>();
-            if (hpComp) {
-                float hpRatio = static_cast<float>(hpComp->getHP()) / hpComp->getMaxHP();
-                if (hpRatio >= 0.8f)
-                    animator->resetAnimator(1, 1, 10.f, 0, 30, 48, 14, 0, 0);
-                else if (hpRatio >= 0.6f)
-                    animator->resetAnimator(1, 1, 10.f, 48, 30, 48, 14, 0, 0);
-                else if (hpRatio >= 0.4f)
-                    animator->resetAnimator(1, 1, 10.f, 96, 30, 48, 14, 0, 0);
-                else if (hpRatio >= 0.2f)
-                    animator->resetAnimator(1, 1, 10.f, 144, 30, 48, 14, 0, 0);
-                else
-                    animator->resetAnimator(1, 1, 10.f, 192, 30, 48, 14, 0, 0);
-            }
-        }
-    });
+    hpBarBg->addComponent<Script>(hpBarScript);
 
     auto manaBarBg = _world.createEntity();
     manaBarBg->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
@@ -891,6 +858,8 @@ void UIFactory::createPlayerHUD()
     manaBarBg->addComponent<Tag>("player_mana_bar_bg");
 
     manaBarBg->addComponent<Script>([](int id, World& w) {
+        if (w.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
+            return;
         auto barEnt = GameHelper::getEntityById(w, id);
         if (!barEnt)
             return;
@@ -969,6 +938,8 @@ void UIFactory::createScoreDisplay()
     tComp->setColor(0, 255, 255, 255);
 
     scoreTxt->addComponent<Script>([](int id, World& w) {
+        if (w.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
+            return;
         auto e = GameHelper::getEntityById(w, id);
         auto stats = GameHelper::getEntityByTag(w, "game_stats");
         if (!e || !stats)
