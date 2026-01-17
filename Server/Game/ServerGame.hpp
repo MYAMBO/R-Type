@@ -26,7 +26,7 @@
 
 class ServerGame {
     public:
-        ServerGame(IGameNetwork& network);
+        ServerGame(IGameNetwork& network, int &tick);
         ~ServerGame() = default;
 
         void run();
@@ -58,6 +58,7 @@ class ServerGame {
         void manaRegenScript(int entityId, World &world);
 
 
+        int& _tick;
         World _world;
         Packet _packet;
         IGameNetwork& _network;

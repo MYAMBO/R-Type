@@ -23,10 +23,11 @@
  */
 Server::Server()
 {
+    _tick = 0;
     _tcpPort = -1;
     _udpPort = -1;
     _debugMode = false;
-    _game = std::make_shared<ServerGame>(*this);
+    _game = std::make_shared<ServerGame>(*this, _tick);
     _packetReader = Packetreader(sf::Packet(), _game);
 }
 
