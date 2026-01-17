@@ -203,6 +203,8 @@ void Game::loadingRun()
     _factory.createScrapUIEmpty(2);
     _factory.createScrapUIEmpty(3);
     _factory.createBackGameUI();
+    _factory.createGameOverScreen();
+    _factory.createVictoryScreen();
     updateLoadingState(0.8f, "Connecting to server...");
     Packet packet;
 
@@ -598,4 +600,13 @@ void Game::updatePlayerMana(uint32_t playerId, int mana)
     auto dataComp = player->getComponent<Data>();
     if (dataComp)
         dataComp->setData("mana", std::to_string(mana));
+}
+
+void Game::showEndScreen(uint8_t status)
+{
+    if (status == 0) {
+        _world.setCurrentScene(static_cast<int>(SceneType::GAME_OVER));
+    } else {
+        _world.setCurrentScene(static_cast<int>(SceneType::VICTORY));
+    }
 }

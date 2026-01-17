@@ -829,3 +829,61 @@ void UIFactory::createLevelCompanionUI()
     });
 
 }
+
+void UIFactory::createGameOverScreen()
+{
+    auto window = _world.getWindow();
+    float width = static_cast<float>(window->getSize().x);
+    float height = static_cast<float>(window->getSize().y);
+    float centerX = width / 2.0f;
+    float centerY = height / 2.0f;
+
+    auto bg = _world.createEntity();
+    bg->addComponent<Position>(0, 0);
+    bg->addComponent<RectangleShape>(3840.f, 2160.f, 50, 0, 0, 220);
+    bg->addComponent<Scene>(static_cast<int>(SceneType::GAME_OVER));
+    bg->addComponent<Layer>(LayerType::BACKGROUND);
+
+    auto title = _world.createEntity();
+    title->addComponent<Position>(centerX, centerY - 150);
+    title->addComponent<Text>("GAME OVER", "../assets/font/logo.ttf", 100);
+    title->getComponent<Text>()->setColor(255, 0, 0, 255);
+    title->addComponent<Scene>(static_cast<int>(SceneType::GAME_OVER));
+    title->addComponent<Layer>(LayerType::UI);
+    title->addComponent<Tag>("game_over_title");
+
+    auto subtitle = _world.createEntity();
+    subtitle->addComponent<Position>(centerX, centerY - 50);
+    subtitle->addComponent<Text>("All players have been defeated", "../assets/font/logo.ttf", 40);
+    subtitle->getComponent<Text>()->setColor(200, 100, 100, 255);
+    subtitle->addComponent<Scene>(static_cast<int>(SceneType::GAME_OVER));
+    subtitle->addComponent<Layer>(LayerType::UI);
+}
+
+void UIFactory::createVictoryScreen()
+{
+    auto window = _world.getWindow();
+    float width = static_cast<float>(window->getSize().x);
+    float height = static_cast<float>(window->getSize().y);
+    float centerX = width / 2.0f;
+    float centerY = height / 2.0f;
+
+    auto bg = _world.createEntity();
+    bg->addComponent<Position>(0, 0);
+    bg->addComponent<RectangleShape>(3840.f, 2160.f, 30, 50, 10, 220);
+    bg->addComponent<Scene>(static_cast<int>(SceneType::VICTORY));
+    bg->addComponent<Layer>(LayerType::BACKGROUND);
+    auto title = _world.createEntity();
+    title->addComponent<Position>(centerX, centerY - 200);
+    title->addComponent<Text>("VICTORY!", "../assets/font/logo.ttf", 120);
+    title->getComponent<Text>()->setColor(255, 215, 0, 255);
+    title->addComponent<Scene>(static_cast<int>(SceneType::VICTORY));
+    title->addComponent<Layer>(LayerType::UI);
+    title->addComponent<Tag>("victory_title");
+    auto congrats = _world.createEntity();
+    congrats->addComponent<Position>(centerX, centerY);
+    congrats->addComponent<Text>("Congratulations!", "../assets/font/logo.ttf", 50);
+    congrats->getComponent<Text>()->setColor(100, 255, 100, 255);
+    congrats->addComponent<Scene>(static_cast<int>(SceneType::VICTORY));
+    congrats->addComponent<Layer>(LayerType::UI);
+}

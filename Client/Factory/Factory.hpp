@@ -78,6 +78,8 @@ class Factory {
         void createBackGameUI();
         void createLasersCompanion(uint64_t companionId, uint64_t playerId);
         void createLevelCompanionUI();
+        void createGameOverScreen();
+        void createVictoryScreen();
 
         void createSparks(World &world, float x, float y, int amount);
     private:

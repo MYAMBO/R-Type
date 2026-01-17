@@ -127,3 +127,13 @@ void Factory::createLevelCompanionUI()
 {
     _uiFactory.createLevelCompanionUI();
 }
+
+void Factory::createGameOverScreen()
+{
+    _uiFactory.createGameOverScreen();
+}
+
+void Factory::createVictoryScreen()
+{
+    _uiFactory.createVictoryScreen();
+}

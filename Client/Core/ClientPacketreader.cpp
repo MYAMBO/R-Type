@@ -79,6 +79,8 @@ void ClientPacketreader::interpretPacket()
                 uint8_t status;
                 if (payload >> status) {
                     std::cout << "EndGame: " << static_cast<int>(status) << std::endl;
+                    if (_game)
+                        _game->showEndScreen(status);
                 }
                 break;
             }
