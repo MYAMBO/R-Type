@@ -1,26 +1,31 @@
 @echo off
-REM ==============================================
+REM =====================================================
 REM Build script for R-Type project on Windows
-REM (Updated for Visual Studio 2026 and x64)
-REM ==============================================
+REM Visual Studio 2026 - x64 - Release
+REM Output binaries go directly into build\
+REM =====================================================
 
-REM Set build directory
+setlocal enabledelayedexpansion
+
+REM ---- Configuration ----
 set BUILD_DIR=build
+set CONFIG=Release
+set ARCH=x64
 
-REM Clean the build directory before starting
-if exist %BUILD_DIR% rmdir /s /q %BUILD_DIR%
+REM ---- Clean build directory ----
+if exist "%BUILD_DIR%" (
+    echo Cleaning previous build...
+    rmdir /s /q "%BUILD_DIR%"
+)
 
-REM Create build directory
-mkdir %BUILD_DIR%
+REM ---- Create build directory ----
+mkdir "%BUILD_DIR%"
+cd "%BUILD_DIR%"
 
-REM Navigate to build directory
-cd %BUILD_DIR%
+REM ---- Generate Visual Studio solution ----
+echo Generating Visual Studio solution...
+cmake .. -A %ARCH%
 
-REM Generate Visual Studio solution with CMake
-REM Using auto-detection (no -G) and specifying 64-bit architecture (-A x64)
-cmake .. -A x64
-
-REM Check if configuration was successful
 if errorlevel 1 (
     echo.
     echo ERROR: CMake configuration failed.
@@ -28,10 +33,10 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM Build the solution in Release configuration
-cmake --build . --config Release
+REM ---- Build (Release) ----
+echo Building project (%CONFIG%)...
+cmake --build . --config %CONFIG%
 
-REM Check if build was successful
 if errorlevel 1 (
     echo.
     echo ERROR: Build failed.
@@ -40,9 +45,10 @@ if errorlevel 1 (
 )
 
 echo.
+echo =====================================
 echo Build Successful!
-echo Executables are likely in: %BUILD_DIR%\Release
+echo Executables are in: %CD%
+echo =====================================
 echo.
 
-REM Optional: pause to see output
 pause

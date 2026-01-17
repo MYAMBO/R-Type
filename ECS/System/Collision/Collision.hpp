@@ -13,6 +13,7 @@
 #include "BoxCollider.hpp"
 #include "World.hpp"
 #include <iostream>
+#include <IGameNetwork.hpp>
 
 
 /**
@@ -24,7 +25,7 @@
 class Collision : public System {
 
     public:
-        Collision() = default;
+        Collision(IGameNetwork& network);
         ~Collision() override = default;
 
         void update(const float& dt, World &w) override;
@@ -32,10 +33,13 @@ class Collision : public System {
                             const BoxCollider &bB, const Position &bP);
 
     private:
-        static void handleCollisionDamage(const std::shared_ptr<Entity> &a,
+        IGameNetwork &_network;
+        void handleCollisionDamage(const std::shared_ptr<Entity> &a,
                                      const std::shared_ptr<Entity> &b);
-        static void applyDamage(const std::shared_ptr<Entity> &attacker,
+        void applyDamage(const std::shared_ptr<Entity> &attacker,
                            const std::shared_ptr<Entity> &target);
+        void applyHeal(const std::shared_ptr<Entity> &attacker,
+                           const std::shared_ptr<Entity> &heal);
 };
 
 

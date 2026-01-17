@@ -8,7 +8,6 @@
 
 #include "ClientPacketreader.hpp"
 
-#include <iostream>
 #include <utility>
 #include <cstring>
 
@@ -31,7 +30,6 @@ void ClientPacketreader::interpretPacket()
         return;
     }
 
-    // Extraire le header
     std::memcpy(&_header, _packet.getData(), sizeof(UDPHeader));
 
     sf::Packet payload;

@@ -35,7 +35,7 @@
 ServerGame::ServerGame(IGameNetwork& network) : _network(network)
 {
     _world.addSystem<ScriptsSys>();
-    _world.addSystem<Collision>();
+    _world.addSystem<Collision>(_network);
     _world.addSystem<DeathSys>(_network);
     _world.addSystem<Movement>();
     _world.setDeltaTime(1.f);
@@ -350,6 +350,25 @@ void ServerGame::createSinusShootingEnemy(const float x, const float y)
     _network.sendPacket(packet);
 }
 
+void ServerGame::createHealPowerUp(const float x, const float y)
+{
+    const auto enemy = _world.createEntity();
+    enemy->addComponent<HP>(10);
+    enemy->addComponent<Damage>(0);
+    enemy->addComponent<Position>(x, y);
+    enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+    enemy->addComponent<Tag>("heal");
+    enemy->addComponent<Script>(
+        [this](const int entityId, World& world)
+        {
+            this->EnemyMovement(entityId, world);
+        }
+    );
+    Packet packet;
+    packet.Spawn(enemy->getId(), HealPU, x, y);
+    _network.sendPacket(packet);
+}
+
 /**
  * @brief Create a wave of enemies
  */
@@ -523,6 +542,23 @@ void ServerGame::handleShoot(const uint32_t id)
     createBullet(pos->getX(), pos->getY());
 }
 
+void ServerGame::handleHeal(const uint32_t id)
+{
+    auto player = GameHelper::getEntityById(_world, id);
+    if (!player)
+        return;
+    auto hp = player->getComponent<HP>();
+    if (!hp)
+        return;
+    unsigned int currentHp = hp->getHP();
+    unsigned int maxHp = hp->getMaxHP();
+    unsigned int newHp = std::min(currentHp + 20, maxHp);
+    hp->setHP(newHp);
+    Packet packet;
+    packet.action(id, HEAL, newHp);
+    _network.sendPacket(packet);
+}
+
 
 /**
  * @brief Create the level and place the enemies via the packet sent.
@@ -592,8 +628,8 @@ void ServerGame::handleAction(const uint32_t id, const uint8_t action, const uin
             break;
         }
         case HEAL : {
+            handleHeal(id);
             break;
-
         }
         case SHIELD : {
             break;

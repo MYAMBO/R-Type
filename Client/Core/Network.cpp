@@ -5,11 +5,23 @@
 ** Network
 */
 
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
 #include <cstring>
 #include <iostream>
 #include <optional>
-#include <netinet/in.h>
-#include <bits/getopt_core.h>
+
+#ifdef _WIN32
+    #include <io.h>
+    #include "getopt.h"
+    #include <winsock2.h>
+    #pragma comment(lib, "ws2_32.lib")
+#else
+    #include <netinet/in.h>
+    #include <bits/getopt_core.h>
+#endif // _WIN32
 
 #include "Game.hpp"
 #include "Network.hpp"

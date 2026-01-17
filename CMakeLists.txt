@@ -2,8 +2,29 @@ cmake_minimum_required(VERSION 3.19)
 
 project(R-Type)
 
+
+# =====================================================
+# Force all binaries into the build directory
+# (Visual Studio / multi-config compatible)
+# =====================================================
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+if (CMAKE_CONFIGURATION_TYPES) # Visual Studio / Xcode
+    foreach(CONFIG ${CMAKE_CONFIGURATION_TYPES})
+        string(TOUPPER ${CONFIG} CONFIG)
+        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CONFIG} ${CMAKE_BINARY_DIR})
+        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CONFIG} ${CMAKE_BINARY_DIR})
+        set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CONFIG} ${CMAKE_BINARY_DIR})
+    endforeach()
+endif()
+
+# =====================================================
+
 if (WIN32)
         message(STATUS "Configuring for Windows...")
+        add_compile_definitions(NOMINMAX)
 elseif(UNIX)
         message(STATUS "Configuring for Linux...")
 endif()
@@ -14,11 +35,21 @@ if (DEV_COMPILE)
         add_compile_options(-Werror)
 endif ()
 
-add_compile_options(-Wall -Wextra)
+if (MSVC)
+    add_compile_options(/W4)
+    if (DEV_COMPILE)
+        add_compile_options(/WX)
+    endif()
+else()
+    add_compile_options(-Wall -Wextra)
+    if (DEV_COMPILE)
+        add_compile_options(-Werror)
+    endif()
+endif()
 
 set(CPM_DOWNLOAD_VERSION 0.40.2)
 
-if(NOT EXISTS "${CMAKE_BINARY_DIR}/cmake/CPM.cmake")
+if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake")
     file(DOWNLOAD
             https://github.com/cpm-cmake/CPM.cmake/releases/download/v${CPM_DOWNLOAD_VERSION}/CPM.cmake
             "${CMAKE_BINARY_DIR}/cmake/CPM.cmake"
@@ -95,6 +126,7 @@ include_directories(Client/Factory/Effect)
 include_directories(Client/ScriptsHandler)
 include_directories(Client/LanguageHandler)
 include_directories(Server/LevelLoader)
+include_directories(Server/GetOpt)
 include_directories(./Server)
 include_directories(./Server/Core)
 include_directories(./Packet)
@@ -123,9 +155,9 @@ add_executable(r-type_server
         ECS/System/Collision/Collision.cpp
         ECS/World.cpp
         ECS/Component/HP/HP.cpp
-        ECS/Component/Damage/Damage.cpp
         Client/GameHelper/GameHelper.cpp
         Server/LevelLoader/LevelLoader.cpp
+        Server/GetOpt/GetOpt.cpp
         ECS/Component/Tag/Tag.cpp
         ECS/Component/Data/Data.cpp
         ECS/Component/Scale/Scale.cpp
@@ -141,7 +173,9 @@ add_executable(r-type_server
         ECS/Component/Rotation/Rotation.cpp
         ECS/Component/Animator/Animator.cpp
         ECS/Component/BoxCollider/BoxCollider.cpp
-        Server/IGameNetwork.hpp)
+        Server/IGameNetwork.hpp
+        Packet/TcpReader.cpp
+        Packet/TcpReader.hpp)
 
 add_executable(r-type_client
         Client/main.cpp
@@ -194,8 +228,17 @@ add_executable(r-type_client
         Packet/MyString.cpp
         Client/Core/Network.cpp
         Client/Core/ClientPacketreader.cpp
-        Client/LanguageHandler/LanguageHandler.cpp)
+        Client/LanguageHandler/LanguageHandler.cpp
+        Server/GetOpt/GetOpt.cpp
+        Packet/TcpReader.cpp
+        Packet/TcpReader.hpp)
 
-target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network sfml-audio tgui)
+if (WIN32)
+    target_link_libraries(r-type_client sfml-main sfml-graphics sfml-window sfml-system sfml-network sfml-audio tgui)
 
-target_link_libraries(r-type_server  sfml-graphics sfml-system sfml-network)
+    target_link_libraries(r-type_server sfml-main sfml-graphics sfml-system sfml-network)
+elseif(UNIX)
+    target_link_libraries(r-type_client sfml-graphics sfml-window sfml-system sfml-network sfml-audio tgui)
+
+    target_link_libraries(r-type_server sfml-graphics sfml-system sfml-network)
+endif()
