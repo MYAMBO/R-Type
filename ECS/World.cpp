@@ -12,6 +12,7 @@
 #include "World.hpp"
 #include "Entity.hpp"
 
+#include <map>
 
 /**
  * @brief Constructs a new World object.
@@ -45,12 +46,41 @@ std::shared_ptr<Entity> World::createEntity(uint64_t id)
 }
 
 /**
- * @brief Manages all systems in the world by calling their update methods.
+ * @brief Manages all systems and profiles their execution time.
  */
 void World::manageSystems()
 {
+    static sf::Clock reportClock;
+    static std::map<std::string, float> accumulatedTime;
+
     for (const auto& system : _systems) {
+        // 1. Démarrer le chrono pour ce système
+        sf::Clock systemClock;
+
+        // 2. Exécuter le système
         system->update(this->getDeltaTime(), *this);
+
+        // 3. Calculer le temps passé (en microsecondes pour plus de précision)
+        float elapsed = systemClock.getElapsedTime().asMicroseconds();
+        
+        // On stocke le nom de la classe du système (ex: "Draw", "Collision")
+        // Note: typeid().name() peut être un peu cryptique selon le compilateur, 
+        // mais c'est le plus simple sans modifier tes classes.
+        accumulatedTime[typeid(*system).name()] += elapsed;
+    }
+
+    // 4. Afficher le rapport toutes les secondes (environ 30 ou 60 frames)
+    if (reportClock.getElapsedTime().asSeconds() >= 1.0f) {
+        std::cout << "\n--- [SYSTEMS PERF REPORT (total for 1s)] ---" << std::endl;
+        for (auto const& [name, time] : accumulatedTime) {
+            // Affichage en millisecondes pour la lisibilité
+            std::cout << "  " << name << " : " << (time / 1000.f) << " ms" << std::endl;
+        }
+        std::cout << "--------------------------------------------" << std::endl;
+        
+        // Reset pour la seconde suivante
+        accumulatedTime.clear();
+        reportClock.restart();
     }
 }
 

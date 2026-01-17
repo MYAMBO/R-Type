@@ -12,6 +12,8 @@
 #include "Scene.hpp"
 #include "Music.hpp"
 #include "SoundEffect.hpp"
+#include "GameHelper.hpp"
+#include "Data.hpp"
 
 #include "Audio.hpp"
 
@@ -24,6 +26,7 @@
 void Audio::update(const float &dt, World &w)
 {
     (void)dt;
+    auto generalVolume = GameHelper::getEntityByTag(w, "game_volume_settings");
     for (const auto &entity : w.getAllEntitiesWithComponent<SoundEffect>()) {
         auto audioComp = entity->getComponent<SoundEffect>();
         auto sceneComp = entity->getComponent<Scene>();
@@ -31,12 +34,16 @@ void Audio::update(const float &dt, World &w)
             continue;
         if (sceneComp->getScene() != w.getCurrentScene() && !audioComp->isGlobal())
             continue;
-
+        
         if (audioComp->getStatus() != AudioState::PLAYING)
             continue;
         audioComp->setStatus(AudioState::STOPPED);
         auto buffer = audioComp->getBuffer();
-        float volume = audioComp->getVolume();
+        auto dataComp = generalVolume->getComponent<Data>();
+        int masterVolume = std::stoi(dataComp->getData("master_volume")) ;
+        int sfxVolume = std::stoi(dataComp->getData("sfx_volume"));
+        int finalVolume = (masterVolume * sfxVolume) / 100;
+        float volume = static_cast<float>(finalVolume);
         std::thread([buffer, volume]() {
             sf::Sound sound(*buffer);
             sound.setVolume(volume);
@@ -50,7 +57,12 @@ void Audio::update(const float &dt, World &w)
         auto musicComp = entity->getComponent<Music>();
         if (!musicComp)
             continue;
-
+        auto dataComp = generalVolume->getComponent<Data>();
+        int masterVolume = std::stoi(dataComp->getData("master_volume")) ;
+        int musicVolume = std::stoi(dataComp->getData("music_volume"));
+        int finalVolume = (masterVolume * musicVolume) / 100;
+        float volume = static_cast<float>(finalVolume);
+        musicComp->setVolume(volume);
         auto& sfMusic = musicComp->getInternalMusic();
 
         switch (musicComp->getState()) {
