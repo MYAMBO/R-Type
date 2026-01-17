@@ -366,11 +366,18 @@ void Game::updateEntity(uint32_t id, uint16_t type, float x, float y)
     case EnemyBullet:
         _factory.createEnemyBullet(id, x, y);
         break;
+    case BackwardEnemyBullet:
+        _factory.createBackwardEnemyBullet(id, x, y);
+        break;
     case PortalBoss:
         _factory.createEnemy(x, y, 6, id);
         break;
+    case Portal:
+        _factory.createEnemy(x, y, 7, id);
+        break;
     case HealPU:
         _factory.createPowerUp(x, y, 1, id);
+        break;
     }
 
 }

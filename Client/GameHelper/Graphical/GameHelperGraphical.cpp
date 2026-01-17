@@ -149,6 +149,21 @@ void GameHelperGraphical::createHealPowerUp(World &world, float x, float y, int 
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
 }
 
+void GameHelperGraphical::createWarningPortal(World &world, float x, float y, int entityId)
+{
+    auto enemy = world.createEntity(entityId);
+    enemy->addComponent<Position>(x, y);
+    enemy->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet30a.gif"));
+    enemy->addComponent<Animator>(3, 3, 5.0f, 0, 0, 33, 33, 0, 0);
+    enemy->addComponent<Scale>(2.0f);
+    enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    enemy->addComponent<Tag>("portal");
+
+    auto sprite = enemy->getComponent<Sprite>();
+    if (sprite && sprite->getSprite())
+        sprite->getSprite()->setColor(sf::Color::Red);
+}
+
 /**
  * @brief Converts a hue value to an RGB color.
  *
