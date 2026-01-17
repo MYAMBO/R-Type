@@ -70,6 +70,7 @@ class Factory {
         void createPowerUp(float x, float y, int type, int entityId);
         void createBullet(size_t entityId, int x, int y, int type);
         void createEnemyBullet(size_t entityId, int x, int y);
+        void createBackwardEnemyBullet(size_t entityId, int x, int y);
         void createCompanion(uint64_t playerId);
         void createScraps(World &world, float x, float y);
         void createScrapUI(World &world, int index);

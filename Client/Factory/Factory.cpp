@@ -73,6 +73,11 @@ void Factory::createEnemyBullet(size_t entityId, int x, int y)
     _worldFactory.createEnemyBullet(entityId, x, y);
 }
 
+void Factory::createBackwardEnemyBullet(size_t entityId, int x, int y)
+{
+    _worldFactory.createBackwardEnemyBullet(entityId, x, y);
+}
+
 void Factory::createBullet(size_t entityId, int x, int y, int type)
 {
     _worldFactory.createBullet(entityId, x, y, type);
