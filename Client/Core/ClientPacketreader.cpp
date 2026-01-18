@@ -114,3 +114,11 @@ void ClientPacketreader::addPacket(sf::Packet data)
 {
     _packet = std::move(data);
 }
+
+/**
+ * @brief returns the packet header
+ */
+UDPHeader ClientPacketreader::getHeader() const
+{
+    return _header;
+}

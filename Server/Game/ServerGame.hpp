@@ -12,8 +12,9 @@
 #include "IGameNetwork.hpp"
 #include "World.hpp"
 #include "EntitiesType.hpp"
+#include "User.hpp"
 
-    #define NB_PLAYER_TO_START 2
+#define NB_PLAYER_TO_START 2
     #define MAX_PLAYER 4
 
 // enum entitiesType
@@ -26,7 +27,7 @@
 
 class ServerGame {
     public:
-        ServerGame(IGameNetwork& network, int &tick);
+        ServerGame(IGameNetwork& network, u_int32_t &tick, std::vector<std::pair<Packet, u_int32_t>> &ackPackets, std::vector<User> &users);
         ~ServerGame() = default;
 
         void run();
@@ -65,13 +66,15 @@ class ServerGame {
         void portalBossBackwardPortalScript(int entityId, World& world);
         void portalBossSpawnTankScript(int entityId, World& world);
 
-        int& _tick;
+        u_int32_t& _tick;
         World _world;
         Packet _packet;
         IGameNetwork& _network;
         int _playerCount = 0;
         bool _gameStarted = false;
         sf::Clock _waveTimer;
+        std::vector<std::pair<Packet, u_int32_t>> _ackPackets;
+        std::vector<User> _users;
 };
 
 #endif //R_TYPE_GAME_H

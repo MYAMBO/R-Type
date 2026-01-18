@@ -122,6 +122,9 @@ void Network::udpThread()
         try
         {
             _packetReader.interpretPacket();
+            u_int32_t ackNbr = _packetReader.getHeader().ack;
+            if (ackNbr != 0)
+                _lastPacketAckNbr = ackNbr;
         }
         catch (std::exception& e)
         {
@@ -181,6 +184,7 @@ void Network::sendPacket(Packet& packet)
 {
      std::unique_lock lock(_mutex);
     _readyCond.wait(lock, [this]{ return _udpPort != -1; });
+    packet.setAck(_lastPacketAckNbr);
 
     const sf::Packet p = packet.getPacket();
     _udpSocket.send(p.getData(), p.getDataSize(), _ip, _udpPort);
