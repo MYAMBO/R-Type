@@ -514,7 +514,6 @@ void ServerGame::handlePlayerReady(const uint32_t playerId)
         _network.sendPacket(startPacket);
         _levelLoader.loadFromFile(5, this);   // Need to change that later to have a level management
         std::cout << "Game started!" << std::endl;
-        startLevel(4);   // Need to change that later to have a level management
     }
 }
 
