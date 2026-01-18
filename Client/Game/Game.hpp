@@ -96,7 +96,7 @@ class Game {
         Packet _packet;
 
         bool _isShootKeyPressed = false;
-            bool _startGameRequested = false;
+        bool _startGameRequested = false;
         int _musicVolume = 100;
         int _sfxVolume = 100;
 };

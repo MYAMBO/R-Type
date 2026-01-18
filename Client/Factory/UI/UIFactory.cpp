@@ -125,6 +125,11 @@ void UIFactory::_addOptionToggle(const std::string& label, bool& stateValue, uin
         stateValue = !stateValue;
         guiStatus->setText(stateValue ? "ON" : "OFF");
         guiStatus->setTextColor(stateValue ? sf::Color::Green : sf::Color::Red);
+        //////// caca code ////////
+        //// ici le if
+        //// vu que c'est un global si ton network l'est pas il faut que tu fasse un if c'est le god mode j'envoie le god mode. 
+        ///// du coup faut faire ça pour le easy et le hard aussi
+        /// caaaaaaaaaaaaaaaaaaca 
     });
 }
 
@@ -391,9 +396,6 @@ void UIFactory::createOptionsMenu() const
             data->setData("lastfont_used", "regular");
             dyslexiaMode = true;
         }
-        data->setData("god_mode", godMode ? "true" : "false");
-        data->setData("easy_mode", easyMode ? "true" : "false");
-        data->setData("hard_mode", hardMode ? "true" : "false");
     }
 
     _addColorBlindCycle("SETTINGS_COLOR_BLIND_MODE", layoutGeneralId);
