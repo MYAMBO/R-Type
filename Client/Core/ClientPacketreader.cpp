@@ -16,7 +16,7 @@
  * @param data The packet to be parsed
  * @param game Pointer to the Game
  */
-ClientPacketreader::ClientPacketreader(sf::Packet data, std::shared_ptr<Game> game) : _packet(std::move(data))
+ClientPacketReader::ClientPacketReader(sf::Packet data, std::shared_ptr<Game> game) : _packet(std::move(data))
 {
     _game = std::move(game);
 }
@@ -24,7 +24,7 @@ ClientPacketreader::ClientPacketreader(sf::Packet data, std::shared_ptr<Game> ga
 /**
  * @brief parse the Packet and interpret it
  */
-void ClientPacketreader::interpretPacket()
+void ClientPacketReader::interpretPacket()
 {
     if (_packet.getDataSize() < sizeof(UDPHeader)) {
         return;
@@ -106,7 +106,7 @@ void ClientPacketreader::interpretPacket()
 /**
  * @brief add packet data
  */
-void ClientPacketreader::addPacket(sf::Packet data)
+void ClientPacketReader::addPacket(sf::Packet data)
 {
     _packet = std::move(data);
 }
@@ -114,7 +114,7 @@ void ClientPacketreader::addPacket(sf::Packet data)
 /**
  * @brief returns the packet header
  */
-UDPHeader ClientPacketreader::getHeader() const
+UDPHeader ClientPacketReader::getHeader() const
 {
     return _header;
 }

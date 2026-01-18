@@ -8,8 +8,8 @@
 #ifndef TCP_READER_HPP
     #define TCP_READER_HPP
 
-    #include <vector>
     #include <string>
+    #include "ServerGame.hpp"
 
 /**
  * @class TcpReader
@@ -21,13 +21,14 @@
 class TcpReader
 {
     public:
-        TcpReader() = default;
+        TcpReader(std::shared_ptr<ServerGame> game);
         ~TcpReader() = default;
 
         std::string InterpretData(const std::string& data);
 
     private:
         std::string loginRequest(const std::string& data);
+        std::shared_ptr<ServerGame> _game;
 };
 
 #endif //TCP_READER_HPP

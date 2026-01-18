@@ -39,10 +39,12 @@
     #include "GuiWidget.hpp"
     #include "SoundEffect.hpp"
     #include "BoxCollider.hpp"
-    #include "RectangleShape.hpp"
+#include "Network.hpp"
+#include "RectangleShape.hpp"
 
 class Game; 
 class World;
+class Network;
 
     #include "UIFactory.hpp"
     #include "WorldFactory.hpp"
@@ -53,7 +55,7 @@ class IGameNetwork;
 
 class Factory {
     public:
-        Factory(World& world);
+        Factory(World& world, Network& network);
         ~Factory() = default;
 
         void createMenu();

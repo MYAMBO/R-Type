@@ -30,13 +30,14 @@
 #include "MyString.hpp"
 #include "ClientPacketreader.hpp"
 
-Network::Network() : _ip(sf::IpAddress(0)), _tcpReader(nullptr)
+Network::Network() : _ip(sf::IpAddress(0))
 {
     _tcpPort = -1;
     _udpPort = -1;
     _debugMode = false;
     _isRunning = true;
-    _packetReader = ClientPacketreader(sf::Packet(), nullptr);
+    _packetReader = std::make_unique<ClientPacketReader>(sf::Packet(), nullptr);
+    _tcpReader = nullptr;
 }
 
 void Network::getIpAdress(std::string option)
@@ -103,8 +104,8 @@ auto Network::initClient() -> void
         throw InitClientException();
 
     _game = std::make_shared<Game>(*this);
-    _packetReader = ClientPacketreader(sf::Packet(), _game);
-    _tcpReader = ClientTcpReader(_game);
+    _packetReader = std::make_unique<ClientPacketReader>(sf::Packet(), _game);
+    _tcpReader = std::make_unique<ClientTcpReader>(_game);
 }
 
 void Network::udpThread()
@@ -120,17 +121,17 @@ void Network::udpThread()
         {
             continue;
         }
-        _packetReader.addPacket(p);
+        _packetReader->addPacket(p);
         try
         {
-            _packetReader.interpretPacket();
-            u_int32_t ackNbr = _packetReader.getHeader().ack;
+            _packetReader->interpretPacket();
+            u_int32_t ackNbr = _packetReader->getHeader().ack;
             if (ackNbr != 0)
                 _lastPacketAckNbr = ackNbr;
         }
         catch (std::exception& e)
         {
-            _packetReader.addPacket(sf::Packet());
+            _packetReader->addPacket(sf::Packet());
             log("UDP | Failed to interpret packet : " + std::string(e.what()));
         }
         log("UDP | Received " + std::to_string(p.getDataSize()) + " bytes from " + sender.value().toString() + " on port " + std::to_string(rport));
@@ -190,7 +191,7 @@ void Network::tcpThread()
 
                 if ((received < data.size() || status != sf::Socket::Status::Done) && !message.empty())
                 {
-                    std::string messageResponse = _tcpReader.InterpretData(message);
+                    std::string messageResponse = _tcpReader->InterpretData(message);
                     _mutex.lock();
                     sendMessage(messageResponse);
                     _mutex.unlock();

@@ -12,20 +12,20 @@ TCP is used for reliable communication of authentication, session management, an
 | Connect Request | `0x01` | -                 | Requests connection to server |
 | Login           | `0x02` | `Name (15 bytes)` | Sends player username         |
 | Ready           | `0x03` | `ReadyStatus (1)` | `0 = not ready`, `1 = ready`  |
-| Toggle mode     | `0x06` | `ModeId`          | Toggle a Mode                 |
+| Set mode        | `0x06` | `ModeId`          | Set a Mode                    |
 
 ---
 
 ## Server → Client Messages
 
-| Command                 | Code | Fields                         | Description                    |
-|-------------------------|------|--------------------------------|--------------------------------|
-| Connect Response        | `0x01` | `PlayerID (1)` - `UDPPort (4)` | Assigns player ID and UDP port |
-| Login Response          | `0x02` | `Status (1)`                   | `0 = fail`, `1 = success`      |
-| Ready Acknowledgment    | `0x03` | -                              | Confirms all players are ready |
-| Game Start              | `0x04` | -                              | Game officially starts         |
+| Command                 | Code | Fields                         | Description                     |
+|-------------------------|------|--------------------------------|---------------------------------|
+| Connect Response        | `0x01` | `PlayerID (1)` - `UDPPort (4)` | Assigns player ID and UDP port  |
+| Login Response          | `0x02` | `Status (1)`                   | `0 = fail`, `1 = success`       |
+| Ready Acknowledgment    | `0x03` | -                              | Confirms all players are ready  |
+| Game Start              | `0x04` | -                              | Game officially starts          |
 | Game Abort              | `0x05` | -                              | Game aborted or server shutdown |
-| Mode Selection response | `0x06` | -                              | A mode is toggled              |
+| Mode Selection response | `0x06` | -                              | A mode is Set                   |
 
 ---
 

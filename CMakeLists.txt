@@ -74,6 +74,7 @@ CPMAddPackage(
 
 include_directories(.)
 include_directories(Action)
+include_directories(Mode)
 include_directories(ECS)
 include_directories(ECS/Component)
 include_directories(ECS/Component/HP)
@@ -175,7 +176,8 @@ add_executable(r-type_server
         ECS/Component/BoxCollider/BoxCollider.cpp
         Server/IGameNetwork.hpp
         Packet/TcpReader.cpp
-        Packet/TcpReader.hpp)
+        Packet/TcpReader.hpp
+        Server/Game/ServerGame.cpp)
 
 add_executable(r-type_client
         Client/main.cpp
@@ -232,7 +234,9 @@ add_executable(r-type_client
         Server/GetOpt/GetOpt.cpp
         Packet/TcpReader.cpp
         Packet/TcpReader.hpp
-        Client/Core/ClientTcpReader.cpp)
+        Client/Core/ClientTcpReader.cpp
+        Server/Game/ServerGame.cpp
+        Server/LevelLoader/LevelLoader.cpp)
 
 if (WIN32)
     target_link_libraries(r-type_client sfml-main sfml-graphics sfml-window sfml-system sfml-network sfml-audio tgui)

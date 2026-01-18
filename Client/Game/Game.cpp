@@ -63,8 +63,9 @@
  * @param title The title of the game window. Default is "Game".
  */
 Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const std::string& title)
-    : _window(sf::VideoMode({width, height}), title), _network(network), _factory(_world)
+    : _window(sf::VideoMode({width, height}), title), _network(network)
 {
+    _factoryPtr = std::make_unique<Factory>(_world, dynamic_cast<Network&>(network));
     _world.addSystem<CameraSys>();
     _world.addSystem<Audio>();
     _world.addSystem<ScriptsSys>();
@@ -151,15 +152,15 @@ void Game::loadingRun()
     packet.Spawn(0, Player, 300, 600);
     _network.sendPacket(packet);
 
-    _factory.createGameTools();
+    _factoryPtr->createGameTools();
     loadfile();
 
     _world.setCurrentScene(static_cast<int>(SceneType::MYAMBO));
 
     auto inputSystem = _world.getSystem<Inputs>();
 
-    _factory.createMyambo();
-    _factory.createKayu();
+    _factoryPtr->createMyambo();
+    _factoryPtr->createKayu();
     int timeout = 180;
 
     while (_world.getCurrentScene() == static_cast<int>(SceneType::MYAMBO)) {
@@ -194,30 +195,30 @@ void Game::loadingRun()
     }
     _world.setCurrentScene(static_cast<int>(SceneType::LOADING));
 
-    _factory.createLoadingScreen();
+    _factoryPtr->createLoadingScreen();
 
     updateLoadingState(0.0f, "Initializing systems...");
-    _factory.createMusicGameplay();
+    _factoryPtr->createMusicGameplay();
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     updateLoadingState(0.1f, "Loading assets...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
-    _factory.createCamera();
-    _factory.createWaitingMenu(&_network);
+    _factoryPtr->createCamera();
+    _factoryPtr->createWaitingMenu(&_network);
     updateLoadingState(0.3f, "Generating Menu...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
-    _factory.createMenu();
-    _factory.createCredits();
-    _factory.createLevelCompanionUI();
-    _factory.createVictoryScreen();
-    _factory.createBackGameUI();
+    _factoryPtr->createMenu();
+    _factoryPtr->createCredits();
+    _factoryPtr->createLevelCompanionUI();
+    _factoryPtr->createVictoryScreen();
+    _factoryPtr->createBackGameUI();
     updateLoadingState(0.6f, "Generating Background...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
-    _factory.createPlayerHUD();
-    _factory.createScrapUIEmpty(1);
-    _factory.createScrapUIEmpty(2);
-    _factory.createScrapUIEmpty(3);
-    _factory.createGameOverScreen();
-    _factory.createScoreDisplay();
+    _factoryPtr->createPlayerHUD();
+    _factoryPtr->createScrapUIEmpty(1);
+    _factoryPtr->createScrapUIEmpty(2);
+    _factoryPtr->createScrapUIEmpty(3);
+    _factoryPtr->createGameOverScreen();
+    _factoryPtr->createScoreDisplay();
     GameHelperGraphical::createStarField(_world);
 
     updateLoadingState(0.8f, "Connecting to server...");
@@ -247,7 +248,7 @@ void Game::run()
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
     _world.setCurrentScene(static_cast<int>(SceneType::MENU));
-    _factory.createPlayerHUD();
+    _factoryPtr->createPlayerHUD();
     //static sf::Clock timer;
 
     while (_window.isOpen()) {
@@ -331,7 +332,7 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
             //GameHelperGraphical::createAnimatorEntity(_world, 400, 400, "../assets/sprites/r-typesheet1.gif", 7, 7, 2.f, 209, 276, 16, 14, 0, 0, 10.f);
             //GameHelperGraphical::createScoreGUI(_world, 400, 300, "1000");
             //GameHelperGraphical::createAnimatorEntity(_world, 200, 200, "../assets/sprites/fire_effect.png", 2, 2, 1.f, 223, 0, 16, 16, 0, 0, 10.f);
-            //_factory.createScraps(_world, 500.f, 0.f);
+            //_factoryPtr->createScraps(_world, 500.f, 0.f);
             _world.setCurrentScene(static_cast<int>(SceneType::VICTORY));
 
         }
@@ -391,7 +392,7 @@ void Game::updateEntity(uint32_t id, uint16_t type, float x, float y)
     }
     switch (type) {
     case Player:
-        _factory.createPlayer(id, x, y);
+        _factoryPtr->createPlayer(id, x, y);
         entity = GameHelper::getEntityById(_world, id);
         if (entity && entity->getComponent<Tag>()->getTag() == "player") {
             entity->addComponent<Script>([this](const int entityId, World& world)
@@ -401,37 +402,37 @@ void Game::updateEntity(uint32_t id, uint16_t type, float x, float y)
         }
         break;
     case Enemy:
-        _factory.createEnemy(x, y, 1, id);
+        _factoryPtr->createEnemy(x, y, 1, id);
         break;
     case Fast:
-        _factory.createEnemy(x, y, 2, id);
+        _factoryPtr->createEnemy(x, y, 2, id);
         break;
     case Tank:
-        _factory.createEnemy(x, y, 3, id);
+        _factoryPtr->createEnemy(x, y, 3, id);
         break;
     case EnemySinus:
-        _factory.createEnemy(x, y, 4, id);
+        _factoryPtr->createEnemy(x, y, 4, id);
         break;
     case ShootingEnemy:
-        _factory.createEnemy(x, y, 5, id);
+        _factoryPtr->createEnemy(x, y, 5, id);
         break;
     case Bullet:
-        _factory.createBullet(id, x, y, type);
+        _factoryPtr->createBullet(id, x, y, type);
         break;
     case EnemyBullet:
-        _factory.createEnemyBullet(id, x, y);
+        _factoryPtr->createEnemyBullet(id, x, y);
         break;
     case BackwardEnemyBullet:
-        _factory.createBackwardEnemyBullet(id, x, y);
+        _factoryPtr->createBackwardEnemyBullet(id, x, y);
         break;
     case PortalBoss:
-        _factory.createEnemy(x, y, 6, id);
+        _factoryPtr->createEnemy(x, y, 6, id);
         break;
     case Portal:
-        _factory.createEnemy(x, y, 7, id);
+        _factoryPtr->createEnemy(x, y, 7, id);
         break;
     case HealPU:
-        _factory.createPowerUp(x, y, 1, id);
+        _factoryPtr->createPowerUp(x, y, 1, id);
         break;
     }
 }
@@ -523,7 +524,7 @@ void Game::playerInput(uint32_t entityId, World &world)
             auto group = GameHelper::getEntitiesByGroup(world, compPlayer->getComponent<Group>()->getId());
             for (auto& entity : group) {
                 if (entity->getComponent<Tag>()->getTag() == "companion") {
-                    _factory.createLasersCompanion(entity->getId(), compPlayer->getId());
+                    _factoryPtr->createLasersCompanion(entity->getId(), compPlayer->getId());
                 }
             }
         }

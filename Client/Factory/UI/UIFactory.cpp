@@ -15,7 +15,9 @@
 #include <array>
 #include <thread>
 
-UIFactory::UIFactory(World& world) : _world(world), _languageHandler(std::make_shared<LanguageHandler>("en"))
+#include "Mode.hpp"
+
+UIFactory::UIFactory(World& world, Network& network) : _world(world), _network(&network), _languageHandler(std::make_shared<LanguageHandler>("en"))
 {
 }
 
@@ -123,15 +125,21 @@ void UIFactory::_addOptionToggle(const std::string& label, bool& stateValue, uin
     guiStatus->setFont("../assets/font/regular.ttf");
     guiStatus->setTextColor(stateValue ? sf::Color::Green : sf::Color::Red);
 
-    guiBtn->setCallback([&stateValue, guiStatus]() {
+    guiBtn->setCallback([this, &stateValue, guiStatus, label]() {
         stateValue = !stateValue;
         guiStatus->setText(stateValue ? "ON" : "OFF");
         guiStatus->setTextColor(stateValue ? sf::Color::Green : sf::Color::Red);
-        //////// caca code ////////
-        //// ici le if
-        //// vu que c'est un global si ton network l'est pas il faut que tu fasse un if c'est le god mode j'envoie le god mode. 
-        ///// du coup faut faire ça pour le easy et le hard aussi
-        /// caaaaaaaaaaaaaaaaaaca 
+
+        if (label == "SETTINGS_GOD_MODE") {
+            std::string msg = {(char)6, (char)GODMODE};
+            _network->sendMessage(msg);
+        } else if (label == "SETTINGS_EASY_MODE") {
+            std::string msg = {(char)6, (char)EASYMODE};
+            _network->sendMessage(msg);
+        } else if (label == "SETTINGS_HARD_MODE") {
+            std::string msg = {(char)6, (char)HARDMODE};
+            _network->sendMessage(msg);
+        }
     });
 }
 

@@ -12,6 +12,15 @@
 #include "SFML/Audio/Music.hpp"
 
 /**
+ * @brief Construct a TcpReader
+ * @param game Pointer to the Server-side game
+ */
+TcpReader::TcpReader(std::shared_ptr<ServerGame> game)
+{
+    _game = std::move(game);
+}
+
+/**
  * Generates a login request message.
  *
  * @param data A string input used as placeholder or context for the request. It is currently ignored in the implementation.
@@ -40,10 +49,18 @@ std::string TcpReader::InterpretData(const std::string& data)
     if (data.empty())
         return {};
 
+    std::cout << "TCP data : " << data << std::endl;
     switch (data.at(0)) {
         case 2:
             return loginRequest(data);
+        case 6 : {
+            if (data.size() < 2)
+                return {};
+            int value = static_cast<unsigned char>(data.at(1));
+            _game->setMode(static_cast<Mode>(value));
+            return {"Mode Setted"};
+        }
         default:
-            return {"undefined"};
+            return {};
     }
 }

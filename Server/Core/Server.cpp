@@ -21,7 +21,7 @@
  *
  * @return None
  */
-Server::Server()
+Server::Server() : _tcpReader(nullptr)
 {
     _tick = 0;
     _tcpPort = -1;
@@ -29,6 +29,7 @@ Server::Server()
     _debugMode = false;
     _game = std::make_shared<ServerGame>(*this, _tick, _ackPackets, _users);
     _packetReader = Packetreader(sf::Packet(), _game);
+    _tcpReader = TcpReader(_game);
 }
 
 /**

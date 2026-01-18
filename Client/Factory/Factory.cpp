@@ -8,8 +8,8 @@
 #include "Factory.hpp"
 #include "Game.hpp"
 
-Factory::Factory(World& world)  :
-    _uiFactory(world), _worldFactory(world),
+Factory::Factory(World& world, Network& network)  :
+    _uiFactory(world, network), _worldFactory(world),
     _effectFactory(world), _toolsFactory(world)
 {
 }

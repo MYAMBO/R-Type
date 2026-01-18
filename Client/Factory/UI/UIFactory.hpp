@@ -12,10 +12,11 @@
 
 class Game;
 class IGameNetwork;
+class Network;
 
 class UIFactory {
     public:
-        explicit UIFactory(World& world);
+        explicit UIFactory(World& world, Network& network);
         ~UIFactory() = default;
 
         void createMenu() const;
@@ -33,6 +34,7 @@ class UIFactory {
   
     private:
         World& _world;
+        std::shared_ptr<Network> _network;
         std::shared_ptr<LanguageHandler> _languageHandler;
         void _addOptionToggle(const std::string& label, bool& stateValue, uint64_t parentId) const;
         void _addOptionSlider(const std::string& label, float initialValue, uint64_t parentId, std::function<void(float)> onValueChange,  std::function<void(int, World&)> onUpdate = nullptr) const;

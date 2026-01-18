@@ -30,6 +30,6 @@ std::string ClientTcpReader::InterpretData(const std::string& data)
         case 6:
             return {"Mode Confirmed"};
         default:
-            return {"undefined"};
+            return {""};
     }
 }

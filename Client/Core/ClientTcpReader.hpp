@@ -15,6 +15,8 @@
 #include "Game.hpp"
 
 
+class Game;
+
 class ClientTcpReader
 {
     public:

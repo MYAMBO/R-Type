@@ -13,14 +13,16 @@
 #include "Packet.hpp"
 #include "Game.hpp"
 
+class Game;
+
 /**
  * @brief PacketReader class to read and interpret received data
  */
-class ClientPacketreader
+class ClientPacketReader
 {
     public:
-        explicit ClientPacketreader(sf::Packet data = sf::Packet(), std::shared_ptr<Game> game = nullptr);
-        ~ClientPacketreader() = default;
+        explicit ClientPacketReader(sf::Packet data = sf::Packet(), std::shared_ptr<Game> game = nullptr);
+        ~ClientPacketReader() = default;
 
         void interpretPacket();
         void addPacket(sf::Packet data);

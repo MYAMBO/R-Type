@@ -12,11 +12,15 @@
 #include <thread>
 #include <utility>
 #include <condition_variable>
+#include <memory>
 #include <Packet.hpp>
-#include <ClientPacketreader.hpp>
-#include <ClientTcpReader.hpp>
+#include "ClientPacketreader.hpp"
+#include "ClientTcpReader.hpp"
 
 #include "IGameNetwork.hpp"
+
+class ClientPacketReader;
+class ClientTcpReader;
 
 class Network : public IGameNetwork {
     public:
@@ -66,8 +70,8 @@ class Network : public IGameNetwork {
         unsigned int _playerId = 0;
         std::shared_ptr<Game> _game;
         u_int32_t _lastPacketAckNbr = 0;
-        ClientPacketreader _packetReader;
-        ClientTcpReader _tcpReader;
+        std::unique_ptr<ClientPacketReader> _packetReader;
+        std::unique_ptr<ClientTcpReader> _tcpReader;
         bool _isRunning = true;
 };
 

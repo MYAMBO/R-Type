@@ -55,6 +55,8 @@ enum PlayerColor {
 //     Bullet
 // };
 
+class Factory;
+
 /**
  * @brief Main Game class to handle the game window and loop.
  */
@@ -92,8 +94,9 @@ class Game {
         sf::RenderWindow _window;
         World _world;
         IGameNetwork& _network;
-        Factory _factory;
         Packet _packet;
+
+        std::unique_ptr<Factory> _factoryPtr;
 
         bool _isShootKeyPressed = false;
         bool _startGameRequested = false;

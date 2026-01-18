@@ -147,9 +147,11 @@ void Collision::applyDamage(const std::shared_ptr<Entity> &attacker,
     auto targetTag = target->getComponent<Tag>();
 
     if (damage && hp) {
+        if (hp.get()->getHP() == static_cast<unsigned int>(-1))
+            return;
         int oldHp = hp->getHP();
         int newHp = oldHp - damage->getDamage();
-        if (newHp < 0)
+        if ( newHp < 0)
             newHp = 0;
         hp->setHP(newHp);
         if (targetTag && targetTag->getTag() == "player") {

@@ -15,6 +15,7 @@
 #include "EntitiesType.hpp"
 #include "LevelLoader.hpp"
 #include "User.hpp"
+#include "Mode.hpp"
 
 #define NB_PLAYER_TO_START 2
     #define MAX_PLAYER 4
@@ -50,7 +51,7 @@ class ServerGame {
         void createWarningPortal(const float x, const float y, float duration);
         void checkGameEnd();
         void sendGameEnd(uint8_t status);
-
+        void setMode(Mode mode);
 
     private:
         void createPlayer(float x, float y);
@@ -67,7 +68,6 @@ class ServerGame {
         void portalBossBarrageScript(int entityId, World& world);
         void portalBossBackwardPortalScript(int entityId, World& world);
         void portalBossSpawnTankScript(int entityId, World& world);
-        void setMode(bool godMode, bool easyMode, bool hardMode);
 
         u_int32_t& _tick;
         World _world;
