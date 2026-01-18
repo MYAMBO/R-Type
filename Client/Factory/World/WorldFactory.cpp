@@ -224,7 +224,7 @@ void WorldFactory::createPlayer(uint64_t id, float x, float y)
         player->addComponent<Animator>(2, 2, 3.f, 0, 0, 33, 19, 0, 0);
         player->addComponent<Tag>("player");
     } else {
-        player->addComponent<Animator>(2, 2, 3.f, 0, (playerCount * 17), 33, 19, 0, 0);
+        player->addComponent<Animator>(2, 2, 3.f, 0, ((playerCount - 1) * 17), 33, 19, 0, 0);
         player->addComponent<Tag>("player_mate");
     }
 
