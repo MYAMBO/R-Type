@@ -92,7 +92,7 @@ void ServerGame::run()
             {
                 for (auto [fst, snd] : _ackPackets)
                 {
-                    if (snd == tmpAck && snd + 500 < _tick)
+                    if (snd == static_cast<unsigned>(tmpAck) && snd + 500 < _tick)
                         _network.sendPacket(fst);
                 }
             }
