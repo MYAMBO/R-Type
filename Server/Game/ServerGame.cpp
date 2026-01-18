@@ -123,11 +123,11 @@ void ServerGame::createPlayer(const float x, const float y)
     };
     player->addComponent<Data>(dataMap);
     player->addComponent<Script>(
-       [this](const int entityId, World& world)
-       {
-           this->manaRegenScript(entityId, world);
-       }
-   );
+        [this](const int entityId, World& world)
+        {
+            this->manaRegenScript(entityId, world);
+        }
+    );
     Packet packet;
     packet.Spawn(player->getId(), Player, x, y);
     // send all the entity to the client
@@ -490,16 +490,15 @@ void ServerGame::handleNewPlayer()
         return;
     }
 
-    createPlayer(200, 200);
+    createPlayer(200, 300 + (_playerCount) * 100);
     _playerCount++;
 
     std::cout << "Player " << _playerCount << " connected" << std::endl;
-
+ 
     if (_playerCount == NB_PLAYER_TO_START && !_gameStarted) {
         _gameStarted = true;
         _waveTimer.restart();
         startLevel(4);   // Need to change that later to have a level management
-
     }
 }
 
