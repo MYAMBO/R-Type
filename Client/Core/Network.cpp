@@ -34,8 +34,8 @@ Network::Network()
     _tcpPort = -1;
     _udpPort = -1;
     _debugMode = false;
-    _packetReader = ClientPacketreader(sf::Packet(), nullptr);
     _isRunning = true;
+    _packetReader = ClientPacketreader(sf::Packet(), nullptr);
 }
 
 void Network::getIpAdress(std::string option)
@@ -134,6 +134,36 @@ void Network::udpThread()
 
 void Network::tcpThread()
 {
+    bool ready = false;
+
+    while (_isRunning && !ready)
+    {
+        char data[1024];
+        std::size_t received = 0;
+
+        auto status = _tcpClient.receive(data, sizeof(data), received);
+
+        if (status == sf::Socket::Status::Disconnected)
+            break;
+
+        if (status != sf::Socket::Status::Done)
+            continue;
+
+        if (received < 6)
+            continue;
+
+        uint32_t value32;
+        std::memcpy(&value32, &data[2], sizeof(value32));
+        _udpPort = ntohl(value32);
+        _playerId = static_cast<unsigned char>(data[1]);
+
+        _udpSocket.send("", 0, _ip, _udpPort);
+
+        std::lock_guard lock(_mutex);
+        _ready = true;
+        ready = true;
+        _readyCond.notify_all();
+    }
     while (_isRunning)
     {
         char data[1024];

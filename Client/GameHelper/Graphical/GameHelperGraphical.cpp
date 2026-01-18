@@ -135,6 +135,20 @@ void GameHelperGraphical::createShootingEnemy(World &world, float x, float y, in
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
 }
 
+void GameHelperGraphical::createHealPowerUp(World &world, float x, float y, int entityId)
+{
+    auto enemy = world.createEntity(entityId);
+    enemy->addComponent<HP>(10);
+    enemy->addComponent<Damage>(0);
+    enemy->addComponent<Position>(x, y);
+    enemy->addComponent<Sprite>(std::string("../assets/sprites/Heal.png"));
+    enemy->addComponent<Animator>(5, 5, 5.0f, 97, 215, 230, 200, 48, 0);
+    enemy->addComponent<Scale>(0.3f);
+    enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    enemy->addComponent<Tag>("heal");
+    enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+}
+
 /**
  * @brief Converts a hue value to an RGB color.
  *

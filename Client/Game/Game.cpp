@@ -75,6 +75,7 @@ Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const
     _world.addSystem<Draw>();
     _world.addSystem<GuiSystem>(_window);
     _world.addSystem<Audio>();
+    _packet.setId(0).setAck(0).setPacketNbr(1).setTotalPacketNbr(1);
 }
 
 /**
@@ -217,6 +218,7 @@ void Game::loadingRun()
  */
 void Game::run()
 {
+    const auto tickRate = std::chrono::microseconds(1000000 / 30);
     auto inputSystem = _world.getSystem<Inputs>();
     auto entermusic = _world.createEntity();
     entermusic->addComponent<SoundEffect>("../assets/sounds/loading.mp3", 100.f);
@@ -244,10 +246,19 @@ void Game::run()
             musicComp->play();
     }
     while (_window.isOpen()) {
+        auto start = std::chrono::steady_clock::now();
         _window.clear(sf::Color::Black);
         gameInput(inputSystem);
         _world.manageSystems();
+        if (_packet.getPacket().getDataSize() != 12) {
+            _network.sendPacket(_packet);
+            _packet.clear();
+        }
         _window.display();
+        auto end = std::chrono::steady_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        if (elapsed < tickRate)
+            std::this_thread::sleep_for(tickRate - elapsed);
     }
     savefile();
 }
@@ -369,6 +380,8 @@ void Game::updateEntity(uint32_t id, uint16_t type, float x, float y)
     case PortalBoss:
         _factory.createEnemy(x, y, 6, id);
         break;
+    case HealPU:
+        _factory.createPowerUp(x, y, 1, id);
     }
 
 }
@@ -435,13 +448,11 @@ void Game::playerInput(uint32_t entityId, World &world)
     if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("SHOOT")))) {
         auto dataComp = compPlayer->getComponent<Data>();
         if (!isShootKeyPressed && dataComp && std::stoi(dataComp->getData("mana")) >= 20) {
-            Packet packet;
-            packet.action(compPlayer->getId(), FIRE, 0);
-            packet.setAck(0);
-            packet.setId(compPlayer->getId());
-            packet.setPacketNbr(1);
-            packet.setTotalPacketNbr(1);
-            _network.sendPacket(packet);
+            _packet.action(compPlayer->getId(), FIRE, 0);
+            _packet.setAck(0);
+            _packet.setId(compPlayer->getId());
+            _packet.setPacketNbr(1);
+            _packet.setTotalPacketNbr(1);
             isShootKeyPressed = true;
             compPlayer->getComponent<SoundEffect>()->play();
             int mana = std::stoi(dataComp->getData("mana"));
@@ -470,13 +481,11 @@ void Game::playerInput(uint32_t entityId, World &world)
     }
     if (moved)
     {
-        Packet packet = Packet();
-        packet.updatePosition(entityId, pos->getX(), pos->getY());
-        packet.setAck(1);
-        packet.setId(compPlayer->getId());
-        packet.setPacketNbr(1);
-        packet.setTotalPacketNbr(1);
-        _network.sendPacket(packet);
+        _packet.updatePosition(entityId, pos->getX(), pos->getY());
+        _packet.setAck(1);
+        _packet.setId(compPlayer->getId());
+        _packet.setPacketNbr(1);
+        _packet.setTotalPacketNbr(1);
     }
 }
 
@@ -567,18 +576,17 @@ void Game::handleAction(const uint32_t id, const uint8_t action, const uint32_t 
     }
 }
 
-void Game::healEntity(const uint32_t entityId, const uint32_t amount)
+void Game::healEntity(const uint32_t entityId, const uint32_t newHp)
 {
     const auto entity = GameHelper::getEntityById(_world, entityId);
+    if (!entity) return;
 
-    const unsigned int hpMax = entity->getComponent<HP>()->getMaxHP();
-    const unsigned int actualHp = entity->getComponent<HP>()->getHP();
+    auto hp = entity->getComponent<HP>();
+    if (!hp)
+        return;
+    hp->setHP(newHp);
 
-    if (actualHp + amount > hpMax) {
-        entity->getComponent<HP>()->setHP(hpMax);
-    } else {
-        entity->getComponent<HP>()->setHP(actualHp + amount);
-    }
+    std::cout << "Entity " << entityId << " HP set to: " << newHp << std::endl;
 }
 
 void Game::updatePlayerMana(uint32_t playerId, int mana)

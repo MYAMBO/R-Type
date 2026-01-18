@@ -46,6 +46,9 @@ else()
         add_compile_options(-Werror)
     endif()
 endif()
+
+set(CPM_DOWNLOAD_VERSION 0.40.2)
+
 if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake")
     file(DOWNLOAD
             https://github.com/cpm-cmake/CPM.cmake/releases/download/v${CPM_DOWNLOAD_VERSION}/CPM.cmake
