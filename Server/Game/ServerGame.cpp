@@ -30,7 +30,7 @@
 
 static bool gameOverSent = false;
 
-static auto getAckId() -> u_int32_t
+static auto getAckId() -> uint32_t
 {
     static uint32_t id = 0;
     return ++id;
