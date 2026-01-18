@@ -30,25 +30,6 @@ std::string TcpReader::loginRequest(const std::string& data)
 }
 
 /**
- * Generates the list with all level received from the client
- *
- * @param data A string containing the input data to be interpreted.
- * @return A Vector of string representing the result of interpreting the data.
- */
-std::vector<std::string> TcpReader::levelSelection(const std::string& data)
-{
-    std::vector<std::string> levelsNames;
-
-    std::stringstream ss(data);
-    std::string item;
-
-    while (std::getline(ss, item, ',')) {
-        levelsNames.push_back(item);
-    }
-    return levelsNames;
-}
-
-/**
  * Interprets incoming data and processes it based on its type.
  *
  * @param data A string containing the input data to be interpreted. The first character is used to determine the type of operation.

@@ -18,14 +18,12 @@
 class ClientTcpReader
 {
     public:
-        ClientTcpReader() = default;
+        ClientTcpReader(std::shared_ptr<Game> game);
         ~ClientTcpReader() = default;
 
         std::string InterpretData(const std::string& data);
 
     private:
-        std::string loginRequest(const std::string& data);
-        static std::vector<std::string> levelSelection(const std::string& data);
 
         std::shared_ptr<Game> _game;
 };

@@ -30,8 +30,7 @@
 #include "MyString.hpp"
 #include "ClientPacketreader.hpp"
 
-Network::Network()
-    : _ip(sf::IpAddress(0))
+Network::Network() : _ip(sf::IpAddress(0)), _tcpReader(nullptr)
 {
     _tcpPort = -1;
     _udpPort = -1;
@@ -105,6 +104,7 @@ auto Network::initClient() -> void
 
     _game = std::make_shared<Game>(*this);
     _packetReader = ClientPacketreader(sf::Packet(), _game);
+    _tcpReader = ClientTcpReader(_game);
 }
 
 void Network::udpThread()
