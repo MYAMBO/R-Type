@@ -27,9 +27,9 @@
 #include "Action.hpp"
 #include "Data.hpp"
 
-static auto getAckId() -> u_int32_t
+static auto getAckId() -> uint32_t
 {
-    static u_int32_t id = 0;
+    static uint32_t id = 0;
     return ++id;
 }
 
@@ -38,7 +38,7 @@ static auto getAckId() -> u_int32_t
  *
  * Initializes the game.
  */
-ServerGame::ServerGame(IGameNetwork& network, u_int32_t &tick, std::vector<std::pair<Packet, u_int32_t>> &ackPackets, std::vector<User> &users) :
+ServerGame::ServerGame(IGameNetwork& network, uint32_t &tick, std::vector<std::pair<Packet, uint32_t>> &ackPackets, std::vector<User> &users) :
 _tick(tick), _network(network), _ackPackets(ackPackets), _users(users)
 {
     _world.addSystem<ScriptsSys>();
@@ -73,7 +73,7 @@ void ServerGame::run()
         checkDeaths();
         _ackPackets.erase(
             std::remove_if(_ackPackets.begin(), _ackPackets.end(),
-                [this](const std::pair<Packet, u_int32_t>& tmpPacket) {
+                [this](const std::pair<Packet, uint32_t>& tmpPacket) {
                     return tmpPacket.second + 1500 < _tick;
                 }),
             _ackPackets.end()

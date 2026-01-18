@@ -173,7 +173,7 @@ void Server::udpThread()
         try
         {
             _packetReader.interpretPacket();
-            u_int32_t ackNb = _packetReader.getHeader().ack;
+            uint32_t ackNb = _packetReader.getHeader().ack;
             _mutex.lock();
             for (auto tmp : _users)
             {
