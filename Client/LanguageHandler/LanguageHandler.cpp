@@ -21,7 +21,7 @@ void LanguageHandler::loadLanguageFile(const std::string& languageId)
     std::ifstream file(filePath);
 
     if (!file.is_open())
-        throw LanguageHandler::LoadLanguageException();
+        return;
     _language.clear();
     while (std::getline(file, line)) {
         if (const size_t delimiterPos = line.find(':'); delimiterPos != std::string::npos) {
@@ -42,8 +42,4 @@ std::string LanguageHandler::getTranslation(const std::string& key) const
     if (const auto it = _language.find(key); it != _language.end())
         return it->second;
     return key;
-}
-
-const char* LanguageHandler::LoadLanguageException::what() const noexcept {
-    return "Fail to load language file";
 }
