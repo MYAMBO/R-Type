@@ -169,6 +169,8 @@ void ServerGame::EnemyMovement(const uint32_t entityId, World &world)
     auto pos = entity->getComponent<Position>();
     pos->setX(pos->getX() - 1 * world.getDeltaTime());
 
+    if (pos->getX() <= -100.0f)
+        pos->setX(2000.0f);
     Packet packet;
     packet.updatePosition(entityId, pos->getX(), pos->getY());
     _network.sendPacket(packet);
@@ -199,6 +201,8 @@ void ServerGame::EnemySinusMovement(uint32_t entityId, World& world)
     pos->setX(pos->getX() - speedX * dt);
     timers[entityId] += dt * sinusSpeed;
     pos->setY(startYPos[entityId] + std::sin(timers[entityId]) * amplitude);
+    if (pos->getX() <= -100.0f)
+        pos->setX(2000.0f);
     Packet packet;
     packet.updatePosition(entityId, pos->getX(), pos->getY());
     _network.sendPacket(packet);
@@ -498,7 +502,7 @@ void ServerGame::handleNewPlayer()
     if (_playerCount == NB_PLAYER_TO_START && !_gameStarted) {
         _gameStarted = true;
         _waveTimer.restart();
-        startLevel(4);   // Need to change that later to have a level management
+        startLevel(0);   // Need to change that later to have a level management
     }
 }
 
