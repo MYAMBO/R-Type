@@ -249,25 +249,20 @@ void handlePlayerDeath(World &world)
 
 void Game::handleStartGameTransition()
 {
-    printf("[Game] Transitioning to Gameplay, resetting players...\n");
-    
     for (const auto& entity : _world.getAllEntitiesWithComponent<Tag>()) {
         auto tag = entity->getComponent<Tag>();
-        if (!tag) continue;
+        if (!tag)
+            continue;
 
         if (tag->getTag() == "player" || tag->getTag() == "player_mate") {
             if (auto data = entity->getComponent<Data>())
                 data->setData("died", "false");
-            
-            // Reset Position
             if (auto pos = entity->getComponent<Position>()) {
                 pos->setX(300.f);
                 pos->setY(600.f);
                 pos->setTargetX(300.f);
                 pos->setTargetY(600.f);
             }
-            
-            // Reset Health
             if (auto hp = entity->getComponent<HP>()) {
                 hp->setHP(100);
                 hp->setAlive(true);
@@ -276,32 +271,6 @@ void Game::handleStartGameTransition()
     }
     _world.setCurrentScene(static_cast<int>(SceneType::GAMEPLAY));
     _packet.clear();
-}
-
-void Game::securityDeath()
-{
-    if (_world.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
-        return;
-    auto players = _world.getAllEntitiesWithComponent<Tag>();
-    for (const auto& entity : players) {
-        auto tag = entity->getComponent<Tag>();
-        if (tag && (tag->getTag() == "player" || tag->getTag() == "player_mate")) {
-            auto hpComp = entity->getComponent<HP>();
-            auto dataComp = entity->getComponent<Data>();
-            auto position = entity->getComponent<Position>();
-
-            if (hpComp && dataComp) {
-                if (dataComp->getData("died") == "true" && hpComp->getHP() == 100) {
-                    hpComp->setHP(100);
-                    hpComp->setAlive(true);
-                    position->setX(300.f);
-                    position->setY(600.f);
-                    dataComp->setData("died", "false");
-                    printf("[SecurityDeath] Player %d was respawned by security check.\n", entity->getId());
-                }
-            }
-        }
-    }
 }
 
 /**
@@ -334,6 +303,21 @@ void Game::run()
         if (_startGameRequested && _world.getCurrentScene() == static_cast<int>(SceneType::WAITING_ROOM)) {
             handleStartGameTransition();
             _startGameRequested = false;
+            auto readyStateEntity = GameHelper::getEntityByTag(_world, "waiting_room_ready_state");
+            if (!readyStateEntity)
+                return;
+            auto dataComp = readyStateEntity->getComponent<Data>();
+            if (!dataComp)
+                return;
+            dataComp->setData("is_ready", "false");
+            auto scoreEntity = GameHelper::getEntityByTag(_world, "game_stats");
+            if (scoreEntity) {
+                auto data = scoreEntity->getComponent<Data>();
+                if (data) {
+                    data->setData("high_score", "0");
+                    data->setData("scraps_collected", "0");
+                }
+            }
         }
         gameInput(inputSystem);
         _world.manageSystems();
@@ -343,8 +327,6 @@ void Game::run()
         }
         _window.display();
         refreshCaches(_world);
-
-        securityDeath();
         handlePlayerDeath(_world);
         auto end = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -370,7 +352,7 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
             int currentScene = _world.getCurrentScene();
             if (currentScene == static_cast<int>(SceneType::MENU)) {
                 _window.close();
-            } else if (currentScene != static_cast<int>(SceneType::MYAMBO) && currentScene != static_cast<int>(SceneType::KAYU)) {
+            } else if (currentScene != static_cast<int>(SceneType::MYAMBO) && currentScene != static_cast<int>(SceneType::KAYU) && currentScene != static_cast<int>(SceneType::GAMEPLAY)) {
                 _world.setCurrentScene(static_cast<int>(SceneType::MENU));
             }
         }
@@ -646,13 +628,6 @@ int Game::killEntity(int id)
     if (name && (name->getTag() == "player" || name->getTag() == "player_mate")) {
         auto dataComp = entity->getComponent<Data>();
         auto pos = entity->getComponent<Position>();
-        auto hpComp = entity->getComponent<HP>();
-        printf("[Game] Player %d has died.\n", id);
-        printf("[Game] HP at time of death: %d\n", hpComp ? hpComp->getHP() : -1);
-        if (hpComp) {
-            if (hpComp->getHP() == 100)
-                return 0;
-        }
         if (dataComp)
             dataComp->setData("died", "true");
         if (pos) {
@@ -746,11 +721,13 @@ void Game::handleAction(const uint32_t id, const uint8_t action, const uint32_t 
 void Game::healEntity(const uint32_t entityId, const uint32_t newHp)
 {
     const auto entity = GameHelper::getEntityById(_world, entityId);
-    if (!entity) return;
+    if (!entity)
+        return;
 
     auto hp = entity->getComponent<HP>();
     if (!hp)
         return;
+    auto dataComp = entity->getComponent<Data>();
     hp->setHP(newHp);
     std::cout << "Entity " << entityId << " HP set to: " << newHp << std::endl;
 }

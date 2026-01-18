@@ -27,6 +27,8 @@
 #include "Action.hpp"
 #include "Data.hpp"
 
+static bool gameOverSent = false;
+
 static auto getAckId() -> u_int32_t
 {
     static u_int32_t id = 0;
@@ -546,6 +548,7 @@ void ServerGame::handlePlayerReady(const uint32_t playerId)
             }
         }
         _levelLoader.loadFromFile(_level, this);
+        gameOverSent = false;
         std::cout << "Game started!" << std::endl;
     }
 }
@@ -852,7 +855,6 @@ void ServerGame::checkGameEnd()
         }
     }
     if (alivePlayers == 0 && _playerCount > 0) {
-        static bool gameOverSent = false;
         if (!gameOverSent) {
             std::cout << "GAME OVER - All players dead!" << std::endl;
             sendGameEnd(0);

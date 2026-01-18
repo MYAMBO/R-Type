@@ -77,7 +77,6 @@ class Game {
         void updateLoadingState(float progress, const std::string& status);
         void smootherMovement(int entityId, World &world, float targetX, float targetY);
         void handleStartGameTransition();
-        void securityDeath();
 
 
         void bulletShooting(); // Need to remove it, maybe
