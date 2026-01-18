@@ -13,6 +13,8 @@
 #include <iostream>
 #include <optional>
 
+#include "TcpReader.hpp"
+
 #ifdef _WIN32
     #include <io.h>
     #include "getopt.h"
@@ -135,6 +137,7 @@ void Network::udpThread()
 void Network::tcpThread()
 {
     bool ready = false;
+    TcpReader _tcpReader(true);
 
     while (_isRunning && !ready)
     {
@@ -149,7 +152,7 @@ void Network::tcpThread()
         if (status != sf::Socket::Status::Done)
             continue;
 
-        if (received < 6)
+        if (received != 6)
             continue;
 
         uint32_t value32;
@@ -166,32 +169,35 @@ void Network::tcpThread()
     }
     while (_isRunning)
     {
-        char data[1024];
-        std::size_t received = 0;
+        std::array<char, 1024> data {};
+        std::size_t received;
+        std::string message;
 
-        auto status = _tcpClient.receive(data, sizeof(data), received);
-
-        if (status == sf::Socket::Status::Disconnected)
-            break;
-
-        if (status != sf::Socket::Status::Done)
-            continue;
-
-        if (received < 6)
-            continue;
-
-        uint32_t value32;
-        std::memcpy(&value32, &data[2], sizeof(value32));
-        _udpPort = ntohl(value32);
-        _playerId = static_cast<unsigned char>(data[1]);
-
-        _udpSocket.send("", 0, _ip, _udpPort);
-
+        while (true)
         {
-            std::lock_guard lock(_mutex);
-            _ready = true;
+            data.fill(0);
+            sf::Socket::Status status = _tcpClient.receive(data.data(), data.size(), received);
+            if (status == sf::Socket::Status::Disconnected)
+                break;
+            if ((status != sf::Socket::Status::Done && message.empty()))
+                break;
+
+            if (received != 0)
+            {
+                message += std::string(data.data(), received);
+
+                if ((received < data.size() || status != sf::Socket::Status::Done) && !message.empty())
+                {
+                    std::string messageResponse = _tcpReader.InterpretData(message);
+                    _mutex.lock();
+                    sendMessage(messageResponse);
+                    _mutex.unlock();
+                    message.clear();
+                    log("sent");
+                    break;
+                }
+            }
         }
-        _readyCond.notify_all();
     }
 }
 
