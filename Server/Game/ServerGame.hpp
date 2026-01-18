@@ -29,7 +29,7 @@
 
 class ServerGame {
     public:
-        ServerGame(IGameNetwork& network, u_int32_t &tick, std::vector<std::pair<Packet, u_int32_t>> &ackPackets, std::vector<User> &users);
+        ServerGame(IGameNetwork& network, uint32_t &tick, std::vector<std::pair<Packet, uint32_t>> &ackPackets, std::vector<User> &users);
         ~ServerGame() = default;
 
         void run();
@@ -69,7 +69,7 @@ class ServerGame {
         void portalBossSpawnTankScript(int entityId, World& world);
         bool resolveBulletSpawnOverlap(const std::shared_ptr<Entity>& bullet, const std::string& targetTag);
 
-        u_int32_t& _tick;
+        uint32_t& _tick;
         World _world;
         Packet _packet;
         IGameNetwork& _network;
@@ -79,7 +79,7 @@ class ServerGame {
         bool _gameStarted = false;
         sf::Clock _waveTimer;
         std::unordered_set<uint32_t> _readyPlayers;
-        std::vector<std::pair<Packet, u_int32_t>> _ackPackets;
+        std::vector<std::pair<Packet, uint32_t>> _ackPackets;
         std::vector<User> _users;
 };
 

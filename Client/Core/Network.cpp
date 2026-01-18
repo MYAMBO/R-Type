@@ -123,7 +123,7 @@ void Network::udpThread()
         try
         {
             _packetReader.interpretPacket();
-            u_int32_t ackNbr = _packetReader.getHeader().ack;
+            uint32_t ackNbr = _packetReader.getHeader().ack;
             if (ackNbr != 0)
                 _lastPacketAckNbr = ackNbr;
         }
