@@ -497,7 +497,7 @@ void Game::playerInput(uint32_t entityId, World &world)
 
     if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("SHOOT")))) {
         auto dataComp = compPlayer->getComponent<Data>();
-        if (!isShootKeyPressed && dataComp && std::stoi(dataComp->getData("mana")) >= 5) {
+        if (!isShootKeyPressed && dataComp && std::stoi(dataComp->getData("mana")) >= 10) {
             _packet.action(compPlayer->getId(), FIRE, 0);
             _packet.setAck(0);
             _packet.setId(compPlayer->getId());
