@@ -9,8 +9,7 @@
     #define R_TYPE_GAME_H
 
 #include <unordered_set>
-#include <memory>
-#include <string>
+#include <SFML/System.hpp>
 #include "IGameNetwork.hpp"
 #include "World.hpp"
 #include "LevelLoader.hpp"
@@ -74,6 +73,7 @@ class ServerGame {
         Packet _packet;
         IGameNetwork& _network;
         LevelLoader _levelLoader;
+        int _level = 2;
         int _playerCount = 0;
         int _readyCount = 0;
         bool _gameStarted = false;

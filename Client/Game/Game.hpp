@@ -76,6 +76,7 @@ class Game {
         void playerInput(uint32_t entityId, World &world);
         void updateLoadingState(float progress, const std::string& status);
         void smootherMovement(int entityId, World &world, float targetX, float targetY);
+        void handleStartGameTransition();
 
 
         void bulletShooting(); // Need to remove it, maybe

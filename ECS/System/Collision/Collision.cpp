@@ -153,6 +153,8 @@ void Collision::applyDamage(const std::shared_ptr<Entity> &attacker,
             newHp = 0;
         hp->setHP(newHp);
         if (targetTag && targetTag->getTag() == "player") {
+            printf("[Collision] Player entity %d took %d damage, HP: %d -> %d\n",
+                target->getId(), damage->getDamage(), oldHp, newHp);
             Packet packet;
             packet.action(target->getId(), HEAL, newHp);
             _network.sendPacket(packet);
@@ -171,6 +173,8 @@ void Collision::applyHeal(const std::shared_ptr<Entity> &player,
     unsigned int healAmount = 20;
     unsigned int newHp = std::min(currentHp + healAmount, maxHp);
     hp->setHP(newHp);
+    printf("[Collision] Player entity %d healed for %d, HP: %d -> %d\n",
+        player->getId(), newHp - currentHp, currentHp, newHp);
     Packet packet;
     packet.action(player->getId(), HEAL, newHp);
     _network.sendPacket(packet);

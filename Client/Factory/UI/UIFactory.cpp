@@ -7,13 +7,6 @@
 
 #include "Tag.hpp"
 #include "Game.hpp"
-#include "Data.hpp"
-#include "Text.hpp"
-#include "Music.hpp"
-#include "Layer.hpp"
-#include "Scene.hpp"
-#include "Scale.hpp"
-#include "Script.hpp"
 #include "Network.hpp"
 #include "Factory.hpp"
 #include "Animator.hpp"
@@ -27,6 +20,7 @@
 #include "GameHelperGraphical.hpp"
 
 #include <array>
+#include <thread>
 
 UIFactory::UIFactory(World& world) : _world(world), _languageHandler(std::make_shared<LanguageHandler>("en"))
 {
@@ -617,7 +611,7 @@ void UIFactory::createMenu() const
             sfx->play();
         auto m = GameHelper::getEntityByTag(_world, "menu_music");
         if (m) m->getComponent<Music>()->stop();
-        _world.setCurrentScene(static_cast<int>(SceneType::WAITING_ROOM));   // here call server for say ready to play
+        _world.setCurrentScene(static_cast<int>(SceneType::WAITING_ROOM));
     });
     guiLayout->addSpace(0.2f);
 
@@ -925,7 +919,7 @@ void UIFactory::createGameOverScreen()
     btnRetry->addComponent<Tag>("game_over_button_retry");
     auto guiRetry = btnRetry->getComponent<GuiWidget>();
     styleNeonButton(guiRetry);
-    guiRetry->setCallback([this]() { _world.setCurrentScene(static_cast<int>(SceneType::GAMEPLAY)); });
+    guiRetry->setCallback([this]() { _world.setCurrentScene(static_cast<int>(SceneType::WAITING_ROOM)); });
 
     auto btnMenu = _world.createEntity();
     btnMenu->addComponent<GuiWidget>(WidgetType::BUTTON, "ABANDON MISSION", layoutEnt->getId());
@@ -1013,7 +1007,9 @@ void UIFactory::createVictoryScreen()
     btnNext->addComponent<Tag>("victory_button_next");
     auto guiNext = btnNext->getComponent<GuiWidget>();
     styleNeonButton(guiNext);
-    guiNext->setCallback([this]() { _world.setCurrentScene(static_cast<int>(SceneType::MENU)); });
+    guiNext->setCallback([this]() {
+        _world.setCurrentScene(static_cast<int>(SceneType::WAITING_ROOM));
+    });
 
     auto btnCredits = _world.createEntity();
     btnCredits->addComponent<GuiWidget>(WidgetType::BUTTON, "VIEW CREDITS", layoutEnt->getId());
@@ -1230,7 +1226,7 @@ void UIFactory::createWaitingMenu(IGameNetwork* network)
 
         const auto btnReady = _world.createEntity();
         btnReady->addComponent<Data>(std::map<std::string, std::string>{{"text", "READY"}});
-        btnReady->addComponent<GuiWidget>(WidgetType::BUTTON, "READY", waitingRoot->getId());
+        btnReady->addComponent<GuiWidget>(WidgetType::BUTTON, "UNREADY", waitingRoot->getId());
         btnReady->addComponent<Scene>(static_cast<int>(SceneType::WAITING_ROOM));
         btnReady->addComponent<Tag>("waiting_room_button_ready");
         btnReady->addComponent<SoundEffect>("../assets/sounds/clics.mp3", 100.f);
@@ -1247,13 +1243,25 @@ void UIFactory::createWaitingMenu(IGameNetwork* network)
         guiReady->getRawWidget()->getRenderer()->setProperty("TextColorHover", tgui::Color::White);
         guiReady->setTextSize(30);
         
-        bool readyState = false;
-        guiReady->setCallback([network, guiReady, readyState]() mutable {
+        auto readyStateEntity = _world.createEntity();
+        readyStateEntity->addComponent<Data>(std::map<std::string, std::string>{{"is_ready", "true"}});
+        readyStateEntity->addComponent<Tag>("waiting_room_ready_state");
+
+        static bool readyState = true;
+        guiReady->setCallback([this, network, guiReady]() mutable {
             const auto impl = dynamic_cast<Network*>(network);
             if (!impl)
                 return;
+            auto readyStateEntity = GameHelper::getEntityByTag(_world, "waiting_room_ready_state");
+            if (!readyStateEntity)
+                return;
+            auto dataComp = readyStateEntity->getComponent<Data>();
+            if (!dataComp)
+                return;
+            bool readyState = dataComp->getData("is_ready") == "true";
+            dataComp->setData("is_ready", readyState ? "false" : "true");
             readyState = !readyState;
-            guiReady->setText(readyState ? "UNREADY" : "READY");
+            guiReady->setText(readyState ? "READY" : "UNREADY");
             constexpr std::array<std::uint8_t, 1> buffer{0x0E};
             const std::string message(
                 reinterpret_cast<const char*>(buffer.data()),

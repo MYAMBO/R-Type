@@ -28,7 +28,9 @@
 #include "Data.hpp"
 #include "EntitiesType.hpp"
 
-static auto getAckId() -> uint32_t
+static bool gameOverSent = false;
+
+static auto getAckId() -> u_int32_t
 {
     static uint32_t id = 0;
     return ++id;
@@ -550,13 +552,39 @@ void ServerGame::handlePlayerReady(const uint32_t playerId)
     std::cout << "Player " << playerId << " is ready. Ready count: " << _readyCount << "/" << _playerCount << std::endl;
 
     if (_readyCount == NB_PLAYER_TO_START && !_gameStarted && _playerCount >= NB_PLAYER_TO_START) {
+        auto test = _world.getAllEntitiesWithComponent<Tag>();
+        for (const auto& entity : test) {
+            auto tag = entity->getComponent<Tag>();
+            if (tag && tag->getTag() == "player") {
+                auto pos = entity->getComponent<Position>();
+                pos->setX(200.f);
+                pos->setY(300.f);
+                auto hpComp = entity->getComponent<HP>();
+                if (hpComp) {
+                    printf("[Game Start] Resetting HP for player %d\n", entity->getId());
+                    hpComp->setHP(100);
+                    hpComp->setAlive(true);
+                    _packet.action(entity->getId(), HEAL, 100);
+                }
+            }
+        }
         _gameStarted = true;
         _waveTimer.restart();
         Packet startPacket;
+        startPacket.clear();
         startPacket.setId(0).setAck(0).setPacketNbr(1).setTotalPacketNbr(1);
         startPacket.startGame();
         _network.sendPacket(startPacket);
-        _levelLoader.loadFromFile(5, this);   // Need to change that later to have a level management
+        auto all = _world.getAllEntitiesWithComponent<Tag>();
+        for (auto& ent : all) {
+            auto t = ent->getComponent<Tag>()->getTag();
+            if (t != "player") {
+                _world.killEntity(ent->getId());
+                _packet.dead(ent->getId());
+            }
+        }
+        _levelLoader.loadFromFile(_level, this);
+        gameOverSent = false;
         std::cout << "Game started!" << std::endl;
     }
 }
@@ -641,7 +669,12 @@ void ServerGame::checkDeaths()
             }
             hp->setAlive(false);
             _packet.dead(entity->getId());
-            _world.killEntity(entity->getId());
+            auto tag = entity->getComponent<Tag>();
+            if (tag && tag->getTag() != "player") {
+                _world.killEntity(entity->getId());
+            } else if (!tag) {
+                _world.killEntity(entity->getId());
+            }
             _packet.setAck(getAckId());
             _ackPackets.emplace_back(_packet, _tick);
             for (auto tmp : _users)
@@ -773,8 +806,6 @@ void ServerGame::portalBossSpawnTankScript(int entityId, World& world)
         float offsetY =  800.0f;
         createTank(pos->getX(), pos->getY() + 60.0f);
         createTank(pos->getX(), pos->getY() + 60.0f + offsetY);
-
-
     }
 }
 
@@ -853,13 +884,13 @@ void ServerGame::checkGameEnd()
         }
     }
     if (alivePlayers == 0 && _playerCount > 0) {
-        static bool gameOverSent = false;
         if (!gameOverSent) {
             std::cout << "GAME OVER - All players dead!" << std::endl;
             sendGameEnd(0);
             _readyCount = 0;
             _readyPlayers.clear();
             gameOverSent = true;
+            _gameStarted = false;
         }
         return;
     }
@@ -879,6 +910,10 @@ void ServerGame::checkGameEnd()
     if (!enemyAlive && !victorySent && alivePlayers > 0) {
         victorySent = true;
         std::cout << "VICTORY - All enemies defeated!" << std::endl;
+        if (_levelLoader.getLevelsCount() > _level) {
+            _level++;
+        }
+        _gameStarted = false;
         sendGameEnd(1);
         _readyCount = 0;
         _readyPlayers.clear();

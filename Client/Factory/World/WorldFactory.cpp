@@ -232,7 +232,8 @@ void WorldFactory::createPlayer(uint64_t id, float x, float y)
 
     std::map<std::string, std::string> dataMap = {
         {"mana", "100"},
-        {"scraps", "0"}
+        {"scraps", "0"},
+        {"died", "false"}
     };
     player->addComponent<Data>(dataMap);
 

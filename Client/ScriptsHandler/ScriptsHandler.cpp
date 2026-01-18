@@ -87,9 +87,6 @@ void playerfire(size_t entityId, World &world)
             continue;
 
         if (tag->getTag() == "player" || tag->getTag() == "player_mate") {
-            auto playerHp = e->getComponent<HP>();
-            if (playerHp && playerHp->getHP() <= 0)
-                continue;
             player = e;
             break;
         }
@@ -172,7 +169,7 @@ void dotScript(int entityId, World& world)
     static bool soundPlayed = false;
     
     if (!kayu || !corp || !rect || !posDot)
-    return;
+        return;
 
     float kayuRight = kayu->getComponent<Position>()->getX() + 150.f;
     float corpLeft = corp->getComponent<Position>()->getX() - 150.f;

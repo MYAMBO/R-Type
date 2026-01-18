@@ -116,3 +116,12 @@ void LevelLoader::findAllLevel()
     }
 }
 
+std::map<int, std::tuple<std::string, std::string>> LevelLoader::getLevelsList()
+{
+    return _levelsList;
+}
+
+int LevelLoader::getLevelsCount()
+{
+    return static_cast<int>(_levelsList.size());
+}

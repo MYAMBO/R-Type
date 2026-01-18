@@ -220,6 +220,54 @@ void Game::loadingRun()
     run();
 }
 
+void handlePlayerDeath(World &world)
+{
+    for (const auto& e : world.getAllEntitiesWithComponent<Tag>()) {
+        auto name = e->getComponent<Tag>();
+        if (!name)
+            continue;
+        if (name->getTag() == "player" || name->getTag() == "player_mate") {
+            auto hpComp = e->getComponent<HP>();
+            if (!hpComp || hpComp->getHP() > 0)
+                continue;
+            auto dataComp = e->getComponent<Data>();
+            auto pos = e->getComponent<Position>();
+            if (dataComp)
+                dataComp->setData("died", "true");
+            if (pos) {
+                pos->setX(-100.f);
+                pos->setY(-100.f);
+            }
+        }
+    }
+}
+
+void Game::handleStartGameTransition()
+{
+    for (const auto& entity : _world.getAllEntitiesWithComponent<Tag>()) {
+        auto tag = entity->getComponent<Tag>();
+        if (!tag)
+            continue;
+
+        if (tag->getTag() == "player" || tag->getTag() == "player_mate") {
+            if (auto data = entity->getComponent<Data>())
+                data->setData("died", "false");
+            if (auto pos = entity->getComponent<Position>()) {
+                pos->setX(300.f);
+                pos->setY(600.f);
+                pos->setTargetX(300.f);
+                pos->setTargetY(600.f);
+            }
+            if (auto hp = entity->getComponent<HP>()) {
+                hp->setHP(100);
+                hp->setAlive(true);
+            }
+        }
+    }
+    _world.setCurrentScene(static_cast<int>(SceneType::GAMEPLAY));
+    _packet.clear();
+}
+
 /**
  * @brief Runs the main game loop.
  *
@@ -243,11 +291,29 @@ void Game::run()
 
     _world.setCurrentScene(static_cast<int>(SceneType::MENU));
     _factory.createPlayerHUD();
-    //static sf::Clock timer;
 
     while (_window.isOpen()) {
         auto start = std::chrono::steady_clock::now();
         _window.clear(sf::Color::Black);
+        if (_startGameRequested && _world.getCurrentScene() == static_cast<int>(SceneType::WAITING_ROOM)) {
+            handleStartGameTransition();
+            _startGameRequested = false;
+            auto readyStateEntity = GameHelper::getEntityByTag(_world, "waiting_room_ready_state");
+            if (!readyStateEntity)
+                return;
+            auto dataComp = readyStateEntity->getComponent<Data>();
+            if (!dataComp)
+                return;
+            dataComp->setData("is_ready", "false");
+            auto scoreEntity = GameHelper::getEntityByTag(_world, "game_stats");
+            if (scoreEntity) {
+                auto data = scoreEntity->getComponent<Data>();
+                if (data) {
+                    data->setData("high_score", "0");
+                    data->setData("scraps_collected", "0");
+                }
+            }
+        }
         gameInput(inputSystem);
         _world.manageSystems();
         if (_packet.getPacket().getDataSize() != 12) {
@@ -256,33 +322,7 @@ void Game::run()
         }
         _window.display();
         refreshCaches(_world);
-        /*if (timer.getElapsedTime().asSeconds() >= 1.0f) {
-            size_t total = 0;
-            auto allEntities = _world.getAllEntitiesWithComponent<Tag>();
-            total = allEntities.size();
-            int scene = _world.getCurrentScene();
-
-            std::cout << "--- [PERF MONITOR] ---" << std::endl;
-            std::cout << "  Total Entities: " << total << std::endl;
-            std::cout << "  Current Scene : " << scene << std::endl;
-
-            auto stars = _world.getAllEntitiesWithComponent<Tag>();
-            int starCount = 0;
-            for (auto& s : stars) {
-                if (s->getComponent<Tag>()->getTag() == "background_star") starCount++;
-            }
-            std::cout << "  Active Stars  : " << starCount << std::endl;
-            std::cout << "----------------------" << std::endl;
-
-            timer.restart();
-        }*/
-        if (_world.getCurrentScene() == static_cast<int>(SceneType::WAITING_ROOM)) {
-            if (!_startGameRequested)
-                continue;
-            _startGameRequested = false;
-            _world.setCurrentScene(static_cast<int>(SceneType::GAMEPLAY));
-        }
-
+        handlePlayerDeath(_world);
         auto end = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
         if (elapsed < tickRate)
@@ -307,7 +347,7 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
             int currentScene = _world.getCurrentScene();
             if (currentScene == static_cast<int>(SceneType::MENU)) {
                 _window.close();
-            } else if (currentScene != static_cast<int>(SceneType::MYAMBO) && currentScene != static_cast<int>(SceneType::KAYU)) {
+            } else if (currentScene != static_cast<int>(SceneType::MYAMBO) && currentScene != static_cast<int>(SceneType::KAYU) && currentScene != static_cast<int>(SceneType::GAMEPLAY)) {
                 _world.setCurrentScene(static_cast<int>(SceneType::MENU));
             }
         }
@@ -319,19 +359,6 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
         if (eventOpt->is<sf::Event::Resized>()) {
             sf::FloatRect visibleArea({0, 0}, {static_cast<float>(_window.getSize().x), static_cast<float>( _window.getSize().y)});
             _window.setView(sf::View(visibleArea));
-        }
-        // temporary testing code
-        if (inputSystem->isTriggered(*eventOpt, KeyboardKey::Key_M)) {
-            //GameHelperGraphical::createAnimatorEntity(_world, 400, 400, "../assets/sprites/green_effect.png", 5, 5, 2.f, 478, 154, 20, 20, 0, 0, 10.f);
-            //GameHelperGraphical::createAnimatorEntity(_world, 400, 400, "../assets/sprites/r-typesheet1.gif", 7, 7, 2.f, 209, 276, 16, 14, 0, 0, 10.f);
-            //GameHelperGraphical::createScoreGUI(_world, 400, 300, "1000");
-            //GameHelperGraphical::createAnimatorEntity(_world, 200, 200, "../assets/sprites/fire_effect.png", 2, 2, 1.f, 223, 0, 16, 16, 0, 0, 10.f);
-            //_factory.createScraps(_world, 500.f, 0.f);
-            _world.setCurrentScene(static_cast<int>(SceneType::VICTORY));
-
-        }
-        if (inputSystem->isTriggered(*eventOpt, KeyboardKey::Key_N)) {
-            _world.setCurrentScene(static_cast<int>(SceneType::GAMEPLAY));
         }
         inputSystem->update(0.0f, _world);
     }
@@ -451,17 +478,17 @@ void Game::playerInput(uint32_t entityId, World &world)
     std::shared_ptr<Entity> compPlayer = GameHelper::getEntityById(world, entityId);
     auto settings = GameHelper::getEntityByTag(world, "game_controls_settings");
     auto data = settings->getComponent<Data>();
+    auto playerData = compPlayer->getComponent<Data>();
 
-    if (!compCam || !compPlayer || !inputSystem || !data)
+    if (!compCam || !compPlayer || !inputSystem || !data || !playerData)
         return;
 
     auto pos = compPlayer->getComponent<Position>();
     auto vel = compPlayer->getComponent<Velocity>();
-
+    
     float targetVx = 0.0f;
     float targetVy = 0.0f;
     bool moved = false;
-
 
     if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("RIGHT")))) {
         if (_window.getSize().x - 50.f > pos->getX() + 7.0f) {
@@ -593,6 +620,18 @@ int Game::killEntity(int id)
         GameHelperGraphical::createAnimatorEntity(_world, pos->getX(), pos->getY(), "../assets/sprites/green_effect.png", 5, 5, 2.f, 478, 154, 20, 20, 0, 0, 4.f);
         GameHelperGraphical::soundEffectEntity("../assets/sounds/heal.mp3", 75.f, _world.getCurrentScene(), _world);
     }
+    if (name && (name->getTag() == "player" || name->getTag() == "player_mate")) {
+        auto dataComp = entity->getComponent<Data>();
+        auto pos = entity->getComponent<Position>();
+        if (dataComp)
+            dataComp->setData("died", "true");
+        if (pos) {
+            GameHelperGraphical::createAnimatorEntity(_world, pos->getX(), pos->getY(), "../assets/sprites/r-typesheet1.gif", 5, 5, 2.f, 288, 295, 31, 32, 3, 0, 3.f);
+            pos->setX(-100.f);
+            pos->setY(-100.f);
+        }
+        return 0;
+    }
     _world.killEntity(id);
     return 0;
 }
@@ -677,11 +716,13 @@ void Game::handleAction(const uint32_t id, const uint8_t action, const uint32_t 
 void Game::healEntity(const uint32_t entityId, const uint32_t newHp)
 {
     const auto entity = GameHelper::getEntityById(_world, entityId);
-    if (!entity) return;
+    if (!entity)
+        return;
 
     auto hp = entity->getComponent<HP>();
     if (!hp)
         return;
+    auto dataComp = entity->getComponent<Data>();
     hp->setHP(newHp);
     std::cout << "Entity " << entityId << " HP set to: " << newHp << std::endl;
 }

@@ -22,6 +22,9 @@ class LevelLoader
 
         static void loadFromFile(int id, ServerGame *server);
 
+        std::map<int, std::tuple<std::string, std::string>> getLevelsList();
+        int getLevelsCount();
+
     private:
         // A map with ID -> tuple (map path, map name)
         static std::map<int,  std::tuple<std::string, std::string>> _levelsList;
