@@ -92,6 +92,11 @@ void ClientPacketreader::interpretPacket()
                 }
                 break;
             }
+            case 0x0F: {
+                if (_game)
+                    _game->startGameFromServer();
+                break;
+            }
             default:
                 return;
         }

@@ -74,6 +74,7 @@ class Game {
         void showEndScreen(uint8_t status);
         void createEnemy(float x, float y, uint16_t type);
         void updatePlayerMana(uint32_t playerId, int mana);
+        void startGameFromServer();
 
     private:
         void gameInput(std::shared_ptr<Inputs> inputSystem);
@@ -95,6 +96,7 @@ class Game {
         Packet _packet;
 
         bool _isShootKeyPressed = false;
+            bool _startGameRequested = false;
         int _musicVolume = 100;
         int _sfxVolume = 100;
 };

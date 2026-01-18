@@ -489,15 +489,31 @@ void ServerGame::handleNewPlayer()
         return;
     }
 
-    createPlayer(200, 200);
+    createPlayer(200, 300 + (_playerCount) * 100);
     _playerCount++;
 
     std::cout << "Player " << _playerCount << " connected" << std::endl;
+}
 
-    if (_playerCount == NB_PLAYER_TO_START && !_gameStarted) {
+/**
+ * @brief Handle player ready status
+ *
+ * @param playerId The id of the player who is ready
+ */
+void ServerGame::handlePlayerReady(const uint32_t playerId)
+{
+    _readyCount++;
+    std::cout << "Player " << playerId << " is ready. Ready count: " << _readyCount << "/" << _playerCount << std::endl;
+
+    if (_readyCount == NB_PLAYER_TO_START && !_gameStarted && _playerCount >= NB_PLAYER_TO_START) {
         _gameStarted = true;
         _waveTimer.restart();
-        _levelLoader.loadFromFile(4, this);   // Need to change that later to have a level management
+        Packet startPacket;
+        startPacket.setId(0).setAck(0).setPacketNbr(1).setTotalPacketNbr(1);
+        startPacket.startGame();
+        _network.sendPacket(startPacket);
+        _levelLoader.loadFromFile(5, this);   // Need to change that later to have a level management
+        std::cout << "Game started!" << std::endl;
     }
 }
 

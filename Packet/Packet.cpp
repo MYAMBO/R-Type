@@ -170,3 +170,21 @@ void Packet::action(const uint32_t id, const uint8_t action, const uint32_t data
     _payload << action;                     // 1 byte
     _payload << data;                     // 4 byte
 }
+
+/**
+ * @brief Write start game signal in packet
+ */
+void Packet::startGame()
+{
+    _payload << static_cast<uint8_t>(0x0F); // opcode
+}
+
+/**
+ * @brief Write ready status in packet
+ * @param playerId The id of the player
+ */
+void Packet::ready(const uint32_t playerId)
+{
+    _payload << static_cast<uint8_t>(0x0E); // opcode
+    _payload << playerId;                   // 4 bytes
+}
