@@ -131,8 +131,7 @@ void ServerGame::manaRegenScript(int entityId, World &world)
         currentMana += 1;
         if (currentMana > maxMana)
             currentMana = maxMana;
-        data->setData("mana", std::to_string(currentMana));
-        _packet.updateMana(entityId, currentMana);
+        data->setData("mana", std::to_string(currentMana))_packet.action(entityId, MANA, currentMana);
     }
 }
 
@@ -497,7 +496,7 @@ void ServerGame::handleNewPlayer()
     if (_playerCount == NB_PLAYER_TO_START && !_gameStarted) {
         _gameStarted = true;
         _waveTimer.restart();
-        startLevel(4);   // Need to change that later to have a level management
+        _levelLoader.loadFromFile(4, this);   // Need to change that later to have a level management
     }
 }
 
@@ -553,7 +552,7 @@ void ServerGame::handleShoot(const uint32_t id)
         return;
     currentMana -= manaCost;
     data->setData("mana", std::to_string(currentMana));
-    _packet.updateMana(id, currentMana);
+    _packet.action(id, MANA, currentMana);
     createBullet(pos->getX(), pos->getY());
 }
 
@@ -784,6 +783,8 @@ void ServerGame::handleAction(const uint32_t id, const uint8_t action, const uin
         case BEAM : {
             break;
         }
+        default:
+            ;
     }
 }
 
