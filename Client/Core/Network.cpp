@@ -160,7 +160,7 @@ void Network::tcpThread()
         uint32_t value32;
         std::memcpy(&value32, &data[2], sizeof(value32));
         _udpPort = ntohl(value32);
-        _playerId = static_cast<unsigned char>(data[3]);
+        _playerId = static_cast<unsigned char>(data[1]);
 
         _udpSocket.send("", 0, _ip, _udpPort);
 
