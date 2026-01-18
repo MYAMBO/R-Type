@@ -28,8 +28,9 @@ public:
              int offsetX = 0, int offsetY = 0);
     ~Animator() override = default;
 
-    [[nodiscard]] int getCurrentFrame() const;
     [[nodiscard]] float getFrameRate() const;
+    [[nodiscard]] int getTotalFrames() const;
+    [[nodiscard]] int getCurrentFrame() const;
     [[nodiscard]] float getCurrentTime() const;
     [[nodiscard]] sf::IntRect getFrameRect() const;
 

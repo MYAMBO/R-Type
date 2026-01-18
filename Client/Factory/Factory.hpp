@@ -63,6 +63,7 @@ class Factory {
         void createPauseMenu();
         void createOptionsMenu();
         void createLevelSelect();
+        void createMusicGameplay();
         void createLoadingScreen();
         void createPlayer(uint64_t id = 0);
         void createBackground(sf::RenderWindow& window);
@@ -70,6 +71,7 @@ class Factory {
         void createPowerUp(float x, float y, int type, int entityId);
         void createBullet(size_t entityId, int x, int y, int type);
         void createEnemyBullet(size_t entityId, int x, int y);
+        void createBackwardEnemyBullet(size_t entityId, int x, int y);
         void createCompanion(uint64_t playerId);
         void createScraps(World &world, float x, float y);
         void createScrapUI(World &world, int index);
@@ -77,8 +79,13 @@ class Factory {
         void createBackGameUI();
         void createLasersCompanion(uint64_t companionId, uint64_t playerId);
         void createLevelCompanionUI();
+        void createGameOverScreen();
+        void createVictoryScreen();
+        void createPlayerHUD();
+        void createScoreDisplay();
+        void createWaitingMenu();
 
-        void createSparks(World &world, float x, float y, int amount);
+        void createSparks(World &world, float x, float y, int amount, SceneType scene, int lifeTime = 300);
     private:
         UIFactory _uiFactory;
         WorldFactory _worldFactory;

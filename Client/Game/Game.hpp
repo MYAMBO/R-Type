@@ -31,10 +31,13 @@ enum class SceneType {
     MENU = 2,
     OPTIONS = 3,
     LANGUAGES = 4,
+    WAITING_ROOM = 5,
     MYAMBO = 10,
     KAYU = 11,
     CREDITS = 42,
     PAUSE = 1000,
+    GAME_OVER = 8,
+    VICTORY = 9,
 };
 
 enum PlayerColor {
@@ -68,6 +71,7 @@ class Game {
         int killEntity(int id);
         void menudisplay();
         void gameplaydisplay();
+        void showEndScreen(uint8_t status);
         void createEnemy(float x, float y, uint16_t type);
         void updatePlayerMana(uint32_t playerId, int mana);
 

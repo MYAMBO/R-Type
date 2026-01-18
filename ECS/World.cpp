@@ -12,6 +12,7 @@
 #include "World.hpp"
 #include "Entity.hpp"
 
+#include <map>
 
 /**
  * @brief Constructs a new World object.
@@ -44,6 +45,32 @@ std::shared_ptr<Entity> World::createEntity(uint64_t id)
     return entity;
 }
 
+
+/**
+ * @brief Manages all systems and profiles their execution time.
+ */
+/*void World::manageSystems()
+{
+    static sf::Clock reportClock;
+    static std::map<std::string, float> accumulatedTime;
+    for (const auto& system : _systems) {
+        sf::Clock systemClock;
+        system->update(this->getDeltaTime(), *this);
+        float elapsed = systemClock.getElapsedTime().asMicroseconds();
+        accumulatedTime[typeid(*system).name()] += elapsed;
+    }
+
+    if (reportClock.getElapsedTime().asSeconds() >= 1.0f) {
+        std::cout << "\n--- [SYSTEMS PERF REPORT (total for 1s)] ---" << std::endl;
+        for (auto const& [name, time] : accumulatedTime) {
+            std::cout << "  " << name << " : " << (time / 1000.f) << " ms" << std::endl;
+        }
+        std::cout << "--------------------------------------------" << std::endl;
+        accumulatedTime.clear();
+        reportClock.restart();
+    }
+}*/
+
 /**
  * @brief Manages all systems in the world by calling their update methods.
  */
@@ -53,6 +80,7 @@ void World::manageSystems()
         system->update(this->getDeltaTime(), *this);
     }
 }
+
 
 /**
  * @brief Retrieves the current SFML event.
