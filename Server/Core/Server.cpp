@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <getopt.h>
 
 #include "TcpReader.hpp"
 

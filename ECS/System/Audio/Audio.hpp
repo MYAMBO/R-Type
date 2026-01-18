@@ -10,8 +10,6 @@
 
     #include "World.hpp"
 
-    #include <list>
-
 /**
  * @brief Audio system responsible for updating Audio components.
  * It handles PLAYING, PAUSED, and STOPPED states for every Audio component.
@@ -23,7 +21,6 @@ class Audio : public System {
         ~Audio() override = default;
 
         void update(const float &dt, World &w) override;
-    private:
 };
 
 #endif /* !AUDIO_HPP_ */

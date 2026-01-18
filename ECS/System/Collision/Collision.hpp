@@ -12,7 +12,6 @@
 #include "Position.hpp"
 #include "BoxCollider.hpp"
 #include "World.hpp"
-#include <iostream>
 #include <IGameNetwork.hpp>
 
 

@@ -10,8 +10,6 @@
 
     #include <memory>
     #include "World.hpp"
-    #include "Camera.hpp"
-    #include <map> 
 
 /**
  * @brief GameHelper class providing utility functions for game entities.

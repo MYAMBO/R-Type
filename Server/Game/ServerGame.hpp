@@ -11,10 +11,8 @@
 #include <unordered_set>
 #include <memory>
 #include <string>
-#include <SFML/System.hpp>
 #include "IGameNetwork.hpp"
 #include "World.hpp"
-#include "EntitiesType.hpp"
 #include "LevelLoader.hpp"
 #include "User.hpp"
 
@@ -46,10 +44,10 @@ class ServerGame {
         void createTank(float x, float y);
         void createSinusEnemy(float x, float y);
         void createShootingEnemy(float x, float y);
-        void createSinusShootingEnemy(const float x, const float y);
-        void createPortalBoss(const float x, const float y);
-        void createHealPowerUp(const float x, const float y);
-        void createWarningPortal(const float x, const float y, float duration);
+        void createSinusShootingEnemy(float x, float y);
+        void createPortalBoss(float x, float y);
+        void createHealPowerUp(float x, float y);
+        void createWarningPortal(float x, float y, float duration);
         void checkGameEnd();
         void sendGameEnd(uint8_t status);
 

@@ -22,7 +22,6 @@ class ScriptsSys : public System {
         ~ScriptsSys() override = default;
 
         void update(const float& dt, World &w) override;
-    private:
 };
 
 #endif

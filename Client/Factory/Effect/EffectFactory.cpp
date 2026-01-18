@@ -5,9 +5,24 @@
 ** EffectFactory
 */
 
+#include "Tag.hpp"
 #include "Game.hpp"
+#include "Data.hpp"
+#include "Text.hpp"
+#include "Music.hpp"
+#include "Layer.hpp"
+#include "Scene.hpp"
+#include "Script.hpp"
+#include "Network.hpp"
 #include "Factory.hpp"
-#include "EffectFactory.hpp"
+#include "Velocity.hpp"
+#include "Animator.hpp"
+#include "Position.hpp"
+#include "GuiWidget.hpp"
+#include "GameHelper.hpp"
+#include "SoundEffect.hpp"
+#include "RectangleShape.hpp"
+#include "ScriptsHandler.hpp"
 
 EffectFactory::EffectFactory(World& world) : _world(world)
 {

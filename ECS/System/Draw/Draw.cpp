@@ -5,7 +5,6 @@
 ** Draw.cpp
 */
 
-#include <iostream>
 #include <algorithm>
 #include <SFML/Graphics/Glsl.hpp>
 #include <SFML/Graphics/Image.hpp>
@@ -29,17 +28,20 @@
 Draw::Draw() : _shaderLoaded(false)
 {
     sf::Image img(sf::Vector2u(1, 1), sf::Color::White);
-    _whiteTexture.loadFromImage(img);
+    if (!_whiteTexture.loadFromImage(img))
+        throw std::runtime_error("Failed to load image");
 }
 
 void Draw::update(const float& dt, World &w)
 {
+    (void) dt;
     auto window = w.getWindow();
     if (!window)
         return;
 
     if (!_shaderLoaded) {
-        _shader.loadFromFile("../assets/shaders/colorblind.frag", sf::Shader::Type::Fragment);
+        if (!_shader.loadFromFile("../assets/shaders/colorblind.frag", sf::Shader::Type::Fragment))
+            throw std::runtime_error("Failed to load fragment");
         _shaderLoaded = true;
     }
     static int modeCheckClock = 0;

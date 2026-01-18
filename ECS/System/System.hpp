@@ -22,7 +22,6 @@ class System {
         virtual ~System() = default;
 
         virtual void update(const float& dt, World &w) = 0;
-    private:
 };
 
 #endif /* !SYSTEM_HPP_ */

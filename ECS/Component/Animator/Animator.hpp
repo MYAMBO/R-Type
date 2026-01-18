@@ -12,7 +12,6 @@
 
 #include "Component.hpp"
 
-
 /**
  * @brief Animator component to animate the sprite of entities.
  *

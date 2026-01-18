@@ -5,7 +5,6 @@
 ** SoundEffect Component
 */
 
-#include <thread>
 #include <iostream>
 
 #include "SoundEffect.hpp"

@@ -5,9 +5,14 @@
 ** ToolsFactory
 */
 
+#include "Tag.hpp"
+#include "Data.hpp"
 #include "Game.hpp"
+#include "Scene.hpp"
+#include "Script.hpp"
 #include "Factory.hpp"
 #include "ToolsFactory.hpp"
+#include "ScriptsHandler.hpp"
 
 ToolsFactory::ToolsFactory(World& world) : _world(world)
 {

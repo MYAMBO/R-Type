@@ -22,7 +22,6 @@ class Movement : public System {
         ~Movement() override = default;
 
         void update(const float& dt, World &w) override;
-    private:
 };
 
 #endif
