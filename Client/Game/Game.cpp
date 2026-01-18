@@ -202,7 +202,7 @@ void Game::loadingRun()
     updateLoadingState(0.1f, "Loading assets...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _factory.createCamera();
-    _factory.createWaitingMenu();
+    _factory.createWaitingMenu(&_network);
     updateLoadingState(0.3f, "Generating Menu...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _factory.createMenu();
@@ -336,8 +336,7 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
 
         }
         if (inputSystem->isTriggered(*eventOpt, KeyboardKey::Key_N)) {
-            _world.setCurrentScene(static_cast<int>(SceneType::GAME_OVER));
-
+            _world.setCurrentScene(static_cast<int>(SceneType::GAMEPLAY));
         }
         inputSystem->update(0.0f, _world);
     }
@@ -506,6 +505,13 @@ void Game::playerInput(uint32_t entityId, World &world)
             _packet.setTotalPacketNbr(1);
             isShootKeyPressed = true;
             compPlayer->getComponent<SoundEffect>()->play();
+            int mana = std::stoi(dataComp->getData("mana"));
+            if (mana >= 20) {
+                mana -= 20;
+                if (mana < 0)
+                    mana = 0;
+                dataComp->setData("mana", std::to_string(mana));
+            }
             auto group = GameHelper::getEntitiesByGroup(world, compPlayer->getComponent<Group>()->getId());
             for (auto& entity : group) {
                 if (entity->getComponent<Tag>()->getTag() == "companion") {
@@ -694,6 +700,11 @@ void Game::updatePlayerMana(const uint32_t playerId, const int mana)
     auto dataComp = player->getComponent<Data>();
     if (dataComp)
         dataComp->setData("mana", std::to_string(mana));
+}
+
+void Game::startGameFromServer()
+{
+    _startGameRequested = true;
 }
 
 void Game::showEndScreen(uint8_t status)

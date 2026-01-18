@@ -101,6 +101,13 @@ void Packetreader::interpretPacket()
                 }
                 break;
             }
+            case 0x0E: {
+                if (uint32_t playerId; payload >> playerId) {
+                    std::cout << "Player " << playerId << " is ready" << std::endl;
+                    if (_game) _game->handlePlayerReady(playerId);
+                }
+                break;
+            }
             default:
                 std::cerr << "Unknown opcode: " << static_cast<int>(opcode) << std::endl;
                 return;

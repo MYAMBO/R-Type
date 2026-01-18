@@ -238,6 +238,7 @@ void WorldFactory::createPlayer(uint64_t id, float x, float y)
     fire->addComponent<Group>(playerCount);
     fire->addComponent<Layer>(10);
     fire->addComponent<Tag>("fire");
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 /**
