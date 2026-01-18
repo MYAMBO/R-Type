@@ -469,25 +469,25 @@ void Game::playerInput(uint32_t entityId, World &world)
 
 
     if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("RIGHT")))) {
-        if (compCam->getPosition().x + compCam->getSize().x > pos->getX() + 7.0f) {
+        if (_window.getSize().x - 50.f > pos->getX() + 7.0f) {
             targetVx = 7.0f;
             moved = true;
         }
     }
     if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("LEFT")))) {
-        if (compCam->getPosition().x < pos->getX() - 7.0f) {
+        if (0 < pos->getX() - 7.0f) {
             targetVx = -7.0f;
             moved = true;
         }
     }
     if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("UP")))) {
-        if (compCam->getPosition().y < pos->getY() - 7.0f) {
+        if (0 < pos->getY() - 7.0f) {
             targetVy = -7.0f;
             moved = true;
         }
     }
     if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("DOWN")))) {
-        if (compCam->getPosition().y + compCam->getSize().y > pos->getY() + 7.0f) {
+        if (_window.getSize().y - 20.f > pos->getY() + 7.0f) {
             targetVy = 7.0f;
             moved = true;
         }
