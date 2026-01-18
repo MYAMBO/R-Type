@@ -10,6 +10,10 @@
 #include "Collision.hpp"
 #include "WorldFactory.hpp"
 
+#include <thread>
+static int playerCount = 0;
+
+
 WorldFactory::WorldFactory(World& world) : _world(world)
 {
 }
@@ -190,23 +194,22 @@ void WorldFactory::createBackwardEnemyBullet(size_t entityId, int x, int y)
  * 
  * This function initializes the player entity with necessary components.
  */
-void WorldFactory::createPlayer(uint64_t id)
+void WorldFactory::createPlayer(uint64_t id, float x, float y)
 {
-    
     if (GameHelper::getEntityById(_world, id) != nullptr)
         return;
-    static int playerCount = 0;
     if (playerCount >= 4)
         return;
+    playerCount++;
     auto player = _world.createEntity(id);
     player->addComponent<HP>(100);
-    player->addComponent<Position>(75.0f, 75.0f);
+    player->addComponent<Position>(x, y);
     player->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet42.gif"));
     player->addComponent<Scale>(3.f);
     player->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     player->addComponent<SoundEffect>(std::string("../assets/sounds/lazershoot.mp3"));
     player->addComponent<Layer>(10);
-    player->addComponent<Group>(playerCount + 1);
+    player->addComponent<Group>(playerCount);
     player->addComponent<Damage>(10);
     player->addComponent<BoxCollider>(33.0f, 19.0f);
 
@@ -216,7 +219,7 @@ void WorldFactory::createPlayer(uint64_t id)
     };
     player->addComponent<Data>(dataMap);
 
-    if (playerCount == 0) {
+    if (playerCount - 1 == 0) {
         player->addComponent<Velocity>(0.f, 0.f);
         player->addComponent<Animator>(2, 2, 3.f, 0, 0, 33, 19, 0, 0);
         player->addComponent<Tag>("player");
@@ -224,10 +227,7 @@ void WorldFactory::createPlayer(uint64_t id)
         player->addComponent<Animator>(2, 2, 3.f, 0, (playerCount * 17), 33, 19, 0, 0);
         player->addComponent<Tag>("player_mate");
     }
-    if (player->getComponent<Tag>()->getTag() == "player_mate")
-        return;
 
-    playerCount++;
     auto fire = _world.createEntity();
     fire->addComponent<Position>(0.f, 85.f);
     fire->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet1.gif"));
@@ -238,6 +238,7 @@ void WorldFactory::createPlayer(uint64_t id)
     fire->addComponent<Group>(playerCount);
     fire->addComponent<Layer>(10);
     fire->addComponent<Tag>("fire");
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 /**
