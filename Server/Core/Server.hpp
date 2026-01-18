@@ -76,5 +76,6 @@ class Server : public IGameNetwork
         std::shared_ptr<ServerGame> _game;
         Packetreader _packetReader;
         std::vector<std::pair<std::string, unsigned short>> _udpUsers;
+        int _tick;
 };
 #endif // SERVER

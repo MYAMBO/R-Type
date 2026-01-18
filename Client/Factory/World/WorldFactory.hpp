@@ -18,6 +18,7 @@ class WorldFactory {
         void createCamera();
         void createBackground(sf::RenderWindow& window);
         void createEnemy(float x, float y, int type, int entityId);
+        void createPowerUp(float x, float y, int type, int entityId);
         void createPlayer(uint64_t playerId);
         void createEnemyBullet(size_t entityId, int x, int y);
         void createBullet(size_t entityId, int x, int y, int type);

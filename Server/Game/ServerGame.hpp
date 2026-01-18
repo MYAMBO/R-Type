@@ -26,12 +26,13 @@
 
 class ServerGame {
     public:
-        ServerGame(IGameNetwork& network);
+        ServerGame(IGameNetwork& network, int &tick);
         ~ServerGame() = default;
 
         void run();
         void serverUpdatePosition(uint32_t id, float x, float y);
         void handleShoot(uint32_t id);
+        void handleHeal(uint32_t id);
         void handleAction(uint32_t id, uint8_t action, uint32_t data);
         void handleNewPlayer();
         void startLevel(int levelId);
@@ -42,6 +43,7 @@ class ServerGame {
         void createShootingEnemy(float x, float y);
         void createSinusShootingEnemy(const float x, const float y);
         void createPortalBoss(const float x, const float y);
+        void createHealPowerUp(const float x, const float y);
 
     private:
         void createPlayer(float x, float y);
@@ -56,7 +58,9 @@ class ServerGame {
         void manaRegenScript(int entityId, World &world);
 
 
+        int& _tick;
         World _world;
+        Packet _packet;
         IGameNetwork& _network;
         int _playerCount = 0;
         bool _gameStarted = false;

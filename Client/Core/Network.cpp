@@ -34,8 +34,8 @@ Network::Network()
     _tcpPort = -1;
     _udpPort = -1;
     _debugMode = false;
-    _packetReader = ClientPacketreader(sf::Packet(), nullptr);
     _isRunning = true;
+    _packetReader = ClientPacketreader(sf::Packet(), nullptr);
 }
 
 void Network::getIpAdress(std::string option)
