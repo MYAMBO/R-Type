@@ -5,10 +5,12 @@
 ** Text
 */
 
+#include <iostream>
+
 #include "Text.hpp"
 
 /**
-* @brief Construtor of the Text component
+* @brief Constructor of the Text component
 * @param content The string content of the text
 * @param fontPath The path to the font file
 * @param size The character size of the text

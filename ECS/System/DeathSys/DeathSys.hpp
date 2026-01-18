@@ -22,11 +22,10 @@ private:
     IGameNetwork& _network;
 
 public:
-    // DeathSys() = default;
     DeathSys(IGameNetwork& network) : _network(network) {}
     ~DeathSys() override = default;
 
-    void update(const float& dt, World &w) override;
+    void update(const float& dt, World &world) override;
 };
 
 #endif //R_TYPE_DEATHSYS_H

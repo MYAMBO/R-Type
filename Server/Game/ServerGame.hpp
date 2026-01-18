@@ -12,7 +12,6 @@
 #include <SFML/System.hpp>
 #include "IGameNetwork.hpp"
 #include "World.hpp"
-#include "EntitiesType.hpp"
 #include "LevelLoader.hpp"
 #include "User.hpp"
 
@@ -29,7 +28,7 @@
 
 class ServerGame {
     public:
-        ServerGame(IGameNetwork& network, u_int32_t &tick, std::vector<std::pair<Packet, u_int32_t>> &ackPackets, std::vector<User> &users);
+        ServerGame(IGameNetwork& network, uint32_t &tick, std::vector<std::pair<Packet, uint32_t>> &ackPackets, std::vector<User> &users);
         ~ServerGame() = default;
 
         void run();
@@ -44,10 +43,10 @@ class ServerGame {
         void createTank(float x, float y);
         void createSinusEnemy(float x, float y);
         void createShootingEnemy(float x, float y);
-        void createSinusShootingEnemy(const float x, const float y);
-        void createPortalBoss(const float x, const float y);
-        void createHealPowerUp(const float x, const float y);
-        void createWarningPortal(const float x, const float y, float duration);
+        void createSinusShootingEnemy(float x, float y);
+        void createPortalBoss(float x, float y);
+        void createHealPowerUp(float x, float y);
+        void createWarningPortal(float x, float y, float duration);
         void checkGameEnd();
         void sendGameEnd(uint8_t status);
 
@@ -67,8 +66,9 @@ class ServerGame {
         void portalBossBarrageScript(int entityId, World& world);
         void portalBossBackwardPortalScript(int entityId, World& world);
         void portalBossSpawnTankScript(int entityId, World& world);
+        bool resolveBulletSpawnOverlap(const std::shared_ptr<Entity>& bullet, const std::string& targetTag);
 
-        u_int32_t& _tick;
+        uint32_t& _tick;
         World _world;
         Packet _packet;
         IGameNetwork& _network;
@@ -79,7 +79,7 @@ class ServerGame {
         bool _gameStarted = false;
         sf::Clock _waveTimer;
         std::unordered_set<uint32_t> _readyPlayers;
-        std::vector<std::pair<Packet, u_int32_t>> _ackPackets;
+        std::vector<std::pair<Packet, uint32_t>> _ackPackets;
         std::vector<User> _users;
 };
 

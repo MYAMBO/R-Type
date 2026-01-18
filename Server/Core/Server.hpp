@@ -16,7 +16,6 @@
     #pragma comment(lib, "ws2_32.lib")
 #else
     #include <netinet/in.h>
-    #include <unistd.h>
 #endif // _WIN32
 
 #include <thread>
@@ -78,7 +77,7 @@ class Server : public IGameNetwork
         Packetreader _packetReader;
         TcpReader _tcpReader;
         std::vector<std::pair<std::string, unsigned short>> _udpUsers;
-        std::vector<std::pair<Packet, u_int32_t>> _ackPackets;
-        u_int32_t _tick;
+        std::vector<std::pair<Packet, uint32_t>> _ackPackets;
+        uint32_t _tick;
 };
 #endif // SERVER

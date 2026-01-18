@@ -27,7 +27,6 @@
 
 #include "Game.hpp"
 #include "Network.hpp"
-#include "MyString.hpp"
 #include "ClientPacketreader.hpp"
 
 Network::Network() : _ip(sf::IpAddress(0)), _tcpReader(nullptr)
@@ -64,7 +63,7 @@ auto Network::parse(const int ac, char **av) -> void
                 {
                     getIpAdress(std::string(optarg));
                 }
-                catch (std::exception e)
+                catch (std::exception& e)
                 {
                     std::cerr << e.what() << std::endl;
                 }
@@ -124,7 +123,7 @@ void Network::udpThread()
         try
         {
             _packetReader.interpretPacket();
-            u_int32_t ackNbr = _packetReader.getHeader().ack;
+            uint32_t ackNbr = _packetReader.getHeader().ack;
             if (ackNbr != 0)
                 _lastPacketAckNbr = ackNbr;
         }
@@ -162,7 +161,8 @@ void Network::tcpThread()
         _udpPort = ntohl(value32);
         _playerId = static_cast<unsigned char>(data[1]);
 
-        _udpSocket.send("", 0, _ip, _udpPort);
+        if (_udpSocket.send("", 0, _ip, _udpPort) != sf::Socket::Status::Done)
+            log("fail to send UDP packet");
 
         std::lock_guard lock(_mutex);
         _ready = true;
@@ -222,7 +222,8 @@ void Network::sendPacket(Packet& packet)
     packet.setAck(_lastPacketAckNbr);
 
     const sf::Packet p = packet.getPacket();
-    _udpSocket.send(p.getData(), p.getDataSize(), _ip, _udpPort);
+    if (_udpSocket.send(p.getData(), p.getDataSize(), _ip, _udpPort) != sf::Socket::Status::Done)
+        log("fail to send UDP packet");
 }
 
 void Network::sendAll(sf::TcpSocket& socket, const void* data, std::size_t size)

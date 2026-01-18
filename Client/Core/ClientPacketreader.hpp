@@ -25,12 +25,10 @@ class ClientPacketreader
         void interpretPacket();
         void addPacket(sf::Packet data);
         [[nodiscard]] UDPHeader getHeader() const;
-        //void clear();
     private:
         sf::Packet _packet;
         UDPHeader _header;
         std::shared_ptr<Game> _game;
 };
-
 
 #endif //R_TYPE_PACKETREADER_HPP

@@ -5,14 +5,31 @@
 ** WorldFactory
 */
 
+#include "HP.hpp"
+#include "Tag.hpp"
+#include "Data.hpp"
 #include "Game.hpp"
+#include "Scale.hpp"
+#include "Music.hpp"
+#include "Scene.hpp"
+#include "Layer.hpp"
+#include "Script.hpp"
+#include "Damage.hpp"
 #include "Factory.hpp"
+#include "Velocity.hpp"
+#include "Animator.hpp"
+#include "Rotation.hpp"
 #include "Collision.hpp"
+#include "GameHelper.hpp"
+#include "SoundEffect.hpp"
+#include "BoxCollider.hpp"
+#include "EntitiesType.hpp"
 #include "WorldFactory.hpp"
+#include "ScriptsHandler.hpp"
 
 #include <thread>
-static int playerCount = 0;
 
+static int playerCount = 0;
 
 WorldFactory::WorldFactory(World& world) : _world(world)
 {

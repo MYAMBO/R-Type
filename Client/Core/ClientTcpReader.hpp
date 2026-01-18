@@ -10,10 +10,8 @@
 
 #include <memory>
 #include <string>
-#include <vector>
 
 #include "Game.hpp"
-
 
 class ClientTcpReader
 {
@@ -24,7 +22,6 @@ class ClientTcpReader
         std::string InterpretData(const std::string& data);
 
     private:
-
         std::shared_ptr<Game> _game;
 };
 

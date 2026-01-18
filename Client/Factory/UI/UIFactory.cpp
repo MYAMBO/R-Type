@@ -5,11 +5,18 @@
 ** UIFactory
 */
 
-#include "HP.hpp"
+#include "Tag.hpp"
 #include "Game.hpp"
 #include "Network.hpp"
 #include "Factory.hpp"
+#include "Animator.hpp"
+#include "Position.hpp"
 #include "UIFactory.hpp"
+#include "GuiWidget.hpp"
+#include "GameHelper.hpp"
+#include "SoundEffect.hpp"
+#include "RectangleShape.hpp"
+#include "ScriptsHandler.hpp"
 #include "GameHelperGraphical.hpp"
 
 #include <array>

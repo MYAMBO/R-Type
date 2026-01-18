@@ -10,12 +10,11 @@
 #include "Data.hpp"
 #include "Text.hpp"
 #include "Scale.hpp"
+#include "Layer.hpp"
 #include "Scene.hpp"
 #include "Group.hpp"
 #include "Music.hpp"
-#include "Inputs.hpp"
 #include "Sprite.hpp"
-#include "Rotation.hpp"
 #include "Position.hpp"
 #include "Velocity.hpp"
 #include "Animator.hpp"
@@ -27,8 +26,6 @@
 #include "GameHelperGraphical.hpp"
 
 #include "Network.hpp"
-#include "Packet.hpp"
-
 
 static std::shared_ptr<Entity> cachedPlayer = nullptr;
 static std::shared_ptr<Entity> cachedCamera = nullptr;
@@ -62,7 +59,6 @@ void refreshCaches(World& world) {
 
 void playerfire(size_t entityId, World &world)
 {
-    //refreshCaches(world);
     if (world.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
         return;
     auto fire = GameHelper::getEntityById(world, entityId);

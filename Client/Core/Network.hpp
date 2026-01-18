@@ -65,7 +65,7 @@ class Network : public IGameNetwork {
         bool _ready = false;
         unsigned int _playerId = 0;
         std::shared_ptr<Game> _game;
-        u_int32_t _lastPacketAckNbr = 0;
+        uint32_t _lastPacketAckNbr = 0;
         ClientPacketreader _packetReader;
         ClientTcpReader _tcpReader;
         bool _isRunning = true;

@@ -11,7 +11,6 @@
 
     #include <SFML/Graphics/Text.hpp>
     #include <SFML/Graphics/View.hpp>
-    #include <SFML/Graphics/Texture.hpp>
 
 #include "Component.hpp"
 

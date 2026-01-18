@@ -26,12 +26,13 @@
 #include "Collision.hpp"
 #include "Action.hpp"
 #include "Data.hpp"
+#include "EntitiesType.hpp"
 
 static bool gameOverSent = false;
 
 static auto getAckId() -> u_int32_t
 {
-    static u_int32_t id = 0;
+    static uint32_t id = 0;
     return ++id;
 }
 
@@ -40,7 +41,7 @@ static auto getAckId() -> u_int32_t
  *
  * Initializes the game.
  */
-ServerGame::ServerGame(IGameNetwork& network, u_int32_t &tick, std::vector<std::pair<Packet, u_int32_t>> &ackPackets, std::vector<User> &users) :
+ServerGame::ServerGame(IGameNetwork& network, uint32_t &tick, std::vector<std::pair<Packet, uint32_t>> &ackPackets, std::vector<User> &users) :
 _tick(tick), _network(network), _ackPackets(ackPackets), _users(users)
 {
     _world.addSystem<ScriptsSys>();
@@ -75,7 +76,7 @@ void ServerGame::run()
         checkDeaths();
         _ackPackets.erase(
             std::remove_if(_ackPackets.begin(), _ackPackets.end(),
-                [this](const std::pair<Packet, u_int32_t>& tmpPacket) {
+                [this](const std::pair<Packet, uint32_t>& tmpPacket) {
                     return tmpPacket.second + 1500 < _tick;
                 }),
             _ackPackets.end()
@@ -393,6 +394,35 @@ void ServerGame::createWave()
         createEnemy(1920 + static_cast<float>(i) * 100, 200 + static_cast<float>(i % 3) * 250);
 }
 
+bool ServerGame::resolveBulletSpawnOverlap(const std::shared_ptr<Entity>& bullet, const std::string& targetTag)
+{
+    auto bulletPos = bullet->getComponent<Position>();
+    auto bulletCol = bullet->getComponent<BoxCollider>();
+    auto bulletDmg = bullet->getComponent<Damage>();
+    if (!bulletPos || !bulletCol || !bulletDmg)
+        return false;
+    for (const auto& entity : _world.getAllEntitiesWithComponent<Tag>()) {
+        auto tag = entity->getComponent<Tag>();
+        if (!tag || tag->getTag() != targetTag)
+            continue;
+        auto hp = entity->getComponent<HP>();
+        auto pos = entity->getComponent<Position>();
+        auto col = entity->getComponent<BoxCollider>();
+        if (!hp || !pos || !col)
+            continue;
+        if (!Collision::checkCollision(*bulletCol, *bulletPos, *col, *pos))
+            continue;
+
+        int newHp = static_cast<int>(hp->getHP()) - bulletDmg->getDamage();
+        if (newHp < 0)
+            newHp = 0;
+        hp->setHP(static_cast<unsigned int>(newHp));
+        _world.killEntity(bullet->getId());
+        return true;
+    }
+    return false;
+}
+
 /**
  * @brief define the movement of a bullet.
  *
@@ -402,18 +432,18 @@ void ServerGame::createWave()
 void ServerGame::BulletMovement(const uint32_t entityId, World &world)
 {
     const auto entity = GameHelper::getEntityById(world, entityId);
-    const auto vel = entity->getComponent<Velocity>();
+    
+    if (!entity)
+        return;
+    
     const auto pos = entity->getComponent<Position>();
+    if (!pos)
+        return;
 
-    if (vel) {
-        pos->setX(pos->getX() + vel->getVelocityX() * world.getDeltaTime());
-        pos->setY(pos->getY() + vel->getVelocityY() * world.getDeltaTime());
-    }
     if (pos->getX() > 2800 || pos->getX() < -100) {
         world.killEntity(entityId);
         _packet.dead(entityId);
     } else {
-        pos->setX(pos->getX() + 10 * world.getDeltaTime());
         _packet.updatePosition(entityId, pos->getX(), pos->getY());
     }
 }
@@ -441,6 +471,8 @@ void ServerGame::createBullet(const float x, const float y)
         }
     );
     _packet.Spawn(bullet->getId(), Bullet, x + 60.f, y + 15.f);
+    if (resolveBulletSpawnOverlap(bullet, "enemy"))
+        _packet.dead(bullet->getId());
 }
 
 void ServerGame::createEnemyBullet(const float x, const float y)
@@ -460,6 +492,8 @@ void ServerGame::createEnemyBullet(const float x, const float y)
         }
     );
     _packet.Spawn(bullet->getId(), EnemyBullet, x + 60.f, y + 15.f);
+    if (resolveBulletSpawnOverlap(bullet, "player"))
+        _packet.dead(bullet->getId());
 }
 
 void ServerGame::createEnemyBackwardBullet(const float x, const float y)
@@ -479,6 +513,8 @@ void ServerGame::createEnemyBackwardBullet(const float x, const float y)
         }
     );
     _packet.Spawn(bullet->getId(), BackwardEnemyBullet, x + 60.f, y + 15.f);
+    if (resolveBulletSpawnOverlap(bullet, "player"))
+        _packet.dead(bullet->getId());
 }
 
 /**
@@ -571,14 +607,6 @@ void ServerGame::serverUpdatePosition(const uint32_t id, const float x, const fl
 
     const auto pos = entity->getComponent<Position>();
 
-    const auto distanceX = pos->getX() - x;
-    const auto distanceY = pos->getY() - y;
-
-    // if is not good for now just set the position
-    //if (distanceX * distanceX + distanceY * distanceY <= 20.f) {
-    //    pos->setX(x);
-    //    pos->setY(y);
-    //}
     pos->setX(x);
     pos->setY(y);
     _packet.updatePosition(id, x, y);
@@ -600,7 +628,7 @@ void ServerGame::handleShoot(const uint32_t id)
     if (!pos || !data)
         return;
     int currentMana = std::stoi(data->getData("mana"));
-    const int manaCost = 5;
+    const int manaCost = 10;
     if (currentMana < manaCost)
         return;
     currentMana -= manaCost;
@@ -810,6 +838,7 @@ void ServerGame::createPortalBoss(const float x, const float y)
  */
 void ServerGame::handleAction(const uint32_t id, const uint8_t action, const uint32_t data)
 {
+    (void) data;
     switch (action)
     {
         case FIRE : {

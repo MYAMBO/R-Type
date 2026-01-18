@@ -5,14 +5,13 @@
 ** DeathSys
 */
 
-#include "DeathSys.hpp"
-#include "Animator.hpp"
 #include "Sprite.hpp"
 #include "Tag.hpp"
 #include "GameHelper.hpp"
 
 void DeathSys::update(const float &dt, World &world)
 {
+    (void)dt;
     std::vector<uint64_t> entitiesToKill;
     auto entities = world.getAllEntitiesWithComponent<HP>();
 

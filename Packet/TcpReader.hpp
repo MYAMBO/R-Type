@@ -8,7 +8,6 @@
 #ifndef TCP_READER_HPP
     #define TCP_READER_HPP
 
-    #include <vector>
     #include <string>
 
 /**

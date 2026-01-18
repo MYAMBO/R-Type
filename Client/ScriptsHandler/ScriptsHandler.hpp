@@ -8,9 +8,6 @@
 #ifndef SCRIPTS_HPP_
     #define SCRIPTS_HPP_
 
-    #include "World.hpp"
-    #include "Script.hpp"
-
 void refreshCaches(World& world);
 void dotScript(int entityId, World& world);
 void kayuScript(int entityId, World& world);

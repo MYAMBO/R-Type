@@ -50,12 +50,14 @@ R-Type is a modern reimplementation of the classic arcade shooter with a focus o
 git clone https://github.com/MYAMBO/R-Type.git
 cd R-Type
 
-# Create build directory
-mkdir build && cd build
+# Launch the build script (Linux)
+./build.sh
 
-# Configure and build
-cmake ..
-make
+# Launch the build script (Windows)
+./build.bat
+
+# Enter on build directory
+cd build
 
 # Run the server
 ./r-type_server -p 4444 -u 1111
@@ -63,8 +65,6 @@ make
 # Run the client (in another terminal)
 ./r-type_client -p 4444 -u localhost
 ```
-
-
 
 ---
 

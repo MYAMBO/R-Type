@@ -8,6 +8,8 @@
 #ifndef UIFACTORY_HPP_
     #define UIFACTORY_HPP_
 
+#include <functional>
+
 #include "LanguageHandler.hpp"
 
 class Game;

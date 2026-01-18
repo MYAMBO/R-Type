@@ -5,17 +5,10 @@
 ** GameHelper
 */
 
-#include "HP.hpp"
 #include "Tag.hpp"
 #include "Group.hpp"
-#include "Damage.hpp"
-#include "Camera.hpp"
-#include "Position.hpp"
-#include "Velocity.hpp"
 #include "GameHelper.hpp"
 #include "BoxCollider.hpp"
-
-
 
 /**
  * @brief Retrieves the main player from the world.

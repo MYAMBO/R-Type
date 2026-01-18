@@ -9,7 +9,6 @@
 
 #include <iostream>
 
-
 /**
      * @brief Construct a new Animator component.
      *

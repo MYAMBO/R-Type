@@ -9,7 +9,6 @@
     #define MUSIC_HPP_
 
     #include <string>
-    #include <memory>
     #include <SFML/Audio.hpp>
 
     #include "Component.hpp"
