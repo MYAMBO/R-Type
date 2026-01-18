@@ -8,6 +8,8 @@
 #include "DeathSys.hpp"
 #include "Animator.hpp"
 #include "Sprite.hpp"
+#include "Tag.hpp"
+#include "GameHelper.hpp"
 
 void DeathSys::update(const float &dt, World &world)
 {
@@ -31,6 +33,11 @@ void DeathSys::update(const float &dt, World &world)
         }
     }
     for (auto id : entitiesToKill) {
-        world.killEntity(id);
+        auto entity = GameHelper::getEntityById(world, id);
+        if (!entity)
+            continue;
+        auto tag = entity->getComponent<Tag>();
+        if (tag && tag->getTag() != "player")
+            world.killEntity(id);
     }
 }

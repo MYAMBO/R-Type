@@ -514,6 +514,21 @@ void ServerGame::handlePlayerReady(const uint32_t playerId)
     std::cout << "Player " << playerId << " is ready. Ready count: " << _readyCount << "/" << _playerCount << std::endl;
 
     if (_readyCount == NB_PLAYER_TO_START && !_gameStarted && _playerCount >= NB_PLAYER_TO_START) {
+        auto test = _world.getAllEntitiesWithComponent<Tag>();
+        for (const auto& entity : test) {
+            auto tag = entity->getComponent<Tag>();
+            if (tag && tag->getTag() == "player") {
+                auto pos = entity->getComponent<Position>();
+                pos->setX(200.f);
+                pos->setY(300.f);
+                auto hpComp = entity->getComponent<HP>();
+                if (hpComp) {
+                    hpComp->setHP(100);
+                    hpComp->setAlive(true);
+                }
+                printf("Player %d position reset to (200, 300) and HP restored.\n", entity->getId());
+            }
+        }
         _gameStarted = true;
         _waveTimer.restart();
         Packet startPacket;
@@ -613,7 +628,12 @@ void ServerGame::checkDeaths()
             }
             hp->setAlive(false);
             _packet.dead(entity->getId());
-            _world.killEntity(entity->getId());
+            auto tag = entity->getComponent<Tag>();
+            if (tag && tag->getTag() != "player") {
+                _world.killEntity(entity->getId());
+            } else if (!tag) {
+                _world.killEntity(entity->getId());
+            }
             _packet.setAck(getAckId());
             _ackPackets.emplace_back(_packet, _tick);
             for (auto tmp : _users)
@@ -745,8 +765,6 @@ void ServerGame::portalBossSpawnTankScript(int entityId, World& world)
         float offsetY =  800.0f;
         createTank(pos->getX(), pos->getY() + 60.0f);
         createTank(pos->getX(), pos->getY() + 60.0f + offsetY);
-
-
     }
 }
 
@@ -832,6 +850,13 @@ void ServerGame::checkGameEnd()
             _readyPlayers.clear();
             gameOverSent = true;
             _gameStarted = false;
+            for (const auto& entity : _world.getAllEntitiesWithComponent<Tag>()) {
+                auto tag = entity->getComponent<Tag>();
+                if (tag && tag->getTag() == "enemy") {
+                    _world.killEntity(entity->getId());
+                    _packet.dead(entity->getId());
+                }
+            }
         }
         return;
     }
