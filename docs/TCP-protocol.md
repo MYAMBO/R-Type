@@ -12,7 +12,7 @@ TCP is used for reliable communication of authentication, session management, an
 | Connect Request | `0x01` | -                 | Requests connection to server |
 | Login           | `0x02` | `Name (15 bytes)` | Sends player username         |
 | Ready           | `0x03` | `ReadyStatus (1)` | `0 = not ready`, `1 = ready`  |
-| Select Level    | `0x06` | `Level name`      | Send selected level           |
+| Select Level    | `0x06` | `Level Id`        | Send selected level           |
 | Upload level    | `0x07` | `Level file`      | Send a new map to the server  |
 
 ---
