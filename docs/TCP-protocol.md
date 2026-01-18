@@ -12,21 +12,21 @@ TCP is used for reliable communication of authentication, session management, an
 | Connect Request | `0x01` | -                 | Requests connection to server |
 | Login           | `0x02` | `Name (15 bytes)` | Sends player username         |
 | Ready           | `0x03` | `ReadyStatus (1)` | `0 = not ready`, `1 = ready`  |
-| Select Level    | `0x06` | `Name` | Send the selected level       |
-| Upload Level    | `0x07` | `Name`            | Send a new Level Json         |
+| Select Level    | `0x06` | `Level Id`        | Send selected level           |
+| Upload level    | `0x07` | `Level file`      | Send a new map to the server  |
 
 ---
 
 ## Server → Client Messages
 
-| Command              | Code   | Fields                         | Description                     |
-|----------------------|--------|--------------------------------|---------------------------------|
+| Command              | Code | Fields                         | Description                     |
+|----------------------|------|--------------------------------|---------------------------------|
 | Connect Response     | `0x01` | `PlayerID (1)` - `UDPPort (4)` | Assigns player ID and UDP port  |
 | Login Response       | `0x02` | `Status (1)`                   | `0 = fail`, `1 = success`       |
 | Ready Acknowledgment | `0x03` | -                              | Confirms all players are ready  |
 | Game Start           | `0x04` | -                              | Game officially starts          |
 | Game Abort           | `0x05` | -                              | Game aborted or server shutdown |
-| Level Selection      | `0x06` | `List of maps`                 | List of level for selection     |
+| Level Selection      | `0x06` | `List of Levels`               | Send list of all Levels         |
 
 ---
 

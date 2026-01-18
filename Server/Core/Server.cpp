@@ -212,7 +212,8 @@ void Server::udpThread()
  */
 void Server::tcpThread()
 {
-    TcpReader _tcpReader;
+    TcpReader _tcpReader(true);
+
     while (true)
     {
         _mutex.lock();
