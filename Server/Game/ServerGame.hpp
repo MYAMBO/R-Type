@@ -72,6 +72,7 @@ class ServerGame {
         Packet _packet;
         IGameNetwork& _network;
         LevelLoader _levelLoader;
+        int _level = 2;
         int _playerCount = 0;
         int _readyCount = 0;
         bool _gameStarted = false;

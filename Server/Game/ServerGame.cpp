@@ -512,7 +512,7 @@ void ServerGame::handlePlayerReady(const uint32_t playerId)
         startPacket.setId(0).setAck(0).setPacketNbr(1).setTotalPacketNbr(1);
         startPacket.startGame();
         _network.sendPacket(startPacket);
-        _levelLoader.loadFromFile(5, this);   // Need to change that later to have a level management
+        _levelLoader.loadFromFile(_level, this);
         std::cout << "Game started!" << std::endl;
     }
 }
@@ -840,6 +840,9 @@ void ServerGame::checkGameEnd()
     if (!enemyAlive && !victorySent && alivePlayers > 0) {
         victorySent = true;
         std::cout << "VICTORY - All enemies defeated!" << std::endl;
+        if (_levelLoader.getLevelsCount() > _level) {
+            _level++;
+        }
         sendGameEnd(1);
     }
 }

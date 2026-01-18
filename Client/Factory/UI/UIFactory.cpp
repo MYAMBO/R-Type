@@ -602,7 +602,7 @@ void UIFactory::createMenu() const
             sfx->play();
         auto m = GameHelper::getEntityByTag(_world, "menu_music");
         if (m) m->getComponent<Music>()->stop();
-        _world.setCurrentScene(static_cast<int>(SceneType::WAITING_ROOM));   // here call server for say ready to play
+        _world.setCurrentScene(static_cast<int>(SceneType::WAITING_ROOM));
     });
     guiLayout->addSpace(0.2f);
 
@@ -910,7 +910,7 @@ void UIFactory::createGameOverScreen()
     btnRetry->addComponent<Tag>("game_over_button_retry");
     auto guiRetry = btnRetry->getComponent<GuiWidget>();
     styleNeonButton(guiRetry);
-    guiRetry->setCallback([this]() { _world.setCurrentScene(static_cast<int>(SceneType::GAMEPLAY)); });
+    guiRetry->setCallback([this]() { _world.setCurrentScene(static_cast<int>(SceneType::WAITING_ROOM)); });
 
     auto btnMenu = _world.createEntity();
     btnMenu->addComponent<GuiWidget>(WidgetType::BUTTON, "ABANDON MISSION", layoutEnt->getId());
@@ -998,7 +998,9 @@ void UIFactory::createVictoryScreen()
     btnNext->addComponent<Tag>("victory_button_next");
     auto guiNext = btnNext->getComponent<GuiWidget>();
     styleNeonButton(guiNext);
-    guiNext->setCallback([this]() { _world.setCurrentScene(static_cast<int>(SceneType::MENU)); });
+    guiNext->setCallback([this]() {
+        _world.setCurrentScene(static_cast<int>(SceneType::WAITING_ROOM));
+    });
 
     auto btnCredits = _world.createEntity();
     btnCredits->addComponent<GuiWidget>(WidgetType::BUTTON, "VIEW CREDITS", layoutEnt->getId());
