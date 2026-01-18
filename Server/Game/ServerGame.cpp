@@ -131,7 +131,8 @@ void ServerGame::manaRegenScript(int entityId, World &world)
         currentMana += 1;
         if (currentMana > maxMana)
             currentMana = maxMana;
-        data->setData("mana", std::to_string(currentMana))_packet.action(entityId, MANA, currentMana);
+        data->setData("mana", std::to_string(currentMana));
+        _packet.action(entityId, MANA, currentMana);
     }
 }
 
@@ -569,19 +570,6 @@ void ServerGame::handleHeal(const uint32_t id)
     unsigned int newHp = std::min(currentHp + 20, maxHp);
     hp->setHP(newHp);
     _packet.action(id, HEAL, newHp);
-}
-
-
-/**
- * @brief Create the level and place the enemies via the packet sent.
- *
- * @param levelId The number id of the chosen level.
- */
-void ServerGame::startLevel(const int levelId)
-{
-    const std::string levelPath = "../Levels/level" + std::to_string(levelId) + ".json";
-    LevelLoader::loadFromFile(levelPath, this);
-
 }
 
 void ServerGame::checkDeaths()
