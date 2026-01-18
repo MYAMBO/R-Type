@@ -27,12 +27,19 @@
 #include "Action.hpp"
 #include "Data.hpp"
 
+static auto getAckId() -> u_int32_t
+{
+    static u_int32_t id = 0;
+    return ++id;
+}
+
 /**
  * @brief Constructs a new Game object.
  *
  * Initializes the game.
  */
-ServerGame::ServerGame(IGameNetwork& network, int &tick) : _tick(tick), _network(network)
+ServerGame::ServerGame(IGameNetwork& network, u_int32_t &tick, std::vector<std::pair<Packet, u_int32_t>> &ackPackets, std::vector<User> &users) :
+_tick(tick), _network(network), _ackPackets(ackPackets), _users(users)
 {
     _world.addSystem<ScriptsSys>();
     _world.addSystem<Collision>(_network);
@@ -64,6 +71,29 @@ void ServerGame::run()
         // }
         _world.manageSystems();
         checkDeaths();
+        _ackPackets.erase(
+            std::remove_if(_ackPackets.begin(), _ackPackets.end(),
+                [this](const std::pair<Packet, u_int32_t>& tmpPacket) {
+                    return tmpPacket.second + 1500 < _tick;
+                }),
+            _ackPackets.end()
+        );
+
+        for (const auto& tmp : _users)
+        {
+            if (_ackPackets.empty())
+                break;
+            if (tmp._ackList.empty())
+                continue;
+            for (auto tmpAck : tmp._ackList)
+            {
+                for (auto [fst, snd] : _ackPackets)
+                {
+                    if (snd == tmpAck && snd + 500 < _tick)
+                        _network.sendPacket(fst);
+                }
+            }
+        }
         if (_packet.getPacket().getDataSize() != 12) {
             _network.sendPacket(_packet);
             _packet.clear();
@@ -100,8 +130,7 @@ void ServerGame::manaRegenScript(int entityId, World &world)
         currentMana += 1;
         if (currentMana > maxMana)
             currentMana = maxMana;
-        data->setData("mana", std::to_string(currentMana));
-        _packet.updateMana(entityId, currentMana);
+        data->setData("mana", std::to_string(currentMana))_packet.action(entityId, MANA, currentMana);
     }
 }
 
@@ -506,7 +535,7 @@ void ServerGame::handleShoot(const uint32_t id)
         return;
     currentMana -= manaCost;
     data->setData("mana", std::to_string(currentMana));
-    _packet.updateMana(id, currentMana);
+    _packet.action(id, MANA, currentMana);
     createBullet(pos->getX(), pos->getY());
 }
 
@@ -549,9 +578,20 @@ void ServerGame::checkDeaths()
         if (!hp || hp->getHP() > 0)
             continue;
         if (hp->isAlive()) {
+            if (_packet.getPacket().getDataSize() != 12) {
+                _network.sendPacket(_packet);
+                _packet.clear();
+            }
             hp->setAlive(false);
             _packet.dead(entity->getId());
             _world.killEntity(entity->getId());
+            _packet.setAck(getAckId());
+            _ackPackets.emplace_back(_packet, _tick);
+            for (auto tmp : _users)
+                tmp._ackList.emplace_back(_tick);
+            _network.sendPacket(_packet);
+            _packet.setAck(0);
+            _packet.clear();
         }
     }
 }
@@ -599,5 +639,7 @@ void ServerGame::handleAction(const uint32_t id, const uint8_t action, const uin
         case BEAM : {
             break;
         }
+        default:
+            ;
     }
 }

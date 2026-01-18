@@ -91,15 +91,6 @@ void ClientPacketreader::interpretPacket()
                 }
                 break;
             }
-            case 0x0E: {
-                uint32_t playerId;
-                int mana;
-                if (payload >> playerId >> mana) {
-                    if (_game)
-                        _game->updatePlayerMana(playerId, mana);
-                }
-                break;
-            }
             default:
                 return;
         }
@@ -112,4 +103,12 @@ void ClientPacketreader::interpretPacket()
 void ClientPacketreader::addPacket(sf::Packet data)
 {
     _packet = std::move(data);
+}
+
+/**
+ * @brief returns the packet header
+ */
+UDPHeader ClientPacketreader::getHeader() const
+{
+    return _header;
 }

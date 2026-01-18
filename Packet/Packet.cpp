@@ -91,7 +91,7 @@ Packet& Packet::setTotalPacketNbr(const uint8_t totalPacketNbr)
  */
 void Packet::timeSync(const uint32_t time)
 {
-    _payload << static_cast<uint8_t>(0x06); // opcode
+    _payload << static_cast<uint8_t>(0x08); // opcode
     _payload << time;                       // 4 bytes
 }
 
@@ -144,7 +144,7 @@ void Packet::collision(const uint32_t entityOneId, const uint32_t entityTwoId)
  */
 void Packet::dead(const uint32_t id)
 {
-    _payload << static_cast<uint8_t>(0x08); // opcode
+    _payload << static_cast<uint8_t>(0x0B); // opcode
     _payload << id;                         // 4 bytes
 }
 
@@ -169,16 +169,4 @@ void Packet::action(const uint32_t id, const uint8_t action, const uint32_t data
     _payload << id;                         // 4 bytes
     _payload << action;                     // 1 byte
     _payload << data;                     // 4 byte
-}
-
-/**
- * @brief Write in packet to update mana
- * @param playerId The id of the player
- * @param mana The current mana value
- */
-void Packet::updateMana(const uint32_t playerId, const int mana)
-{
-    _payload << static_cast<uint8_t>(0x0E); // opcode
-    _payload << playerId;                    // 4 bytes
-    _payload << mana;                        // 4 bytes
 }
