@@ -137,7 +137,7 @@ void Network::udpThread()
 void Network::tcpThread()
 {
     bool ready = false;
-    TcpReader _tcpReader(true);
+    TcpReader _tcpReader(false);
 
     while (_isRunning && !ready)
     {
