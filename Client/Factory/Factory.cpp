@@ -148,3 +148,8 @@ void Factory::createMusicGameplay()
 {
     _worldFactory.createMusicGameplay();
 }
+
+void Factory::createWaitingMenu()
+{
+    _uiFactory.createWaitingMenu();
+}

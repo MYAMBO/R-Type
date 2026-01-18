@@ -602,7 +602,7 @@ void UIFactory::createMenu() const
             sfx->play();
         auto m = GameHelper::getEntityByTag(_world, "menu_music");
         if (m) m->getComponent<Music>()->stop();
-        _world.setCurrentScene(static_cast<int>(SceneType::GAMEPLAY));
+        _world.setCurrentScene(static_cast<int>(SceneType::WAITING_ROOM));   // here call server for say ready to play
     });
     guiLayout->addSpace(0.2f);
 
@@ -1160,5 +1160,45 @@ void UIFactory::createScoreDisplay()
         float winWidth = static_cast<float>(w.getWindow()->getSize().x);
         float textWidth = textComp->getSfText().getGlobalBounds().size.x;
         posComp->setX(winWidth - textWidth - 50.f);
+    });
+}
+
+void UIFactory::createWaitingMenu()
+{
+    auto waitEntity = _world.createEntity();
+    waitEntity->addComponent<Scene>(static_cast<int>(SceneType::WAITING_ROOM));
+    waitEntity->addComponent<Layer>(LayerType::UI + 2);
+    waitEntity->addComponent<Tag>("waiting_room_text");
+    waitEntity->addComponent<Position>(0.f, 0.f);
+    waitEntity->addComponent<Text>("Waiting for players...", "../assets/font/regular.ttf", 60);
+    waitEntity->addComponent<Data>(std::map<std::string, std::string>{{"timer", "0"}});
+    auto textComp = waitEntity->getComponent<Text>();
+    textComp->setColor(255, 255, 255, 255); 
+    waitEntity->addComponent<Script>([](int id, World& w) {
+        if (w.getCurrentScene() != static_cast<int>(SceneType::WAITING_ROOM))
+            return;
+        auto e = GameHelper::getEntityById(w, id);
+        if (!e)
+            return;
+        auto posComp = e->getComponent<Position>();
+        auto textComp = e->getComponent<Text>();
+        float winWidth = static_cast<float>(w.getWindow()->getSize().x);
+        float textWidth = textComp->getSfText().getGlobalBounds().size.x;
+        posComp->setX((winWidth - textWidth) / 2.f);
+        posComp->setY(static_cast<float>(w.getWindow()->getSize().y) / 2.f - textComp->getSfText().getGlobalBounds().size.y / 2.f);
+        if (auto dataComp = e->getComponent<Data>()) {
+            int timer = std::stoi(dataComp->getData("timer"));
+            timer++;
+            if (timer >= 60) {
+                timer = 0;
+                std::string currentText = textComp->getText();
+                if (currentText.back() == '.') {
+                    textComp->setString("Waiting for players");
+                } else {
+                    textComp->setString(currentText + ".");
+                }
+            }
+            dataComp->setData("timer", std::to_string(timer));
+        }
     });
 }
