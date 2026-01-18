@@ -1,49 +1,51 @@
-## Game
+# Game Class
 
 The **Game** class is the central controller of the client-side application.  
-It coordinates the main game loop, manages the ECS **World**, handles networking synchronization via **IGameNetwork**, and delegates entity creation to the **Creator**. It also handles input processing and movement interpolation.
+It coordinates the main game loop, manages the ECS **World**, handles networking synchronization via **IGameNetwork**, and delegates entity creation to the **Factory**. It also manages scene transitions (Menu, Gameplay, Pause, etc.) and movement interpolation.
 
-### Enums
+## Enums
 
 The class defines several enumerations to standardize game constants:
 *   **LayerType**: Defines rendering order (`BACKGROUND = -1`, `UI = 1000`).
+*   **SceneType**: Defines the current state of the application (`MENU`, `GAMEPLAY`, `LOADING`, `PAUSE`, `GAME_OVER`, `VICTORY`, etc.).
 *   **PlayerColor**: Defines available player skin variants (`BLUE`, `PURPLE`, `RED`, `GREEN`).
-*   **entitiesType**: Defines identifiers for network spawning (`None`, `Player`, `Enemy`, `Bullet`).
 
-### Dependencies & Integration
+## Dependencies & Integration
 
 | Type | Name | Description |
 |:---|:---|:---|
 | **Manager** | [`World`](../ECS/World.md) | The ECS container managed by the Game. |
-| **Factory** | [`Creator`](../Creator/Creator.md) | Handles the instantiation of complex entities. |
-| **Interface** | [`IGameNetwork`](../Core/IGameNetwork.md) | Abstract interface for communicating with the server (UDP/TCP). |
+| **Factory** | [`Factory`](../Factory/Factory.md) | Handles the instantiation of complex entities. |
+| **Interface** | [`IGameNetwork`](../Core/IGameNetwork.md) | Abstract interface for communicating with the server. |
 
 ---
 
-### Public Methods
+## Public Methods
 
 | Method | Signature | Description |
 |:---|:---|:---|
-| **Constructor** | `Game(IGameNetwork& network, uint width, uint height, string title)` | Initializes the window, ECS, and Entity Creator. Inject the network interface. |
-| **Destructor** | `~Game()` | Cleans up resources and closes the window. |
-| **Run** | `void run()` | Starts the main game loop (Poll Events -> Network Sync -> Update -> Render). |
-| **Kill Entity** | `int killEntity(int id)` | Removes an entity from the world based on its ID. Returns status. |
-| **Handle Spawn** | `void handleSpawn(int id, int type, float x, float y)` | Called by the network when an entity needs to be created on the client side. |
-| **Scene Logic** | `void menudisplay()`<br>`void gameplaydisplay()` | Specific logic loops or update calls for the Menu and Gameplay scenes. |
+| **Constructor** | `Game(IGameNetwork& network, uint width, uint height, string title)` | Initializes the window, ECS, and Factory. Inject the network interface. |
+| **Run** | `void run()` | Starts the main game loop (Events -> Network Sync -> Update -> Render). |
+| **Update Entity** | `void updateEntity(uint32_t id, uint16_t type, float x, float y)` | Synchronizes or spawns an entity based on server data. |
+| **Handle Action** | `void handleAction(uint32_t id, uint8_t action, uint32_t data)` | Processes specific actions (animations, status changes) sent by the server. |
+| **Kill Entity** | `int killEntity(int id)` | Removes an entity from the world based on its ID. |
+| **Mana Update** | `void updatePlayerMana(uint32_t playerId, int mana)` | Updates the specific mana/resource component of a player. |
+| **Scene Logic** | `void menudisplay()` / `void gameplaydisplay()` | Specific logic for rendering and updating the Menu and Gameplay scenes. |
+| **End Screen** | `void showEndScreen(uint8_t status)` | Displays victory or defeat screens based on the status code. |
 
-### Private Internal Logic
+## Private Internal Logic
 
 | Method | Signature | Description |
 |:---|:---|:---|
-| **Game Input** | `void gameInput(std::shared_ptr<Inputs> inputSystem)` | Handles global inputs (window closing, escape key). |
-| **Player Input** | `void playerInput(int entityId, World &world)` | Processes local player inputs and sends move commands to the server. |
-| **Loading** | `void updateLoadingState(float progress, string status)` | Updates the visual representation of the loading screen. |
-| **Interpolation** | `void smootherMovement(int entityId, World &world, float tX, float tY)` | Smoothly moves a networked entity towards its target position (`tX`, `tY`) to hide network latency. |
-| **Shooting** | `void bulletShooting()` | Manages logic for automated shooting or bullet patterns. |
+| **Game Input** | `void gameInput(shared_ptr<Inputs> inputSystem)` | Handles global window inputs and scene-independent controls. |
+| **Player Input** | `void playerInput(uint32_t entityId, World &world)` | Processes local player inputs and sends move/action commands to the server. |
+| **Interpolation** | `void smootherMovement(int entityId, World &world, float tX, float tY)` | Smoothly moves a networked entity towards its target position to hide latency. |
+| **Persistence** | `void savefile()` / `void loadfile()` | Handles local data storage (settings, progress). |
+| **Heal** | `void healEntity(uint32_t entityId, uint32_t amount)` | Applies healing logic to a specific entity. |
 
 ---
 
-### Internal Data
+## Internal Data
 
 ```mermaid
 classDiagram
@@ -51,18 +53,20 @@ classDiagram
     - _window: sf::RenderWindow
     - _world: World
     - _network: IGameNetwork&
-    - _creator: Creator
+    - _factory: Factory
+    - _musicVolume: int
+    - _sfxVolume: int
     - _isShootKeyPressed: bool
     + Game(network: IGameNetwork&, width: uint, height: uint, title: string)
     + ~Game()
     + run() void
+    + updateEntity(id: uint32_t, type: uint16_t, x: float, y: float) void
+    + handleAction(id: uint32_t, action: uint8_t, data: uint32_t) void
     + killEntity(id: int) int
-    + handleSpawn(id: int, type: int, x: float, y: float) void
-    + menudisplay() void
-    + gameplaydisplay() void
+    + showEndScreen(status: uint8_t) void
     - gameInput(inputSystem: shared_ptr~Inputs~) void
-    - playerInput(entityId: int, world: World) void
-    - updateLoadingState(progress: float, status: string) void
+    - playerInput(entityId: uint32_t, world: World) void
     - smootherMovement(entityId: int, world: World, targetX: float, targetY: float) void
-    - bulletShooting() void
+    - savefile() void
+    - loadfile() void
   }
