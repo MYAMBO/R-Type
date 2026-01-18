@@ -8,7 +8,6 @@
 #include <thread>
 #include <chrono>
 
-#include "Tag.hpp"
 #include "Scene.hpp"
 #include "Music.hpp"
 #include "SoundEffect.hpp"

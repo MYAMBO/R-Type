@@ -16,7 +16,6 @@ class TextSystem : public System {
         ~TextSystem() override = default;
 
         void update(const float& dt, World &w) override;
-    private:
 };
 
 #endif

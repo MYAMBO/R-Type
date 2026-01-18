@@ -5,12 +5,9 @@
 ** ClientTcpReader.cpp
 */
 
-#include "ClientTcpReader.hpp"
-
-#include <cstdint>
-#include <array>
 #include <utility>
 
+#include "ClientTcpReader.hpp"
 #include "SFML/Audio/Music.hpp"
 
 ClientTcpReader::ClientTcpReader(std::shared_ptr<Game> game) : _game(std::move(game)) {}

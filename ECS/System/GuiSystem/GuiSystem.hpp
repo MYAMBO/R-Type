@@ -11,7 +11,6 @@
     #include <TGUI/Backend/SFML-Graphics.hpp>
 
     #include "System.hpp"
-    #include "GuiWidget.hpp"
 
 /**
  * @brief System to manage GUI widgets using TGUI.

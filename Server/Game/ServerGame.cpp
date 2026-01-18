@@ -26,6 +26,7 @@
 #include "Collision.hpp"
 #include "Action.hpp"
 #include "Data.hpp"
+#include "EntitiesType.hpp"
 
 static auto getAckId() -> u_int32_t
 {
@@ -578,14 +579,6 @@ void ServerGame::serverUpdatePosition(const uint32_t id, const float x, const fl
 
     const auto pos = entity->getComponent<Position>();
 
-    const auto distanceX = pos->getX() - x;
-    const auto distanceY = pos->getY() - y;
-
-    // if is not good for now just set the position
-    //if (distanceX * distanceX + distanceY * distanceY <= 20.f) {
-    //    pos->setX(x);
-    //    pos->setY(y);
-    //}
     pos->setX(x);
     pos->setY(y);
     _packet.updatePosition(id, x, y);
@@ -814,6 +807,7 @@ void ServerGame::createPortalBoss(const float x, const float y)
  */
 void ServerGame::handleAction(const uint32_t id, const uint8_t action, const uint32_t data)
 {
+    (void) data;
     switch (action)
     {
         case FIRE : {

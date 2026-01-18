@@ -12,7 +12,7 @@
     #include <memory>
 
     #include "World.hpp"
-    #include "GameHelper.hpp"
+    #include "Camera.hpp"
 
 /**
 * @brief Enumeration for different color blindness modes.

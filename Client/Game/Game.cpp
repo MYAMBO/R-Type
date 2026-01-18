@@ -26,12 +26,10 @@
 #include "Scene.hpp"
 #include "Action.hpp"
 #include "Audio.hpp"
-#include "Music.hpp"
 #include "Inputs.hpp"
 #include "Entity.hpp"
 #include "Script.hpp"
 #include "Camera.hpp"
-#include "Button.hpp"
 #include "Factory.hpp"
 #include "Velocity.hpp"
 #include "Position.hpp"
@@ -48,10 +46,7 @@
 #include "GuiSystem.hpp"
 #include "Animation.hpp"
 #include "Collision.hpp"
-#include "DeathSys.hpp"
 #include "ScriptsSys.hpp"
-
-#include "LevelLoader.hpp"
 
 /**
  * @brief Constructs a new Game object.

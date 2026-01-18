@@ -7,7 +7,10 @@
 
 #include "HP.hpp"
 #include "Tag.hpp"
-#include "Group.hpp"
+#include "Data.hpp"
+#include "Text.hpp"
+#include "Game.hpp"
+#include "Layer.hpp"
 #include "Scene.hpp"
 #include "Scale.hpp"
 #include "Damage.hpp"
@@ -20,9 +23,7 @@
 #include "GameHelper.hpp"
 #include "BoxCollider.hpp"
 #include "SoundEffect.hpp"
-
-#include "Game.hpp"
-#include "GameHelper.hpp"
+#include "ScriptsHandler.hpp"
 #include "GameHelperGraphical.hpp"
 
 /**

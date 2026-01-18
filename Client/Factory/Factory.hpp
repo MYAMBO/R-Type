@@ -8,38 +8,11 @@
 #ifndef FACTORY_HPP_
     #define FACTORY_HPP_
 
-    #include <memory>
     #include <cstdint>
-    #include <functional>
     #include <SFML/Graphics/RenderWindow.hpp>
 
-    #include "GameHelper.hpp"
     #include "GameHelperGraphical.hpp"
-    #include "ScriptsHandler.hpp"
-
-    #include "HP.hpp"
-    #include "Tag.hpp"
-    #include "Data.hpp"
-    #include "Text.hpp"
-    #include "Scale.hpp"
-    #include "Layer.hpp"
     #include "Group.hpp"
-    #include "Scene.hpp"
-    #include "Audio.hpp"
-    #include "Music.hpp"
-    #include "Sprite.hpp"
-    #include "Camera.hpp"
-    #include "Button.hpp"
-    #include "Script.hpp"
-    #include "Damage.hpp"
-    #include "Position.hpp"
-    #include "Velocity.hpp"
-    #include "Animator.hpp"
-    #include "Rotation.hpp"
-    #include "GuiWidget.hpp"
-    #include "SoundEffect.hpp"
-    #include "BoxCollider.hpp"
-    #include "RectangleShape.hpp"
 
 class Game; 
 class World;
