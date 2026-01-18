@@ -391,6 +391,9 @@ void UIFactory::createOptionsMenu() const
             data->setData("lastfont_used", "regular");
             dyslexiaMode = true;
         }
+        data->setData("god_mode", godMode ? "true" : "false");
+        data->setData("easy_mode", easyMode ? "true" : "false");
+        data->setData("hard_mode", hardMode ? "true" : "false");
     }
 
     _addColorBlindCycle("SETTINGS_COLOR_BLIND_MODE", layoutGeneralId);

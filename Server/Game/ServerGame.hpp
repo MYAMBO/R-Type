@@ -64,6 +64,7 @@ class ServerGame {
         void portalBossBarrageScript(int entityId, World& world);
         void portalBossBackwardPortalScript(int entityId, World& world);
         void portalBossSpawnTankScript(int entityId, World& world);
+        void setMode(bool godMode, bool easyMode, bool hardMode);
 
         World _world;
         IGameNetwork& _network;

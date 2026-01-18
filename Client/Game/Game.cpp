@@ -439,10 +439,14 @@ void Game::playerInput(uint32_t entityId, World &world)
         return;
     static bool isShootKeyPressed = false;
 
+
     auto inputSystem = world.getSystem<Inputs>();
     std::shared_ptr<Camera> compCam = GameHelperGraphical::getMainCamera(world);
     std::shared_ptr<Entity> compPlayer = GameHelper::getEntityById(world, entityId);
     auto settings = GameHelper::getEntityByTag(world, "game_controls_settings");
+    if (!compCam || !compPlayer || !inputSystem || !settings) {
+        return;
+    }
     auto data = settings->getComponent<Data>();
 
     if (!compCam || !compPlayer || !inputSystem || !data)
@@ -450,6 +454,10 @@ void Game::playerInput(uint32_t entityId, World &world)
 
     auto pos = compPlayer->getComponent<Position>();
     auto vel = compPlayer->getComponent<Velocity>();
+
+    if (!pos || !vel) {
+        return;
+    }
 
     float targetVx = 0.0f;
     float targetVy = 0.0f;

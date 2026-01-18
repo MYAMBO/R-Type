@@ -847,3 +847,27 @@ void ServerGame::checkGameEnd()
         sendGameEnd(1);
     }
 }
+
+void ServerGame::setMode(bool godMode, bool easyMode, bool hardMode)
+{
+    auto players = _world.getAllEntitiesWithComponent<Tag>();
+
+    for (const auto& entity : players) {
+        if (entity->getComponent<Tag>()->getTag() == "player") {
+            auto hp = entity->getComponent<HP>();
+            if (godMode) {
+                hp->setHP(-1);
+                hp->setMaxHP(-1);
+            } else if (hardMode) {
+                hp->setHP(50);
+                hp->setMaxHP(50);
+            } else if (easyMode) {
+                hp->setHP(200);
+                hp->setMaxHP(200);
+            } else {
+                hp->setHP(100);
+                hp->setMaxHP(100);
+            }
+        }
+    }
+}
