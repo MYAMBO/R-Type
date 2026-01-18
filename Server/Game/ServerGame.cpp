@@ -523,18 +523,28 @@ void ServerGame::handlePlayerReady(const uint32_t playerId)
                 pos->setY(300.f);
                 auto hpComp = entity->getComponent<HP>();
                 if (hpComp) {
+                    printf("[Game Start] Resetting HP for player %d\n", entity->getId());
                     hpComp->setHP(100);
                     hpComp->setAlive(true);
+                    _packet.action(entity->getId(), HEAL, 100);
                 }
-                printf("Player %d position reset to (200, 300) and HP restored.\n", entity->getId());
             }
         }
         _gameStarted = true;
         _waveTimer.restart();
         Packet startPacket;
+        startPacket.clear();
         startPacket.setId(0).setAck(0).setPacketNbr(1).setTotalPacketNbr(1);
         startPacket.startGame();
         _network.sendPacket(startPacket);
+        auto all = _world.getAllEntitiesWithComponent<Tag>();
+        for (auto& ent : all) {
+            auto t = ent->getComponent<Tag>()->getTag();
+            if (t != "player") {
+                _world.killEntity(ent->getId());
+                _packet.dead(ent->getId());
+            }
+        }
         _levelLoader.loadFromFile(_level, this);
         std::cout << "Game started!" << std::endl;
     }
@@ -850,13 +860,6 @@ void ServerGame::checkGameEnd()
             _readyPlayers.clear();
             gameOverSent = true;
             _gameStarted = false;
-            for (const auto& entity : _world.getAllEntitiesWithComponent<Tag>()) {
-                auto tag = entity->getComponent<Tag>();
-                if (tag && tag->getTag() == "enemy") {
-                    _world.killEntity(entity->getId());
-                    _packet.dead(entity->getId());
-                }
-            }
         }
         return;
     }
