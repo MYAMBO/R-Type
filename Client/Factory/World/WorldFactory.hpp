@@ -19,7 +19,7 @@ class WorldFactory {
         void createMusicGameplay();
         void createEnemy(float x, float y, int type, int entityId);
         void createPowerUp(float x, float y, int type, int entityId);
-        void createPlayer(uint64_t playerId);
+        void createPlayer(uint64_t playerId, float x, float y);
         void createEnemyBullet(size_t entityId, int x, int y);
         void createBackwardEnemyBullet(size_t entityId, int x, int y);
         void createBullet(size_t entityId, int x, int y, int type);

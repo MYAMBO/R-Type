@@ -1163,7 +1163,7 @@ void UIFactory::createScoreDisplay()
     });
 }
 
-void UIFactory::createWaitingMenu()
+void UIFactory::createWaitingMenu(IGameNetwork* network)
 {
     auto waitEntity = _world.createEntity();
     waitEntity->addComponent<Scene>(static_cast<int>(SceneType::WAITING_ROOM));
@@ -1201,4 +1201,43 @@ void UIFactory::createWaitingMenu()
             dataComp->setData("timer", std::to_string(timer));
         }
     });
+
+    if (network != nullptr) {
+        const auto waitingRoot = _world.createEntity();
+        waitingRoot->addComponent<Scene>(static_cast<int>(SceneType::WAITING_ROOM));
+        waitingRoot->addComponent<Layer>(LayerType::UI + 3);
+        waitingRoot->addComponent<GuiWidget>(WidgetType::PANEL);
+        waitingRoot->addComponent<Tag>("waiting_room_panel");
+        const auto panelGui = waitingRoot->getComponent<GuiWidget>();
+        panelGui->setSize("100%", "100%");
+        panelGui->getRawWidget()->getRenderer()->setProperty("BackgroundColor", tgui::Color(0, 0, 0, 0));
+        panelGui->getRawWidget()->getRenderer()->setProperty("BorderColor", tgui::Color(0, 0, 0, 0));
+
+        const auto btnReady = _world.createEntity();
+        btnReady->addComponent<Data>(std::map<std::string, std::string>{{"text", "READY"}});
+        btnReady->addComponent<GuiWidget>(WidgetType::BUTTON, "READY", waitingRoot->getId());
+        btnReady->addComponent<Scene>(static_cast<int>(SceneType::WAITING_ROOM));
+        btnReady->addComponent<Tag>("waiting_room_button_ready");
+        btnReady->addComponent<SoundEffect>("../assets/sounds/clics.mp3", 100.f);
+        btnReady->getComponent<SoundEffect>()->setGlobal(true);
+        const auto guiReady = btnReady->getComponent<GuiWidget>();
+        guiReady->setSize("200", "60");
+        guiReady->setPosition("50%", "60%");
+        guiReady->setOrigin(0.5f, 0.5f);
+        guiReady->setFont("../assets/font/regular.ttf");
+        guiReady->getRawWidget()->getRenderer()->setProperty("BackgroundColor", tgui::Color(50, 150, 255));
+        guiReady->getRawWidget()->getRenderer()->setProperty("BackgroundColorHover", tgui::Color(100, 180, 255));
+        guiReady->getRawWidget()->getRenderer()->setProperty("BorderColor", tgui::Color(100, 200, 255));
+        guiReady->getRawWidget()->getRenderer()->setProperty("TextColor", tgui::Color::White);
+        guiReady->getRawWidget()->getRenderer()->setProperty("TextColorHover", tgui::Color::White);
+        guiReady->setTextSize(30);
+        
+        guiReady->setCallback([network]() {
+            // Send ready packet to server
+            Packet readyPacket;
+            readyPacket.setId(0).setAck(0).setPacketNbr(1).setTotalPacketNbr(1);
+            readyPacket.ready(0); // playerId will be set by the client, using 0 for now
+            network->sendPacket(readyPacket);
+        });
+    }
 }

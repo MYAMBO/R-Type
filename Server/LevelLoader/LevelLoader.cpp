@@ -92,7 +92,7 @@ void LevelLoader::loadFromFile(const int id, ServerGame *server)
 void LevelLoader::findAllLevel()
 {
     bool findLoop = true;
-    std::string path = "../levels/level";
+    std::string path = "../Levels/level";
 
     for (int i = 1; findLoop; i++) {
         std::string tempPath = path + std::to_string(i) + ".json";

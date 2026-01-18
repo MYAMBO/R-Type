@@ -14,6 +14,7 @@
 #include <condition_variable>
 #include <Packet.hpp>
 #include <ClientPacketreader.hpp>
+#include <ClientTcpReader.hpp>
 
 #include "IGameNetwork.hpp"
 
@@ -66,6 +67,7 @@ class Network : public IGameNetwork {
         std::shared_ptr<Game> _game;
         u_int32_t _lastPacketAckNbr = 0;
         ClientPacketreader _packetReader;
+        ClientTcpReader _tcpReader;
         bool _isRunning = true;
 };
 
