@@ -42,14 +42,14 @@ void ClientPacketreader::interpretPacket()
         if (!(payload >> opcode)) break;
 
         switch (opcode) {
-            case 0x06: {
+            case 0x08: {
                 uint32_t time;
                 if (payload >> time) {
                     std::cout << "TimeSync received: " << time << std::endl;
                 }
                 break;
             }
-            case 0x07: {
+            case 0x09: {
                 uint32_t id;
                 uint16_t type;
                 float x, y;
@@ -59,14 +59,14 @@ void ClientPacketreader::interpretPacket()
                 }
                 break;
             }
-            case 0x08: {
+            case 0x0A: {
                 uint32_t id1, id2;
                 if (payload >> id1 >> id2) {
                     std::cout << "Collision between " << id1 << " and " << id2 << std::endl;
                 }
                 break;
             }
-            case 0x09: {
+            case 0x0B: {
                 uint32_t id;
                 if (payload >> id) {
                     std::cout << "Entity " << id << " dead" << std::endl;
@@ -75,28 +75,19 @@ void ClientPacketreader::interpretPacket()
                 }
                 break;
             }
-            case 0x0A: {
+            case 0x0C: {
                 uint8_t status;
                 if (payload >> status) {
                     std::cout << "EndGame: " << static_cast<int>(status) << std::endl;
                 }
                 break;
             }
-            case 0x0B: {
+            case 0x0D: {
                 uint32_t id;
                 uint8_t actionId;
                 uint32_t data;
                 if (payload >> id >> actionId >> data) {
                     _game->handleAction(id, actionId, data);
-                }
-                break;
-            }
-            case 0x0C: {
-                uint32_t playerId;
-                int mana;
-                if (payload >> playerId >> mana) {
-                    if (_game)
-                        _game->updatePlayerMana(playerId, mana);
                 }
                 break;
             }

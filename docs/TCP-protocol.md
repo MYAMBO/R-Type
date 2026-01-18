@@ -7,23 +7,26 @@ TCP is used for reliable communication of authentication, session management, an
 
 ## Client → Server Messages
 
-| Command | Code | Fields | Description |
-|---------|------|--------|-------------|
-| Connect Request | `0x01` | - | Requests connection to server |
-| Login | `0x02` | `Name (15 bytes)` | Sends player username |
-| Ready | `0x03` | `ReadyStatus (1)` | `0 = not ready`, `1 = ready` |
+| Command         | Code   | Fields            | Description                   |
+|-----------------|--------|-------------------|-------------------------------|
+| Connect Request | `0x01` | -                 | Requests connection to server |
+| Login           | `0x02` | `Name (15 bytes)` | Sends player username         |
+| Ready           | `0x03` | `ReadyStatus (1)` | `0 = not ready`, `1 = ready`  |
+| Select Level    | `0x06` | `Name` | Send the selected level       |
+| Upload Level    | `0x07` | `Name`            | Send a new Level Json         |
 
 ---
 
 ## Server → Client Messages
 
-| Command | Code | Fields | Description |
-|---------|------|--------|-------------|
-| Connect Response | `0x01` | `PlayerID (1)` - `UDPPort (4)` | Assigns player ID and UDP port |
-| Login Response | `0x02` | `Status (1)` | `0 = fail`, `1 = success` |
-| Ready Acknowledgment | `0x03` | - | Confirms all players are ready |
-| Game Start | `0x04` | - | Game officially starts |
-| Game Abort | `0x05` | - | Game aborted or server shutdown |
+| Command              | Code   | Fields                         | Description                     |
+|----------------------|--------|--------------------------------|---------------------------------|
+| Connect Response     | `0x01` | `PlayerID (1)` - `UDPPort (4)` | Assigns player ID and UDP port  |
+| Login Response       | `0x02` | `Status (1)`                   | `0 = fail`, `1 = success`       |
+| Ready Acknowledgment | `0x03` | -                              | Confirms all players are ready  |
+| Game Start           | `0x04` | -                              | Game officially starts          |
+| Game Abort           | `0x05` | -                              | Game aborted or server shutdown |
+| Level Selection      | `0x06` | `List of maps`                 | List of level for selection     |
 
 ---
 
