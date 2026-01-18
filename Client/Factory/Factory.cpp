@@ -149,7 +149,7 @@ void Factory::createMusicGameplay()
     _worldFactory.createMusicGameplay();
 }
 
-void Factory::createWaitingMenu()
+void Factory::createWaitingMenu(IGameNetwork* network)
 {
-    _uiFactory.createWaitingMenu();
+    _uiFactory.createWaitingMenu(network);
 }

@@ -23,10 +23,11 @@
  */
 Server::Server()
 {
+    _tick = 0;
     _tcpPort = -1;
     _udpPort = -1;
     _debugMode = false;
-    _game = std::make_shared<ServerGame>(*this);
+    _game = std::make_shared<ServerGame>(*this, _tick, _ackPackets, _users);
     _packetReader = Packetreader(sf::Packet(), _game);
 }
 
@@ -172,6 +173,16 @@ void Server::udpThread()
         try
         {
             _packetReader.interpretPacket();
+            u_int32_t ackNb = _packetReader.getHeader().ack;
+            _mutex.lock();
+            for (auto tmp : _users)
+            {
+                if (std::find(tmp._ackList.begin(), tmp._ackList.end(), ackNb) != tmp._ackList.end()) {
+                    tmp._ackList.erase(std::remove(tmp._ackList.begin(), tmp._ackList.end(), ackNb), tmp._ackList.end());
+                }
+            }
+            _mutex.unlock();
+
         }
         catch (std::exception& e)
         {
@@ -201,7 +212,6 @@ void Server::udpThread()
  */
 void Server::tcpThread()
 {
-    TcpReader _tcpReader;
     while (true)
     {
         _mutex.lock();

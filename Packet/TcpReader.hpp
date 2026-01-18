@@ -8,6 +8,7 @@
 #ifndef TCP_READER_HPP
     #define TCP_READER_HPP
 
+    #include <vector>
     #include <string>
 
 /**
@@ -20,7 +21,7 @@
 class TcpReader
 {
     public:
-        TcpReader();
+        TcpReader() = default;
         ~TcpReader() = default;
 
         std::string InterpretData(const std::string& data);

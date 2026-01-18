@@ -12,8 +12,10 @@
 #include "IGameNetwork.hpp"
 #include "World.hpp"
 #include "EntitiesType.hpp"
+#include "LevelLoader.hpp"
+#include "User.hpp"
 
-    #define NB_PLAYER_TO_START 2
+#define NB_PLAYER_TO_START 2
     #define MAX_PLAYER 4
 
 // enum entitiesType
@@ -26,7 +28,7 @@
 
 class ServerGame {
     public:
-        ServerGame(IGameNetwork& network);
+        ServerGame(IGameNetwork& network, u_int32_t &tick, std::vector<std::pair<Packet, u_int32_t>> &ackPackets, std::vector<User> &users);
         ~ServerGame() = default;
 
         void run();
@@ -35,7 +37,7 @@ class ServerGame {
         void handleHeal(uint32_t id);
         void handleAction(uint32_t id, uint8_t action, uint32_t data);
         void handleNewPlayer();
-        void startLevel(int levelId);
+        void handlePlayerReady(uint32_t playerId);
         void createEnemy(float x, float y);
         void createFast(float x, float y);
         void createTank(float x, float y);
@@ -66,11 +68,17 @@ class ServerGame {
         void portalBossSpawnTankScript(int entityId, World& world);
         void setMode(bool godMode, bool easyMode, bool hardMode);
 
+        u_int32_t& _tick;
         World _world;
+        Packet _packet;
         IGameNetwork& _network;
+        LevelLoader _levelLoader;
         int _playerCount = 0;
+        int _readyCount = 0;
         bool _gameStarted = false;
         sf::Clock _waveTimer;
+        std::vector<std::pair<Packet, u_int32_t>> _ackPackets;
+        std::vector<User> _users;
 };
 
 #endif //R_TYPE_GAME_H

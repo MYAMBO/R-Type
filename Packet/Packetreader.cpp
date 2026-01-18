@@ -47,7 +47,7 @@ void Packetreader::interpretPacket()
         if (!(payload >> opcode)) break;
 
         switch (opcode) {
-            case 0x06: {
+            case 0x08: {
                 uint32_t time;
                 if (payload >> time) {
                     std::cout << "TimeSync: " << time << std::endl;
@@ -55,7 +55,7 @@ void Packetreader::interpretPacket()
                 }
                 break;
             }
-            case 0x07: {
+            case 0x09: {
                 uint32_t id;
                 uint16_t type;
                 float x, y;
@@ -70,34 +70,41 @@ void Packetreader::interpretPacket()
                 }
                 break;
             }
-            case 0x08: {
+            case 0x0A: {
                 uint32_t id1, id2;
                 if (payload >> id1 >> id2) {
                     std::cout << "Collision between " << id1 << " and " << id2 << std::endl;
                 }
                 break;
             }
-            case 0x09: {
+            case 0x0B: {
                 uint32_t id;
                 if (payload >> id) {
                     std::cout << "Entity " << id << " is dead" << std::endl;
                 }
                 break;
             }
-            case 0x0A: {
+            case 0x0C: {
                 uint8_t status;
                 if (payload >> status) {
                     std::cout << "EndGame status: " << static_cast<int>(status) << std::endl;
                 }
                 break;
             }
-            case 0x0B: {
+            case 0x0D: {
                 uint32_t id;
                 uint8_t actionId;
                 uint32_t data;
                 if (payload >> id >> actionId >> data) {
                     std::cout << "Action " << static_cast<int>(actionId) << " from " << id << std::endl;
                     if (_game) _game->handleAction(id, actionId, data);
+                }
+                break;
+            }
+            case 0x0E: {
+                if (uint32_t playerId; payload >> playerId) {
+                    std::cout << "Player " << playerId << " is ready" << std::endl;
+                    if (_game) _game->handlePlayerReady(playerId);
                 }
                 break;
             }
@@ -119,4 +126,12 @@ void Packetreader::clear()
 void Packetreader::addPacket(sf::Packet data)
 {
     _packet = std::move(data);
+}
+
+/**
+ * @brief returns the packet header
+ */
+UDPHeader Packetreader::getHeader() const
+{
+    return _header;
 }

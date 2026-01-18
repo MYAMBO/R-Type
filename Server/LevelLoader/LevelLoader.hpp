@@ -8,22 +8,25 @@
 #ifndef R_TYPE_LEVELLOADER_HPP
     #define R_TYPE_LEVELLOADER_HPP
 
-#include <iostream>
 #include <string>
+#include <map>
+#include <tuple>
 
-#include "World.hpp"
-#include "ServerGame.hpp"
-
-
+class ServerGame;
 
 class LevelLoader
 {
     public:
-        LevelLoader() = default;
+        LevelLoader();
         ~LevelLoader() = default;
 
-        static void loadFromFile(const std::string &path, ServerGame *server);
+        static void loadFromFile(int id, ServerGame *server);
 
+    private:
+        // A map with ID -> tuple (map path, map name)
+        static std::map<int,  std::tuple<std::string, std::string>> _levelsList;
+
+        static void findAllLevel();
 };
 
 
