@@ -489,7 +489,7 @@ void ServerGame::handleNewPlayer()
         return;
     }
 
-    createPlayer(200, 200);
+    createPlayer(200, 300 + (_playerCount) * 100);
     _playerCount++;
 
     std::cout << "Player " << _playerCount << " connected" << std::endl;
@@ -497,7 +497,7 @@ void ServerGame::handleNewPlayer()
 
 /**
  * @brief Handle player ready status
- * 
+ *
  * @param playerId The id of the player who is ready
  */
 void ServerGame::handlePlayerReady(const uint32_t playerId)
@@ -514,6 +514,7 @@ void ServerGame::handlePlayerReady(const uint32_t playerId)
         _network.sendPacket(startPacket);
         _levelLoader.loadFromFile(5, this);   // Need to change that later to have a level management
         std::cout << "Game started!" << std::endl;
+        startLevel(4);   // Need to change that later to have a level management
     }
 }
 

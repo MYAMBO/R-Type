@@ -67,7 +67,7 @@ class Factory {
         void createLevelSelect();
         void createMusicGameplay();
         void createLoadingScreen();
-        void createPlayer(uint64_t id = 0);
+        void createPlayer(uint64_t id = 0, float x = 0.f, float y = 0.f);
         void createBackground(sf::RenderWindow& window);
         void createEnemy(float x, float y, int type, int entityId);
         void createPowerUp(float x, float y, int type, int entityId);
