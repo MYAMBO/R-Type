@@ -83,6 +83,7 @@ class Factory {
         void createVictoryScreen();
         void createPlayerHUD();
         void createScoreDisplay();
+        void createWaitingMenu();
 
         void createSparks(World &world, float x, float y, int amount, SceneType scene, int lifeTime = 300);
     private:
