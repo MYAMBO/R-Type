@@ -77,6 +77,9 @@ void LevelLoader::loadFromFile(const int id, ServerGame *server)
                 else if (type == "portal_boss") {
                     server->createPortalBoss(x, y);
                 }
+                else if (type == "heal") {
+                    server->createHealPowerUp(x, y);
+                }
             }
         }
     } catch (const json::parse_error& e) {

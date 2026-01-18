@@ -11,7 +11,10 @@
 
 #include "SFML/Audio/Music.hpp"
 
-TcpReader::TcpReader() = default;
+TcpReader::TcpReader(bool isServer)
+{
+    _isServer = isServer;
+}
 
 /**
  * Generates a login request message.
@@ -60,11 +63,24 @@ std::string TcpReader::InterpretData(const std::string& data)
 {
     if (data.empty())
         return {};
-    switch (data.at(0))
+    if (_isServer)
     {
-    case 2:
-        return loginRequest(data);
-    default:
-        return {"undefined"};
+        switch (data.at(0))
+        {
+        case 2:
+            return loginRequest(data);
+        default:
+            return {"undefined"};
+        }
+    }
+    else
+    {
+        switch (data.at(0))
+        {
+        case 2:
+            return loginRequest(data);
+        default:
+            return {"undefined"};
+        }
     }
 }
