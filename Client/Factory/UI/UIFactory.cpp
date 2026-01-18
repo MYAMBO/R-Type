@@ -7,10 +7,12 @@
 
 #include "HP.hpp"
 #include "Game.hpp"
+#include "Network.hpp"
 #include "Factory.hpp"
 #include "UIFactory.hpp"
 #include "GameHelperGraphical.hpp"
 
+#include <array>
 #include <thread>
 
 UIFactory::UIFactory(World& world) : _world(world), _languageHandler(std::make_shared<LanguageHandler>("en"))
@@ -1234,12 +1236,19 @@ void UIFactory::createWaitingMenu(IGameNetwork* network)
         guiReady->getRawWidget()->getRenderer()->setProperty("TextColorHover", tgui::Color::White);
         guiReady->setTextSize(30);
         
-        guiReady->setCallback([network]() {
-            // Send ready packet to server
-            Packet readyPacket;
-            readyPacket.setId(0).setAck(0).setPacketNbr(1).setTotalPacketNbr(1);
-            readyPacket.ready(0); // playerId will be set by the client, using 0 for now
-            network->sendPacket(readyPacket);
+        bool readyState = false;
+        guiReady->setCallback([network, guiReady, readyState]() mutable {
+            const auto impl = dynamic_cast<Network*>(network);
+            if (!impl)
+                return;
+            readyState = !readyState;
+            guiReady->setText(readyState ? "UNREADY" : "READY");
+            constexpr std::array<std::uint8_t, 1> buffer{0x0E};
+            const std::string message(
+                reinterpret_cast<const char*>(buffer.data()),
+                buffer.size()
+            );
+            impl->sendMessage(message);
         });
     }
 }
