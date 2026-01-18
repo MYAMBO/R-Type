@@ -6,7 +6,16 @@
 */
 
 #include "Tag.hpp"
+#include "Data.hpp"
+#include "Text.hpp"
 #include "Game.hpp"
+#include "World.hpp"
+#include "Scene.hpp"
+#include "Music.hpp"
+#include "Layer.hpp"
+#include "Scale.hpp"
+#include "Entity.hpp"
+#include "Script.hpp"
 #include "Network.hpp"
 #include "Factory.hpp"
 #include "Animator.hpp"
@@ -1247,7 +1256,6 @@ void UIFactory::createWaitingMenu(IGameNetwork* network)
         readyStateEntity->addComponent<Data>(std::map<std::string, std::string>{{"is_ready", "true"}});
         readyStateEntity->addComponent<Tag>("waiting_room_ready_state");
 
-        static bool readyState = true;
         guiReady->setCallback([this, network, guiReady]() mutable {
             const auto impl = dynamic_cast<Network*>(network);
             if (!impl)
