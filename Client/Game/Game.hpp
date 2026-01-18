@@ -31,6 +31,7 @@ enum class SceneType {
     MENU = 2,
     OPTIONS = 3,
     LANGUAGES = 4,
+    WAITING_ROOM = 5,
     MYAMBO = 10,
     KAYU = 11,
     CREDITS = 42,

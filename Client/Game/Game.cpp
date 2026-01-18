@@ -144,10 +144,10 @@ void Game::loadingRun()
     _world.setWindow(_window);
     _world.setDeltaTime(1.f);
     _factory.createGameTools();
+    loadfile();
 
     _world.setCurrentScene(static_cast<int>(SceneType::MYAMBO));
 
-    loadfile();
     auto inputSystem = _world.getSystem<Inputs>();
 
     _factory.createMyambo();
@@ -189,24 +189,26 @@ void Game::loadingRun()
     _factory.createLoadingScreen();
 
     updateLoadingState(0.0f, "Initializing systems...");
+    _factory.createMusicGameplay();
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     updateLoadingState(0.1f, "Loading assets...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _factory.createCamera();
+    _factory.createWaitingMenu();
     updateLoadingState(0.3f, "Generating Menu...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _factory.createMenu();
+    _factory.createCredits();
     _factory.createLevelCompanionUI();
+    _factory.createVictoryScreen();
+    _factory.createBackGameUI();
     updateLoadingState(0.6f, "Generating Background...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
-    _factory.createCredits();
     _factory.createPlayerHUD();
     _factory.createScrapUIEmpty(1);
     _factory.createScrapUIEmpty(2);
     _factory.createScrapUIEmpty(3);
-    _factory.createBackGameUI();
     _factory.createGameOverScreen();
-    _factory.createVictoryScreen();
     _factory.createScoreDisplay();
     GameHelperGraphical::createStarField(_world);
 
@@ -244,14 +246,8 @@ void Game::run()
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
     _world.setCurrentScene(static_cast<int>(SceneType::MENU));
-    auto musicmenu = GameHelper::getEntityByTag(_world, "menu_music");
-    if (musicmenu) {
-        auto musicComp = musicmenu->getComponent<Music>();
-        if (musicComp)
-            musicComp->play();
-    }
     _factory.createPlayerHUD();
-    static sf::Clock timer;
+    //static sf::Clock timer;
     while (_window.isOpen()) {
         auto start = std::chrono::steady_clock::now();
         _window.clear(sf::Color::Black);
@@ -283,6 +279,12 @@ void Game::run()
 
             timer.restart();
         }*/
+        if (_world.getCurrentScene() == static_cast<int>(SceneType::WAITING_ROOM)) {
+            auto mate = GameHelper::getEntityByTag(_world, "player_mate");    // here need to wait for game start call from server
+            if (!mate)
+                continue;
+            _world.setCurrentScene(static_cast<int>(SceneType::GAMEPLAY));
+        }
 
         auto end = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -327,6 +329,12 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
             //GameHelperGraphical::createAnimatorEntity(_world, 400, 400, "../assets/sprites/r-typesheet1.gif", 7, 7, 2.f, 209, 276, 16, 14, 0, 0, 10.f);
             //GameHelperGraphical::createScoreGUI(_world, 400, 300, "1000");
             //GameHelperGraphical::createAnimatorEntity(_world, 200, 200, "../assets/sprites/fire_effect.png", 2, 2, 1.f, 223, 0, 16, 16, 0, 0, 10.f);
+            //_factory.createScraps(_world, 500.f, 0.f);
+            _world.setCurrentScene(static_cast<int>(SceneType::VICTORY));
+
+        }
+        if (inputSystem->isTriggered(*eventOpt, KeyboardKey::Key_N)) {
+            _world.setCurrentScene(static_cast<int>(SceneType::GAME_OVER));
             _factory.createScraps(_world, 500.f, 0.f);
 
         }
@@ -538,6 +546,9 @@ static void addScore(World &w, int entityId)
     int currentScore = std::stoi(dataComp->getData("score"));
     currentScore += std::stoi(entityData->getData("score"));
     dataComp->setData("score", std::to_string(currentScore));
+    if (currentScore > std::stoi(dataComp->getData("high_score"))) {
+        dataComp->setData("high_score", std::to_string(currentScore));
+    }
 }
 
 /**
@@ -598,7 +609,8 @@ void Game::savefile()
     std::vector<std::string> tagsToSave = {
         "game_volume_settings",
         "game_controls_settings",
-        "game_availability_settings"
+        "game_availability_settings",
+        "game_stats"
     };
     for (const auto& tag : tagsToSave) {
         auto entity = GameHelper::getEntityByTag(_world, tag);

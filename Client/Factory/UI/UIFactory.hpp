@@ -28,6 +28,7 @@ class UIFactory {
         void createVictoryScreen();
         void createPlayerHUD();
         void createScoreDisplay();
+        void createWaitingMenu();
   
     private:
         World& _world;

@@ -63,6 +63,7 @@ class Factory {
         void createPauseMenu();
         void createOptionsMenu();
         void createLevelSelect();
+        void createMusicGameplay();
         void createLoadingScreen();
         void createPlayer(uint64_t id = 0);
         void createBackground(sf::RenderWindow& window);
@@ -82,6 +83,7 @@ class Factory {
         void createVictoryScreen();
         void createPlayerHUD();
         void createScoreDisplay();
+        void createWaitingMenu();
 
         void createSparks(World &world, float x, float y, int amount, SceneType scene, int lifeTime = 300);
     private:

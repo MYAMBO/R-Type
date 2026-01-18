@@ -456,7 +456,8 @@ void GameHelperGraphical::createStarField(World &world)
     spawner->addComponent<Tag>("star_spawner");
     
     spawner->addComponent<Script>([](int id, World& w) {
-        if (w.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
+        (void)id;
+        if (w.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY) && w.getCurrentScene() != static_cast<int>(SceneType::WAITING_ROOM))
             return;
         static int frameSkip = 0;
         if (frameSkip++ % 2 != 0)
@@ -469,7 +470,14 @@ void GameHelperGraphical::createStarField(World &world)
 
         for (const auto& ent : allEntities) {
             auto tagComp = ent->getComponent<Tag>();
-            if (tagComp && tagComp->getTag() == "background_star") {
+            auto sceneComp = ent->getComponent<Scene>();
+            if (!sceneComp || !tagComp)
+                continue;
+            if (tagComp->getTag() == "background_star") {
+                if (w.getCurrentScene() == static_cast<int>(SceneType::GAMEPLAY) && sceneComp->getScene() == static_cast<int>(SceneType::WAITING_ROOM))
+                    sceneComp->setScene(static_cast<int>(SceneType::GAMEPLAY));
+                if (w.getCurrentScene() == static_cast<int>(SceneType::WAITING_ROOM) && sceneComp->getScene() == static_cast<int>(SceneType::GAMEPLAY))
+                    sceneComp->setScene(static_cast<int>(SceneType::WAITING_ROOM));
                 auto pos = ent->getComponent<Position>();
                 if (pos) {
                     if (pos->getX() < -50.f) {
@@ -480,10 +488,8 @@ void GameHelperGraphical::createStarField(World &world)
                 }
             }
         }
-
-        if (starCount < 150 && (rand() % 5 == 0)) {
+        if (starCount < 150 && (rand() % 5 == 0))
             GameHelperGraphical::createStar(w, static_cast<float>(winSize.x + 50), static_cast<float>(rand() % winSize.y));
-        }
         static unsigned int lastW = 0, lastH = 0;
         if (winSize.x != lastW || winSize.y != lastH) {
             lastW = winSize.x;
@@ -494,4 +500,41 @@ void GameHelperGraphical::createStarField(World &world)
             }
         }
     });
+}
+
+/**
+ * @brief Resets the positions of credit text entities based on the current window size.
+ *
+ * @param world The world containing the credit entities.
+ */
+void GameHelperGraphical::resetCreditsPositions(World &world)
+{
+    auto window = world.getWindow();
+    if (!window)
+        return;
+    float startY = window->getSize().y + 50.f;
+    float lineSpacing = 80.f;
+
+    for (const auto& entity : world.getAllEntitiesWithComponent<Script>()) {
+        auto scriptComp = entity->getComponent<Script>();
+        if (!scriptComp)
+            continue;
+        auto tagComp = entity->getComponent<Tag>();
+        if (!tagComp)
+            continue;
+        std::string tag = tagComp->getTag();
+        auto positionComp = entity->getComponent<Position>();
+        auto textComp = entity->getComponent<Text>();
+        if (tag == "credits_title" && positionComp && textComp) {
+            positionComp->setY(startY - lineSpacing * 2);
+        } else if (tag == "credits_subtitle" && positionComp && textComp) {
+            positionComp->setY(startY - lineSpacing);
+        } else if (tag.find("credit_role_") == 0 && positionComp && textComp) {
+            int lineIndex = std::stoi(tag.substr(12));
+            positionComp->setY(startY + (lineIndex * lineSpacing));
+        } else if (tag.find("credit_name_") == 0 && positionComp && textComp) {
+            int lineIndex = std::stoi(tag.substr(12));
+            positionComp->setY(startY + (lineIndex * lineSpacing));
+        }
+    }
 }

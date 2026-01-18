@@ -54,6 +54,7 @@ class GameHelperGraphical {
         static std::shared_ptr<Camera> getMainCamera(World &world);
 
         static void createStarField(World &world);
+        static void resetCreditsPositions(World &world);
         static void playRandomAmbianceEnemy(World &world);
         static void createStar(World &world, float x, float y);
         static void createSparks(World &world, float x, float y, int amount);

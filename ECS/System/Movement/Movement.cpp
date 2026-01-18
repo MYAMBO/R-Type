@@ -9,6 +9,7 @@
 
 #include "Position.hpp"
 #include "Velocity.hpp"
+#include "Scene.hpp"
 
 /**
 * @brief Update the positions of all entities if they have it in the world
@@ -20,6 +21,9 @@ void Movement::update(const float& dt, World &w)
     for (const auto &entity : w.getAllEntitiesWithComponent<Position>()) {
         const auto posComp = entity->getComponent<Position>();
         const auto velComp = entity->getComponent<Velocity>();
+        const auto sceneComp = entity->getComponent<Scene>();
+        if (sceneComp && sceneComp->getScene() != w.getCurrentScene())
+            continue;
         if (!posComp)
             continue;
         if (posComp && velComp) {

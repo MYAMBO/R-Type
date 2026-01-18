@@ -14,6 +14,32 @@ WorldFactory::WorldFactory(World& world) : _world(world)
 {
 }
 
+void WorldFactory::createMusicGameplay()
+{
+    auto music = _world.createEntity();
+    music->addComponent<Music>("../assets/sounds/game.mp3", 50.f, true);
+    music->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    music->addComponent<Tag>("gameplay_music");
+    music->addComponent<Script>([](int entityId, World& world) {
+        if (world.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY)) {
+            if (auto entity = GameHelper::getEntityById(world, entityId)) {
+                auto musicComp = entity->getComponent<Music>();
+                if (musicComp && musicComp->getState() == MusicState::PLAYING) {
+                    musicComp->stop();
+                }
+            }
+            return;
+        }
+        auto entity = GameHelper::getEntityById(world, entityId);
+        if (!entity)
+            return;
+        auto musicComp = entity->getComponent<Music>();
+        if (musicComp && musicComp->getState() != MusicState::PLAYING) {
+            musicComp->play();
+        }
+    });
+}
+
 /**
  * @brief Creates a bullet entity.
  *
@@ -209,7 +235,6 @@ void WorldFactory::createPlayer(uint64_t id)
     fire->addComponent<Scale>(3.f);
     fire->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     fire->addComponent<Script>(playerfire);
-    fire->addComponent<Music>("../assets/sounds/game.mp3", 100.f, true);
     fire->addComponent<Group>(playerCount);
     fire->addComponent<Layer>(10);
     fire->addComponent<Tag>("fire");
