@@ -63,7 +63,7 @@ auto Network::parse(const int ac, char **av) -> void
                 {
                     getIpAdress(std::string(optarg));
                 }
-                catch (std::exception e)
+                catch (std::exception& e)
                 {
                     std::cerr << e.what() << std::endl;
                 }
