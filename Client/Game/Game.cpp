@@ -141,6 +141,14 @@ void Game::loadingRun()
     _window.setFramerateLimit(30);
     _world.setWindow(_window);
     _world.setDeltaTime(1.f);
+    Packet packet;
+    packet.setId(0);
+    packet.setAck(0);
+    packet.setPacketNbr(1);
+    packet.setTotalPacketNbr(1);
+    packet.Spawn(0, Player, 300, 600);
+    _network.sendPacket(packet);
+
     _factory.createGameTools();
     loadfile();
 
@@ -211,7 +219,6 @@ void Game::loadingRun()
     GameHelperGraphical::createStarField(_world);
 
     updateLoadingState(0.8f, "Connecting to server...");
-    Packet packet;
 
     run();
 }
@@ -230,13 +237,6 @@ void Game::run()
     entermusic->addComponent<Scene>(static_cast<int>(SceneType::LOADING));
     entermusic->addComponent<Tag>("entering_game_music");
 
-    Packet packet;
-    packet.setId(0);
-    packet.setAck(0);
-    packet.setPacketNbr(1);
-    packet.setTotalPacketNbr(1);
-    packet.Spawn(0, Player, 300, 300);
-    _network.sendPacket(packet);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     entermusic->getComponent<SoundEffect>()->play();
@@ -246,6 +246,7 @@ void Game::run()
     _world.setCurrentScene(static_cast<int>(SceneType::MENU));
     _factory.createPlayerHUD();
     //static sf::Clock timer;
+
     while (_window.isOpen()) {
         _window.clear(sf::Color::Black);
         gameInput(inputSystem);
@@ -272,12 +273,12 @@ void Game::run()
 
             timer.restart();
         }*/
-        if (_world.getCurrentScene() == static_cast<int>(SceneType::WAITING_ROOM)) {
-            auto mate = GameHelper::getEntityByTag(_world, "player_mate");    // here need to wait for game start call from server
-            if (!mate)
-                continue;
-            _world.setCurrentScene(static_cast<int>(SceneType::GAMEPLAY));
-        }
+        //if (_world.getCurrentScene() == static_cast<int>(SceneType::WAITING_ROOM)) {
+        //    auto mate = GameHelper::getEntityByTag(_world, "player_mate");    // here need to wait for game start call from server
+        //    if (!mate)
+        //        continue;
+        //    _world.setCurrentScene(static_cast<int>(SceneType::GAMEPLAY));
+        //}
 
     }
     savefile();
@@ -323,7 +324,7 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
            
         }
         if (inputSystem->isTriggered(*eventOpt, KeyboardKey::Key_N)) {
-            _world.setCurrentScene(static_cast<int>(SceneType::GAME_OVER));
+            _world.setCurrentScene(static_cast<int>(SceneType::GAMEPLAY));
         }
         inputSystem->update(0.0f, _world);
     }
@@ -378,7 +379,7 @@ void Game::updateEntity(uint32_t id, uint16_t type, float x, float y)
     }
     switch (type) {
     case Player:
-        _factory.createPlayer(id);
+        _factory.createPlayer(id, x, y);
         entity = GameHelper::getEntityById(_world, id);
         if (entity && entity->getComponent<Tag>()->getTag() == "player") {
             entity->addComponent<Script>([this](const int entityId, World& world)
@@ -421,7 +422,6 @@ void Game::updateEntity(uint32_t id, uint16_t type, float x, float y)
         _factory.createPowerUp(x, y, 1, id);
         break;
     }
-
 }
 
 /**
@@ -441,7 +441,7 @@ void Game::playerInput(uint32_t entityId, World &world)
 
     auto inputSystem = world.getSystem<Inputs>();
     std::shared_ptr<Camera> compCam = GameHelperGraphical::getMainCamera(world);
-    std::shared_ptr<Entity> compPlayer = GameHelper::getEntityByTag(world, "player");
+    std::shared_ptr<Entity> compPlayer = GameHelper::getEntityById(world, entityId);
     auto settings = GameHelper::getEntityByTag(world, "game_controls_settings");
     auto data = settings->getComponent<Data>();
 
@@ -514,6 +514,7 @@ void Game::playerInput(uint32_t entityId, World &world)
     }
     if (moved)
     {
+        printf("Sending position update for entity %u: (%.2f, %.2f)\n", entityId, pos->getX(), pos->getY());
         Packet packet = Packet();
         packet.updatePosition(entityId, pos->getX(), pos->getY());
         packet.setAck(1);
