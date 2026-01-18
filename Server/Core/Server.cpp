@@ -212,8 +212,6 @@ void Server::udpThread()
  */
 void Server::tcpThread()
 {
-    TcpReader _tcpReader(true);
-
     while (true)
     {
         _mutex.lock();
@@ -251,6 +249,16 @@ void Server::tcpThread()
 
                     if ((received < data.size() || status != sf::Socket::Status::Done) && !message.empty())
                     {
+                        if (!message.empty()) {
+                            if (const unsigned char opcode = static_cast<unsigned char>(message.at(0)); opcode == 0x0E) {
+                                if (_game) {
+                                    _game->handlePlayerReady(tmp.getId());
+                                    log("TCP | Player ready: " + std::to_string(tmp.getId()));
+                                }
+                                message.clear();
+                                break;
+                            }
+                        }
                         std::string messageResponse = _tcpReader.InterpretData(message);
                         _mutex.lock();
                         sendMessage(messageResponse, tmp.getId());

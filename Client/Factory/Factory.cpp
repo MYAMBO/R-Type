@@ -53,9 +53,9 @@ void Factory::createLoadingScreen()
     _uiFactory.createLoadingScreen();
 }
 
-void Factory::createPlayer(uint64_t id)
+void Factory::createPlayer(uint64_t id, float x, float y)
 {
-    _worldFactory.createPlayer(static_cast<int>(id));
+    _worldFactory.createPlayer(static_cast<int>(id), x, y);
 }
 
 void Factory::createEnemy(float x, float y, int type, int entityId)
@@ -149,7 +149,7 @@ void Factory::createMusicGameplay()
     _worldFactory.createMusicGameplay();
 }
 
-void Factory::createWaitingMenu()
+void Factory::createWaitingMenu(IGameNetwork* network)
 {
-    _uiFactory.createWaitingMenu();
+    _uiFactory.createWaitingMenu(network);
 }

@@ -391,6 +391,35 @@ void ServerGame::createWave()
         createEnemy(1920 + static_cast<float>(i) * 100, 200 + static_cast<float>(i % 3) * 250);
 }
 
+bool ServerGame::resolveBulletSpawnOverlap(const std::shared_ptr<Entity>& bullet, const std::string& targetTag)
+{
+    auto bulletPos = bullet->getComponent<Position>();
+    auto bulletCol = bullet->getComponent<BoxCollider>();
+    auto bulletDmg = bullet->getComponent<Damage>();
+    if (!bulletPos || !bulletCol || !bulletDmg)
+        return false;
+    for (const auto& entity : _world.getAllEntitiesWithComponent<Tag>()) {
+        auto tag = entity->getComponent<Tag>();
+        if (!tag || tag->getTag() != targetTag)
+            continue;
+        auto hp = entity->getComponent<HP>();
+        auto pos = entity->getComponent<Position>();
+        auto col = entity->getComponent<BoxCollider>();
+        if (!hp || !pos || !col)
+            continue;
+        if (!Collision::checkCollision(*bulletCol, *bulletPos, *col, *pos))
+            continue;
+
+        int newHp = static_cast<int>(hp->getHP()) - bulletDmg->getDamage();
+        if (newHp < 0)
+            newHp = 0;
+        hp->setHP(static_cast<unsigned int>(newHp));
+        _world.killEntity(bullet->getId());
+        return true;
+    }
+    return false;
+}
+
 /**
  * @brief define the movement of a bullet.
  *
@@ -400,18 +429,18 @@ void ServerGame::createWave()
 void ServerGame::BulletMovement(const uint32_t entityId, World &world)
 {
     const auto entity = GameHelper::getEntityById(world, entityId);
-    const auto vel = entity->getComponent<Velocity>();
+    
+    if (!entity)
+        return;
+    
     const auto pos = entity->getComponent<Position>();
+    if (!pos)
+        return;
 
-    if (vel) {
-        pos->setX(pos->getX() + vel->getVelocityX() * world.getDeltaTime());
-        pos->setY(pos->getY() + vel->getVelocityY() * world.getDeltaTime());
-    }
     if (pos->getX() > 2800 || pos->getX() < -100) {
         world.killEntity(entityId);
         _packet.dead(entityId);
     } else {
-        pos->setX(pos->getX() + 10 * world.getDeltaTime());
         _packet.updatePosition(entityId, pos->getX(), pos->getY());
     }
 }
@@ -439,6 +468,8 @@ void ServerGame::createBullet(const float x, const float y)
         }
     );
     _packet.Spawn(bullet->getId(), Bullet, x + 60.f, y + 15.f);
+    if (resolveBulletSpawnOverlap(bullet, "enemy"))
+        _packet.dead(bullet->getId());
 }
 
 void ServerGame::createEnemyBullet(const float x, const float y)
@@ -458,6 +489,8 @@ void ServerGame::createEnemyBullet(const float x, const float y)
         }
     );
     _packet.Spawn(bullet->getId(), EnemyBullet, x + 60.f, y + 15.f);
+    if (resolveBulletSpawnOverlap(bullet, "player"))
+        _packet.dead(bullet->getId());
 }
 
 void ServerGame::createEnemyBackwardBullet(const float x, const float y)
@@ -477,6 +510,8 @@ void ServerGame::createEnemyBackwardBullet(const float x, const float y)
         }
     );
     _packet.Spawn(bullet->getId(), BackwardEnemyBullet, x + 60.f, y + 15.f);
+    if (resolveBulletSpawnOverlap(bullet, "player"))
+        _packet.dead(bullet->getId());
 }
 
 /**
@@ -489,15 +524,39 @@ void ServerGame::handleNewPlayer()
         return;
     }
 
-    createPlayer(200, 200);
+    createPlayer(200, 300 + (_playerCount) * 100);
     _playerCount++;
 
     std::cout << "Player " << _playerCount << " connected" << std::endl;
+}
 
-    if (_playerCount == NB_PLAYER_TO_START && !_gameStarted) {
+/**
+ * @brief Handle player ready status
+ *
+ * @param playerId The id of the player who is ready
+ */
+void ServerGame::handlePlayerReady(const uint32_t playerId)
+{
+    if (_readyPlayers.find(playerId) != _readyPlayers.end()) {
+        _readyPlayers.erase(playerId);
+        _readyCount = static_cast<int>(_readyPlayers.size());
+        std::cout << "Player " << playerId << " unready. Ready count: " << _readyCount << "/" << _playerCount << std::endl;
+        return;
+    }
+
+    _readyPlayers.insert(playerId);
+    _readyCount = static_cast<int>(_readyPlayers.size());
+    std::cout << "Player " << playerId << " is ready. Ready count: " << _readyCount << "/" << _playerCount << std::endl;
+
+    if (_readyCount == NB_PLAYER_TO_START && !_gameStarted && _playerCount >= NB_PLAYER_TO_START) {
         _gameStarted = true;
         _waveTimer.restart();
-        _levelLoader.loadFromFile(4, this);   // Need to change that later to have a level management
+        Packet startPacket;
+        startPacket.setId(0).setAck(0).setPacketNbr(1).setTotalPacketNbr(1);
+        startPacket.startGame();
+        _network.sendPacket(startPacket);
+        _levelLoader.loadFromFile(5, this);   // Need to change that later to have a level management
+        std::cout << "Game started!" << std::endl;
     }
 }
 
@@ -548,7 +607,7 @@ void ServerGame::handleShoot(const uint32_t id)
     if (!pos || !data)
         return;
     int currentMana = std::stoi(data->getData("mana"));
-    const int manaCost = 5;
+    const int manaCost = 10;
     if (currentMana < manaCost)
         return;
     currentMana -= manaCost;
@@ -804,6 +863,8 @@ void ServerGame::checkGameEnd()
         if (!gameOverSent) {
             std::cout << "GAME OVER - All players dead!" << std::endl;
             sendGameEnd(0);
+            _readyCount = 0;
+            _readyPlayers.clear();
             gameOverSent = true;
         }
         return;
@@ -825,5 +886,7 @@ void ServerGame::checkGameEnd()
         victorySent = true;
         std::cout << "VICTORY - All enemies defeated!" << std::endl;
         sendGameEnd(1);
+        _readyCount = 0;
+        _readyPlayers.clear();
     }
 }

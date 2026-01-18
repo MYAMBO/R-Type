@@ -46,6 +46,8 @@ class Packet
         void dead(uint32_t id);
         void endGame(uint8_t status);
         void action(uint32_t id, uint8_t action, uint32_t data);
+        void ready(uint32_t playerId);
+        void startGame();
 
         [[nodiscard]] sf::Packet getPacket() const;
     private:

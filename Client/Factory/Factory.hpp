@@ -49,6 +49,8 @@ class World;
     #include "EffectFactory.hpp"
     #include "ToolsFactory.hpp"
 
+class IGameNetwork;
+
 class Factory {
     public:
         Factory(World& world);
@@ -65,7 +67,7 @@ class Factory {
         void createLevelSelect();
         void createMusicGameplay();
         void createLoadingScreen();
-        void createPlayer(uint64_t id = 0);
+        void createPlayer(uint64_t id = 0, float x = 0.f, float y = 0.f);
         void createBackground(sf::RenderWindow& window);
         void createEnemy(float x, float y, int type, int entityId);
         void createPowerUp(float x, float y, int type, int entityId);
@@ -83,7 +85,7 @@ class Factory {
         void createVictoryScreen();
         void createPlayerHUD();
         void createScoreDisplay();
-        void createWaitingMenu();
+        void createWaitingMenu(IGameNetwork* network = nullptr);
 
         void createSparks(World &world, float x, float y, int amount, SceneType scene, int lifeTime = 300);
     private:
