@@ -22,11 +22,16 @@ EffectFactory::EffectFactory(World& world) : _world(world)
  * @param y The y-coordinate for the spark origin.
  * @param amount The number of sparks to create.
  */
-void EffectFactory::createSparks(World &world, float x, float y, int amount)
+void EffectFactory::createSparks(World &world, float x, float y, int amount, SceneType scene, int lifeTime)
 {
     for (int i = 0; i < amount; i++) {
         auto spark = world.createEntity();
-        spark->addComponent<Scene>(static_cast<int>(SceneType::KAYU));
+        spark->addComponent<Scene>(static_cast<int>(scene));
+        spark->addComponent<Tag>("spark_effect");
+        spark->addComponent<Data>(std::map<std::string, std::string>{
+            {"lifetime", std::to_string(lifeTime)},
+            {"scene", std::to_string(static_cast<int>(scene))}
+        });
         spark->addComponent<Position>(x, y);
         float vx = (rand() % 200 - 100) / 10.f;
         float vy = (rand() % 200 - 100) / 10.f;
@@ -154,8 +159,9 @@ void EffectFactory::createCredits()
     auto window = _world.getWindow();
     float width = static_cast<float>(window->getSize().x);
     float height = static_cast<float>(window->getSize().y);
-    float centerX = width / 8.f;
-    float centerX2 = width / 2.f;
+    float centerX = width / 2.f;
+    float centerLeft = width / 3.f;
+    float centerRight = width + (width / 3.f);
 
     std::vector<std::pair<std::string, std::string>> credits = {
         {"A Cinematic Experience by", "MYAMBO STUDIOS"},
@@ -288,19 +294,37 @@ void EffectFactory::createCredits()
     title->addComponent<Scene>(static_cast<int>(SceneType::CREDITS));
     title->addComponent<Layer>(LayerType::UI);
     title->addComponent<Tag>("credits_title");
-    title->addComponent<Position>(centerX + centerX / 2.f, startY - lineSpacing * 2);
-    title->addComponent<Velocity>(0.f, -3.f);
     title->addComponent<Text>("CREDITS R-TYPE", "../assets/font/logo.ttf", 80);
+    title->addComponent<Position>(centerX - title->getComponent<Text>()->getGlobalBounds().size.x / 2.f, startY - lineSpacing * 2);
+    title->addComponent<Velocity>(0.f, -3.f);
     title->getComponent<Text>()->setColor(255, 255, 255, 255);
+    title->addComponent<Script>([](int id, World& w) {
+        if (w.getCurrentScene() != static_cast<int>(SceneType::CREDITS))
+            return;
+        auto e = GameHelper::getEntityById(w, id);
+        auto pos = e->getComponent<Position>();
+        auto title = e->getComponent<Text>();
+        if (pos && title)
+            pos->setX((static_cast<float>(w.getWindow()->getSize().x) / 2.0f) - title->getGlobalBounds().size.x / 2.0f);
+    });
 
     auto subtitle = _world.createEntity();
     subtitle->addComponent<Scene>(static_cast<int>(SceneType::CREDITS));
     subtitle->addComponent<Layer>(LayerType::UI);
     subtitle->addComponent<Tag>("credits_subtitle");
-    subtitle->addComponent<Position>(centerX + centerX / 2.f, startY - lineSpacing);
-    subtitle->addComponent<Velocity>(0.f, -3.f);
     subtitle->addComponent<Text>("Thank you for playing!", "../assets/font/logo.ttf", 40);
     subtitle->getComponent<Text>()->setColor(255, 255, 255, 255);
+    subtitle->addComponent<Position>(centerX - subtitle->getComponent<Text>()->getGlobalBounds().size.x / 2.f, startY - lineSpacing);
+    subtitle->addComponent<Velocity>(0.f, -3.f);
+    subtitle->addComponent<Script>([](int id, World& w) {
+        if (w.getCurrentScene() != static_cast<int>(SceneType::CREDITS))
+            return;
+        auto e = GameHelper::getEntityById(w, id);
+        auto pos = e->getComponent<Position>();
+        auto title = e->getComponent<Text>();
+        if (pos && title)
+            pos->setX((static_cast<float>(w.getWindow()->getSize().x) / 2.0f) - title->getGlobalBounds().size.x / 2.0f);
+    });
 
     for (size_t i = 0; i < credits.size(); ++i) {
         if (!credits[i].first.empty())
@@ -309,7 +333,7 @@ void EffectFactory::createCredits()
             role->addComponent<Scene>(static_cast<int>(SceneType::CREDITS));
             role->addComponent<Layer>(LayerType::UI);
             role->addComponent<Tag>("credit_role_" + std::to_string(i));
-            role->addComponent<Position>(centerX, startY + (i * lineSpacing));
+            role->addComponent<Position>(centerLeft, startY + (i * lineSpacing));
             role->addComponent<Velocity>(0.f, -3.f);
             role->addComponent<Script>(creditsScript);
             role->addComponent<Text>(credits[i].first, "../assets/font/logo.ttf", 20);
@@ -321,7 +345,7 @@ void EffectFactory::createCredits()
             name->addComponent<Scene>(static_cast<int>(SceneType::CREDITS));
             name->addComponent<Layer>(LayerType::UI);
             name->addComponent<Tag>("credit_name_" + std::to_string(i));
-            name->addComponent<Position>(centerX2, startY + (i * lineSpacing));
+            name->addComponent<Position>(centerRight, startY + (i * lineSpacing));
             name->addComponent<Velocity>(0.f, -3.f);
             name->addComponent<Script>(creditsNameScript);
             name->addComponent<Text>(credits[i].second, "../assets/font/logo.ttf", 25);
@@ -339,7 +363,7 @@ void EffectFactory::createCredits()
             return;
         auto inputs = w.getSystem<Inputs>();
         if (inputs && (inputs->isKeyPressed(KeyboardKey::Key_Escape) || inputs->isKeyPressed(KeyboardKey::Key_Space))) {
-            w.setCurrentScene(2);
+            w.setCurrentScene(static_cast<int>(SceneType::MENU));
         }
     });
 }

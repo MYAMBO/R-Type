@@ -61,8 +61,15 @@ void GameHelperGraphical::createBasicEnemy(World &world, float x, float y, int e
     enemy->addComponent<Animator>(2, 6, 5.0f, 0, 0, 33, 30, 33, 0);
     enemy->addComponent<Scale>(2.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    enemy->addComponent<Data>(std::map<std::string, std::string>{
+        {"score", "+100"},
+        {"type", "basic"},
+        {"death_sound", "../assets/sounds/killed_first.mp3"},
+        {"sound_cooldown", "1"}
+    });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+    enemy->addComponent<Script>(enemyScript);
 }
 
 void GameHelperGraphical::createFastEnemy(World &world, float x, float y, int entityId)
@@ -75,8 +82,15 @@ void GameHelperGraphical::createFastEnemy(World &world, float x, float y, int en
     enemy->addComponent<Animator>(8, 8, 5.0f, 0, 0, 27, 30, 6, 0);
     enemy->addComponent<Scale>(2.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    enemy->addComponent<Data>(std::map<std::string, std::string>{
+        {"score", "+150"},
+        {"type", "fast"},
+        {"death_sound", "../assets/sounds/killed_second.mp3"},
+        {"sound_cooldown", "1"}
+    });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+    enemy->addComponent<Script>(enemyScript);
 }
 
 void GameHelperGraphical::createTankEnemy(World &world, float x, float y, int entityId)
@@ -89,8 +103,15 @@ void GameHelperGraphical::createTankEnemy(World &world, float x, float y, int en
     enemy->addComponent<Animator>(3, 3, 5.0f, 16, 0, 33, 33, 0, 0);
     enemy->addComponent<Scale>(2.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    enemy->addComponent<Data>(std::map<std::string, std::string>{
+        {"score", "+200"},
+        {"type", "tank"},
+        {"death_sound", "../assets/sounds/killed_first.mp3"},
+        {"sound_cooldown", "100"}
+    });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+    enemy->addComponent<Script>(enemyScript);
 }
 
 /**
@@ -110,8 +131,15 @@ void GameHelperGraphical::createSinusEnemy(World &world, float x, float y, int e
     enemy->addComponent<Animator>(2, 6, 5.0f, 0, 0, 33, 30, 33, 0);
     enemy->addComponent<Scale>(2.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    enemy->addComponent<Data>(std::map<std::string, std::string>{
+        {"score", "+300"},
+        {"type", "sinus"},
+        {"death_sound", "../assets/sounds/killed_second.mp3"},
+        {"sound_cooldown", "300"}
+    });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+    enemy->addComponent<Script>(enemyScript);
 }
 
 /**
@@ -131,8 +159,15 @@ void GameHelperGraphical::createShootingEnemy(World &world, float x, float y, in
     enemy->addComponent<Animator>(2, 6, 5.0f, 0, 0, 33, 30, 33, 0);
     enemy->addComponent<Scale>(2.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    enemy->addComponent<Data>(std::map<std::string, std::string>{
+        {"score", "+250"},
+        {"type", "shooting"},
+        {"death_sound", "../assets/sounds/killed_second.mp3"},
+        {"sound_cooldown", "300"}
+    });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+    enemy->addComponent<Script>(enemyScript);
 }
 
 void GameHelperGraphical::createHealPowerUp(World &world, float x, float y, int entityId)
@@ -147,6 +182,21 @@ void GameHelperGraphical::createHealPowerUp(World &world, float x, float y, int 
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
     enemy->addComponent<Tag>("heal");
     enemy->addComponent<BoxCollider>(66.0f, 60.0f);
+}
+
+void GameHelperGraphical::createWarningPortal(World &world, float x, float y, int entityId)
+{
+    auto enemy = world.createEntity(entityId);
+    enemy->addComponent<Position>(x, y);
+    enemy->addComponent<Sprite>(std::string("../assets/sprites/r-typesheet30a.gif"));
+    enemy->addComponent<Animator>(3, 3, 5.0f, 0, 0, 33, 33, 0, 0);
+    enemy->addComponent<Scale>(2.0f);
+    enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    enemy->addComponent<Tag>("portal");
+
+    auto sprite = enemy->getComponent<Sprite>();
+    if (sprite && sprite->getSprite())
+        sprite->getSprite()->setColor(sf::Color::Red);
 }
 
 /**
@@ -217,7 +267,7 @@ void GameHelperGraphical::soundEffectEntity(const std::string& filepath, float v
     auto soundEntity = world.createEntity();
     soundEntity->addComponent<SoundEffect>(filepath, volume);
     soundEntity->addComponent<Scene>(scene);
-    soundEntity->addComponent<Tag>("sound_effect");
+    soundEntity->addComponent<Tag>("sound_effect" + std::to_string(soundEntity->getId()));
     soundEntity->getComponent<SoundEffect>()->play();
     soundEntity->addComponent<Script>([](int id, World& w) {
         auto entity = GameHelper::getEntityById(w, id);
@@ -250,6 +300,241 @@ void GameHelperGraphical::createPortalBoss(World &world, float x, float y, int e
     enemy->addComponent<Animator>(5, 5, 5.0f, 116, 0, 67, 79, 0, 0);
     enemy->addComponent<Scale>(14.f);
     enemy->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    enemy->addComponent<Data>(std::map<std::string, std::string>{
+        {"score", "+10000"},
+        {"type", "portal_boss"}
+    });
     enemy->addComponent<Tag>("enemy");
     enemy->addComponent<BoxCollider>(66.0f, 600.0f);
+}
+
+void GameHelperGraphical::createAnimatorEntity(World &world, float x, float y, const std::string& spritePath,
+    int rows, int cols, float animSpeed, int startX, int startY, int frameWidth, int frameHeight, int offsetX, int offsetY, float scale)
+{
+    auto entity = world.createEntity();
+    entity->addComponent<Position>(x, y);
+    entity->addComponent<Sprite>(spritePath);
+    entity->addComponent<Animator>(rows, cols, animSpeed, startX, startY, frameWidth, frameHeight, offsetX, offsetY);
+    entity->addComponent<Scale>(scale);
+    entity->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    entity->addComponent<Tag>("animator_entity");
+    entity->addComponent<Script>([](int id, World& w) {
+        auto entity = GameHelper::getEntityById(w, id);
+        if (!entity)
+            return;
+        auto animatorComp = entity->getComponent<Animator>();
+        if (!animatorComp)
+            return;
+        if (animatorComp->getCurrentFrame() == animatorComp->getTotalFrames() - 1) {
+            w.killEntity(id);
+        }
+    });
+}
+
+void GameHelperGraphical::createScoreGUI(World &world, float x, float y, const std::string& scoreText)
+{
+    auto entity = world.createEntity();
+    entity->addComponent<Position>(x, y);
+    entity->addComponent<Velocity>(0.f, -0.5f);
+    entity->addComponent<Text>(scoreText, "../assets/font/regular.ttf", 50);
+    entity->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    entity->addComponent<Layer>(LayerType::UI + 5);
+    entity->addComponent<Tag>("score_popup");
+    entity->addComponent<Data>(std::map<std::string, std::string>{
+        {"lifetime", "30"},
+        {"hue", "60.0"} 
+    });
+
+    entity->addComponent<Script>([](int id, World& w) {
+        auto e = GameHelper::getEntityById(w, id);
+        if (!e)
+            return;
+
+        auto text = e->getComponent<Text>();
+        auto data = e->getComponent<Data>();
+        if (!text || !data)
+            return;
+
+        int life = std::stoi(data->getData("lifetime"));
+        float hue = std::stof(data->getData("hue"));
+
+        if (life > 0) {
+            hue += 15.0f;
+            if (hue >= 360.0f)
+                hue = 0.0f;
+            sf::Color rainbowCol = GameHelperGraphical::hueToRGB(hue);
+            sf::Color currentCol = text->getSfText().getFillColor();
+            int newAlpha = (currentCol.a > 8) ? (currentCol.a - 8) : 0;
+            text->setColor(rainbowCol.r, rainbowCol.g, rainbowCol.b, newAlpha);
+            data->setData("lifetime", std::to_string(life - 1));
+            data->setData("hue", std::to_string(hue));
+        } else {
+            w.killEntity(id);
+        }
+    });
+}
+
+void GameHelperGraphical::playRandomAmbianceEnemy(World &world)
+{
+    static std::vector<std::string> sounds = {
+        "../assets/sounds/first_moaning.mp3",
+        "../assets/sounds/second_moaning.mp3",
+        "../assets/sounds/third_moaning.mp3"
+    };
+
+    printf("Playing enemy ambiance sound\n");
+    int choice = rand() % sounds.size();
+    
+    auto soundEnt = world.createEntity();
+    soundEnt->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    soundEnt->addComponent<SoundEffect>(sounds[choice], 40.f);
+    float randomPitch = 0.8f + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (1.2f - 0.8f)));
+    auto sfx = soundEnt->getComponent<SoundEffect>();
+    sfx->setPitch(randomPitch);
+    if (sfx)
+        sfx->play();
+
+    soundEnt->addComponent<Script>([](int id, World& w) {
+        auto e = GameHelper::getEntityById(w, id);
+        if (e && e->getComponent<SoundEffect>()->getSfStatus() == sf::Sound::Status::Stopped) {
+            w.killEntity(id);
+        }
+    });
+}
+
+/**
+ * @brief Creates a star entity in the world at the specified position.
+ */
+void GameHelperGraphical::createStar(World &world, float x, float y)
+{
+    auto star = world.createEntity();
+    star->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    star->addComponent<Layer>(LayerType::BACKGROUND);
+    star->addComponent<Tag>("background_star");
+
+    float randScale = 0.5f + static_cast<float>(rand() % 15) / 10.f;
+    float speed = randScale;
+
+    star->addComponent<Position>(x, y);
+    star->addComponent<Velocity>(-speed, 0.f);
+    star->addComponent<Scale>(randScale);
+    
+    int starColor = rand() % 2;
+    if (starColor == 0) {
+        star->addComponent<Sprite>(std::string("../assets/sprites/water_effect.png"));
+    } else {
+        star->addComponent<Sprite>(std::string("../assets/sprites/purple_effect.png"));
+    }
+    int starType = rand() % 7;
+    switch (starType) {
+        case 0: star->addComponent<Animator>(4, 4, 5.f, 223, 48, 16, 16, 0, 0); break;
+        case 1: star->addComponent<Animator>(2, 2, 20.f, 160, 80, 16, 16, 0, 0); break;
+        case 2: star->addComponent<Animator>(5, 5, 8.f, 385, 16, 16, 16, 0, 0); break;
+        case 3: star->addComponent<Animator>(5, 5, 6.f, 480, 0, 16, 16, 0, 0); break;
+        case 4: star->addComponent<Animator>(5, 5, 12.f, 480, 48, 16, 16, 0, 0); break;
+        case 5: star->addComponent<Animator>(5, 5, 4.f, 480, 96, 16, 16, 0, 0); break;
+        case 6: default: 
+                star->addComponent<Animator>(5, 5, 10.f, 480, 112, 16, 16, 0, 0); break;
+    }
+}
+
+/**
+ * @brief Initialise le champ d'étoiles et le générateur
+ */
+void GameHelperGraphical::createStarField(World &world)
+{
+    auto window = world.getWindow();
+    float width = static_cast<float>(window->getSize().x);
+    float height = static_cast<float>(window->getSize().y);
+
+    for (int i = 0; i < 50; i++) {
+        GameHelperGraphical::createStar(world, static_cast<float>(rand() % (int)width), static_cast<float>(rand() % (int)height));
+    }
+
+    auto spawner = world.createEntity();
+    spawner->addComponent<Scene>(static_cast<int>(SceneType::GAMEPLAY));
+    spawner->addComponent<Tag>("star_spawner");
+    
+    spawner->addComponent<Script>([](int id, World& w) {
+        (void)id;
+        if (w.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY) && w.getCurrentScene() != static_cast<int>(SceneType::WAITING_ROOM))
+            return;
+        static int frameSkip = 0;
+        if (frameSkip++ % 2 != 0)
+            return;
+        auto window = w.getWindow();
+        if (!window) return;
+        auto winSize = window->getSize();
+        int starCount = 0;
+        auto allEntities = w.getAllEntitiesWithComponent<Tag>(); 
+
+        for (const auto& ent : allEntities) {
+            auto tagComp = ent->getComponent<Tag>();
+            auto sceneComp = ent->getComponent<Scene>();
+            if (!sceneComp || !tagComp)
+                continue;
+            if (tagComp->getTag() == "background_star") {
+                if (w.getCurrentScene() == static_cast<int>(SceneType::GAMEPLAY) && sceneComp->getScene() == static_cast<int>(SceneType::WAITING_ROOM))
+                    sceneComp->setScene(static_cast<int>(SceneType::GAMEPLAY));
+                if (w.getCurrentScene() == static_cast<int>(SceneType::WAITING_ROOM) && sceneComp->getScene() == static_cast<int>(SceneType::GAMEPLAY))
+                    sceneComp->setScene(static_cast<int>(SceneType::WAITING_ROOM));
+                auto pos = ent->getComponent<Position>();
+                if (pos) {
+                    if (pos->getX() < -50.f) {
+                        w.killEntity(ent->getId());
+                    } else {
+                        starCount++;
+                    }
+                }
+            }
+        }
+        if (starCount < 150 && (rand() % 5 == 0))
+            GameHelperGraphical::createStar(w, static_cast<float>(winSize.x + 50), static_cast<float>(rand() % winSize.y));
+        static unsigned int lastW = 0, lastH = 0;
+        if (winSize.x != lastW || winSize.y != lastH) {
+            lastW = winSize.x;
+            lastH = winSize.y;
+            if (starCount < 100) {
+                for (int i = 0; i < 15; i++)
+                    GameHelperGraphical::createStar(w, static_cast<float>(rand() % lastW), static_cast<float>(rand() % lastH));
+            }
+        }
+    });
+}
+
+/**
+ * @brief Resets the positions of credit text entities based on the current window size.
+ *
+ * @param world The world containing the credit entities.
+ */
+void GameHelperGraphical::resetCreditsPositions(World &world)
+{
+    auto window = world.getWindow();
+    if (!window)
+        return;
+    float startY = window->getSize().y + 50.f;
+    float lineSpacing = 80.f;
+
+    for (const auto& entity : world.getAllEntitiesWithComponent<Script>()) {
+        auto scriptComp = entity->getComponent<Script>();
+        if (!scriptComp)
+            continue;
+        auto tagComp = entity->getComponent<Tag>();
+        if (!tagComp)
+            continue;
+        std::string tag = tagComp->getTag();
+        auto positionComp = entity->getComponent<Position>();
+        auto textComp = entity->getComponent<Text>();
+        if (tag == "credits_title" && positionComp && textComp) {
+            positionComp->setY(startY - lineSpacing * 2);
+        } else if (tag == "credits_subtitle" && positionComp && textComp) {
+            positionComp->setY(startY - lineSpacing);
+        } else if (tag.find("credit_role_") == 0 && positionComp && textComp) {
+            int lineIndex = std::stoi(tag.substr(12));
+            positionComp->setY(startY + (lineIndex * lineSpacing));
+        } else if (tag.find("credit_name_") == 0 && positionComp && textComp) {
+            int lineIndex = std::stoi(tag.substr(12));
+            positionComp->setY(startY + (lineIndex * lineSpacing));
+        }
+    }
 }
