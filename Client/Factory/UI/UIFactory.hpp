@@ -11,6 +11,7 @@
 #include "LanguageHandler.hpp"
 
 class Game;
+class IGameNetwork;
 
 class UIFactory {
     public:
@@ -28,7 +29,7 @@ class UIFactory {
         void createVictoryScreen();
         void createPlayerHUD();
         void createScoreDisplay();
-        void createWaitingMenu();
+        void createWaitingMenu(IGameNetwork* network = nullptr);
   
     private:
         World& _world;

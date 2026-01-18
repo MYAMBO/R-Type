@@ -194,7 +194,7 @@ void Game::loadingRun()
     updateLoadingState(0.1f, "Loading assets...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _factory.createCamera();
-    _factory.createWaitingMenu();
+    _factory.createWaitingMenu(&_network);
     updateLoadingState(0.3f, "Generating Menu...");
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     _factory.createMenu();
@@ -280,9 +280,9 @@ void Game::run()
             timer.restart();
         }*/
         if (_world.getCurrentScene() == static_cast<int>(SceneType::WAITING_ROOM)) {
-            auto mate = GameHelper::getEntityByTag(_world, "player_mate");    // here need to wait for game start call from server
-            if (!mate)
+            if (!_startGameRequested)
                 continue;
+            _startGameRequested = false;
             _world.setCurrentScene(static_cast<int>(SceneType::GAMEPLAY));
         }
 
@@ -694,6 +694,11 @@ void Game::updatePlayerMana(const uint32_t playerId, const int mana)
     auto dataComp = player->getComponent<Data>();
     if (dataComp)
         dataComp->setData("mana", std::to_string(mana));
+}
+
+void Game::startGameFromServer()
+{
+    _startGameRequested = true;
 }
 
 void Game::showEndScreen(uint8_t status)

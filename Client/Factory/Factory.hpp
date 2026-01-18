@@ -49,6 +49,8 @@ class World;
     #include "EffectFactory.hpp"
     #include "ToolsFactory.hpp"
 
+class IGameNetwork;
+
 class Factory {
     public:
         Factory(World& world);
@@ -83,7 +85,7 @@ class Factory {
         void createVictoryScreen();
         void createPlayerHUD();
         void createScoreDisplay();
-        void createWaitingMenu();
+        void createWaitingMenu(IGameNetwork* network = nullptr);
 
         void createSparks(World &world, float x, float y, int amount, SceneType scene, int lifeTime = 300);
     private:

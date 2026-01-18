@@ -37,6 +37,7 @@ class ServerGame {
         void handleHeal(uint32_t id);
         void handleAction(uint32_t id, uint8_t action, uint32_t data);
         void handleNewPlayer();
+        void handlePlayerReady(uint32_t playerId);
         void createEnemy(float x, float y);
         void createFast(float x, float y);
         void createTank(float x, float y);
@@ -72,6 +73,7 @@ class ServerGame {
         IGameNetwork& _network;
         LevelLoader _levelLoader;
         int _playerCount = 0;
+        int _readyCount = 0;
         bool _gameStarted = false;
         sf::Clock _waveTimer;
         std::vector<std::pair<Packet, u_int32_t>> _ackPackets;
