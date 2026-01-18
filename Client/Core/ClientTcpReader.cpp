@@ -2,10 +2,11 @@
 ** EPITECH PROJECT, 2025
 ** R-Type
 ** File description:
-** TcpReader.cpp
+** ClientTcpReader.cpp
 */
 
-#include "TcpReader.hpp"
+#include "ClientTcpReader.hpp"
+
 #include <cstdint>
 #include <array>
 
@@ -17,7 +18,7 @@
  * @param data A string input used as placeholder or context for the request. It is currently ignored in the implementation.
  * @return A string containing the generated login request message.
  */
-std::string TcpReader::loginRequest(const std::string& data)
+std::string ClientTcpReader::loginRequest(const std::string& data)
 {
     (void)data;
     std::array<std::uint8_t, 1> buffer{};
@@ -35,7 +36,8 @@ std::string TcpReader::loginRequest(const std::string& data)
  * @param data A string containing the input data to be interpreted.
  * @return A Vector of string representing the result of interpreting the data.
  */
-std::vector<std::string> TcpReader::levelSelection(const std::string& data)
+std::vector<std::string> ClientTcpReader::levelSelection(
+    const std::string& data)
 {
     std::vector<std::string> levelsNames;
 
@@ -54,7 +56,7 @@ std::vector<std::string> TcpReader::levelSelection(const std::string& data)
  * @param data A string containing the input data to be interpreted. The first character is used to determine the type of operation.
  * @return A string representing the result of interpreting the data. Returns a login request string if the type matches, or "undefined" if no valid type is identified.
  */
-std::string TcpReader::InterpretData(const std::string& data)
+std::string ClientTcpReader::InterpretData(const std::string& data)
 {
     if (data.empty())
         return {};

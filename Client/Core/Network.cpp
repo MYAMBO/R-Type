@@ -140,7 +140,6 @@ void Network::udpThread()
 void Network::tcpThread()
 {
     bool ready = false;
-    TcpReader _tcpReader(false);
 
     while (_isRunning && !ready)
     {

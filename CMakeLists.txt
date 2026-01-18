@@ -231,7 +231,8 @@ add_executable(r-type_client
         Client/LanguageHandler/LanguageHandler.cpp
         Server/GetOpt/GetOpt.cpp
         Packet/TcpReader.cpp
-        Packet/TcpReader.hpp)
+        Packet/TcpReader.hpp
+        Client/Core/ClientTcpReader.cpp)
 
 if (WIN32)
     target_link_libraries(r-type_client sfml-main sfml-graphics sfml-window sfml-system sfml-network sfml-audio tgui)

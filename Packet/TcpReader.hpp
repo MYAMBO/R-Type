@@ -21,7 +21,7 @@
 class TcpReader
 {
     public:
-        TcpReader(bool isServer);
+        TcpReader() = default;
         ~TcpReader() = default;
 
         std::string InterpretData(const std::string& data);
@@ -29,7 +29,6 @@ class TcpReader
     private:
         std::string loginRequest(const std::string& data);
         static std::vector<std::string> levelSelection(const std::string& data);
-        bool _isServer;
 };
 
 #endif //TCP_READER_HPP
