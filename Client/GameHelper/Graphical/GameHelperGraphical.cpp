@@ -456,7 +456,8 @@ void GameHelperGraphical::createStarField(World &world)
     spawner->addComponent<Tag>("star_spawner");
     
     spawner->addComponent<Script>([](int id, World& w) {
-        if (w.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
+        (void)id;
+        if (w.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY) && w.getCurrentScene() != static_cast<int>(SceneType::WAITING_ROOM))
             return;
         static int frameSkip = 0;
         if (frameSkip++ % 2 != 0)
@@ -469,7 +470,14 @@ void GameHelperGraphical::createStarField(World &world)
 
         for (const auto& ent : allEntities) {
             auto tagComp = ent->getComponent<Tag>();
-            if (tagComp && tagComp->getTag() == "background_star") {
+            auto sceneComp = ent->getComponent<Scene>();
+            if (!sceneComp || !tagComp)
+                continue;
+            if (tagComp->getTag() == "background_star") {
+                if (w.getCurrentScene() == static_cast<int>(SceneType::GAMEPLAY) && sceneComp->getScene() == static_cast<int>(SceneType::WAITING_ROOM))
+                    sceneComp->setScene(static_cast<int>(SceneType::GAMEPLAY));
+                if (w.getCurrentScene() == static_cast<int>(SceneType::WAITING_ROOM) && sceneComp->getScene() == static_cast<int>(SceneType::GAMEPLAY))
+                    sceneComp->setScene(static_cast<int>(SceneType::WAITING_ROOM));
                 auto pos = ent->getComponent<Position>();
                 if (pos) {
                     if (pos->getX() < -50.f) {
