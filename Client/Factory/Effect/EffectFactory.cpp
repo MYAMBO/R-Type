@@ -265,11 +265,11 @@ void EffectFactory::createCredits()
         {"This game was made by", "5 Humans & 1 Fox."},
         {"", ""},
         {"--- THE LEGENDARY FIVE ---", ""},
-        {"ANTOINE", "The Ping"},
-        {"MARTIN", "The Glow"},
-        {"YANIS", "The Logic"},
-        {"PIERRE", "The Engine"},
-        {"TIMOTE", "The Packet"},
+        {"ANTOINE", "The Office"},
+        {"MARTIN", "The Yae Miko Enjoyer"},
+        {"YANIS", "The Includer"},
+        {"PIERRE", "The Asteroid"},
+        {"TIMOTE", "The Windowser"},
         {"", ""},
         {"THANK YOU FOR WATCHING", "PLEASE REBOOT YOUR COMPUTER NOW"}
     };
