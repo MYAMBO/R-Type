@@ -281,12 +281,12 @@ void Game::run()
 
             timer.restart();
         }*/
-        //if (_world.getCurrentScene() == static_cast<int>(SceneType::WAITING_ROOM)) {
-        //    auto mate = GameHelper::getEntityByTag(_world, "player_mate");    // here need to wait for game start call from server
-        //    if (!mate)
-        //        continue;
-        //    _world.setCurrentScene(static_cast<int>(SceneType::GAMEPLAY));
-        //}
+        if (_world.getCurrentScene() == static_cast<int>(SceneType::WAITING_ROOM)) {
+            if (!_startGameRequested)
+                continue;
+            _startGameRequested = false;
+            _world.setCurrentScene(static_cast<int>(SceneType::GAMEPLAY));
+        }
 
         auto end = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
