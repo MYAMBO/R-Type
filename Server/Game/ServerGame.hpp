@@ -8,6 +8,7 @@
 #ifndef R_TYPE_GAME_H
     #define R_TYPE_GAME_H
 
+#include <unordered_set>
 #include <SFML/System.hpp>
 #include "IGameNetwork.hpp"
 #include "World.hpp"
@@ -77,6 +78,7 @@ class ServerGame {
         int _readyCount = 0;
         bool _gameStarted = false;
         sf::Clock _waveTimer;
+        std::unordered_set<uint32_t> _readyPlayers;
         std::vector<std::pair<Packet, u_int32_t>> _ackPackets;
         std::vector<User> _users;
 };

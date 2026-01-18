@@ -506,7 +506,15 @@ void ServerGame::handleNewPlayer()
  */
 void ServerGame::handlePlayerReady(const uint32_t playerId)
 {
-    _readyCount++;
+    if (_readyPlayers.find(playerId) != _readyPlayers.end()) {
+        _readyPlayers.erase(playerId);
+        _readyCount = static_cast<int>(_readyPlayers.size());
+        std::cout << "Player " << playerId << " unready. Ready count: " << _readyCount << "/" << _playerCount << std::endl;
+        return;
+    }
+
+    _readyPlayers.insert(playerId);
+    _readyCount = static_cast<int>(_readyPlayers.size());
     std::cout << "Player " << playerId << " is ready. Ready count: " << _readyCount << "/" << _playerCount << std::endl;
 
     if (_readyCount == NB_PLAYER_TO_START && !_gameStarted && _playerCount >= NB_PLAYER_TO_START) {
@@ -824,6 +832,8 @@ void ServerGame::checkGameEnd()
         if (!gameOverSent) {
             std::cout << "GAME OVER - All players dead!" << std::endl;
             sendGameEnd(0);
+            _readyCount = 0;
+            _readyPlayers.clear();
             gameOverSent = true;
         }
         return;
@@ -845,6 +855,8 @@ void ServerGame::checkGameEnd()
         victorySent = true;
         std::cout << "VICTORY - All enemies defeated!" << std::endl;
         sendGameEnd(1);
+        _readyCount = 0;
+        _readyPlayers.clear();
     }
 }
 

@@ -813,6 +813,11 @@ void uiLevelCompanionScript(int id, World& w)
     auto entity = GameHelper::getEntityById(w, id);
     if (!entity)
         return;
+    if (!cachedPlayer) {
+        cachedPlayer = GameHelper::getEntityByTag(w, "player");
+        if (!cachedPlayer)
+            return;
+    }
     auto groupComp = cachedPlayer->getComponent<Group>();
     if (!groupComp)
         return;
@@ -841,6 +846,11 @@ void hpBarScript(int id, World& w)
     auto animator = barEnt->getComponent<Animator>();
     if (!animator)
         return;
+    if (!cachedPlayer) {
+        cachedPlayer = GameHelper::getEntityByTag(w, "player");
+        if (!cachedPlayer)
+            return;
+    }
     auto hpComp = cachedPlayer->getComponent<HP>();
     if (hpComp) {
         float hpRatio = static_cast<float>(hpComp->getHP()) / hpComp->getMaxHP();
