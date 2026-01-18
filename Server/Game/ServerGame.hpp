@@ -8,6 +8,9 @@
 #ifndef R_TYPE_GAME_H
     #define R_TYPE_GAME_H
 
+#include <unordered_set>
+#include <memory>
+#include <string>
 #include <SFML/System.hpp>
 #include "IGameNetwork.hpp"
 #include "World.hpp"
@@ -66,6 +69,7 @@ class ServerGame {
         void portalBossBarrageScript(int entityId, World& world);
         void portalBossBackwardPortalScript(int entityId, World& world);
         void portalBossSpawnTankScript(int entityId, World& world);
+        bool resolveBulletSpawnOverlap(const std::shared_ptr<Entity>& bullet, const std::string& targetTag);
 
         u_int32_t& _tick;
         World _world;
@@ -76,6 +80,7 @@ class ServerGame {
         int _readyCount = 0;
         bool _gameStarted = false;
         sf::Clock _waveTimer;
+        std::unordered_set<uint32_t> _readyPlayers;
         std::vector<std::pair<Packet, u_int32_t>> _ackPackets;
         std::vector<User> _users;
 };
