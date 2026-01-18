@@ -27,6 +27,8 @@ std::string ClientTcpReader::InterpretData(const std::string& data)
         return {};
 
     switch (data.at(0)) {
+        case 6:
+            return {"Mode Confirmed"};
         default:
             return {"undefined"};
     }
