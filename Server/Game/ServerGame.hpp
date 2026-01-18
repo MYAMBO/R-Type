@@ -12,6 +12,7 @@
 #include "IGameNetwork.hpp"
 #include "World.hpp"
 #include "EntitiesType.hpp"
+#include "LevelLoader.hpp"
 
     #define NB_PLAYER_TO_START 2
     #define MAX_PLAYER 4
@@ -57,6 +58,7 @@ class ServerGame {
 
         World _world;
         IGameNetwork& _network;
+        LevelLoader _levelLoader;
         int _playerCount = 0;
         bool _gameStarted = false;
         sf::Clock _waveTimer;

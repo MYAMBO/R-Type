@@ -10,12 +10,15 @@
 
 #include "LevelLoader.hpp"
 #include "GameHelper.hpp"
+#include "ServerGame.hpp"
 
 #include <iostream>
 #include <fstream>
 
 
 using json = nlohmann::json;
+
+std::map<int, std::tuple<std::string, std::string>> LevelLoader::_levelsList;
 
 LevelLoader::LevelLoader()
 {
@@ -25,6 +28,10 @@ LevelLoader::LevelLoader()
 void LevelLoader::loadFromFile(const int id, ServerGame *server)
 {
     try {
+        if (_levelsList.find(id) == _levelsList.end()) {
+            std::cerr << "ERROR: Level ID " << id << " not found in _levelsList." << std::endl;
+            return;
+        }
         auto path = std::get<0>(_levelsList[id]);
 
         std::ifstream file(path);
