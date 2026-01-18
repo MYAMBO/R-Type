@@ -12,6 +12,7 @@
 #include "IGameNetwork.hpp"
 #include "World.hpp"
 #include "EntitiesType.hpp"
+#include "LevelLoader.hpp"
 
     #define NB_PLAYER_TO_START 2
     #define MAX_PLAYER 4
@@ -35,7 +36,6 @@ class ServerGame {
         void handleHeal(uint32_t id);
         void handleAction(uint32_t id, uint8_t action, uint32_t data);
         void handleNewPlayer();
-        void startLevel(int levelId);
         void createEnemy(float x, float y);
         void createFast(float x, float y);
         void createTank(float x, float y);
@@ -62,6 +62,7 @@ class ServerGame {
         World _world;
         Packet _packet;
         IGameNetwork& _network;
+        LevelLoader _levelLoader;
         int _playerCount = 0;
         bool _gameStarted = false;
         sf::Clock _waveTimer;

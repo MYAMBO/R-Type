@@ -450,8 +450,7 @@ void ServerGame::handleNewPlayer()
     if (_playerCount == NB_PLAYER_TO_START && !_gameStarted) {
         _gameStarted = true;
         _waveTimer.restart();
-        startLevel(4);   // Need to change that later to have a level management
-
+        _levelLoader.loadFromFile(4, this);   // Need to change that later to have a level management
     }
 }
 
