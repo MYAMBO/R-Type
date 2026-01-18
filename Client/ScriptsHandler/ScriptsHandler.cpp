@@ -10,12 +10,11 @@
 #include "Data.hpp"
 #include "Text.hpp"
 #include "Scale.hpp"
+#include "Layer.hpp"
 #include "Scene.hpp"
 #include "Group.hpp"
 #include "Music.hpp"
-#include "Inputs.hpp"
 #include "Sprite.hpp"
-#include "Rotation.hpp"
 #include "Position.hpp"
 #include "Velocity.hpp"
 #include "Animator.hpp"
@@ -27,49 +26,27 @@
 #include "GameHelperGraphical.hpp"
 
 #include "Network.hpp"
-#include "Packet.hpp"
 
-void backgroundScrollScript(size_t entityId, World &world)
-{
-    auto entity = GameHelper::getEntityById(world, entityId);
-    if (!entity) return;
+static std::shared_ptr<Entity> cachedPlayer = nullptr;
+static std::shared_ptr<Entity> cachedCamera = nullptr;
+static std::shared_ptr<Entity> cachedVolumeSettings = nullptr;
+static std::shared_ptr<Entity> cachedDifficultySettings = nullptr;
 
-    auto posComp = entity->getComponent<Position>();
-    auto spriteComp = entity->getComponent<Sprite>();
-    auto scaleComp = entity->getComponent<Scale>();
-    auto tagComp = entity->getComponent<Tag>();
-    auto windowSize = world.getWindow()->getSize();
-
-    if (!posComp || !spriteComp || !scaleComp || !tagComp)
-        return;
-
-    auto sprite = spriteComp->getSprite();
-    auto textureRect = sprite->getTextureRect();
-    float scaleX = static_cast<float>(windowSize.x) / textureRect.size.x;
-    float scaleY = static_cast<float>(windowSize.y) / textureRect.size.y;
-    float finalScale = std::max(scaleX, scaleY);
-    
-    if (std::abs(scaleComp->getScale() - finalScale) > 0.001f) {
-        scaleComp->setScale(finalScale * 1.2f);
+/**
+ * @brief Refresh cached entity pointers every 60 frames.
+ *
+ * This function updates static cached pointers to frequently accessed entities
+ * such as the player, camera, and settings entities to optimize performance.
+ * @param world The game world containing entities and components.
+ */
+void refreshCaches(World& world) {
+    static int cacheTimer = 0;
+    if (cacheTimer++ % 60 == 0 || !cachedPlayer) {
+        cachedPlayer = GameHelper::getEntityByTag(world, "player");
+        cachedCamera = GameHelper::getEntityByTag(world, "main_camera");
+        cachedVolumeSettings = GameHelper::getEntityByTag(world, "game_volume_settings");
+        cachedDifficultySettings = GameHelper::getEntityByTag(world, "game_difficulty_settings");
     }
-
-    float currentWidth = static_cast<float>(textureRect.size.x) * finalScale * 1.2f;
-
-    std::string otherTag = (tagComp->getTag() == "background_first") ? "background_second" : "background_first";
-    auto otherEntity = GameHelper::getEntityByTag(world, otherTag);
-
-    if (posComp->getX() <= -currentWidth) {
-        if (otherEntity) {
-            auto otherPos = otherEntity->getComponent<Position>();
-            if (otherPos) {
-                posComp->setX(otherPos->getX() + currentWidth - 2.0f);
-            }
-        } else {
-            posComp->setX(currentWidth);
-        }
-    }
-    if (world.getCurrentScene() != entity->getComponent<Scene>()->getScene())
-        entity->getComponent<Scene>()->setScene(world.getCurrentScene());
 }
 
 /**
@@ -82,6 +59,8 @@ void backgroundScrollScript(size_t entityId, World &world)
 
 void playerfire(size_t entityId, World &world)
 {
+    if (world.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
+        return;
     auto fire = GameHelper::getEntityById(world, entityId);
     if (!fire)
         return;
@@ -108,23 +87,12 @@ void playerfire(size_t entityId, World &world)
             continue;
 
         if (tag->getTag() == "player" || tag->getTag() == "player_mate") {
-            auto playerHp = e->getComponent<HP>();
-            if (playerHp && playerHp->getHP() <= 0)
-                continue;
             player = e;
             break;
         }
     }
     if (!player)
-    return;
-    auto musicComp = fire->getComponent<Music>();
-    if (!musicComp)
         return;
-    if (world.getCurrentScene() == static_cast<int>(SceneType::GAMEPLAY)) {
-        musicComp->play();
-    } else if (musicComp) {
-        musicComp->stop();
-    }
     auto posPlayer = player->getComponent<Position>();
     auto posFire = fire->getComponent<Position>();
     if (!posFire || !posPlayer)
@@ -149,54 +117,6 @@ void changeSceneScript(int entityId, World& world)
     entity->getComponent<Scene>()->setScene(world.getCurrentScene());
 }
 
-/**
- * @brief Updates the HP bar based on the entity's current HP.
- *
- * This function adjusts the scale of the HP bar sprite to reflect
- * the current health of the associated entity.
- * @param entityId The unique ID of the HP bar entity.
- * @param world The game world containing entities and components.
- */
-void hpBarScript(int entityId, World& world)
-{
-    auto player = GameHelper::getEntityByTag(world, "player");
-    auto entity = GameHelper::getEntityById(world, entityId);
-    if (!player || !entity)
-        return;
-
-    auto hpComp = player->getComponent<HP>();
-    auto spriteComp = entity->getComponent<RectangleShape>();
-    if (!hpComp || !spriteComp)
-        return;
-    float hp = static_cast<float>(hpComp->getHP());
-    float maxHp = static_cast<float>(hpComp->getMaxHP());
-    float scaleX = hp / maxHp;
-    spriteComp->setSize(400.f * scaleX, 20.f);
-}
-
-/**
- * @brief Updates the Mana bar based on the entity's current Mana.
- *
- * This function adjusts the scale of the Mana bar sprite to reflect
- * the current mana of the associated entity.
- * @param entityId The unique ID of the Mana bar entity.
- * @param world The game world containing entities and components.
- */
-void manaBarScript(int entityId, World& world)
-{
-    auto player = GameHelper::getEntityByTag(world, "player");
-    auto entity = GameHelper::getEntityById(world, entityId);
-    if (!player || !entity)
-        return;
-    auto dataComp = player->getComponent<Data>();
-    auto spriteComp = entity->getComponent<RectangleShape>();
-    if (!dataComp || !spriteComp)
-        return;
-    int mana = std::stoi(dataComp->getData("mana"));
-    int maxMana = 100;
-    float scaleX = static_cast<float>(mana) / static_cast<float>(maxMana);
-    spriteComp->setSize(400.f * scaleX, 10.f);
-}
 
 /**
  * @brief Script to handle player-specific behavior.
@@ -207,6 +127,8 @@ void manaBarScript(int entityId, World& world)
  */
 void playerScript(int entityId, World& world)
 {
+    if (world.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
+        return;
     (void)entityId;
     auto player = GameHelper::getEntityByTag(world, "player");
     if (!player)
@@ -230,8 +152,10 @@ void playerScript(int entityId, World& world)
  */
 void dotScript(int entityId, World& world)
 {
+    if (world.getCurrentScene() != static_cast<int>(SceneType::KAYU))
+        return;
     auto dotEnt = GameHelper::getEntityById(world, entityId);
-    if (!dotEnt || world.getCurrentScene() != static_cast<int>(SceneType::KAYU))
+    if (!dotEnt)
         return;
     float width = static_cast<float>(world.getWindow()->getSize().x);
     float height = static_cast<float>(world.getWindow()->getSize().y);
@@ -245,7 +169,7 @@ void dotScript(int entityId, World& world)
     static bool soundPlayed = false;
     
     if (!kayu || !corp || !rect || !posDot)
-    return;
+        return;
 
     float kayuRight = kayu->getComponent<Position>()->getX() + 150.f;
     float corpLeft = corp->getComponent<Position>()->getX() - 150.f;
@@ -261,8 +185,8 @@ void dotScript(int entityId, World& world)
         }
     } else if (availableSpace <= 221.f) {
         if (!used) {
-            EffectFactory::createSparks(world, centerX, centerY, 20);
-            EffectFactory::createSparks(world, centerX, centerY + 100.f, 20);
+            EffectFactory::createSparks(world, centerX, centerY, 20, SceneType::KAYU);
+            EffectFactory::createSparks(world, centerX, centerY + 100.f, 20, SceneType::KAYU);
             used = true;
         }
         rect->setSize(9.0f, 1000.f);
@@ -283,6 +207,8 @@ void dotScript(int entityId, World& world)
  */
 void myamboScript(int entityId, World& world)
 {
+    if (world.getCurrentScene() != static_cast<int>(SceneType::MYAMBO))
+        return;
     float width = static_cast<float>(world.getWindow()->getSize().x);
     float height = static_cast<float>(world.getWindow()->getSize().y);
     float centerX = width / 2.0f;
@@ -324,6 +250,8 @@ void myamboScript(int entityId, World& world)
  */
 void productionScript(int entityId, World& world)
 {
+    if (world.getCurrentScene() != static_cast<int>(SceneType::MYAMBO))
+        return;
     float width = static_cast<float>(world.getWindow()->getSize().x);
     float height = static_cast<float>(world.getWindow()->getSize().y);
     float centerX = width / 2.0f;
@@ -380,8 +308,10 @@ void productionScript(int entityId, World& world)
  */
 void kayuScript(int entityId, World& world)
 {
+    if (world.getCurrentScene() != static_cast<int>(SceneType::KAYU))
+        return;
     auto e = GameHelper::getEntityById(world, entityId);
-    if (!e || world.getCurrentScene() != static_cast<int>(SceneType::KAYU))
+    if (!e)
         return;
     float width = static_cast<float>(world.getWindow()->getSize().x);
     float height = static_cast<float>(world.getWindow()->getSize().y);
@@ -420,8 +350,10 @@ void kayuScript(int entityId, World& world)
  */
 void corpScript(int entityId, World& world)
 {
+    if (world.getCurrentScene() != static_cast<int>(SceneType::KAYU))
+        return;
     auto e = GameHelper::getEntityById(world, entityId);
-    if (!e || world.getCurrentScene() != static_cast<int>(SceneType::KAYU))
+    if (!e)
         return;
     float width = static_cast<float>(world.getWindow()->getSize().x);
     float height = static_cast<float>(world.getWindow()->getSize().y);
@@ -456,6 +388,8 @@ void corpScript(int entityId, World& world)
  */
 void myamboGlowScript(int entityId, World& world)
 {
+    if (world.getCurrentScene() != static_cast<int>(SceneType::MYAMBO))
+        return;
     auto entity = GameHelper::getEntityById(world, entityId);
     if (!entity)
         return;
@@ -494,6 +428,8 @@ void myamboGlowScript(int entityId, World& world)
  */
 void productionGlowScript(int entityId, World& world)
 {
+    if (world.getCurrentScene() != static_cast<int>(SceneType::MYAMBO))
+        return;
     auto entity = GameHelper::getEntityById(world, entityId);
     if (!entity)
         return;
@@ -525,6 +461,8 @@ void productionGlowScript(int entityId, World& world)
  */
 void kayuGlowScript(int entityId, World& world)
 {
+    if (world.getCurrentScene() != static_cast<int>(SceneType::KAYU))
+        return;
     auto entity = GameHelper::getEntityById(world, entityId);
     if (!entity)
         return;
@@ -553,6 +491,8 @@ void kayuGlowScript(int entityId, World& world)
  */
 void corpGlowScript(int entityId, World& world)
 {
+    if (world.getCurrentScene() != static_cast<int>(SceneType::KAYU))
+        return;
     auto entity = GameHelper::getEntityById(world, entityId);
     if (!entity)
         return;
@@ -580,6 +520,8 @@ void corpGlowScript(int entityId, World& world)
  */
 void volumeSettingsScript(int entityId, World& world)
 {
+    if (world.getCurrentScene() != static_cast<int>(SceneType::OPTIONS))
+        return;
     auto entity = GameHelper::getEntityById(world, entityId);
     if (!entity)
         return;
@@ -618,11 +560,29 @@ void volumeSettingsScript(int entityId, World& world)
 void sparkScript(int id, World& w)
 {
     auto e = GameHelper::getEntityById(w, id);
-    if (!e) return;
+    if (!e)
+        return;
+    auto dataComp = e->getComponent<Data>();
+    if (!dataComp)
+        return;
+    if (std::stoi(dataComp->getData("scene")) != w.getCurrentScene()) {
+        w.killEntity(id);
+        return;
+    }
+
     auto r = e->getComponent<RectangleShape>();
-    if (r->getSize().x > 0.1f) {
-        r->setSize(r->getSize().x * 0.8f, r->getSize().y * 0.8f);
-        r->setColor(r->getColor().r, r->getColor().g * 0.8f, r->getColor().b, r->getColor().a);
+    auto data = e->getComponent<Data>();
+    if (!r || !data)
+        return;
+
+    int lifetime = std::atoi(data->getData("lifetime").c_str());
+
+    if (lifetime > 0) {
+        float newSize = r->getSize().x * 0.98f;
+        r->setSize(newSize, newSize);
+        sf::Color col = r->getColor();
+        r->setColor(col.r, static_cast<int>(col.g * 0.8f), col.b, static_cast<int>(col.a * 0.9f));
+        data->setData("lifetime", std::to_string(lifetime - 1));
     }
     else
         w.killEntity(id);
@@ -637,7 +597,9 @@ void sparkScript(int id, World& w)
  */
 void creditsScript(int id, World& w)
 {
-    auto centerX = static_cast<float>(w.getWindow()->getSize().x) / 8.f;
+    if (w.getCurrentScene() != static_cast<int>(SceneType::CREDITS))
+        return;
+    auto centerX = static_cast<float>(w.getWindow()->getSize().x) / 5.f;
     auto pos = GameHelper::getEntityById(w, id);
     if (!pos)
         return;
@@ -654,12 +616,14 @@ void creditsScript(int id, World& w)
  */
 void creditsNameScript(int id, World& w)
 {
-    auto centerX2 = static_cast<float>(w.getWindow()->getSize().x) / 2.f;
+    if (w.getCurrentScene() != static_cast<int>(SceneType::CREDITS))
+        return;
+    auto centerX = static_cast<float>(w.getWindow()->getSize().x) / 3 + static_cast<float>(w.getWindow()->getSize().x) / 3.f;
     auto pos = GameHelper::getEntityById(w, id);
     if (!pos)
         return;
     auto positionComp = pos->getComponent<Position>();
-    positionComp->setX(centerX2);
+    positionComp->setX(centerX);
 }
 
 /**
@@ -671,6 +635,8 @@ void creditsNameScript(int id, World& w)
  */
 void availabilitySettingsScript(int entityId, World& world)
 {
+    if (world.getCurrentScene() != static_cast<int>(SceneType::OPTIONS))
+        return;
     (void)entityId;
     auto entity = GameHelper::getEntityById(world, entityId);
     if (!entity)
@@ -729,15 +695,16 @@ void availabilitySettingsScript(int entityId, World& world)
  */
 void companionScript(int entityId, World& world)
 {
+    if (world.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
+        return;
     auto companionEntity = GameHelper::getEntityById(world, entityId);
-    auto playerEntity = GameHelper::getEntityByTag(world, "player");
     
-    if (!companionEntity || !playerEntity)
+    if (!companionEntity)
         return;
     auto cPos = companionEntity->getComponent<Position>();
     auto cLayer = companionEntity->getComponent<Layer>();
     auto cData = companionEntity->getComponent<Data>();
-    auto pPos = playerEntity->getComponent<Position>();
+    auto pPos = cachedPlayer->getComponent<Position>();
 
     if (!cPos || !pPos || !cData)
         return;
@@ -750,7 +717,7 @@ void companionScript(int entityId, World& world)
     float offsetY = std::sin(angle) * radiusY;
     cPos->setX(pPos->getX() + offsetX + 20.f);
     cPos->setY(pPos->getY() + offsetY);
-    int pLayerVal = playerEntity->getComponent<Layer>() ? playerEntity->getComponent<Layer>()->getLayerId() : 10;
+    int pLayerVal = cachedPlayer->getComponent<Layer>() ? cachedPlayer->getComponent<Layer>()->getLayerId() : 10;
     if (std::cos(angle) < 0) {
         if (cLayer) cLayer->setLayerId(pLayerVal - 1);
         companionEntity->getComponent<Scale>()->setScale(1.5f); 
@@ -793,6 +760,8 @@ void companionScript(int entityId, World& world)
  */
 void companionLaserScript(int entityId, World& world)
 {
+    if (world.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
+        return;
     auto laserEntity = GameHelper::getEntityById(world, entityId);
     auto playerEntity = GameHelper::getEntityByTag(world, "player");
     if (!laserEntity || !playerEntity)
@@ -804,5 +773,89 @@ void companionLaserScript(int entityId, World& world)
     if (lPos->getX() > window->getSize().x + 100) {
         world.killEntity(entityId);
         return;
+    }
+}
+
+
+void enemyScript(int entityId, World& world)
+{
+    if (world.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
+        return;
+    auto e = GameHelper::getEntityById(world, entityId);
+    if (!e || world.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
+        return;
+
+    auto data = e->getComponent<Data>();
+    if (!data)
+        return;
+    int cooldown = std::stoi(data->getData("sound_cooldown"));
+    if (cooldown > 0) {
+        data->setData("sound_cooldown", std::to_string(cooldown - 1));
+        return;
+    }
+    if (cooldown == 0 && rand() % 6000 == 0) {
+        GameHelperGraphical::playRandomAmbianceEnemy(world);
+        data->setData("sound_cooldown", "3000");
+    }
+}
+
+void uiLevelCompanionScript(int id, World& w)
+{
+    if (w.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
+        return;
+    auto entity = GameHelper::getEntityById(w, id);
+    if (!entity)
+        return;
+    if (!cachedPlayer) {
+        cachedPlayer = GameHelper::getEntityByTag(w, "player");
+        if (!cachedPlayer)
+            return;
+    }
+    auto groupComp = cachedPlayer->getComponent<Group>();
+    if (!groupComp)
+        return;
+    auto groupPlayer = GameHelper::getEntitiesByGroup(w, groupComp->getId());
+    for (const auto& ent : groupPlayer) {
+        auto companion = GameHelper::getEntityById(w, ent->getId());
+        if (!companion)
+            continue;
+        auto name = companion->getComponent<Tag>()->getTag();
+        if (name != "companion")
+            continue;
+        auto dataCompanion = companion->getComponent<Data>();
+        if (!dataCompanion)
+            continue;
+        entity->getComponent<Text>()->setString(std::to_string(std::stoi(dataCompanion->getData("level")) + 1));
+    }
+}
+
+void hpBarScript(int id, World& w)
+{
+    if (w.getCurrentScene() != static_cast<int>(SceneType::GAMEPLAY))
+        return;
+    auto barEnt = GameHelper::getEntityById(w, id);
+    if (!barEnt)
+        return;
+    auto animator = barEnt->getComponent<Animator>();
+    if (!animator)
+        return;
+    if (!cachedPlayer) {
+        cachedPlayer = GameHelper::getEntityByTag(w, "player");
+        if (!cachedPlayer)
+            return;
+    }
+    auto hpComp = cachedPlayer->getComponent<HP>();
+    if (hpComp) {
+        float hpRatio = static_cast<float>(hpComp->getHP()) / hpComp->getMaxHP();
+        if (hpRatio >= 0.8f)
+            animator->resetAnimator(1, 1, 10.f, 0, 30, 48, 14, 0, 0);
+        else if (hpRatio >= 0.6f)
+            animator->resetAnimator(1, 1, 10.f, 48, 30, 48, 14, 0, 0);
+        else if (hpRatio >= 0.4f)
+            animator->resetAnimator(1, 1, 10.f, 96, 30, 48, 14, 0, 0);
+        else if (hpRatio >= 0.2f)
+            animator->resetAnimator(1, 1, 10.f, 144, 30, 48, 14, 0, 0);
+        else
+            animator->resetAnimator(1, 1, 10.f, 192, 30, 48, 14, 0, 0);
     }
 }

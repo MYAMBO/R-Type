@@ -16,17 +16,15 @@
 #include "IGameNetwork.hpp"
 
 class DeathSys : public System {
-private:
-    std::map<uint64_t, float> _deathTimers;
-    std::vector<uint64_t> _entitiesToKill;
-    IGameNetwork& _network;
+    public:
+        DeathSys(IGameNetwork& network) : _network(network) {}
+        ~DeathSys() override = default;
 
-public:
-    // DeathSys() = default;
-    DeathSys(IGameNetwork& network) : _network(network) {}
-    ~DeathSys() override = default;
-
-    void update(const float& dt, World &w) override;
+        void update(const float& dt, World &world) override;
+    private:
+        std::map<uint64_t, float> _deathTimers;
+        std::vector<uint64_t> _entitiesToKill;
+        IGameNetwork& _network;
 };
 
 #endif //R_TYPE_DEATHSYS_H

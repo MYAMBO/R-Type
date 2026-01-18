@@ -5,6 +5,7 @@
 ** Sprite
 */
 
+#include <iostream>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Image.hpp>
@@ -24,7 +25,8 @@ Sprite::Sprite(const std::string& filepath)
         std::cerr << "[Sprite] Failed to load texture: " << filepath << std::endl;
         sf::Image fallbackImage;
         fallbackImage.resize({ 1, 1 }, sf::Color::Magenta);
-        _texture.loadFromImage(fallbackImage);
+        if (!_texture.loadFromImage(fallbackImage))
+            throw std::runtime_error("Failed to load texture");
     }
     _sprite = std::make_shared<sf::Sprite>(_texture);
 }

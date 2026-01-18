@@ -31,10 +31,13 @@ enum class SceneType {
     MENU = 2,
     OPTIONS = 3,
     LANGUAGES = 4,
+    WAITING_ROOM = 5,
     MYAMBO = 10,
     KAYU = 11,
     CREDITS = 42,
     PAUSE = 1000,
+    GAME_OVER = 8,
+    VICTORY = 9,
 };
 
 enum PlayerColor {
@@ -43,14 +46,6 @@ enum PlayerColor {
     RED,
     GREEN
 };
-
-// enum entitiesType
-// {
-//     None = 0,
-//     Player = 1,
-//     Enemy,
-//     Bullet
-// };
 
 /**
  * @brief Main Game class to handle the game window and loop.
@@ -68,8 +63,10 @@ class Game {
         int killEntity(int id);
         void menudisplay();
         void gameplaydisplay();
+        void showEndScreen(uint8_t status);
         void createEnemy(float x, float y, uint16_t type);
         void updatePlayerMana(uint32_t playerId, int mana);
+        void startGameFromServer();
 
     private:
         void gameInput(std::shared_ptr<Inputs> inputSystem);
@@ -79,6 +76,7 @@ class Game {
         void playerInput(uint32_t entityId, World &world);
         void updateLoadingState(float progress, const std::string& status);
         void smootherMovement(int entityId, World &world, float targetX, float targetY);
+        void handleStartGameTransition();
 
 
         void bulletShooting(); // Need to remove it, maybe
@@ -88,8 +86,10 @@ class Game {
         World _world;
         IGameNetwork& _network;
         Factory _factory;
+        Packet _packet;
 
         bool _isShootKeyPressed = false;
+            bool _startGameRequested = false;
         int _musicVolume = 100;
         int _sfxVolume = 100;
 };

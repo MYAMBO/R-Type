@@ -16,11 +16,12 @@ class WorldFactory {
         ~WorldFactory() = default;
 
         void createCamera();
-        void createBackground(sf::RenderWindow& window);
+        void createMusicGameplay();
         void createEnemy(float x, float y, int type, int entityId);
         void createPowerUp(float x, float y, int type, int entityId);
-        void createPlayer(uint64_t playerId);
+        void createPlayer(uint64_t playerId, float x, float y);
         void createEnemyBullet(size_t entityId, int x, int y);
+        void createBackwardEnemyBullet(size_t entityId, int x, int y);
         void createBullet(size_t entityId, int x, int y, int type);
         void createCompanion(uint64_t playerId);
         void createScraps(World &world, float x, float y);

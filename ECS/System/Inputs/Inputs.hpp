@@ -9,7 +9,6 @@
     #define INPUTS_HPP_
 
     #include <vector>
-    #include <algorithm>
     #include <SFML/Window/Event.hpp>
     #include <SFML/Window/Keyboard.hpp>
 

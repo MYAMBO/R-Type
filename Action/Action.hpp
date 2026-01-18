@@ -13,7 +13,8 @@ enum Action
     FIRE,
     HEAL,
     SHIELD,
-    BEAM
+    BEAM,
+    MANA
 };
 
 #endif //R_TYPE_ACTION_HPP

@@ -9,7 +9,6 @@
 
 #include <iostream>
 
-
 /**
      * @brief Construct a new Animator component.
      *
@@ -147,4 +146,9 @@ void Animator::resetAnimator(int nbFrame, int framePerRow, float frameRate,
     _frameRate = frameRate;
     _currentFrame = 0;
     _currentTime = 0.f;
+}
+
+int Animator::getTotalFrames() const
+{
+    return _nbFrame;
 }

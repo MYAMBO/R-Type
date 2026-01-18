@@ -22,6 +22,7 @@ class User
         [[nodiscard]] unsigned short getPort() const;
         [[nodiscard]] std::string getName() const;
         [[nodiscard]] std::string getIp() const;
+        std::vector<int> _ackList;
 
     private:
         std::shared_ptr<sf::TcpSocket> _socket;

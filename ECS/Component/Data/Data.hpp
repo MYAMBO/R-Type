@@ -9,7 +9,6 @@
     #define DATA_HPP_
 
     #include <map>
-    #include <cstddef>
 
     #include "Component.hpp"
 

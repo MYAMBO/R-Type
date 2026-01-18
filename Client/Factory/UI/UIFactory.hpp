@@ -8,9 +8,12 @@
 #ifndef UIFACTORY_HPP_
     #define UIFACTORY_HPP_
 
+#include <functional>
+
 #include "LanguageHandler.hpp"
 
 class Game;
+class IGameNetwork;
 
 class UIFactory {
     public:
@@ -24,6 +27,12 @@ class UIFactory {
         void createBackGameUI() const;
         void createScrapUIEmpty(int index) const;
         void createLevelCompanionUI();
+        void createGameOverScreen();
+        void createVictoryScreen();
+        void createPlayerHUD();
+        void createScoreDisplay();
+        void createWaitingMenu(IGameNetwork* network = nullptr);
+  
     private:
         World& _world;
         std::shared_ptr<LanguageHandler> _languageHandler;

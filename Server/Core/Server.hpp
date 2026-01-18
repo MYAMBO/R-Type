@@ -7,6 +7,7 @@
 
 #ifndef SERVER
 #define SERVER
+#include "TcpReader.hpp"
 
 #ifdef _WIN32
     #include <io.h>
@@ -15,7 +16,6 @@
     #pragma comment(lib, "ws2_32.lib")
 #else
     #include <netinet/in.h>
-    #include <unistd.h>
 #endif // _WIN32
 
 #include <thread>
@@ -75,6 +75,9 @@ class Server : public IGameNetwork
         std::mutex _mutex;
         std::shared_ptr<ServerGame> _game;
         Packetreader _packetReader;
+        TcpReader _tcpReader;
         std::vector<std::pair<std::string, unsigned short>> _udpUsers;
+        std::vector<std::pair<Packet, uint32_t>> _ackPackets;
+        uint32_t _tick;
 };
 #endif // SERVER

@@ -7,7 +7,6 @@
 
 #include "Damage.hpp"
 
-
 /**
  * @brief Constructs a new Damage component with the number of damages.
  * @param damage Is the number of damage point.

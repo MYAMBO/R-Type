@@ -12,6 +12,7 @@
 #include "World.hpp"
 #include "Entity.hpp"
 
+#include <map>
 
 /**
  * @brief Constructs a new World object.
@@ -53,6 +54,7 @@ void World::manageSystems()
         system->update(this->getDeltaTime(), *this);
     }
 }
+
 
 /**
  * @brief Retrieves the current SFML event.

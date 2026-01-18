@@ -11,7 +11,6 @@
 
 #include "Component.hpp"
 
-
 /**
  * @brief Damage component to define if entities can deals damage.
  *

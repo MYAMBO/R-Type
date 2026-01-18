@@ -12,7 +12,6 @@
 
 #include <memory>
 #include <string>
-#include <iostream>
 
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/Font.hpp>

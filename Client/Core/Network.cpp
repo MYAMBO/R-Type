@@ -13,6 +13,8 @@
 #include <iostream>
 #include <optional>
 
+#include "TcpReader.hpp"
+
 #ifdef _WIN32
     #include <io.h>
     #include "getopt.h"
@@ -25,17 +27,15 @@
 
 #include "Game.hpp"
 #include "Network.hpp"
-#include "MyString.hpp"
 #include "ClientPacketreader.hpp"
 
-Network::Network()
-    : _ip(sf::IpAddress(0))
+Network::Network() : _ip(sf::IpAddress(0)), _tcpReader(nullptr)
 {
     _tcpPort = -1;
     _udpPort = -1;
     _debugMode = false;
-    _packetReader = ClientPacketreader(sf::Packet(), nullptr);
     _isRunning = true;
+    _packetReader = ClientPacketreader(sf::Packet(), nullptr);
 }
 
 void Network::getIpAdress(std::string option)
@@ -63,7 +63,7 @@ auto Network::parse(const int ac, char **av) -> void
                 {
                     getIpAdress(std::string(optarg));
                 }
-                catch (std::exception e)
+                catch (std::exception& e)
                 {
                     std::cerr << e.what() << std::endl;
                 }
@@ -103,6 +103,7 @@ auto Network::initClient() -> void
 
     _game = std::make_shared<Game>(*this);
     _packetReader = ClientPacketreader(sf::Packet(), _game);
+    _tcpReader = ClientTcpReader(_game);
 }
 
 void Network::udpThread()
@@ -122,6 +123,9 @@ void Network::udpThread()
         try
         {
             _packetReader.interpretPacket();
+            uint32_t ackNbr = _packetReader.getHeader().ack;
+            if (ackNbr != 0)
+                _lastPacketAckNbr = ackNbr;
         }
         catch (std::exception& e)
         {
@@ -134,7 +138,9 @@ void Network::udpThread()
 
 void Network::tcpThread()
 {
-    while (_isRunning)
+    bool ready = false;
+
+    while (_isRunning && !ready)
     {
         char data[1024];
         std::size_t received = 0;
@@ -147,7 +153,7 @@ void Network::tcpThread()
         if (status != sf::Socket::Status::Done)
             continue;
 
-        if (received < 6)
+        if (received != 6)
             continue;
 
         uint32_t value32;
@@ -155,13 +161,45 @@ void Network::tcpThread()
         _udpPort = ntohl(value32);
         _playerId = static_cast<unsigned char>(data[1]);
 
-        _udpSocket.send("", 0, _ip, _udpPort);
+        if (_udpSocket.send("", 0, _ip, _udpPort) != sf::Socket::Status::Done)
+            log("fail to send UDP packet");
 
-        {
-            std::lock_guard lock(_mutex);
-            _ready = true;
-        }
+        std::lock_guard lock(_mutex);
+        _ready = true;
+        ready = true;
         _readyCond.notify_all();
+    }
+    while (_isRunning)
+    {
+        std::array<char, 1024> data {};
+        std::size_t received;
+        std::string message;
+
+        while (true)
+        {
+            data.fill(0);
+            sf::Socket::Status status = _tcpClient.receive(data.data(), data.size(), received);
+            if (status == sf::Socket::Status::Disconnected)
+                break;
+            if ((status != sf::Socket::Status::Done && message.empty()))
+                break;
+
+            if (received != 0)
+            {
+                message += std::string(data.data(), received);
+
+                if ((received < data.size() || status != sf::Socket::Status::Done) && !message.empty())
+                {
+                    std::string messageResponse = _tcpReader.InterpretData(message);
+                    _mutex.lock();
+                    sendMessage(messageResponse);
+                    _mutex.unlock();
+                    message.clear();
+                    log("sent");
+                    break;
+                }
+            }
+        }
     }
 }
 
@@ -181,9 +219,11 @@ void Network::sendPacket(Packet& packet)
 {
      std::unique_lock lock(_mutex);
     _readyCond.wait(lock, [this]{ return _udpPort != -1; });
+    packet.setAck(_lastPacketAckNbr);
 
     const sf::Packet p = packet.getPacket();
-    _udpSocket.send(p.getData(), p.getDataSize(), _ip, _udpPort);
+    if (_udpSocket.send(p.getData(), p.getDataSize(), _ip, _udpPort) != sf::Socket::Status::Done)
+        log("fail to send UDP packet");
 }
 
 void Network::sendAll(sf::TcpSocket& socket, const void* data, std::size_t size)

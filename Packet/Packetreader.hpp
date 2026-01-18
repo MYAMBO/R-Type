@@ -25,6 +25,7 @@ class Packetreader
         void interpretPacket();
         void addPacket(sf::Packet data);
         void clear();
+        [[nodiscard]] UDPHeader getHeader() const;
 
     private:
         sf::Packet _packet;

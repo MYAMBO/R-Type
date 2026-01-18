@@ -5,11 +5,13 @@
 ** Data
 */
 
+#include <string>
+
 #include "Data.hpp"
 
 /**
  * @brief Constructs a new Data component with specified data map.
- * @param map The initial key-value data map.
+ * @param data The initial key-value data map.
 */
 Data::Data(std::map<std::string, std::string> data)
     : _data(data)

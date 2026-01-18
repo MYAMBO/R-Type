@@ -1,0 +1,9 @@
+{
+  "metadata": {
+    "name": "Level 0 - tank Test",
+    "scene": 1
+  },
+  "entities": [
+    { "type": "tank_enemy", "tag": "enemy", "x": 800,  "y": 100, "hp": 50, "velocity": { "x": -2, "y": 0 } }
+  ]
+}

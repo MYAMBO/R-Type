@@ -20,7 +20,7 @@
 class TcpReader
 {
     public:
-        TcpReader();
+        TcpReader() = default;
         ~TcpReader() = default;
 
         std::string InterpretData(const std::string& data);

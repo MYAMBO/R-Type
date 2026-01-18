@@ -6,11 +6,13 @@ This documentation aims to help new contributors understand the architecture, th
 
 ## Documentation Map
 
-| Section | Description |
-| :--- | :--- |
-| **[Architecture](architecture.md)** | High-level view of the Client, Server, and the Game Engine core (ECS). |
-| **[Technical Choices](technical_choices.md)** | Comparative study of libraries, algorithms, and security measures. |
-| **[Network Protocol](protocol.md)** | The RFC-like specification of the communication between client and server. |
+| Section                                       | Description                                                                   |
+|:----------------------------------------------|:------------------------------------------------------------------------------|
+| **[Architecture](architecture.md)**           | High-level view of the Client, Server, and the Game Engine core (ECS).        |
+| **[Technical Choices](technical_choices.md)** | Comparative study of libraries, algorithms, and security measures.            |
+| **[Network Protocol](protocol.md)**           | The UDP and TCP specification of the communication between client and server. |
+| **[Packet System](Server/packet_system.md)**  | Explanation of how data is transited between server and client.               |
+| **[ACK](Server/ACK.md)**                      | ACK system explanation and implementation.                                    |
 
 ## Quick Start for Contributors
 

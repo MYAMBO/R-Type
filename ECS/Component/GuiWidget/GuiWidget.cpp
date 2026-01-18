@@ -4,6 +4,7 @@
 ** File description:
 ** GuiWidget
 */
+
 #include "GuiWidget.hpp"
 
 /**
@@ -239,6 +240,7 @@ void GuiWidget::setPlaceholder(const std::string& placeholder)
  */
 void GuiWidget::setPasswordMode(bool passwordMode)
 {
+    (void) passwordMode;
     if (auto w = std::dynamic_pointer_cast<tgui::EditBox>(_widget))
         w->setPasswordCharacter('*');
 }

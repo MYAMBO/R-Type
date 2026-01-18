@@ -12,7 +12,7 @@
     #include <memory>
 
     #include "World.hpp"
-    #include "GameHelper.hpp"
+    #include "Camera.hpp"
 
 /**
 * @brief Enumeration for different color blindness modes.
@@ -53,15 +53,23 @@ class GameHelperGraphical {
         static ColorMatrix getColorMatrix(ColorBlindMode mode);
         static std::shared_ptr<Camera> getMainCamera(World &world);
 
+        static void createStarField(World &world);
+        static void resetCreditsPositions(World &world);
+        static void playRandomAmbianceEnemy(World &world);
+        static void createStar(World &world, float x, float y);
         static void createSparks(World &world, float x, float y, int amount);
-        static void createBasicEnemy(World &world, float x, float y, int entityId);
         static void createTankEnemy(World &world, float x, float y, int entityId);
         static void createFastEnemy(World &world, float x, float y, int entityId);
         static void createPortalBoss(World &world, float x, float y, int entityId);
         static void createSinusEnemy(World &world, float x, float y, int entityId);
+        static void createBasicEnemy(World &world, float x, float y, int entityId);
         static void createShootingEnemy(World &world, float x, float y, int entityId);
+        static void createScoreGUI(World &world, float x, float y, const std::string& scoreText);
         static void createHealPowerUp(World &world, float x, float y, int entityId);
+        static void createWarningPortal(World &world, float x, float y, int entityId);
         static void soundEffectEntity(const std::string& filepath, float volume, int scene, World& world);
+        static void createAnimatorEntity(World &world, float x, float y, const std::string& spritePath, int rows,
+                int cols, float animSpeed, int startX, int startY, int frameWidth, int frameHeight, int offsetX = 0, int offsetY = 0, float scale = 1.f);
 };
 
 #endif /* !GAMEHELPERGRAPHICAL_HPP_ */

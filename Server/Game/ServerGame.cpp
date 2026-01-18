@@ -26,19 +26,30 @@
 #include "Collision.hpp"
 #include "Action.hpp"
 #include "Data.hpp"
+#include "EntitiesType.hpp"
+
+static bool gameOverSent = false;
+
+static auto getAckId() -> uint32_t
+{
+    static uint32_t id = 0;
+    return ++id;
+}
 
 /**
  * @brief Constructs a new Game object.
  *
  * Initializes the game.
  */
-ServerGame::ServerGame(IGameNetwork& network) : _network(network)
+ServerGame::ServerGame(IGameNetwork& network, uint32_t &tick, std::vector<std::pair<Packet, uint32_t>> &ackPackets, std::vector<User> &users) :
+_tick(tick), _network(network), _ackPackets(ackPackets), _users(users)
 {
     _world.addSystem<ScriptsSys>();
     _world.addSystem<Collision>(_network);
     _world.addSystem<DeathSys>(_network);
     _world.addSystem<Movement>();
     _world.setDeltaTime(1.f);
+    _packet.setId(0).setAck(0).setPacketNbr(1).setTotalPacketNbr(1);
 }
 
 /**
@@ -63,10 +74,39 @@ void ServerGame::run()
         // }
         _world.manageSystems();
         checkDeaths();
+        _ackPackets.erase(
+            std::remove_if(_ackPackets.begin(), _ackPackets.end(),
+                [this](const std::pair<Packet, uint32_t>& tmpPacket) {
+                    return tmpPacket.second + 1500 < _tick;
+                }),
+            _ackPackets.end()
+        );
+
+        for (const auto& tmp : _users)
+        {
+            if (_ackPackets.empty())
+                break;
+            if (tmp._ackList.empty())
+                continue;
+            for (auto tmpAck : tmp._ackList)
+            {
+                for (auto [fst, snd] : _ackPackets)
+                {
+                    if (snd == static_cast<unsigned>(tmpAck) && snd + 500 < _tick)
+                        _network.sendPacket(fst);
+                }
+            }
+        }
+        checkGameEnd();
+        if (_packet.getPacket().getDataSize() != 12) {
+            _network.sendPacket(_packet);
+            _packet.clear();
+        }
         auto end = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
         if (elapsed < tickRate) {
             std::this_thread::sleep_for(tickRate - elapsed);
+            _tick++;
         }
     }
 }
@@ -95,9 +135,7 @@ void ServerGame::manaRegenScript(int entityId, World &world)
         if (currentMana > maxMana)
             currentMana = maxMana;
         data->setData("mana", std::to_string(currentMana));
-        Packet packet;
-        packet.updateMana(entityId, currentMana);
-        _network.sendPacket(packet);
+        _packet.action(entityId, MANA, currentMana);
     }
 }
 
@@ -127,11 +165,7 @@ void ServerGame::createPlayer(const float x, const float y)
            this->manaRegenScript(entityId, world);
        }
    );
-    Packet packet;
-    packet.Spawn(player->getId(), Player, x, y);
-    // send all the entity to the client
-    _network.sendPacket(packet);
-    packet = Packet();
+    _packet.Spawn(player->getId(), Player, x, y);
     for (const auto& entity : _world.getAllEntitiesWithComponent<Tag>()) {
         const auto pos = entity->getComponent<Position>();
         const auto tag = entity->getComponent<Tag>();
@@ -144,9 +178,8 @@ void ServerGame::createPlayer(const float x, const float y)
             type = Enemy;
         else if (tag->getTag() == "bullet")
             type = Bullet;
-        packet.Spawn(entity->getId(), type, pos->getX(), pos->getY());
+        _packet.Spawn(entity->getId(), type, pos->getX(), pos->getY());
     }
-    _network.sendPacket(packet);
 }
 
 /**
@@ -168,9 +201,7 @@ void ServerGame::EnemyMovement(const uint32_t entityId, World &world)
     auto pos = entity->getComponent<Position>();
     pos->setX(pos->getX() - 1 * world.getDeltaTime());
 
-    Packet packet;
-    packet.updatePosition(entityId, pos->getX(), pos->getY());
-    _network.sendPacket(packet);
+    _packet.updatePosition(entityId, pos->getX(), pos->getY());
 }
 
 void ServerGame::EnemySinusMovement(uint32_t entityId, World& world)
@@ -198,9 +229,7 @@ void ServerGame::EnemySinusMovement(uint32_t entityId, World& world)
     pos->setX(pos->getX() - speedX * dt);
     timers[entityId] += dt * sinusSpeed;
     pos->setY(startYPos[entityId] + std::sin(timers[entityId]) * amplitude);
-    Packet packet;
-    packet.updatePosition(entityId, pos->getX(), pos->getY());
-    _network.sendPacket(packet);
+    _packet.updatePosition(entityId, pos->getX(), pos->getY());
 }
 
 void ServerGame::ShootingAction(int entityId, World& world)
@@ -246,9 +275,7 @@ void ServerGame::createEnemy(const float x, const float y)
             this->EnemyMovement(entityId, world);
         }
     );
-    Packet packet;
-    packet.Spawn(enemy->getId(), Enemy, x, y);
-    _network.sendPacket(packet);
+    _packet.Spawn(enemy->getId(), Enemy, x, y);
 }
 
 void ServerGame::createFast(const float x, const float y)
@@ -266,9 +293,7 @@ void ServerGame::createFast(const float x, const float y)
             this->EnemyMovement(entityId, world);
         }
     );
-    Packet packet;
-    packet.Spawn(enemy->getId(), Fast, x, y);
-    _network.sendPacket(packet);
+    _packet.Spawn(enemy->getId(), Fast, x, y);
 }
 
 void ServerGame::createTank(const float x, const float y)
@@ -286,9 +311,7 @@ void ServerGame::createTank(const float x, const float y)
             this->EnemyMovement(entityId, world);
         }
     );
-    Packet packet;
-    packet.Spawn(enemy->getId(), Tank, x, y);
-    _network.sendPacket(packet);
+    _packet.Spawn(enemy->getId(), Tank, x, y);
 }
 
 void ServerGame::createSinusEnemy(const float x, const float y)
@@ -305,9 +328,7 @@ void ServerGame::createSinusEnemy(const float x, const float y)
             this->EnemySinusMovement(entityId, world);
         }
     );
-    Packet packet;
-    packet.Spawn(enemy->getId(), EnemySinus, x, y);
-    _network.sendPacket(packet);
+    _packet.Spawn(enemy->getId(), EnemySinus, x, y);
 }
 
 void ServerGame::createShootingEnemy(const float x, const float y)
@@ -325,9 +346,7 @@ void ServerGame::createShootingEnemy(const float x, const float y)
             this->ShootingAction(entityId, world);
         }
     );
-    Packet packet;
-    packet.Spawn(enemy->getId(), ShootingEnemy, x, y);
-    _network.sendPacket(packet);
+    _packet.Spawn(enemy->getId(), ShootingEnemy, x, y);
 }
 
 void ServerGame::createSinusShootingEnemy(const float x, const float y)
@@ -345,9 +364,7 @@ void ServerGame::createSinusShootingEnemy(const float x, const float y)
             this->ShootingAction(entityId, world);
         }
     );
-    Packet packet;
-    packet.Spawn(enemy->getId(), ShootingEnemy, x, y);
-    _network.sendPacket(packet);
+    _packet.Spawn(enemy->getId(), ShootingEnemy, x, y);
 }
 
 void ServerGame::createHealPowerUp(const float x, const float y)
@@ -364,9 +381,7 @@ void ServerGame::createHealPowerUp(const float x, const float y)
             this->EnemyMovement(entityId, world);
         }
     );
-    Packet packet;
-    packet.Spawn(enemy->getId(), HealPU, x, y);
-    _network.sendPacket(packet);
+    _packet.Spawn(enemy->getId(), HealPU, x, y);
 }
 
 /**
@@ -379,6 +394,35 @@ void ServerGame::createWave()
         createEnemy(1920 + static_cast<float>(i) * 100, 200 + static_cast<float>(i % 3) * 250);
 }
 
+bool ServerGame::resolveBulletSpawnOverlap(const std::shared_ptr<Entity>& bullet, const std::string& targetTag)
+{
+    auto bulletPos = bullet->getComponent<Position>();
+    auto bulletCol = bullet->getComponent<BoxCollider>();
+    auto bulletDmg = bullet->getComponent<Damage>();
+    if (!bulletPos || !bulletCol || !bulletDmg)
+        return false;
+    for (const auto& entity : _world.getAllEntitiesWithComponent<Tag>()) {
+        auto tag = entity->getComponent<Tag>();
+        if (!tag || tag->getTag() != targetTag)
+            continue;
+        auto hp = entity->getComponent<HP>();
+        auto pos = entity->getComponent<Position>();
+        auto col = entity->getComponent<BoxCollider>();
+        if (!hp || !pos || !col)
+            continue;
+        if (!Collision::checkCollision(*bulletCol, *bulletPos, *col, *pos))
+            continue;
+
+        int newHp = static_cast<int>(hp->getHP()) - bulletDmg->getDamage();
+        if (newHp < 0)
+            newHp = 0;
+        hp->setHP(static_cast<unsigned int>(newHp));
+        _world.killEntity(bullet->getId());
+        return true;
+    }
+    return false;
+}
+
 /**
  * @brief define the movement of a bullet.
  *
@@ -388,25 +432,20 @@ void ServerGame::createWave()
 void ServerGame::BulletMovement(const uint32_t entityId, World &world)
 {
     const auto entity = GameHelper::getEntityById(world, entityId);
-    const auto vel = entity->getComponent<Velocity>();
+    
+    if (!entity)
+        return;
+    
     const auto pos = entity->getComponent<Position>();
-    Packet packet;
+    if (!pos)
+        return;
 
-    if (entity->getComponent<BoxCollider>()->isTrigger()) {
-        // check collisions with enemies
-    }
-    if (vel) {
-        pos->setX(pos->getX() + vel->getVelocityX() * world.getDeltaTime());
-        pos->setY(pos->getY() + vel->getVelocityY() * world.getDeltaTime());
-    }
-    if (pos->getX() > 3000 || pos->getX() < -100) {
+    if (pos->getX() > 2800 || pos->getX() < -100) {
         world.killEntity(entityId);
-        packet.dead(entityId);
+        _packet.dead(entityId);
     } else {
-        pos->setX(pos->getX() + 10 * world.getDeltaTime());
-        packet.updatePosition(entityId, pos->getX(), pos->getY(), Bullet);
+        _packet.updatePosition(entityId, pos->getX(), pos->getY());
     }
-    _network.sendPacket(packet);
 }
 
 /**
@@ -431,10 +470,9 @@ void ServerGame::createBullet(const float x, const float y)
             this->BulletMovement(entityId, world);
         }
     );
-    Packet packet;
-    packet.Spawn(bullet->getId(), Bullet, x + 60.f, y + 15.f);
-
-    _network.sendPacket(packet);
+    _packet.Spawn(bullet->getId(), Bullet, x + 60.f, y + 15.f);
+    if (resolveBulletSpawnOverlap(bullet, "enemy"))
+        _packet.dead(bullet->getId());
 }
 
 void ServerGame::createEnemyBullet(const float x, const float y)
@@ -453,9 +491,30 @@ void ServerGame::createEnemyBullet(const float x, const float y)
             this->BulletMovement(entityId, world);
         }
     );
-    Packet packet;
-    packet.Spawn(bullet->getId(), EnemyBullet, x + 60.f, y + 15.f);
-    _network.sendPacket(packet);
+    _packet.Spawn(bullet->getId(), EnemyBullet, x + 60.f, y + 15.f);
+    if (resolveBulletSpawnOverlap(bullet, "player"))
+        _packet.dead(bullet->getId());
+}
+
+void ServerGame::createEnemyBackwardBullet(const float x, const float y)
+{
+    const auto bullet = _world.createEntity();
+
+    bullet->addComponent<Position>(x - 60.f, y + 15.f);
+    bullet->addComponent<BoxCollider>(64.0f, 30.0f);
+    bullet->addComponent<Velocity>(5.f, 0.f);
+    bullet->addComponent<Tag>("enemy_bullet");
+    bullet->addComponent<Damage>(10);
+    bullet->addComponent<HP>(10);
+    bullet->addComponent<Script>(
+        [this](const int entityId, World& world)
+        {
+            this->BulletMovement(entityId, world);
+        }
+    );
+    _packet.Spawn(bullet->getId(), BackwardEnemyBullet, x + 60.f, y + 15.f);
+    if (resolveBulletSpawnOverlap(bullet, "player"))
+        _packet.dead(bullet->getId());
 }
 
 /**
@@ -468,16 +527,65 @@ void ServerGame::handleNewPlayer()
         return;
     }
 
-    createPlayer(200, 200);
+    createPlayer(200, 300 + (_playerCount) * 100);
     _playerCount++;
 
     std::cout << "Player " << _playerCount << " connected" << std::endl;
+}
 
-    if (_playerCount == NB_PLAYER_TO_START && !_gameStarted) {
+/**
+ * @brief Handle player ready status
+ *
+ * @param playerId The id of the player who is ready
+ */
+void ServerGame::handlePlayerReady(const uint32_t playerId)
+{
+    if (_readyPlayers.find(playerId) != _readyPlayers.end()) {
+        _readyPlayers.erase(playerId);
+        _readyCount = static_cast<int>(_readyPlayers.size());
+        std::cout << "Player " << playerId << " unready. Ready count: " << _readyCount << "/" << _playerCount << std::endl;
+        return;
+    }
+
+    _readyPlayers.insert(playerId);
+    _readyCount = static_cast<int>(_readyPlayers.size());
+    std::cout << "Player " << playerId << " is ready. Ready count: " << _readyCount << "/" << _playerCount << std::endl;
+
+    if (_readyCount == NB_PLAYER_TO_START && !_gameStarted && _playerCount >= NB_PLAYER_TO_START) {
+        auto test = _world.getAllEntitiesWithComponent<Tag>();
+        for (const auto& entity : test) {
+            auto tag = entity->getComponent<Tag>();
+            if (tag && tag->getTag() == "player") {
+                auto pos = entity->getComponent<Position>();
+                pos->setX(200.f);
+                pos->setY(300.f);
+                auto hpComp = entity->getComponent<HP>();
+                if (hpComp) {
+                    printf("[Game Start] Resetting HP for player %d\n", entity->getId());
+                    hpComp->setHP(100);
+                    hpComp->setAlive(true);
+                    _packet.action(entity->getId(), HEAL, 100);
+                }
+            }
+        }
         _gameStarted = true;
         _waveTimer.restart();
-        startLevel(4);   // Need to change that later to have a level management
-
+        Packet startPacket;
+        startPacket.clear();
+        startPacket.setId(0).setAck(0).setPacketNbr(1).setTotalPacketNbr(1);
+        startPacket.startGame();
+        _network.sendPacket(startPacket);
+        auto all = _world.getAllEntitiesWithComponent<Tag>();
+        for (auto& ent : all) {
+            auto t = ent->getComponent<Tag>()->getTag();
+            if (t != "player") {
+                _world.killEntity(ent->getId());
+                _packet.dead(ent->getId());
+            }
+        }
+        _levelLoader.loadFromFile(_level, this);
+        gameOverSent = false;
+        std::cout << "Game started!" << std::endl;
     }
 }
 
@@ -499,20 +607,9 @@ void ServerGame::serverUpdatePosition(const uint32_t id, const float x, const fl
 
     const auto pos = entity->getComponent<Position>();
 
-    const auto distanceX = pos->getX() - x;
-    const auto distanceY = pos->getY() - y;
-
-    // if is not good for now just set the position
-    //if (distanceX * distanceX + distanceY * distanceY <= 20.f) {
-    //    pos->setX(x);
-    //    pos->setY(y);
-    //}
     pos->setX(x);
     pos->setY(y);
-
-    Packet packet;
-    packet.updatePosition(id, x, y);
-    _network.sendPacket(packet);
+    _packet.updatePosition(id, x, y);
 }
 
 /**
@@ -531,14 +628,12 @@ void ServerGame::handleShoot(const uint32_t id)
     if (!pos || !data)
         return;
     int currentMana = std::stoi(data->getData("mana"));
-    const int manaCost = 5;
+    const int manaCost = 10;
     if (currentMana < manaCost)
         return;
     currentMana -= manaCost;
     data->setData("mana", std::to_string(currentMana));
-    Packet packet;
-    packet.updateMana(id, currentMana);
-    _network.sendPacket(packet);
+    _packet.action(id, MANA, currentMana);
     createBullet(pos->getX(), pos->getY());
 }
 
@@ -554,22 +649,7 @@ void ServerGame::handleHeal(const uint32_t id)
     unsigned int maxHp = hp->getMaxHP();
     unsigned int newHp = std::min(currentHp + 20, maxHp);
     hp->setHP(newHp);
-    Packet packet;
-    packet.action(id, HEAL, newHp);
-    _network.sendPacket(packet);
-}
-
-
-/**
- * @brief Create the level and place the enemies via the packet sent.
- *
- * @param levelId The number id of the chosen level.
- */
-void ServerGame::startLevel(const int levelId)
-{
-    const std::string levelPath = "../Levels/level" + std::to_string(levelId) + ".json";
-    LevelLoader::loadFromFile(levelPath, this);
-
+    _packet.action(id, HEAL, newHp);
 }
 
 void ServerGame::checkDeaths()
@@ -583,12 +663,149 @@ void ServerGame::checkDeaths()
         if (!hp || hp->getHP() > 0)
             continue;
         if (hp->isAlive()) {
+            if (_packet.getPacket().getDataSize() != 12) {
+                _network.sendPacket(_packet);
+                _packet.clear();
+            }
             hp->setAlive(false);
-            Packet packet;
-            packet.dead(entity->getId());
-            _network.sendPacket(packet);
-            _world.killEntity(entity->getId());
+            _packet.dead(entity->getId());
+            auto tag = entity->getComponent<Tag>();
+            if (tag && tag->getTag() != "player") {
+                _world.killEntity(entity->getId());
+            } else if (!tag) {
+                _world.killEntity(entity->getId());
+            }
+            _packet.setAck(getAckId());
+            _ackPackets.emplace_back(_packet, _tick);
+            for (auto tmp : _users)
+                tmp._ackList.emplace_back(_tick);
+            _network.sendPacket(_packet);
+            _packet.setAck(0);
+            _packet.clear();
         }
+    }
+}
+
+void ServerGame::createWarningPortal(float x, float y, float duration)
+{
+    auto portal = _world.createEntity();
+    portal->addComponent<Position>(x, y);
+    portal->addComponent<Tag>("warning_portal");
+    portal->addComponent<Data>(std::map<std::string, std::string>{
+        {"type", "warning"},
+        {"lifetime", "0"},
+        {"duration", std::to_string(duration)}
+    });
+    portal->addComponent<Script>(
+        [this](int entityId, World& world) {
+            auto entity = GameHelper::getEntityById(world, entityId);
+            if (!entity) return;
+            auto data = entity->getComponent<Data>();
+            float lifetime = std::stof(data->getData("lifetime"));
+            float duration = std::stof(data->getData("duration"));
+            lifetime += world.getDeltaTime();
+            data->setData("lifetime", std::to_string(lifetime));
+            if (lifetime >= duration) {
+                world.killEntity(entityId);
+                _packet.dead(entityId);
+            }
+        }
+    );
+    _packet.Spawn(portal->getId(), Portal, x, y);
+}
+
+void ServerGame::portalBossBackwardPortalScript(int entityId, World& world)
+{
+    static std::map<int, int> phase;
+    static std::map<int, float> phaseTimer;
+
+    const auto boss = GameHelper::getEntityById(world, entityId);
+    if (!boss)
+        return;
+    float dt = world.getDeltaTime();
+    phaseTimer[entityId] += dt;
+    if (phase[entityId] == 0 && phaseTimer[entityId] >= 90.0f) {
+        float leftX = 100.0f;
+        for (int i = 0; i < 5; i++) {
+            float yPos = 200.0f + (i * 150.0f);
+            createWarningPortal(leftX, yPos, 60.0f);
+        }
+        phase[entityId] = 1;
+        phaseTimer[entityId] = 0.0f;
+    }
+    else if (phase[entityId] == 1 && phaseTimer[entityId] >= 30.0f) {
+        phase[entityId] = 2;
+        phaseTimer[entityId] = 0.0f;
+    }
+    else if (phase[entityId] == 2) {
+        float leftX = 100.0f;
+        for (int i = 0; i < 5; i++) {
+            float yPos = 200.0f + (i * 150.0f);
+            createEnemyBackwardBullet(leftX, yPos);
+        }
+        phase[entityId] = 3;
+        phaseTimer[entityId] = 0.0f;
+    }
+    else if (phase[entityId] == 3 && phaseTimer[entityId] >= 60.0f) { // 2 secondes
+        phase[entityId] = 0;
+        phaseTimer[entityId] = 0.0f;
+    }
+}
+
+
+
+void ServerGame::portalBossBarrageScript(int entityId, World &world)
+{
+    static std::map<int, float> shootTimers;
+    static std::map<int, float> shootTimers2;
+    const auto boss = GameHelper::getEntityById(world, entityId);
+
+    if (!boss)
+        return;
+    auto hpComp = boss->getComponent<HP>();
+    if (!hpComp || !hpComp->isAlive())
+        return;
+    auto pos = boss->getComponent<Position>();
+    float dt = world.getDeltaTime();
+    shootTimers[entityId] += dt;
+    shootTimers2[entityId] += dt;
+    if (shootTimers[entityId] >= 60.0f) {
+        shootTimers[entityId] = 0.0f;
+        float centerOffset = 500.0f;
+        for (int i = 0; i < 5; i++) {
+            float offsetY = (i - 2) * 50.0f;
+            createEnemyBullet(pos->getX() - 50, pos->getY() + centerOffset + offsetY);
+        }
+    }
+    if (shootTimers2[entityId] >= 90.0f) {
+        shootTimers2[entityId] = 0.0f;
+        float centerOffset = 300.0f;
+        float centerOffset2 = 700.0f;
+        for (int i = 0; i < 5; i++) {
+            float offsetY = (i - 2) * 50.0f;
+            createEnemyBullet(pos->getX() - 50, pos->getY() + centerOffset + offsetY);
+            createEnemyBullet(pos->getX() - 50, pos->getY() + centerOffset2 + offsetY);
+        }
+    }
+}
+
+void ServerGame::portalBossSpawnTankScript(int entityId, World& world)
+{
+    static std::map<int, float> spawnTimer;
+    static std::map<int, float> spawnTimer2;
+
+    const auto boss = GameHelper::getEntityById(world, entityId);
+    if (!boss)
+        return;
+    auto pos = boss->getComponent<Position>();
+    float dt = world.getDeltaTime();
+    spawnTimer[entityId] += dt;
+    spawnTimer2[entityId] += dt;
+    if (spawnTimer[entityId] >= 300.0f) {
+        spawnTimer[entityId] = 0.0f;
+        float offsetY =  800.0f;
+        createTank(pos->getX(), pos->getY() + 60.0f);
+        createTank(pos->getX(), pos->getY() + 60.0f + offsetY);
     }
 }
 
@@ -604,12 +821,12 @@ void ServerGame::createPortalBoss(const float x, const float y)
     enemy->addComponent<Script>(
         [this](const int entityId, World& world)
         {
-           // this->EnemySinusMovement(entityId, world);
+            this->portalBossBarrageScript(entityId, world);
+            this->portalBossBackwardPortalScript(entityId, world);
+          //  this->portalBossSpawnTankScript(entityId, world);
         }
     );
-    Packet packet;
-    packet.Spawn(enemy->getId(), PortalBoss, x, y);
-    _network.sendPacket(packet);
+    _packet.Spawn(enemy->getId(), PortalBoss, x, y);
 }
 
 /**
@@ -621,6 +838,7 @@ void ServerGame::createPortalBoss(const float x, const float y)
  */
 void ServerGame::handleAction(const uint32_t id, const uint8_t action, const uint32_t data)
 {
+    (void) data;
     switch (action)
     {
         case FIRE : {
@@ -637,5 +855,67 @@ void ServerGame::handleAction(const uint32_t id, const uint8_t action, const uin
         case BEAM : {
             break;
         }
+        default:
+            ;
+    }
+}
+
+
+void ServerGame::sendGameEnd(uint8_t status)
+{
+    Packet packet;
+    packet.endGame(status);
+    _network.sendPacket(packet);
+}
+
+void ServerGame::checkGameEnd()
+{
+    if (!_gameStarted)
+        return;
+    auto players = _world.getAllEntitiesWithComponent<Tag>();
+    int alivePlayers = 0;
+    for (const auto& entity : players) {
+        auto tag = entity->getComponent<Tag>();
+        if (tag && tag->getTag() == "player") {
+            auto hp = entity->getComponent<HP>();
+            if (hp && hp->isAlive() && hp->getHP() > 0) {
+                alivePlayers++;
+            }
+        }
+    }
+    if (alivePlayers == 0 && _playerCount > 0) {
+        if (!gameOverSent) {
+            std::cout << "GAME OVER - All players dead!" << std::endl;
+            sendGameEnd(0);
+            _readyCount = 0;
+            _readyPlayers.clear();
+            gameOverSent = true;
+            _gameStarted = false;
+        }
+        return;
+    }
+    auto enemies = _world.getAllEntitiesWithComponent<Tag>();
+    bool enemyAlive = false;
+    for (const auto& entity : enemies) {
+        auto tag = entity->getComponent<Tag>();
+        if (tag && tag->getTag() == "enemy") {
+            auto hp = entity->getComponent<HP>();
+            if (hp && hp->isAlive() && hp->getHP() > 0) {
+                enemyAlive = true;
+                break;
+            }
+        }
+    }
+    static bool victorySent = false;
+    if (!enemyAlive && !victorySent && alivePlayers > 0) {
+        victorySent = true;
+        std::cout << "VICTORY - All enemies defeated!" << std::endl;
+        if (_levelLoader.getLevelsCount() > _level) {
+            _level++;
+        }
+        _gameStarted = false;
+        sendGameEnd(1);
+        _readyCount = 0;
+        _readyPlayers.clear();
     }
 }

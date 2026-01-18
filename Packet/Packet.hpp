@@ -38,14 +38,16 @@ class Packet
         Packet& setPacketNbr(uint8_t packetNbr);
         Packet& setTotalPacketNbr(uint8_t totalPacketNbr);
 
+        void clear();
         void timeSync(uint32_t time);
         void updatePosition(uint32_t id, float x, float y, uint16_t type = 0);
-        void updateMana(uint32_t playerId, int mana);
         void Spawn(uint32_t id, uint16_t type, float x, float y);
         void collision(uint32_t entityOneId, uint32_t entityTwoId);
         void dead(uint32_t id);
         void endGame(uint8_t status);
         void action(uint32_t id, uint8_t action, uint32_t data);
+        void ready(uint32_t playerId);
+        void startGame();
 
         [[nodiscard]] sf::Packet getPacket() const;
     private:

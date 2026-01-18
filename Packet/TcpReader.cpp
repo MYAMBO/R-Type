@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <array>
 
-TcpReader::TcpReader() = default;
+#include "SFML/Audio/Music.hpp"
 
 /**
  * Generates a login request message.
@@ -39,11 +39,11 @@ std::string TcpReader::InterpretData(const std::string& data)
 {
     if (data.empty())
         return {};
-    switch (data.at(0))
-    {
-    case 2:
-        return loginRequest(data);
-    default:
-        return {"undefined"};
+
+    switch (data.at(0)) {
+        case 2:
+            return loginRequest(data);
+        default:
+            return {"undefined"};
     }
 }

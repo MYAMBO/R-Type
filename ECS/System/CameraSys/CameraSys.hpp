@@ -22,7 +22,6 @@ class CameraSys : public System {
         ~CameraSys() override = default;
 
         void update(const float& dt, World &w) override;
-    private:
 };
 
 #endif
