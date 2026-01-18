@@ -8,6 +8,8 @@
 #include "Sprite.hpp"
 #include "Tag.hpp"
 #include "GameHelper.hpp"
+#include "HP.hpp"
+#include "DeathSys.hpp"
 
 void DeathSys::update(const float &dt, World &world)
 {
