@@ -447,7 +447,7 @@ void Game::playerInput(uint32_t entityId, World &world)
 
     if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("SHOOT")))) {
         auto dataComp = compPlayer->getComponent<Data>();
-        if (!isShootKeyPressed && dataComp && std::stoi(dataComp->getData("mana")) >= 20) {
+        if (!isShootKeyPressed && dataComp && std::stoi(dataComp->getData("mana")) >= 5) {
             _packet.action(compPlayer->getId(), FIRE, 0);
             _packet.setAck(0);
             _packet.setId(compPlayer->getId());
@@ -455,26 +455,12 @@ void Game::playerInput(uint32_t entityId, World &world)
             _packet.setTotalPacketNbr(1);
             isShootKeyPressed = true;
             compPlayer->getComponent<SoundEffect>()->play();
-            int mana = std::stoi(dataComp->getData("mana"));
-            if (mana >= 20) {
-                mana -= 20;
-                if (mana < 0)
-                    mana = 0;
-                dataComp->setData("mana", std::to_string(mana));
-            }
             auto group = GameHelper::getEntitiesByGroup(world, compPlayer->getComponent<Group>()->getId());
             for (auto& entity : group) {
                 if (entity->getComponent<Tag>()->getTag() == "companion") {
                     _factory.createLasersCompanion(entity->getId(), compPlayer->getId());
                 }
             }
-            // int mana = std::stoi(dataComp->getData("mana"));
-            // if (mana >= 20) {
-            //     mana -= 20;
-            //     if (mana < 0)
-            //         mana = 0;
-            //     dataComp->setData("mana", std::to_string(mana));
-            // }
         }
     } else {
         isShootKeyPressed = false;
@@ -571,6 +557,10 @@ void Game::handleAction(const uint32_t id, const uint8_t action, const uint32_t 
         case SHIELD: {
             break;
         }
+        case MANA: {
+            updatePlayerMana(id, static_cast<int>(data));
+            break;
+        }
         default:
             break;
     }
@@ -589,7 +579,7 @@ void Game::healEntity(const uint32_t entityId, const uint32_t newHp)
     std::cout << "Entity " << entityId << " HP set to: " << newHp << std::endl;
 }
 
-void Game::updatePlayerMana(uint32_t playerId, int mana)
+void Game::updatePlayerMana(const uint32_t playerId, const int mana)
 {
     auto player = GameHelper::getEntityById(_world, playerId);
     if (!player)
