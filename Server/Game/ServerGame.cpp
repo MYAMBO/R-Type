@@ -403,9 +403,6 @@ void ServerGame::BulletMovement(const uint32_t entityId, World &world)
     const auto vel = entity->getComponent<Velocity>();
     const auto pos = entity->getComponent<Position>();
 
-    if (entity->getComponent<BoxCollider>()->isTrigger()) {
-        // check collisions with enemies
-    }
     if (vel) {
         pos->setX(pos->getX() + vel->getVelocityX() * world.getDeltaTime());
         pos->setY(pos->getY() + vel->getVelocityY() * world.getDeltaTime());
@@ -415,7 +412,7 @@ void ServerGame::BulletMovement(const uint32_t entityId, World &world)
         _packet.dead(entityId);
     } else {
         pos->setX(pos->getX() + 10 * world.getDeltaTime());
-        _packet.updatePosition(entityId, pos->getX(), pos->getY(), Bullet);
+        _packet.updatePosition(entityId, pos->getX(), pos->getY());
     }
 }
 
@@ -501,7 +498,6 @@ void ServerGame::handleNewPlayer()
         _gameStarted = true;
         _waveTimer.restart();
         startLevel(4);   // Need to change that later to have a level management
-
     }
 }
 
