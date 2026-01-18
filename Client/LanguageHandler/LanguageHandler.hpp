@@ -17,10 +17,6 @@ class LanguageHandler {
 
         void loadLanguageFile(const std::string& languageId);
         std::string getTranslation(const std::string& key) const;
-        class LoadLanguageException : public std::exception {
-            public:
-                [[nodiscard]] const char* what() const noexcept override;
-        }; 
     private:
         std::unordered_map<std::string, std::string> _language;
 };
