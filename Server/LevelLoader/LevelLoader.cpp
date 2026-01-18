@@ -9,7 +9,6 @@
 #include "json.hpp"
 
 #include "LevelLoader.hpp"
-#include "World.hpp"
 #include "GameHelper.hpp"
 
 #include <iostream>
@@ -18,9 +17,16 @@
 
 using json = nlohmann::json;
 
-void LevelLoader::loadFromFile(const std::string &path, ServerGame *server)
+LevelLoader::LevelLoader()
+{
+    findAllLevel();
+}
+
+void LevelLoader::loadFromFile(const int id, ServerGame *server)
 {
     try {
+        auto path = std::get<0>(_levelsList[id]);
+
         std::ifstream file(path);
         if (!file.is_open()) {
             std::cerr << "ERROR: file cannot be open("<< path << ")"  << std::endl;
@@ -70,6 +76,33 @@ void LevelLoader::loadFromFile(const std::string &path, ServerGame *server)
         std::cerr << "\n ERROR JSON: " << e.what() << std::endl;
     } catch (const std::exception& e) {
         std::cerr << "\n ERROR: " << e.what() << std::endl;
+    }
+}
+
+void LevelLoader::findAllLevel()
+{
+    bool findLoop = true;
+    std::string path = "../levels/level";
+
+    for (int i = 1; findLoop; i++) {
+        std::string tempPath = path + std::to_string(i) + ".json";
+        std::ifstream file(tempPath);
+
+        if (!file.is_open()) {
+            findLoop = false;
+        } else {
+            json data;
+            file >> data;
+            file.close();
+
+            if (data.contains("metadata")) {
+                auto &meta = data["metadata"];
+
+                if (meta.contains("name")) {
+                    _levelsList[i] = std::make_tuple(tempPath ,meta["name"].get<std::string>());
+                }
+            }
+        }
     }
 }
 

@@ -457,8 +457,7 @@ void ServerGame::handleNewPlayer()
     if (_playerCount == NB_PLAYER_TO_START && !_gameStarted) {
         _gameStarted = true;
         _waveTimer.restart();
-        startLevel(4);   // Need to change that later to have a level management
-
+        LevelLoader::loadFromFile(4, this);   // Need to change that later to have a level management
     }
 }
 
@@ -521,19 +520,6 @@ void ServerGame::handleShoot(const uint32_t id)
     packet.updateMana(id, currentMana);
     _network.sendPacket(packet);
     createBullet(pos->getX(), pos->getY());
-}
-
-
-/**
- * @brief Create the level and place the enemies via the packet sent.
- *
- * @param levelId The number id of the chosen level.
- */
-void ServerGame::startLevel(const int levelId)
-{
-    const std::string levelPath = "../Levels/level" + std::to_string(levelId) + ".json";
-    LevelLoader::loadFromFile(levelPath, this);
-
 }
 
 void ServerGame::checkDeaths()

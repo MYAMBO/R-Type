@@ -34,7 +34,6 @@ class ServerGame {
         void handleShoot(uint32_t id);
         void handleAction(uint32_t id, uint8_t action, uint32_t data);
         void handleNewPlayer();
-        void startLevel(int levelId);
         void createEnemy(float x, float y);
         void createFast(float x, float y);
         void createTank(float x, float y);
