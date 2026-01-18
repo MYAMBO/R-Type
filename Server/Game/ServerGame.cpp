@@ -831,6 +831,7 @@ void ServerGame::checkGameEnd()
             _readyCount = 0;
             _readyPlayers.clear();
             gameOverSent = true;
+            _gameStarted = false;
         }
         return;
     }
@@ -853,6 +854,7 @@ void ServerGame::checkGameEnd()
         if (_levelLoader.getLevelsCount() > _level) {
             _level++;
         }
+        _gameStarted = false;
         sendGameEnd(1);
         _readyCount = 0;
         _readyPlayers.clear();

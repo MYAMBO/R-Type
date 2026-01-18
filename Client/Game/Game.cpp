@@ -285,6 +285,7 @@ void Game::run()
             if (!_startGameRequested)
                 continue;
             _startGameRequested = false;
+            printf("Starting game...");
             _world.setCurrentScene(static_cast<int>(SceneType::GAMEPLAY));
         }
 
