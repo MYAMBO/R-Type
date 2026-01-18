@@ -75,6 +75,8 @@ Game::Game(IGameNetwork& network, unsigned int width, unsigned int height, const
     _world.addSystem<Animation>();
     _world.addSystem<Draw>();
     _world.addSystem<GuiSystem>(_window);
+    _world.addSystem<Audio>();
+    _packet.setId(0).setAck(0).setPacketNbr(1).setTotalPacketNbr(1);
 }
 
 /**
@@ -231,6 +233,7 @@ void Game::loadingRun()
  */
 void Game::run()
 {
+    const auto tickRate = std::chrono::microseconds(1000000 / 30);
     auto inputSystem = _world.getSystem<Inputs>();
     auto entermusic = _world.createEntity();
     entermusic->addComponent<SoundEffect>("../assets/sounds/loading.mp3", 100.f);
@@ -242,15 +245,20 @@ void Game::run()
     entermusic->getComponent<SoundEffect>()->play();
     updateLoadingState(1.0f, "Ready!");
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    
+
     _world.setCurrentScene(static_cast<int>(SceneType::MENU));
     _factory.createPlayerHUD();
     //static sf::Clock timer;
 
     while (_window.isOpen()) {
+        auto start = std::chrono::steady_clock::now();
         _window.clear(sf::Color::Black);
         gameInput(inputSystem);
         _world.manageSystems();
+        if (_packet.getPacket().getDataSize() != 12) {
+            _network.sendPacket(_packet);
+            _packet.clear();
+        }
         _window.display();
         refreshCaches(_world);
         /*if (timer.getElapsedTime().asSeconds() >= 1.0f) {
@@ -258,11 +266,11 @@ void Game::run()
             auto allEntities = _world.getAllEntitiesWithComponent<Tag>();
             total = allEntities.size();
             int scene = _world.getCurrentScene();
-            
+
             std::cout << "--- [PERF MONITOR] ---" << std::endl;
             std::cout << "  Total Entities: " << total << std::endl;
             std::cout << "  Current Scene : " << scene << std::endl;
-            
+
             auto stars = _world.getAllEntitiesWithComponent<Tag>();
             int starCount = 0;
             for (auto& s : stars) {
@@ -280,6 +288,10 @@ void Game::run()
         //    _world.setCurrentScene(static_cast<int>(SceneType::GAMEPLAY));
         //}
 
+        auto end = std::chrono::steady_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        if (elapsed < tickRate)
+            std::this_thread::sleep_for(tickRate - elapsed);
     }
     savefile();
 }
@@ -321,10 +333,11 @@ void Game::gameInput(std::shared_ptr<Inputs> inputSystem)
             //GameHelperGraphical::createAnimatorEntity(_world, 200, 200, "../assets/sprites/fire_effect.png", 2, 2, 1.f, 223, 0, 16, 16, 0, 0, 10.f);
             //_factory.createScraps(_world, 500.f, 0.f);
             _world.setCurrentScene(static_cast<int>(SceneType::VICTORY));
-           
+
         }
         if (inputSystem->isTriggered(*eventOpt, KeyboardKey::Key_N)) {
-            _world.setCurrentScene(static_cast<int>(SceneType::GAMEPLAY));
+            _world.setCurrentScene(static_cast<int>(SceneType::GAME_OVER));
+
         }
         inputSystem->update(0.0f, _world);
     }
@@ -485,23 +498,14 @@ void Game::playerInput(uint32_t entityId, World &world)
 
     if (inputSystem->isKeyPressed(inputSystem->stringToKey(data->getData("SHOOT")))) {
         auto dataComp = compPlayer->getComponent<Data>();
-        if (!isShootKeyPressed && dataComp && std::stoi(dataComp->getData("mana")) >= 20) {
-            Packet packet;
-            packet.action(compPlayer->getId(), FIRE, 0);
-            packet.setAck(0);
-            packet.setId(compPlayer->getId());
-            packet.setPacketNbr(1);
-            packet.setTotalPacketNbr(1);
-            _network.sendPacket(packet);
+        if (!isShootKeyPressed && dataComp && std::stoi(dataComp->getData("mana")) >= 5) {
+            _packet.action(compPlayer->getId(), FIRE, 0);
+            _packet.setAck(0);
+            _packet.setId(compPlayer->getId());
+            _packet.setPacketNbr(1);
+            _packet.setTotalPacketNbr(1);
             isShootKeyPressed = true;
             compPlayer->getComponent<SoundEffect>()->play();
-            int mana = std::stoi(dataComp->getData("mana"));
-            if (mana >= 20) {
-                mana -= 20;
-                if (mana < 0)
-                    mana = 0;
-                dataComp->setData("mana", std::to_string(mana));
-            }
             auto group = GameHelper::getEntitiesByGroup(world, compPlayer->getComponent<Group>()->getId());
             for (auto& entity : group) {
                 if (entity->getComponent<Tag>()->getTag() == "companion") {
@@ -514,14 +518,11 @@ void Game::playerInput(uint32_t entityId, World &world)
     }
     if (moved)
     {
-        printf("Sending position update for entity %u: (%.2f, %.2f)\n", entityId, pos->getX(), pos->getY());
-        Packet packet = Packet();
-        packet.updatePosition(entityId, pos->getX(), pos->getY());
-        packet.setAck(1);
-        packet.setId(compPlayer->getId());
-        packet.setPacketNbr(1);
-        packet.setTotalPacketNbr(1);
-        _network.sendPacket(packet);
+        _packet.updatePosition(entityId, pos->getX(), pos->getY());
+        _packet.setAck(1);
+        _packet.setId(compPlayer->getId());
+        _packet.setPacketNbr(1);
+        _packet.setTotalPacketNbr(1);
     }
 }
 
@@ -663,6 +664,10 @@ void Game::handleAction(const uint32_t id, const uint8_t action, const uint32_t 
         case SHIELD: {
             break;
         }
+        case MANA: {
+            updatePlayerMana(id, static_cast<int>(data));
+            break;
+        }
         default:
             break;
     }
@@ -680,7 +685,7 @@ void Game::healEntity(const uint32_t entityId, const uint32_t newHp)
     std::cout << "Entity " << entityId << " HP set to: " << newHp << std::endl;
 }
 
-void Game::updatePlayerMana(uint32_t playerId, int mana)
+void Game::updatePlayerMana(const uint32_t playerId, const int mana)
 {
     auto player = GameHelper::getEntityById(_world, playerId);
     if (!player)
