@@ -200,6 +200,8 @@ void ServerGame::EnemyMovement(const uint32_t entityId, World &world)
         return;
     auto pos = entity->getComponent<Position>();
     pos->setX(pos->getX() - 1 * world.getDeltaTime());
+    if (pos->getX() <= -100.0f)
+        pos->setX(2000.0f);
 
     _packet.updatePosition(entityId, pos->getX(), pos->getY());
 }
@@ -229,6 +231,8 @@ void ServerGame::EnemySinusMovement(uint32_t entityId, World& world)
     pos->setX(pos->getX() - speedX * dt);
     timers[entityId] += dt * sinusSpeed;
     pos->setY(startYPos[entityId] + std::sin(timers[entityId]) * amplitude);
+    if (pos->getX() <= -100.0f)
+        pos->setX(2000.0f);
     _packet.updatePosition(entityId, pos->getX(), pos->getY());
 }
 
